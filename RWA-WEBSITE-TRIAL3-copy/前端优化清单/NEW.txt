@@ -1,0 +1,52 @@
+新页签
+    Search - Header
+    
+    Wallet 钱包管理 -Header
+
+    MyAssetsView - Header
+        - 资产总览
+        - 交易历史
+        - 持有的代币
+        - 提现记录
+    
+    SettingsView - Header
+        - 通知设置
+        - 隐私设置
+        - 语言偏好
+        - 连接的应用
+
+新功能
+    ProfileView  - Header
+        - 个人资料
+        - KYC 验证
+            - 除了Email验证，要不要增添sms/Authenticator App等验证方式 （页面增加手机号等）
+        - 安全设置
+    WalletView  - Header
+        连接 / 断开 MetaMask
+        实时显示：钱包地址（可复制）、网络/链、原生币余额（ETH 等）与≈AUD价格
+            所有的 address / 金额都来自 MetaMask
+                地址 (address)：来自 MetaMask 注入的 window.ethereum（账户改变会触发 accountsChanged）。✔️
+                原生币余额 (ETH/MATIC 等)：来自链上 provider.getBalance(address)。✔️
+                代币余额 (ERC-20)：来自链上合约 balanceOf(address)。✔️
+                法币金额 (AUD/USD)：这不是 MetaMask 提供的，必须调用第三方价格 API。
+                如果你坚持“严格只来自 MetaMask/链上”，就不要显示 AUD，只显示 ETH / 代币数量。
+                如果可以接受汇率服务，当前项目里已有 fetchAudPriceSafely()，那 AUD 是“链上余额 × 第三方价格”（数据来源已非 MetaMask 本身）。
+
+            不能从 MetaMask 里“读取/提取”代币合约地址：
+            浏览器里的 dApp 和 MetaMask 之间只有少量 JSON-RPC 能力（连接账户、签名、切链等）。
+            MetaMask 不提供 API 让网页读取“用户已添加的代币清单或合约地址”。
+            你截图里能看到合约地址，是 MetaMask 的前端显示；对网页来说不可见。
+            因此，想要显示 PWL-P / PWL-I 的余额，网页必须自己知道它们的合约地址（来自配置、后端、TokenList、或用户输入/粘贴），再用 balanceOf(你的钱包地址) 读取余额。
+
+        自动侦听 accountsChanged、chainChanged、新出块 block 实时刷新
+        扫描并显示你配置的 ERC-20 代币余额（示例含 PWL-P 占位、USDC、DAI；可自行增删）
+        失败重试与错误提示 
+    SmartContract - backend
+        概念：
+            Web3 dApp：前端 → MetaMask 注入的 provider → RPC 节点 → Solidity 合约方法
+            你需要两样东西才能“调合约”：ABI（函数签名）和合约地址（每条链唯一）。
+        结构：
+            ProjectView中新建按钮“”
+                点击后：
+                   - 先检查钱包是否连接、链是否正确；
+                   - 然后调用合约函数（例如 createAgreement(projectId, ...)），让用户在 MetaMask 里确认交易。

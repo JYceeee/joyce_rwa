@@ -1,0 +1,15 @@
+@chris system structure design
+   1. smart contract需要前端有什么功能
+
+@yana UI design
+    1. Details and Trade - 按钮分别连接到哪里/同一个页面？
+    2. more and about security sheets详细说明
+    3. smart contract
+
+Backend都是啥平台
+    1. @xl login&signup - DB?
+        - 互动页面已做好（AppHeader/loginview/signupview）
+    2. @xl KYC 
+        - 互动页面已做好（profileView）
+        - 如何连接
+    3.@zzz smartcontract的功能需要
