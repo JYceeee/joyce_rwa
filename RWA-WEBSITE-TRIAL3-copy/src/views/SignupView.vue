@@ -59,7 +59,7 @@
       </div>
 
       <button class="btn orange auth-submit" type="submit" :disabled="loading || !agree" >
-        {{ loading ? 'registering...' : 'test register' }}
+        {{ loading ? 'registering...' : 'Sign up' }}
       </button>
       
 
@@ -88,28 +88,20 @@ export default {
     };
   },
   methods: {
-    fillTestData() {
-      const timestamp = Date.now();
-      this.user_email = `test_${timestamp}@example.com`;
-      this.user_password = 'test12345';
-      this.user_name = `Test User ${timestamp}`;
-      this.agree = true;
-    },
-    
     async submitSignup() {
       if (!this.user_email || !this.user_password || !this.user_name) {
-        this.$emit('notify', '请输入邮箱、密码和姓名');
+        this.$emit('notify', 'Please enter email, password and name');
         return;
       }
       if (!this.agree) {
-        this.$emit('notify', '请同意条款以继续');
+        this.$emit('notify', 'Please agree to the terms to continue');
         return;
       }
       
       this.loading = true;
       this.signupStatus = true;
       this.signupStatusClass = 'status';
-      this.signupStatusMessage = '正在注册...';
+      this.signupStatusMessage = 'Registering...';
       
       try {
         const response = await fetch('http://localhost:3000/user/reguser', {
@@ -130,9 +122,9 @@ export default {
         
         if (data.status === 0) {
           this.signupStatusClass = 'status success';
-          this.signupStatusMessage = `注册成功！用户: ${this.user_email}`;
+          this.signupStatusMessage = `Registration successful! User: ${this.user_email}`;
           
-          this.$emit('notify', data.message || '注册成功！');
+          this.$emit('notify', data.message || 'Registration successful!');
           
           // 注册成功后自动登录
           setTimeout(async () => {
@@ -158,26 +150,26 @@ export default {
                 // 触发全局登录状态更新事件
                 window.dispatchEvent(new CustomEvent('auth-changed'));
                 
-                this.$emit('notify', '注册成功，已自动登录！');
+                this.$emit('notify', 'Registration successful, auto-logged in!');
                 this.$router.push('/home');
               } else {
-                this.$emit('notify', '注册成功，但自动登录失败，请手动登录');
+                this.$emit('notify', 'Registration successful, but auto-login failed, please login manually');
                 this.$router.push('/login');
               }
             } catch (error) {
-              this.$emit('notify', '注册成功，但自动登录失败，请手动登录');
+              this.$emit('notify', 'Registration successful, but auto-login failed, please login manually');
               this.$router.push('/login');
             }
           }, 1000);
         } else {
           this.signupStatusClass = 'status error';
-          this.signupStatusMessage = `注册失败: ${data.message}`;
+          this.signupStatusMessage = `Registration failed: ${data.message}`;
           this.$emit('notify', data.message);
         }
       } catch (error) {
         this.signupStatusClass = 'status error';
-        this.signupStatusMessage = `网络错误: ${error.message}`;
-        this.$emit('notify', `网络错误: ${error.message}`);
+        this.signupStatusMessage = `Network error: ${error.message}`;
+        this.$emit('notify', `Network error: ${error.message}`);
       } finally {
         this.loading = false;
       }
@@ -236,14 +228,4 @@ export default {
   border: 1px solid #f5c6cb;
 }
 
-.btn.secondary {
-  background: #6c757d;
-  color: white;
-  margin-top: 10px;
-  width: 100%;
-}
-
-.btn.secondary:hover {
-  background: #5a6268;
-}
 </style>

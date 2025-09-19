@@ -1,8 +1,8 @@
 <template>
   <div class="auth-card">
     <div class="auth-logo"><img src="/icons/signup-icon1.png" alt="Mortgage RWA" /></div>
-    <h1 class="auth-title">login test</h1>
-    <!-- <p class="auth-sub">测试用户: ceshi222_joyce@163.com</p> -->
+    <h1 class="auth-title">Login Your Account</h1>
+    <p class="auth-sub">Welcome to Mortgage RWA</p> 
 
     <!-- 登录状态显示 -->
     <div v-if="loginStatus" class="status" :class="loginStatusClass">
@@ -39,16 +39,8 @@
       </div>
 
       <button class="btn orange auth-submit" type="submit" :disabled="loading">
-        {{ loading ? '正在登录...' : '测试登录' }}
+        {{ loading ? 'Logging in...' : 'Login' }}
       </button>
-      
-      <!-- <button class="btn secondary" type="button" @click="fillTestData">
-        填入测试数据
-      </button>
-      
-      <button class="btn success" type="button" @click="testKnownUser">
-        测试已知用户
-      </button> -->
 
       <p class="auth-alt">
         Don't have an account?
@@ -64,9 +56,9 @@ export default {
   emits: ['notify','navigate'],
   data() {
     return {
-      user_email: 'ceshi222_joyce@163.com',
-      user_password: 'rwa12345',
-      remember: true,
+      user_email: '',
+      user_password: '',
+      remember: false,
       loginStatus: false,
       loginStatusMessage: '',
       loginStatusClass: '',
@@ -79,32 +71,20 @@ export default {
     if (isLoggedIn) {
       this.loginStatus = true;
       this.loginStatusClass = 'status success';
-      this.loginStatusMessage = '已登录状态 - Wallet和Profile按钮已显示';
+      // this.loginStatusMessage = 'Logged in - Wallet and Profile buttons are displayed';
     }
   },
   methods: {
-    fillTestData() {
-      this.user_email = 'ceshi222_joyce@163.com';
-      this.user_password = 'rwa12345';
-      this.remember = true;
-    },
-    
-    async testKnownUser() {
-      this.user_email = 'ceshi222_joyce@163.com';
-      this.user_password = 'rwa12345';
-      await this.submitLogin();
-    },
-    
     async submitLogin() {
       if (!this.user_email || !this.user_password) {
-        this.$emit('notify', '请输入邮箱和密码');
+        this.$emit('notify', 'Please enter email and password');
         return;
       }
       
       this.loading = true;
       this.loginStatus = true;
       this.loginStatusClass = 'status';
-      this.loginStatusMessage = '正在登录...';
+      this.loginStatusMessage = 'Logging in...';
       
       try {
         const response = await fetch('http://localhost:3000/user/login', {
@@ -122,7 +102,8 @@ export default {
         
         if (data.status === 0) {
           this.loginStatusClass = 'status success';
-          this.loginStatusMessage = `登录成功！Token: ${data.token ? data.token.substring(0, 50) + '...' : '无'}`;
+          // this.loginStatusMessage = `Successful Login！Token: ${data.token ? data.token.substring(0, 50) + '...' : '无'}`;
+          this.loginStatusMessage = 'Login successful!';
           
           // 保存登录状态
           localStorage.setItem('isLoggedIn', 'true');
@@ -134,22 +115,22 @@ export default {
           // 触发全局登录状态更新事件
           window.dispatchEvent(new CustomEvent('auth-changed'));
           
-          this.$emit('notify', '登录成功！现在可以看到Wallet和Profile按钮了。');
+          // this.$emit('notify', '登录成功！现在可以看到Wallet和Profile按钮了。');
+          this.$emit('notify', 'Login successful!');
           
-          // 显示成功后的界面
+          // 跳转到首页
           setTimeout(() => {
-            alert('登录成功！现在可以看到Wallet和Profile按钮了。');
             this.$router.push('/home');
           }, 1000);
         } else {
           this.loginStatusClass = 'status error';
-          this.loginStatusMessage = `登录失败: ${data.message}`;
+          this.loginStatusMessage = `Login failed: ${data.message}`;
           this.$emit('notify', data.message);
         }
       } catch (error) {
         this.loginStatusClass = 'status error';
-        this.loginStatusMessage = `网络错误: ${error.message}`;
-        this.$emit('notify', `网络错误: ${error.message}`);
+        this.loginStatusMessage = `Network error: ${error.message}`;
+        this.$emit('notify', `Network error: ${error.message}`);
       } finally {
         this.loading = false;
       }
@@ -193,24 +174,4 @@ export default {
   border: 1px solid #f5c6cb;
 }
 
-.btn.secondary {
-  background: #6c757d;
-  color: white;
-  margin-top: 10px;
-  margin-right: 10px;
-}
-
-.btn.secondary:hover {
-  background: #5a6268;
-}
-
-.btn.success {
-  background: #28a745;
-  color: white;
-  margin-top: 10px;
-}
-
-.btn.success:hover {
-  background: #218838;
-}
 </style>

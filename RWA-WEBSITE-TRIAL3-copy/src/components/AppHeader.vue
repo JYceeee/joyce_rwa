@@ -8,7 +8,7 @@
         <nav class="menu" aria-label="Primary">
           <a href="#" @click.prevent="go('/home')">Home</a>
           <a href="#" @click.prevent="go('/projects')">Projects</a>
-          <!-- <a href="#" @click.prevent="go('/portfolio')">Portfolio</a> -->
+          <a href="#" @click.prevent="go('/portfolio')">Portfolio</a>
           <a href="#" @click.prevent="noop">More ▾</a>
         </nav>
       </div>

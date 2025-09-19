@@ -15,7 +15,7 @@ import AppHeader from './components/AppHeader.vue'
 import HomeView from './views/HomeView.vue'
 import ProjectsView from './views/ProjectsView.vue'
 import PortfolioView from './views/PortfolioView.vue'
-// import LoginView from './views/LoginView.vue'
+import LoginView from './views/LoginView.vue'
 import SignupView from './views/SignupView.vue'
 import ProfileView from './views/ProfileView.vue'
 import WalletView from './views/WalletView.vue'
@@ -30,7 +30,7 @@ export default {
     AppFooter, 
     HomeView, 
     ProjectsView, 
-    // LoginView, 
+    LoginView, 
     SignupView, 
     ProfileView, 
     WalletView, 

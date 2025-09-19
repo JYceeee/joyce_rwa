@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="container">
     <h1 class="headline">Property Loans</h1>
 
     <!-- 筛选栏 -->
@@ -158,15 +158,122 @@ export default {
 </script>
 
 <style scoped>
-.h3 {
-  color:black;
+/* 页面容器深色主题 */
+.container {
+  background: #0a0a1a;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* 标题深色主题 */
+.headline {
+  color: #ffffff !important;
+  margin-bottom: 24px;
+}
+
+/* 筛选栏深色主题 */
+.filters {
+  background: transparent;
+  padding: 16px;
+  border-radius: 0;
+  border: none;
+  margin-bottom: 24px;
+}
+
+.filters .input {
+  background: #141426;
+  border: 1px solid #374151;
+  color: #ffffff;
+}
+
+.filters .input::placeholder {
+  color: #9ca3af;
+}
+
+.filters .btn {
+  background: #374151;
+  border: 1px solid #4b5563;
+  color: #ffffff;
+}
+
+.filters .btn:hover {
+  background: #4b5563;
+}
+
+/* 项目网格深色主题 */
+.loan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* 项目卡片深色主题 */
+.loan-card {
+  background: #1d1d36;
+  border: 1px solid #374151;
+  border-radius: 16px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.loan-card:hover {
+  border-color: #4b5563;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.loan-card h3 {
+  color: #ffffff !important;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 12px 0 8px 0;
+}
+
+.loan-card p {
+  color: #9ca3af;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.loan-img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+/* 按钮深色主题 */
+.loan-actions {
+  display: flex;
+  gap: 12px;
 }
 
 .btn.small {
-  color: black !important;
+  color: #ffffff !important;
+  background: #1f2937;
+  border: 1px solid #374151;
+  padding: 8px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn.small:hover {
+  background: #374151;
+  border-color: #4b5563;
 }
 
 .btn.small.orange {
-  color: white !important;
+  color: #ffffff !important;
+  background: var(--orange);
+  border-color: var(--orange);
+}
+
+.btn.small.orange:hover {
+  background: var(--orange);
+  border-color: var(--orange);
+  opacity: 0.9;
 }
 </style>

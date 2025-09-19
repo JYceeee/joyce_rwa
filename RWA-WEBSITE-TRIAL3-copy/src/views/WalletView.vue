@@ -113,7 +113,7 @@
         <div class="mm-balance">{{ bigAudDisplay }}</div>
         <div class="mm-subline">
           <span>+A$0 (+0.00%)</span>
-          <a href="#" @click.prevent class="mm-link">Portfolio ↗</a>
+          <a href="#" @click.prevent="$router.push('/portfolio')" class="mm-link">Portfolio ↗</a>
         </div>
       </div>
       <!-- 操作按钮：一行五个 -->

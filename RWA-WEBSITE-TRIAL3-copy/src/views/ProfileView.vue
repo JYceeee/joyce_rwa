@@ -277,45 +277,55 @@ export default {
   font-size: 15px;
 }
 .container { max-width: 920px; margin: 0 auto; }
-.profile-page { padding-bottom: 64px; }
+/* 页面容器深色主题 */
+.profile-page { 
+  padding-bottom: 64px; 
+  background: #0a0a1a;
+  min-height: 100vh;
+}
+
+.container {
+  background: transparent;
+}
 
 /* 顶部 */
 .topbar { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:24px 16px; }
-.breadcrumb { display:flex; align-items:center; gap:10px; color:#64748b; }
-.crumb-back { border:0; background:transparent; cursor:pointer; color:#64748b; }
+.breadcrumb { display:flex; align-items:center; gap:10px; color:#9ca3af; }
+.crumb-back { border:0; background:transparent; cursor:pointer; color:#9ca3af; }
 .sep{ opacity:.6; }
-.crumb-current{ color:#0f172a; font-weight:600; }
+.crumb-current{ color:#ffffff; font-weight:600; }
 
 /* 标题块 */
 .head { display:flex; align-items:center; gap:16px; padding:0 16px 8px; }
-.avatar{ width:44px; height:44px; border-radius:999px; background:#eef2f7; display:grid; place-items:center;}
-.avatar-initial{ font-weight:700; color:#475569; }
-.title{ font-size:24px; line-height:1.2; margin:0; color:#0f172a; }
-.subtitle{ margin:2px 0 0; color:#94a3b8; }
+.avatar{ width:44px; height:44px; border-radius:999px; background:#374151; display:grid; place-items:center;}
+.avatar-initial{ font-weight:700; color:#ffffff; }
+.title{ font-size:24px; line-height:1.2; margin:0; color:#ffffff; }
+.subtitle{ margin:2px 0 0; color:#9ca3af; }
 
 /* 表单与控件 */
 .form{ margin-top:24px; padding:0 16px; }
 .field{ margin:18px 0; }
-.label{ display:block; font-size:12px; color:#64748b; margin-bottom:8px; }
+.label{ display:block; font-size:12px; color:#9ca3af; margin-bottom:8px; }
 .req{ color:#f97316; }
-.input{ width:100%; height:40px; border:1px solid #e2e8f0; border-radius:8px; padding:0 12px; background:#fff; color:#0f172a; }
-.input:focus{ border-color:#cbd5e1; box-shadow:0 0 0 3px rgba(99,102,241,.08); }
+.input{ width:100%; height:40px; border:1px solid #374151; border-radius:8px; padding:0 12px; background:#1f2937; color:#ffffff; }
+.input:focus{ border-color:#4b5563; box-shadow:0 0 0 3px rgba(59, 130, 246, 0.1); }
+.input::placeholder{ color:#9ca3af; }
 .input.with-icon{ display:flex; align-items:center; gap:8px; padding:0 8px; }
-.input.with-icon select{ border:0; outline:none; width:100%; height:38px; background:transparent; color:#0f172a; }
-.input.with-icon .icon{ width:28px; height:28px; border-radius:10px; background:#fff; display:grid; place-items:center;
-  box-shadow:0 2px 6px rgba(15,23,42,.06), inset 0 0 0 1px #e2e8f0; }
-.i{ width:18px; height:18px; fill:currentColor; color:#0f172a; }
+.input.with-icon select{ border:0; outline:none; width:100%; height:38px; background:transparent; color:#ffffff; }
+.input.with-icon .icon{ width:28px; height:28px; border-radius:10px; background:#374151; display:grid; place-items:center;
+  box-shadow:0 2px 6px rgba(0, 0, 0, 0.2), inset 0 0 0 1px #4b5563; }
+.i{ width:18px; height:18px; fill:currentColor; color:#ffffff; }
 
 /* KYC 横幅 */
 .kyc-banner{ display:flex; align-items:center; gap:10px; height:40px; border-radius:8px; padding:0 12px; border:1px solid; }
-.kyc-banner.orange{ background:#fdebdc; color:#a45117; border-color:#f6d3bb; }
-.kyc-banner.green{ background:#e8f7ec; color:#17683a; border-color:#bfe6cc; }
+.kyc-banner.orange{ background:#1f2937; color:#f97316; border-color:#374151; }
+.kyc-banner.green{ background:#1f2937; color:#16a34a; border-color:#374151; }
 .kyc-banner .icon{
-  width:28px; height:28px; border-radius:10px; background:#fff; display:grid; place-items:center;
-  box-shadow:0 2px 6px rgba(15,23,42,.06), inset 0 0 0 1px currentColor; opacity:.9;
+  width:28px; height:28px; border-radius:10px; background:#374151; display:grid; place-items:center;
+  box-shadow:0 2px 6px rgba(0, 0, 0, 0.2), inset 0 0 0 1px #4b5563; opacity:.9;
 }
 .link{ margin-left:auto; color:inherit; background:transparent; border:0; cursor:pointer; text-decoration:underline; }
-.link.danger{ color:#b91c1c; }
+.link.danger{ color:#dc2626; }
 .verified{ margin-left:4px; display:inline-flex; align-items:center; gap:6px; font-weight:600; }
 
 /* 底部按钮 */
@@ -324,6 +334,6 @@ export default {
 .btn{ border:1px solid transparent; border-radius:10px; padding:8px 14px; cursor:pointer; font-weight:600; line-height:1; }
 .btn.orange{ background:#ea7a2e; color:#fff; }
 .btn.orange:hover{ filter:brightness(.96); }
-.btn.light{ background:#f1f5f9; color:#0f172a; border-color:#e2e8f0; }
-.btn.light:hover{ background:#e9eef5; }
+.btn.light{ background:#374151; color:#ffffff; border-color:#4b5563; }
+.btn.light:hover{ background:#4b5563; }
 </style>
