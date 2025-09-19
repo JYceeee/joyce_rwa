@@ -15,6 +15,7 @@ import BridgeView from '../views/BridgeView.vue'
 import SendView from '../views/SendView.vue'
 import ReceiveView from '../views/ReceiveView.vue'
 import TokenDetailView from '../views/TokenDetailView.vue'
+import TradeProjectView from '../views/TradeProjectView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -33,8 +34,9 @@ const router = createRouter({
     { path: '/token/:address', name: 'tokenDetail', component: TokenDetailView, props: true },
     { path: '/profile', name: 'profile', component: ProfileView },
     { path: '/login', name: 'login', component: LoginView },
-  { path: '/signup', name: 'signup', component: SignupView },
-  // { path: '/email-verify', name: 'emailVerify', component: EmailVerifyView },
+    { path: '/signup', name: 'signup', component: SignupView },
+    { path: '/trade/:code', name: 'tradeProject', component: TradeProjectView, props: true },
+    // { path: '/email-verify', name: 'emailVerify', component: EmailVerifyView },
     { path: '/kycService', component: kycService },
   ],
 })

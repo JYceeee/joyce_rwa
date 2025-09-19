@@ -119,4 +119,5 @@ export default {
 .section.wallet {
   background: #0A0A19;
 }
+
 </style>

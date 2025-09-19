@@ -8,7 +8,7 @@
         <nav class="menu" aria-label="Primary">
           <a href="#" @click.prevent="go('/home')">Home</a>
           <a href="#" @click.prevent="go('/projects')">Projects</a>
-          <a href="#" @click.prevent="go('/portfolio')">Portfolio</a>
+          <!-- <a href="#" @click.prevent="go('/portfolio')">Portfolio</a> -->
           <a href="#" @click.prevent="noop">More ▾</a>
         </nav>
       </div>
@@ -33,13 +33,14 @@
       
       <!-- User Auth Buttons -->
         <template v-if="isLoggedIn">
-          <button class="btn orange pill" @click.prevent="go('/wallet')">
-            <img class="btn-icon" src="/icons/login-wallet-icon.png" alt="" />
+          <button class="btn orange pill" @click.prevent="goToWallet()">
+            <span>🔗</span>
             <span>Wallet</span>
           </button>
-          <button class="btn light pill" @click.prevent="go('/profile')">
-            <img class="btn-icon" src="/icons/user.png" alt="" />
-          Profile</button>
+          <button class="btn light pill" @click.prevent="goToProfile()">
+            <span>👤</span>
+            <span>Profile</span>
+          </button>
         </template>
         <template v-else>
           <a class="btn ghost" href="#" @click.prevent="go('/login')">Log in</a>
@@ -58,16 +59,7 @@ export default {
   data(){
     return { searchOpen: false, searchText: '', isLoggedIn: false }
   },
-//  created() {
-//     // 页面首次进来，同步一次登录态 + 恢复全局 Authorization 头
-//     this.refreshAuth();
-//   },
-//   watch: {
-//     // 每次路由切换时，重读 localStorage，做到“无刷新切换”
-//     $route() {
-//       this.refreshAuth();
-//     }
-//   },
+
   methods: {
     noop(){},
     go(path){
@@ -128,6 +120,14 @@ export default {
     },
     shortenAddress(addr) {
       return addr.slice(0, 6) + "..." + addr.slice(-4);
+    },
+    goToWallet() {
+      // alert('跳转到钱包页面');
+      this.go('/wallet');
+    },
+    goToProfile() {
+      // alert('跳转到个人资料页面');
+      this.go('/profile');
     }
   },
   mounted(){

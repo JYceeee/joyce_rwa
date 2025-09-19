@@ -45,8 +45,7 @@
         <h3>{{ p.code }}</h3>
         <p>{{ p.subtitle }}</p>
         <div class="loan-actions">
-          <a href="#" class="btn small primary">Buy</a>
-          <a href="#" class="btn small orange">Sell</a>
+          <a href="#" class="btn small orange" @click.prevent="openTrade(p.code)">Trade</a>
           <a href="#" class="btn small" @click.prevent="openDetail(p.code)">Detail</a>
         </div>
       </article>
@@ -148,6 +147,11 @@ export default {
       const product = this.products.find(x => x.code === code)
       try { sessionStorage.setItem('lastProduct', JSON.stringify(product)) } catch(e) {}
       this.$router.push({ name: 'detail', params: { code } })
+    },
+    openTrade(code){
+      const product = this.products.find(x => x.code === code)
+      try { sessionStorage.setItem('lastProduct', JSON.stringify(product)) } catch(e) {}
+      this.$router.push({ name: 'tradeProject', params: { code } })
     }
   }
 }
@@ -156,5 +160,13 @@ export default {
 <style scoped>
 .h3 {
   color:black;
+}
+
+.btn.small {
+  color: black !important;
+}
+
+.btn.small.orange {
+  color: white !important;
 }
 </style>

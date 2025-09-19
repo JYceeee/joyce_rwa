@@ -16,7 +16,7 @@
       <div class="avatar"><span class="avatar-initial">O</span></div>
       <div>
         <h1 class="title">Olivia Rhye</h1>
-        <p class="subtitle">@olivia</p>
+        <!-- <p class="subtitle">@olivia</p> -->
       </div>
     </div>
 
@@ -167,18 +167,19 @@ export default {
       }
       try {
         // 调用后端API发送验证码邮件
-        const res = await fetch('/api/send-email-code', {
+        const res = await fetch('http://localhost:3000/user/send-email-code', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: this.form.email })
+          body: JSON.stringify({ user_email: this.form.email })
         });
         const data = await res.json();
-        if (data.success) {
+        if (data.status === 0) {
           this.emailCodeSent = true;
-          this.generatedCode = data.code; // 前端演示用，实际生产环境不应返回验证码
+          this.generatedCode = data.code; // 开发环境返回验证码，便于测试
           this.showEmailModal = true;
+          this.$emit('notify', data.message || '验证码已发送到您的邮箱');
         } else {
-          this.$emit('notify',data.message || 'Failed to send email.');
+          this.$emit('notify', data.message || 'Failed to send email.');
         }
       } catch (e) {
         this.$emit('notify','Network error, please try again.');
@@ -189,17 +190,22 @@ export default {
     async verifyEmailCode() {
       try {
         // 调用后端API校验验证码
-        const res = await fetch('/api/verify-email-code', {
+        const res = await fetch('http://localhost:3000/user/verify-email-code', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: this.form.email, code: this.form.emailCode })
+          body: JSON.stringify({ 
+            user_email: this.form.email, 
+            verification_code: this.form.emailCode 
+          })
         });
         const data = await res.json();
-        if (data.success) {
+        if (data.status === 0) {
           this.emailVerified = true;
-          this.$emit('notify','Email verified and bound to account.');
+          this.emailCodeSent = false; // 隐藏验证码输入框
+          this.form.emailCode = ''; // 清空验证码
+          this.$emit('notify', data.message || 'Email verified and bound to account.');
         } else {
-          this.$emit('notify',data.message || 'Incorrect verification code.');
+          this.$emit('notify', data.message || 'Incorrect verification code.');
         }
       } catch (e) {
         this.$emit('notify','Network error, please try again.');
@@ -230,14 +236,16 @@ export default {
     // 1) 清理本地状态
     localStorage.removeItem('token');
     localStorage.removeItem('isLoggedIn');
-    delete axios.defaults.headers.common['Authorization'];
+    localStorage.removeItem('remember_email');
+    
+    // 2) 触发全局登录状态更新事件
+    window.dispatchEvent(new CustomEvent('auth-changed'));
 
-    // 2) 友好提示（可选）
+    // 3) 友好提示
     this.$emit('notify','You have logged out.');
 
-    // 3) 跳转到登录页
+    // 4) 跳转到登录页
     this.$router.push('/login');
-    // 不需要 location.reload()，Header 会因路由变化而刷新按钮
   }
 }
 }

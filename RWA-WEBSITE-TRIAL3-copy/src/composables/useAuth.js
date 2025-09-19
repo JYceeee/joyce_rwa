@@ -23,14 +23,14 @@ export function useAuth() {
         setAuth(response.token)
         isAuthenticated.value = true
         token.value = response.token
-        return { success: true, message: response.message }
+        return { success: true, message: response.message || '登录成功', token: response.token }
       } else {
         return { success: false, message: response.message }
       }
     } catch (error) {
       return { 
         success: false, 
-        message: error?.response?.data?.message || '登录失败，请稍后重试' 
+        message: error?.response?.data?.message || error.message || '登录失败，请稍后重试' 
       }
     } finally {
       loading.value = false
