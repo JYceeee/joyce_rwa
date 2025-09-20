@@ -60,42 +60,46 @@
 
         <div class="contact-form">
           <h2>Send Message</h2>
-          <form @submit.prevent="submitForm">
-            <div class="form-group">
-              <label for="name">Name *</label>
-              <input type="text" id="name" v-model="form.name" required>
+          <form @submit.prevent="submitForm" class="form-container">
+            <div class="form-fields">
+              <div class="form-group">
+                <label for="name">Name *</label>
+                <input type="text" id="name" v-model="form.name" required>
+              </div>
+
+              <div class="form-group">
+                <label for="email">Email *</label>
+                <input type="email" id="email" v-model="form.email" required>
+              </div>
+
+              <div class="form-group">
+                <label for="phone">Phone</label>
+                <input type="tel" id="phone" v-model="form.phone">
+              </div>
+
+              <div class="form-group">
+                <label for="subject">Subject *</label>
+                <select id="subject" v-model="form.subject" required>
+                  <option value="">Please select a subject</option>
+                  <option value="general">General Consultation</option>
+                  <option value="technical">Technical Support</option>
+                  <option value="business">Business Cooperation</option>
+                  <option value="investment">Investment Consultation</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="message">Message Content *</label>
+                <textarea id="message" v-model="form.message" rows="5" required></textarea>
+              </div>
             </div>
 
-            <div class="form-group">
-              <label for="email">Email *</label>
-              <input type="email" id="email" v-model="form.email" required>
+            <div class="form-submit">
+              <button type="submit" class="btn primary" :disabled="isSubmitting">
+                {{ isSubmitting ? 'Sending...' : 'Send Message' }}
+              </button>
             </div>
-
-            <div class="form-group">
-              <label for="phone">Phone</label>
-              <input type="tel" id="phone" v-model="form.phone">
-            </div>
-
-            <div class="form-group">
-              <label for="subject">Subject *</label>
-              <select id="subject" v-model="form.subject" required>
-                <option value="">Please select a subject</option>
-                <option value="general">General Consultation</option>
-                <option value="technical">Technical Support</option>
-                <option value="business">Business Cooperation</option>
-                <option value="investment">Investment Consultation</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="message">Message Content *</label>
-              <textarea id="message" v-model="form.message" rows="5" required></textarea>
-            </div>
-
-            <button type="submit" class="btn primary" :disabled="isSubmitting">
-              {{ isSubmitting ? 'Sending...' : 'Send Message' }}
-            </button>
           </form>
         </div>
       </div>
@@ -197,6 +201,13 @@ export default {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 60px;
+  align-items: stretch;
+}
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .contact-info h2,
@@ -212,6 +223,7 @@ export default {
   flex-direction: column;
   gap: 24px;
   margin-bottom: 40px;
+  flex: 1;
 }
 
 .contact-method {
@@ -285,10 +297,32 @@ export default {
   border: 1px solid #2a2a4a;
   border-radius: 16px;
   padding: 40px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 24px;
+}
+
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  flex: 1;
+}
+
+.form-submit {
+  margin-top: auto;
+  padding-top: 24px;
 }
 
 .form-group {
-  margin-bottom: 24px;
+  margin-bottom: 0;
 }
 
 .form-group label {

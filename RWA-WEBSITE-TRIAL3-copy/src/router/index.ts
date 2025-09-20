@@ -22,6 +22,8 @@ import TutorialsView from '../views/info/TutorialsView.vue'
 import PricingView from '../views/info/PricingView.vue'
 import AboutUsView from '../views/info/AboutUsView.vue'
 import ContactView from '../views/info/ContactView.vue'
+import OptionsView from '../views/info/OptionsView.vue'
+import SettingsView from '../views/info/SettingsView.vue'
 // Other components
 import kycService from '../components/kycService.vue'
 
@@ -67,7 +69,8 @@ const router = createRouter({
     { path: '/privacy', name: 'privacy', component: OverviewView },
     { path: '/cookies', name: 'cookies', component: OverviewView },
     { path: '/licenses', name: 'licenses', component: OverviewView },
-    { path: '/settings', name: 'settings', component: OverviewView },
+    { path: '/settings', name: 'settings', component: SettingsView },
+    { path: '/options', name: 'options', component: OptionsView },
   ],
 })
 

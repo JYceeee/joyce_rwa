@@ -2,6 +2,15 @@
   <header class="header"> 
     <div class="container nav">
       <div class="left">
+        <!-- 侧边栏触发按钮 -->
+        <button 
+          class="sidebar-toggle-btn" 
+          @click="toggleSidebar"
+          aria-label="Toggle sidebar"
+        >
+          <span class="sidebar-icon">☰</span>
+        </button>
+        
         <a class="brand" href="#" @click.prevent="go('/')">
           <img src="/icons/RWA-logo.png" alt="Mortgage RWA" class="brand-logo" />
         </a>
@@ -9,7 +18,7 @@
           <a href="#" @click.prevent="go('/home')" class="menu-item">Home</a>
           <a href="#" @click.prevent="go('/projects')" class="menu-item">Projects</a>
           <a href="#" @click.prevent="go('/portfolio')" class="menu-item">Portfolio</a>
-          <div class="dropdown-container">
+          <!-- <div class="dropdown-container">
             <a href="#" @click.prevent="toggleMoreDropdown" class="more-link">
               More ▾
             </a>
@@ -31,7 +40,7 @@
                 <span>Help Center</span>
               </a>
             </div>
-          </div>  
+          </div>   -->
         </nav>
         
         <!-- 移动端汉堡菜单按钮 -->
@@ -101,20 +110,69 @@
         <div class="mobile-menu-divider"></div>
         <a href="#" @click.prevent="go('/about')" class="mobile-menu-item">
           <span class="mobile-menu-icon">🏢</span>
-          <span>公司介绍</span>
+          <span>About Us</span>
         </a>
         <a href="#" @click.prevent="go('/vision')" class="mobile-menu-item">
           <span class="mobile-menu-icon">🎯</span>
-          <span>公司愿景</span>
+          <span>Vision</span> 
         </a>
         <a href="#" @click.prevent="go('/contact')" class="mobile-menu-item">
           <span class="mobile-menu-icon">📞</span>
-          <span>联系我们</span>
+          <span>Contact Us</span>
         </a>
         <a href="#" @click.prevent="go('/help')" class="mobile-menu-item">
           <span class="mobile-menu-icon">❓</span>
-          <span>帮助中心</span>
+          <span>Help Center</span>
         </a>
+      </div>
+    </div>
+    
+    <!-- 侧边栏 -->
+    <div class="sidebar" :class="{ open: sidebarOpen }">
+      <div class="sidebar-header">
+        <h3 class="sidebar-title">Navigation Menu</h3>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <a href="#" @click.prevent="go('/overview')" class="sidebar-item">
+          <span class="sidebar-item-icon">📋</span>
+          <span>Overview</span>
+        </a>
+        <a href="#" @click.prevent="go('/about')" class="sidebar-item">
+          <span class="sidebar-item-icon">🏢</span>
+          <span>About Us</span>
+        </a>
+        <a href="#" @click.prevent="go('/features')" class="sidebar-item">
+          <span class="sidebar-item-icon">⭐</span>
+          <span>Features</span>
+        </a>
+        <a href="#" @click.prevent="go('/solutions')" class="sidebar-item">
+          <span class="sidebar-item-icon">🔧</span>
+          <span>Solutions</span>
+        </a>
+        <a href="#" @click.prevent="go('/tutorials')" class="sidebar-item">
+          <span class="sidebar-item-icon">📚</span>
+          <span>Tutorials</span>
+        </a>
+        <a href="#" @click.prevent="go('/pricing')" class="sidebar-item">
+          <span class="sidebar-item-icon">💰</span>
+          <span>Pricing</span>
+        </a>
+        <a href="#" @click.prevent="go('/contact')" class="sidebar-item">
+          <span class="sidebar-item-icon">📞</span>
+          <span>Contacts</span>
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <button class="sidebar-footer-btn" @click="goToOptions">
+          <span class="sidebar-item-icon">⚙️</span>
+          <span>Options</span>
+        </button>
+        <button class="sidebar-footer-btn" @click="goToSettings">
+          <span class="sidebar-item-icon">🔧</span>
+          <span>Settings</span>
+        </button>
       </div>
     </div>
   </header>
@@ -131,7 +189,8 @@ export default {
       searchText: '', 
       isLoggedIn: false,
       moreDropdownOpen: false,
-      mobileMenuOpen: false
+      mobileMenuOpen: false,
+      sidebarOpen: false
     }
   },
 
@@ -142,11 +201,13 @@ export default {
       this.closeSearch();
       this.closeMoreDropdown();
       this.closeMobileMenu();
+      // 注意：不自动关闭侧边栏，只有点击☰按钮才关闭
     },
     toggleMoreDropdown(){
       this.moreDropdownOpen = !this.moreDropdownOpen;
       this.closeSearch();
       this.closeMobileMenu();
+      // 注意：不自动关闭侧边栏
     },
     closeMoreDropdown(){
       this.moreDropdownOpen = false;
@@ -155,9 +216,23 @@ export default {
       this.mobileMenuOpen = !this.mobileMenuOpen;
       this.closeSearch();
       this.closeMoreDropdown();
+      // 注意：不自动关闭侧边栏
     },
     closeMobileMenu(){
       this.mobileMenuOpen = false;
+    },
+    toggleSidebar(){
+      this.sidebarOpen = !this.sidebarOpen;
+      // 注意：只切换侧边栏状态，不关闭其他菜单
+    },
+    closeSidebar(){
+      this.sidebarOpen = false;
+    },
+    goToOptions(){
+      this.go('/options');
+    },
+    goToSettings(){
+      this.go('/settings');
     },
     // refreshAuth() {
     //   const logged = localStorage.getItem('isLoggedIn') === 'true';
@@ -210,6 +285,8 @@ export default {
       if(mobileMenu && this.mobileMenuOpen && !mobileMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)){
         this.closeMobileMenu()
       }
+      
+      // 注意：侧边栏只能通过点击☰按钮关闭，不处理点击外部关闭
     },
     async connectWallet() {
       if (typeof window.ethereum !== "undefined") {
@@ -403,6 +480,9 @@ export default {
   text-decoration: none;
   border-radius: 8px;
   transition: background-color 0.2s ease;
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.01em;
 }
 
 .mobile-menu-item:hover {
@@ -556,6 +636,144 @@ export default {
   
   .dropdown-menu {
     min-width: 140px;
+  }
+}
+
+/* 侧边栏触发按钮样式 */
+.sidebar-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  margin-right: 12px;
+}
+
+.sidebar-toggle-btn:hover {
+  background: var(--brand-600, rgba(255, 165, 0, 0.1));
+}
+
+.sidebar-icon {
+  font-size: 20px;
+  color: var(--text, #ffffff);
+  line-height: 1;
+}
+
+/* 侧边栏样式 */
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 224px;
+  height: 100vh;
+  background: var(--bg, #1a1a2e);
+  border-right: 1px solid var(--border, #2a2a4a);
+  z-index: 999;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar.open {
+  transform: translateX(0);
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border, #2a2a4a);
+}
+
+.sidebar-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text, #ffffff);
+}
+
+
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 0;
+  overflow-y: auto;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  color: var(--text, #ffffff);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.01em;
+}
+
+.sidebar-item:hover {
+  background: var(--brand-600, rgba(255, 165, 0, 0.1));
+  border-left-color: var(--brand, #ffa500);
+  color: var(--text, #ffffff);
+}
+
+.sidebar-item-icon {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+
+.sidebar-footer {
+  padding: 16px 18px;
+  border-top: 1px solid var(--border, #2a2a4a);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar-footer-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  background: transparent;
+  border: 1px solid var(--border, #2a2a4a);
+  border-radius: 6px;
+  color: var(--text, #ffffff);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.sidebar-footer-btn:hover {
+  background: var(--brand-600, rgba(255, 165, 0, 0.1));
+  border-color: var(--brand, #ffa500);
+}
+
+/* 响应式设计 - 移动端侧边栏适配 */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100vw;
+  }
+  
+  .sidebar-toggle-btn {
+    margin-right: 8px;
+    width: 36px;
+    height: 36px;
+  }
+  
+  .sidebar-icon {
+    font-size: 18px;
   }
 }
 </style>

@@ -1,55 +1,55 @@
 <template>
   <div class="container">
     <div class="page-header">
-      <h1>产品概览</h1>
-      <p class="page-subtitle">了解我们的房地产代币化投资平台</p>
+      <h1>Product Overview</h1>
+      <p class="page-subtitle">Know our real estate tokenization investment platform</p>
     </div>
 
     <div class="overview-content">
       <div class="feature-grid">
         <div class="feature-card">
           <div class="feature-icon">🏠</div>
-          <h3>房地产代币化</h3>
-          <p>将传统房地产投资转化为可交易的数字代币，降低投资门槛，提高流动性。</p>
+          <h3>Real Estate Tokenization</h3>
+          <p>Convert traditional real estate investments into tradable digital tokens, reducing investment门槛, and improving liquidity.</p>
         </div>
         
         <div class="feature-card">
           <div class="feature-icon">💰</div>
-          <h3>稳定收益</h3>
-          <p>基于优质房地产抵押贷款，提供稳定的租金收入和资本增值潜力。</p>
+          <h3>Stable Income</h3>
+          <p>Based on high-quality real estate mortgage loans, providing stable rental income and capital appreciation potential.</p>
         </div>
         
         <div class="feature-card">
           <div class="feature-icon">🔒</div>
-          <h3>安全透明</h3>
-          <p>基于区块链技术，所有交易记录公开透明，智能合约自动执行。</p>
+          <h3>Secure and Transparent</h3>
+          <p>Based on blockchain technology, all transaction records are transparent and smart contracts are automatically executed.</p>
         </div>
         
         <div class="feature-card">
           <div class="feature-icon">📊</div>
-          <h3>实时数据</h3>
-          <p>提供实时的市场数据、项目信息和投资表现，帮助您做出明智决策。</p>
+          <h3>Real-Time Data</h3>
+          <p>Provide real-time market data, project information and investment performance, helping you make wise decisions.</p>
         </div>
       </div>
 
       <div class="stats-section">
-        <h2>平台数据</h2>
+        <h2>Platform Data</h2>
         <div class="stats-grid">
           <div class="stat-item">
             <div class="stat-number">$50M+</div>
-            <div class="stat-label">管理资产</div>
+            <div class="stat-label">Managed Assets</div>
           </div>
           <div class="stat-item">
             <div class="stat-number">1,200+</div>
-            <div class="stat-label">活跃投资者</div>
+            <div class="stat-label">Active Investors</div>
           </div>
           <div class="stat-item">
             <div class="stat-number">25+</div>
-            <div class="stat-label">投资项目</div>
+            <div class="stat-label">Investment Projects</div>
           </div>
           <div class="stat-item">
             <div class="stat-number">6.5%</div>
-            <div class="stat-label">平均年化收益</div>
+            <div class="stat-label">Average Annual Return</div>
           </div>
         </div>
       </div>

@@ -1,8 +1,8 @@
 <template>
   <div class="container">
     <div class="page-header">
-      <h1>产品功能</h1>
-      <p class="page-subtitle">探索我们平台的核心功能特性</p>
+      <h1>Features of the Product</h1>
+      <p class="page-subtitle">Explore the core features of our platform</p>
     </div>
 
     <div class="features-content">
@@ -10,58 +10,58 @@
         <div class="feature-item">
           <div class="feature-icon">🔐</div>
           <div class="feature-content">
-            <h3>安全钱包集成</h3>
-            <p>支持MetaMask等主流钱包，确保您的数字资产安全。所有交易都经过加密保护。</p>
+            <h3>Secure Wallet Integration</h3>
+            <p>Supports mainstream wallets like MetaMask, ensuring the security of your digital assets. All transactions are encrypted and protected.</p>
           </div>
         </div>
 
         <div class="feature-item">
           <div class="feature-icon">📈</div>
           <div class="feature-content">
-            <h3>实时交易</h3>
-            <p>24/7实时交易功能，支持买入和卖出房地产代币，享受市场流动性。</p>
+            <h3>Real-Time Trading</h3>
+            <p>24/7 real-time trading functionality, allowing you to buy and sell real estate tokens, enjoy market liquidity.</p>
           </div>
         </div>
 
         <div class="feature-item">
           <div class="feature-icon">📊</div>
           <div class="feature-content">
-            <h3>投资组合管理</h3>
-            <p>直观的投资组合仪表板，实时跟踪您的投资表现和收益情况。</p>
+            <h3>Portfolio Management</h3>
+            <p>Intuitive portfolio dashboard, tracking your investment performance and returns in real-time.</p>
           </div>
         </div>
 
         <div class="feature-item">
           <div class="feature-icon">🏘️</div>
           <div class="feature-content">
-            <h3>项目详情</h3>
-            <p>详细的房地产项目信息，包括位置、估值、租金收入等关键数据。</p>
+            <h3>Project Details</h3>
+            <p>Detailed real estate project information, including location, valuation, rental income, and other key data.</p>
           </div>
         </div>
 
         <div class="feature-item">
           <div class="feature-icon">🔍</div>
           <div class="feature-content">
-            <h3>智能筛选</h3>
-            <p>按类型、地区、风险等级等条件筛选投资项目，找到最适合您的投资机会。</p>
+            <h3>Smart Filtering</h3>
+            <p>Filter investment projects by type, region, risk level, and other criteria to find the best investment opportunities.</p>
           </div>
         </div>
 
         <div class="feature-item">
           <div class="feature-icon">📱</div>
           <div class="feature-content">
-            <h3>移动端支持</h3>
-            <p>响应式设计，完美支持手机和平板设备，随时随地管理您的投资。</p>
+            <h3>Mobile Support</h3>
+            <p>Responsive design, perfectly supporting mobile and tablet devices, allowing you to manage your investments anytime, anywhere.</p>
           </div>
         </div>
       </div>
 
       <div class="cta-section">
-        <h2>准备开始投资？</h2>
-        <p>立即注册账户，开始您的房地产代币化投资之旅</p>
+        <h2>Ready to Start Investing?</h2>
+        <p>Register an account now, start your real estate tokenization investment journey</p>
         <div class="cta-buttons">
-          <router-link to="/signup" class="btn primary">立即注册</router-link>
-          <router-link to="/projects" class="btn secondary">浏览项目</router-link>
+          <router-link to="/signup" class="btn primary">Register Now</router-link>
+          <router-link to="/projects" class="btn secondary">Browse Projects</router-link>
         </div>
       </div>
     </div>
