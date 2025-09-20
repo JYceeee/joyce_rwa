@@ -336,6 +336,25 @@ export default {
 </script>
 
 <style scoped>
+/* —— 采用PortfolioView的深色主题 —— */
+:root { 
+  --bg:#f6f7fb; 
+  --panel:#fff; 
+  --text:#0b1020; 
+  --muted:#6b7280; 
+  --muted-2:#9aa3b2; 
+  --border:#e6e8ef; 
+  --shadow:0 6px 20px rgba(15,23,42,.06); 
+  --primary:#3b82f6; 
+  --primary-ink:#1e40af; 
+  --danger:#ef4444; 
+  --dark-bg:#141426;
+  --dark-panel:#1f2937;
+  --dark-border:#374151;
+  --dark-text:#ffffff;
+  --dark-muted:#9ca3af;
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -343,14 +362,15 @@ export default {
 }
 
 .trade-page {
-  background: #f8f9fa;
+  background: var(--dark-bg);
   min-height: 100vh;
+  color: var(--dark-text);
 }
 
 /* 顶部导航 */
 .topbar {
-  background: white;
-  border-bottom: 1px solid #e9ecef;
+  background: var(--dark-bg);
+  border-bottom: 1px solid var(--dark-border);
   padding: 20px;
 }
 
@@ -358,33 +378,35 @@ export default {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #6c757d;
+  color: var(--dark-muted);
 }
 
 .crumb-back {
   border: none;
   background: transparent;
   cursor: pointer;
-  color: #6c757d;
-  padding: 4px;
-  border-radius: 4px;
+  color: var(--dark-muted);
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
 .crumb-back:hover {
-  background: #f8f9fa;
+  background: var(--dark-panel);
+  color: var(--dark-text);
 }
 
 .crumb {
-  color: #6c757d;
+  color: var(--dark-muted);
 }
 
 .crumb-current {
-  color: #212529;
+  color: var(--dark-text);
   font-weight: 600;
 }
 
 .sep {
-  color: #dee2e6;
+  color: var(--dark-border);
 }
 
 .i {
@@ -407,10 +429,11 @@ export default {
 /* 项目信息卡片 */
 .project-info-card {
   grid-area: project-info;
-  background: white;
-  border-radius: 12px;
+  background: #1d1d36;
+  border: 1px solid #2a2a4a;
+  border-radius: 16px;
   padding: 30px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow);
 }
 
 .project-header {
@@ -433,12 +456,12 @@ export default {
 .project-title {
   font-size: 24px;
   font-weight: 700;
-  color: #212529;
+  color: var(--dark-text);
   margin: 0 0 8px 0;
 }
 
 .project-subtitle {
-  color: #6c757d;
+  color: var(--dark-muted);
   margin: 0 0 12px 0;
 }
 
@@ -449,12 +472,13 @@ export default {
 }
 
 .meta-item {
-  background: #f8f9fa;
-  padding: 4px 12px;
+  background: var(--dark-bg);
+  padding: 6px 12px;
   border-radius: 20px;
   font-size: 12px;
-  color: #495057;
+  color: var(--dark-muted);
   text-transform: capitalize;
+  border: 1px solid var(--dark-border);
 }
 
 .project-metrics {
@@ -467,45 +491,55 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  background: #141426;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #2a2a4a;
 }
 
 .metric-label {
   font-size: 12px;
-  color: #6c757d;
+  color: #94a3b8;
   text-transform: uppercase;
   font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
 .metric-value {
   font-size: 18px;
   font-weight: 600;
-  color: #212529;
+  color: #ffffff;
 }
 
 /* 交易表单 */
 .trade-form-card {
   grid-area: trade-form;
-  background: white;
-  border-radius: 12px;
+  background: var(--dark-panel);
+  border: 1px solid var(--dark-border);
+  border-radius: 16px;
   padding: 30px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow);
 }
 
 .form-title {
   font-size: 24px;
   font-weight: 700;
-  color: #212529;
+  color: var(--dark-text);
   margin: 0 0 30px 0;
 }
 
 .form-section {
   margin-bottom: 30px;
+  background: #1d1d36;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #2a2a4a;
 }
 
 .section-title {
   font-size: 16px;
   font-weight: 600;
-  color: #212529;
+  color: #ffffff;
   margin: 0 0 16px 0;
 }
 
@@ -521,20 +555,23 @@ export default {
   align-items: center;
   gap: 8px;
   padding: 20px;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
-  background: white;
+  border: 2px solid #2a2a4a;
+  border-radius: 12px;
+  background: #1d1d36;
   cursor: pointer;
   transition: all 0.2s;
+  color: #ffffff;
 }
 
 .trade-type-btn:hover {
-  border-color: #ff6b35;
+  border-color: var(--primary);
+  background: #2a2a4a;
 }
 
 .trade-type-btn.active {
-  border-color: #ff6b35;
-  background: #fff5f2;
+  border-color: var(--primary);
+  background: var(--primary);
+  color: white;
 }
 
 .btn-icon {
@@ -543,7 +580,7 @@ export default {
 
 .btn-text {
   font-weight: 600;
-  color: #212529;
+  color: inherit;
 }
 
 .amount-input-group {
@@ -555,19 +592,21 @@ export default {
 .amount-input {
   flex: 1;
   padding: 12px 16px;
-  border: 1px solid #ced4da;
+  border: 1px solid var(--dark-border);
   border-radius: 8px;
   font-size: 16px;
+  background: var(--dark-bg);
+  color: var(--dark-text);
 }
 
 .amount-input:focus {
   outline: none;
-  border-color: #ff6b35;
-  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .amount-unit {
-  color: #6c757d;
+  color: #94a3b8;
   font-weight: 500;
 }
 
@@ -577,7 +616,7 @@ export default {
 
 .info-text {
   font-size: 14px;
-  color: #6c757d;
+  color: #94a3b8;
 }
 
 .price-options {
@@ -591,10 +630,12 @@ export default {
   align-items: center;
   gap: 8px;
   cursor: pointer;
+  color: #ffffff;
 }
 
 .price-option input[type="radio"] {
   margin: 0;
+  accent-color: var(--primary);
 }
 
 .limit-price-input {
@@ -606,25 +647,28 @@ export default {
 .price-input {
   flex: 1;
   padding: 12px 16px;
-  border: 1px solid #ced4da;
+  border: 1px solid var(--dark-border);
   border-radius: 8px;
   font-size: 16px;
+  background: var(--dark-bg);
+  color: var(--dark-text);
 }
 
 .price-input:focus {
   outline: none;
-  border-color: #ff6b35;
-  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .price-unit {
-  color: #6c757d;
+  color: #94a3b8;
   font-weight: 500;
 }
 
 .trade-summary {
-  background: #f8f9fa;
-  border-radius: 8px;
+  background: #1d1d36;
+  border: 1px solid #2a2a4a;
+  border-radius: 12px;
   padding: 20px;
   margin-bottom: 30px;
 }
@@ -638,16 +682,16 @@ export default {
 .summary-item:last-child {
   margin-bottom: 0;
   font-weight: 600;
-  border-top: 1px solid #dee2e6;
+  border-top: 1px solid var(--dark-border);
   padding-top: 8px;
 }
 
 .summary-label {
-  color: #6c757d;
+  color: #94a3b8;
 }
 
 .summary-value {
-  color: #212529;
+  color: #ffffff;
 }
 
 .form-actions {
@@ -666,41 +710,47 @@ export default {
 }
 
 .btn.secondary {
-  background: #6c757d;
-  color: white;
+  background: var(--dark-border);
+  color: var(--dark-text);
+  border: 1px solid var(--dark-border);
 }
 
 .btn.secondary:hover {
-  background: #5a6268;
+  background: var(--dark-muted);
 }
 
 .btn.primary {
-  background: #ff6b35;
+  background: var(--primary);
   color: white;
+  border: 1px solid var(--primary);
 }
 
 .btn.primary:hover {
-  background: #e55a2b;
+  background: var(--primary-ink);
+  border-color: var(--primary-ink);
 }
 
 .btn.primary:disabled {
-  background: #adb5bd;
+  background: var(--dark-border);
+  border-color: var(--dark-border);
   cursor: not-allowed;
+  opacity: 0.5;
 }
 
 /* 交易历史 */
 .trade-history-card {
   grid-area: trade-history;
-  background: white;
-  border-radius: 12px;
+  background: #1d1d36;
+  border: 1px solid #2a2a4a;
+  border-radius: 16px;
   padding: 30px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow);
 }
 
 .card-title {
   font-size: 20px;
   font-weight: 700;
-  color: #212529;
+  color: #ffffff;
   margin: 0 0 20px 0;
 }
 
@@ -715,8 +765,15 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  background: #f8f9fa;
-  border-radius: 8px;
+  background: #141426;
+  border: 1px solid #2a2a4a;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.trade-item:hover {
+  background: #1d1d36;
+  border-color: var(--primary);
 }
 
 .trade-info {
@@ -727,25 +784,25 @@ export default {
 
 .trade-type {
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
 }
 
 .trade-type.buy {
-  background: #d4edda;
-  color: #155724;
+  background: #dcfce7;
+  color: #16a34a;
 }
 
 .trade-type.sell {
-  background: #f8d7da;
-  color: #721c24;
+  background: #fee2e2;
+  color: #dc2626;
 }
 
 .trade-amount {
   font-weight: 500;
-  color: #212529;
+  color: #ffffff;
 }
 
 .trade-details {
@@ -757,12 +814,12 @@ export default {
 
 .trade-price {
   font-weight: 600;
-  color: #212529;
+  color: #ffffff;
 }
 
 .trade-time {
   font-size: 12px;
-  color: #6c757d;
+  color: #94a3b8;
 }
 
 /* 响应式设计 */

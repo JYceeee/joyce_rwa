@@ -369,7 +369,7 @@
         <!-- 项目详情 -->
         <div v-if="activeTab==='Projects'" class="pf-projects">
           <div class="pf-projects-grid">
-            <div v-for="project in projects" :key="project.code" class="pf-project-card">
+            <div v-for="project in accountProjects" :key="project.code" class="pf-project-card">
               <div class="pf-project-header">
                 <img :src="project.image" :alt="project.code" class="pf-project-image" />
                 <div class="pf-project-info">
@@ -651,6 +651,16 @@ const totalInvestment = computed(() => getAccountTotalInvestment(selectedAccount
 const currentValue = computed(() => getAccountCurrentValue(selectedAccount.value))
 const totalGain = computed(() => getAccountTotalGain(selectedAccount.value))
 const roi = computed(() => getAccountROI(selectedAccount.value))
+
+// 获取当前账户下购买的项目
+const accountProjects = computed(() => {
+  if (!selectedAccount.value) return []
+  
+  const accountHoldings = getAccountHoldings(selectedAccount.value)
+  const projectCodes = accountHoldings.map(holding => holding.code)
+  
+  return projects.value.filter(project => projectCodes.includes(project.code))
+})
 
 const portfolioRisk = computed(() => {
   const riskScores = { low: 1, medium: 2, high: 3 }

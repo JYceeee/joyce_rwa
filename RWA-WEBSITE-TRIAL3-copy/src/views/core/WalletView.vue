@@ -3,11 +3,11 @@
     <div v-if="showPrimaryModal" class="modal-mask">
       <div class="modal-wrapper">
         <div class="modal-container">
-          <h2 style="margin-bottom:8px;">Set Primary Wallet</h2>
-          <p>Select the wallet account you want to set as primary:</p>
+          <h2 style="margin-bottom:8px;color:#ffffff;">Set Primary Wallet</h2>
+          <p style="color:#ffffff;">Select the wallet account you want to set as primary:</p>
           <div style="margin:16px 0;">
-            <select v-model="primaryCandidate" style="width:100%;height:38px;font-size:15px;border-radius:8px;">
-              <option v-for="acc in accounts" :key="acc" :value="acc">{{ acc }}</option>
+            <select v-model="primaryCandidate" style="width:100%;height:38px;font-size:15px;border-radius:8px;background:#1d1d36;color:#ffffff;border:1px solid #2a2a4a;padding:0 8px;">
+              <option v-for="acc in accounts" :key="acc" :value="acc" style="background:#1d1d36;color:#ffffff;">{{ acc }}</option>
             </select>
           </div>
           <div style="text-align:right;">
@@ -21,10 +21,10 @@
     <div v-if="showDisconnectModal" class="modal-mask">
       <div class="modal-wrapper">
         <div class="modal-container">
-          <h2 style="margin-bottom:8px;">Disconnect Wallet</h2>
-          <p>Select the wallet account you want to disconnect:</p>
+          <h2 style="margin-bottom:8px;color:#ffffff;">Disconnect Wallet</h2>
+          <p style="color:#ffffff;">Select the wallet account you want to disconnect:</p>
           <div style="margin:16px 0;">
-            <span style="display:block;font-size:15px;padding:8px 0;color:#0f172a;background:#f3f4f6;border-radius:8px;">{{ selectedAccount }}</span>
+            <span style="display:block;font-size:15px;padding:8px 0;color:#ffffff;background:#2a2a4a;border-radius:8px;">{{ selectedAccount }}</span>
           </div>
           <div style="text-align:right;">
             <button class="mm-btn mm-outline" @click="showDisconnectModal=false">Cancel</button>
@@ -37,8 +37,8 @@
     <div v-if="showDisconnectSuccess" class="modal-mask">
       <div class="modal-wrapper">
         <div class="modal-container">
-          <h2 style="margin-bottom:8px;">Wallet Disconnected</h2>
-          <p>{{ disconnectSuccessMsg }}</p>
+          <h2 style="margin-bottom:8px;color:#ffffff;">Wallet Disconnected</h2>
+          <p style="color:#ffffff;">{{ disconnectSuccessMsg }}</p>
           <div style="text-align:right;">
             <button class="mm-btn mm-outline" @click="showDisconnectSuccess=false">Confirm</button>
           </div>
@@ -85,20 +85,20 @@
                 <path d="M3 7a3 3 0 0 1 3-3h12a1 1 0 1 1 0 2H6a1 1 0 0 0-1 1v1h13a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V7Zm18 6h-4a2 2 0 1 0 0 4h4v-4Z"/>
               </svg>
             </span>
-            <select v-model="walletAction" style="border:0;outline:none;width:180px;height:38px;background:transparent;color:#0f172a;">
-              <option value="" disabled>Choose…</option>
-              <option value="link">Link new wallet</option>
-              <option value="set-primary">Set primary wallet</option>
-              <option value="disconnect">Disconnect my wallet</option>
+            <select v-model="walletAction" style="border:0;outline:none;width:180px;height:38px;background:#1d1d36;color:#ffffff;border-radius:8px;padding:0 8px;">
+              <option value="" disabled style="background:#1d1d36;color:#94a3b8;">Choose…</option>
+              <option value="link" style="background:#1d1d36;color:#ffffff;">Link new wallet</option>
+              <option value="set-primary" style="background:#1d1d36;color:#ffffff;">Set primary wallet</option>
+              <option value="disconnect" style="background:#1d1d36;color:#ffffff;">Disconnect my wallet</option>
             </select>
             <template v-if="walletAction==='set-primary'||walletAction==='disconnect'">
-              <select v-model="selectedAccount" style="border:1px solid #e5e7eb;outline:none;width:180px;height:38px;background:#f3f4f6;color:#0f172a;font-size:15px;border-radius:8px;">
-                <option v-for="acc in accounts" :key="acc" :value="acc">{{ acc }}</option>
+              <select v-model="selectedAccount" style="border:1px solid #2a2a4a;outline:none;width:180px;height:38px;background:#1d1d36;color:#ffffff;font-size:15px;border-radius:8px;padding:0 8px;">
+                <option v-for="acc in accounts" :key="acc" :value="acc" style="background:#1d1d36;color:#ffffff;">{{ acc }}</option>
               </select>
               <button class="mm-btn mm-outline" style="margin-left:8px;" @click="onWalletConfirm">Confirm</button>
             </template>
             <template v-if="walletAction==='link'">
-              <input v-model="manualWalletInput" class="mm-input" placeholder="Paste new wallet address" style="width:180px;margin-left:8px;" />
+              <input v-model="manualWalletInput" class="mm-input" placeholder="Paste new wallet address" style="width:180px;margin-left:8px;background:#1d1d36;color:#ffffff;border-color:#2a2a4a;" />
               <button class="mm-btn mm-outline" style="margin-left:8px;" @click="onManualWalletConfirm">Confirm</button>
             </template>
           </div>
@@ -112,7 +112,7 @@
       <div class="mm-hero">
         <div class="mm-balance">{{ bigAudDisplay }}</div>
         <div class="mm-subline">
-          <span>+A$0 (+0.00%)</span>
+          <span>+A$0 (+0.00%)</span> <!--需要修改为投资累计余额的动态数据-->
           <a href="#" @click.prevent="$router.push('/portfolio')" class="mm-link">Portfolio ↗</a>
         </div>
       </div>
@@ -194,7 +194,7 @@
         </div>
       </div>
       <!-- Tokens 列表 -->
-        <div v-if="activeTab==='tokens'" class="mm-tokenlist" style="background:#141426;">
+        <div v-if="activeTab==='tokens'" class="mm-tokenlist" style="background:#1d1d36;">
         <div class="mm-token">
           <div class="mm-token-left">
             <div class="mm-token-icon mm-eth"></div>
@@ -536,11 +536,13 @@ function onManualWalletConfirm() {
   max-width: 420px;
 }
 .modal-container {
-  background: #fff;
+  background: #1d1d36;
+  border: 1px solid #2a2a4a;
   border-radius: 12px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.12);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.3);
   padding: 28px 24px 18px;
   font-size: 15px;
+  color: #ffffff;
 }
 /* Wallet Management Section */
 .mm-wallet-management {
@@ -599,6 +601,7 @@ function onManualWalletConfirm() {
   --blue-ink:#4338ca;
   --border:#e5e7eb;
   --rise:#16a34a;
+  --orange:#f59e0b;
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
   color:var(--text);
   max-width: 960px;
@@ -622,7 +625,7 @@ function onManualWalletConfirm() {
 .mm-link:hover{color:var(--blue-ink);text-decoration:underline;}
 .mm-status{display:flex;align-items:center;gap:10px;}
 .mm-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;}
-.mm-status-text{font-size:14px;color:#334155}
+.mm-status-text{font-size:14px;color:#acb3bd;}
 
 /* 按钮 */
  .mm-btn{border:1px solid var(--border);background:#6b7280;border-radius:999px;padding:6px 12px;cursor:pointer;font-size:14px;color:#FFFFFF;}
@@ -642,7 +645,7 @@ function onManualWalletConfirm() {
 
 /* 信息条 */
 .mm-info{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px;}
-.mm-card{border:1px solid var(--border);border-radius:16px;padding:16px;}
+.mm-card{border:1px solid #2a2a4a;border-radius:16px;padding:16px;background:#1c1c36;}
 .mm-card-label{font-size:12px;color:#64748b;margin-bottom:6px;}
  .mm-card-title{font-weight:600;color:#FFFFFF;}
 .mm-card-sub{font-size:12px;color:#64748b;margin-top:4px;}
@@ -665,20 +668,20 @@ function onManualWalletConfirm() {
 .mm-sort-item.active{border-color:#cbd5e1;background:#f1f5f9}
 
 /* Token 列表 */
-.mm-tokenlist{margin-top:8px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff;}
-.mm-token{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);}
+.mm-tokenlist{margin-top:8px;border:1px solid #2a2a4a;border-radius:16px;overflow:hidden;background:#1d1d36;}
+.mm-token{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #2a2a4a;color:#ffffff;}
 .mm-token:last-child{border-bottom:none;}
 .mm-token-left{display:flex;align-items:center;gap:12px;}
- .mm-token-icon{width:36px;height:36px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-weight:700;color:#FFFFFF;}
+ .mm-token-icon{width:36px;height:36px;border-radius:50%;background:#2a2a4a;display:flex;align-items:center;justify-content:center;font-weight:700;color:#FFFFFF;}
 .mm-eth{background: radial-gradient(100% 100% at 30% 20%, #cfe3ff 0%, #b9c8ff 40%, #9db4ff 100%);}
-.mm-token-title{font-weight:600;}
+.mm-token-title{font-weight:600;color:#ffffff;}
 .mm-dim{color:#94a3b8;}
-.mm-rise{color:var(--rise);font-size:12px;margin-top:2px;}
+.mm-rise{color:#10b981;font-size:12px;margin-top:2px;}
 .mm-token-right{text-align:right;}
-.mm-token-amount{font-weight:600;}
-.mm-token-sub{font-size:12px;color:#64748b;margin-top:2px;}
-.mm-token-footer{display:flex;align-items:center;justify-content:space-between;padding:10px 2px;color:#64748b;font-size:12px;}
-.mm-tip{color:#64748b}
+.mm-token-amount{font-weight:600;color:#ffffff;}
+.mm-token-sub{font-size:12px;color:#94a3b8;margin-top:2px;}
+.mm-token-footer{display:flex;align-items:center;justify-content:space-between;padding:10px 2px;color:#94a3b8;font-size:12px;}
+.mm-tip{color:#94a3b8}
 
 /* 提示 */
 .mm-warn{color:#b45309;font-size:13px;margin-top:8px;}
@@ -690,13 +693,15 @@ function onManualWalletConfirm() {
 /* 自定义代币输入样式 */
 .mm-custom{
   margin-top:12px;
-  border: 1px solid var(--border);
+  border: 1px solid #2a2a4a;
   border-radius: 16px;
   padding: 18px 20px 12px 20px;
+  background: #1d1d36;
 }
 .mm-custom-form{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .mm-note{color:var(--muted);font-size:13px}
-.mm-input{height:36px;border:1px solid var(--border);border-radius:10px;padding:0 10px;outline:none}
+.mm-input{height:36px;border:1px solid #2a2a4a;border-radius:10px;padding:0 10px;outline:none;background:#1d1d36;color:#ffffff;}
+.mm-input::placeholder{color:#94a3b8;}
 
 @media (max-width: 900px){
   .mm-actions{flex-wrap:wrap;}

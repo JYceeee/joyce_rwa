@@ -6,11 +6,45 @@
           <img src="/icons/RWA-logo.png" alt="Mortgage RWA" class="brand-logo" />
         </a>
         <nav class="menu" aria-label="Primary">
-          <a href="#" @click.prevent="go('/home')">Home</a>
-          <a href="#" @click.prevent="go('/projects')">Projects</a>
-          <a href="#" @click.prevent="go('/portfolio')">Portfolio</a>
-          <a href="#" @click.prevent="noop">More ▾</a>
+          <a href="#" @click.prevent="go('/home')" class="menu-item">Home</a>
+          <a href="#" @click.prevent="go('/projects')" class="menu-item">Projects</a>
+          <a href="#" @click.prevent="go('/portfolio')" class="menu-item">Portfolio</a>
+          <div class="dropdown-container">
+            <a href="#" @click.prevent="toggleMoreDropdown" class="more-link">
+              More ▾
+            </a>
+            <div v-if="moreDropdownOpen" class="dropdown-menu">
+              <a href="#" @click.prevent="go('/about')" class="dropdown-item">
+                <span class="dropdown-icon">🏢</span>
+                <span>About Us</span>
+              </a>
+              <a href="#" @click.prevent="go('/vision')" class="dropdown-item">
+                <span class="dropdown-icon">🎯</span>
+                <span>Vision</span>
+              </a>
+              <a href="#" @click.prevent="go('/contact')" class="dropdown-item">
+                <span class="dropdown-icon">📞</span>
+                <span>Contact Us</span>
+              </a>
+              <a href="#" @click.prevent="go('/help')" class="dropdown-item">
+                <span class="dropdown-icon">❓</span>
+                <span>Help Center</span>
+              </a>
+            </div>
+          </div>  
         </nav>
+        
+        <!-- 移动端汉堡菜单按钮 -->
+        <button 
+          class="mobile-menu-btn" 
+          @click="toggleMobileMenu"
+          :class="{ active: mobileMenuOpen }"
+          aria-label="Toggle mobile menu"
+        >
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
       </div>
 
       <div class="right">
@@ -48,6 +82,41 @@
         </template>
       </div>
     </div>
+    
+    <!-- 移动端菜单 -->
+    <div v-if="mobileMenuOpen" class="mobile-menu">
+      <div class="mobile-menu-content">
+        <a href="#" @click.prevent="go('/home')" class="mobile-menu-item">
+          <span class="mobile-menu-icon">🏠</span>
+          <span>Home</span>
+        </a>
+        <a href="#" @click.prevent="go('/projects')" class="mobile-menu-item">
+          <span class="mobile-menu-icon">📊</span>
+          <span>Projects</span>
+        </a>
+        <a href="#" @click.prevent="go('/portfolio')" class="mobile-menu-item">
+          <span class="mobile-menu-icon">💼</span>
+          <span>Portfolio</span>
+        </a>
+        <div class="mobile-menu-divider"></div>
+        <a href="#" @click.prevent="go('/about')" class="mobile-menu-item">
+          <span class="mobile-menu-icon">🏢</span>
+          <span>公司介绍</span>
+        </a>
+        <a href="#" @click.prevent="go('/vision')" class="mobile-menu-item">
+          <span class="mobile-menu-icon">🎯</span>
+          <span>公司愿景</span>
+        </a>
+        <a href="#" @click.prevent="go('/contact')" class="mobile-menu-item">
+          <span class="mobile-menu-icon">📞</span>
+          <span>联系我们</span>
+        </a>
+        <a href="#" @click.prevent="go('/help')" class="mobile-menu-item">
+          <span class="mobile-menu-icon">❓</span>
+          <span>帮助中心</span>
+        </a>
+      </div>
+    </div>
   </header>
 </template>
 
@@ -57,7 +126,13 @@ export default {
   name: 'AppHeader',
   props: {},
   data(){
-    return { searchOpen: false, searchText: '', isLoggedIn: false }
+    return { 
+      searchOpen: false, 
+      searchText: '', 
+      isLoggedIn: false,
+      moreDropdownOpen: false,
+      mobileMenuOpen: false
+    }
   },
 
   methods: {
@@ -65,6 +140,24 @@ export default {
     go(path){
       this.$router.push(path);
       this.closeSearch();
+      this.closeMoreDropdown();
+      this.closeMobileMenu();
+    },
+    toggleMoreDropdown(){
+      this.moreDropdownOpen = !this.moreDropdownOpen;
+      this.closeSearch();
+      this.closeMobileMenu();
+    },
+    closeMoreDropdown(){
+      this.moreDropdownOpen = false;
+    },
+    toggleMobileMenu(){
+      this.mobileMenuOpen = !this.mobileMenuOpen;
+      this.closeSearch();
+      this.closeMoreDropdown();
+    },
+    closeMobileMenu(){
+      this.mobileMenuOpen = false;
     },
     // refreshAuth() {
     //   const logged = localStorage.getItem('isLoggedIn') === 'true';
@@ -99,9 +192,23 @@ export default {
     onDocClick(e){
       const input = this.$refs.searchInput
       const btn = this.$el.querySelector('.search-toggle')
-      if(!input) return
-      if(this.searchOpen && !input.contains(e.target) && !btn.contains(e.target)){
+      const dropdown = this.$el.querySelector('.dropdown-container')
+      const mobileMenuBtn = this.$el.querySelector('.mobile-menu-btn')
+      const mobileMenu = this.$el.querySelector('.mobile-menu')
+      
+      // 处理搜索框点击外部关闭
+      if(input && this.searchOpen && !input.contains(e.target) && !btn.contains(e.target)){
         this.closeSearch()
+      }
+      
+      // 处理dropdown点击外部关闭
+      if(dropdown && this.moreDropdownOpen && !dropdown.contains(e.target)){
+        this.closeMoreDropdown()
+      }
+      
+      // 处理移动端菜单点击外部关闭
+      if(mobileMenu && this.mobileMenuOpen && !mobileMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)){
+        this.closeMobileMenu()
       }
     },
     async connectWallet() {
@@ -155,4 +262,300 @@ export default {
   cursor: pointer;
 }
 .icon-btn:focus { outline: 2px solid #94a3b8; outline-offset: 2px; }
+
+/* Dropdown样式 */
+.dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+.more-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 200px;
+  background: #1d1d36;
+  border: 1px solid #2a2a4a;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  margin-top: 4px;
+  animation: dropdownFadeIn 0.2s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: #ffffff;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #2a2a4a;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover {
+  background: #2a2a4a;
+  color: #ffffff;
+}
+
+.dropdown-icon {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+
+/* 深色主题适配 - 已直接应用深色样式 */
+
+/* 汉堡菜单按钮样式 */
+.mobile-menu-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  gap: 4px;
+}
+
+.hamburger-line {
+  width: 20px;
+  height: 2px;
+  background: var(--text);
+  transition: all 0.3s ease;
+  border-radius: 1px;
+}
+
+.mobile-menu-btn.active .hamburger-line:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.mobile-menu-btn.active .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.mobile-menu-btn.active .hamburger-line:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* 移动端菜单样式 */
+.mobile-menu {
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  z-index: 999;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mobile-menu-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mobile-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: var(--text);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.mobile-menu-item:hover {
+  background: var(--brand-600);
+}
+
+.mobile-menu-icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+}
+
+.mobile-menu-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 0;
+}
+
+/* 响应式设计 - 移动端适配 */
+@media (max-width: 768px) {
+  .nav {
+    padding: 0 16px;
+    gap: 12px;
+  }
+  
+  .left {
+    gap: 12px;
+  }
+  
+  .brand-logo {
+    height: 28px;
+  }
+  
+  .menu {
+    display: none; /* 在移动端隐藏完整菜单 */
+  }
+  
+  .mobile-menu-btn {
+    display: flex; /* 显示汉堡菜单按钮 */
+  }
+  
+  .right {
+    gap: 8px;
+  }
+  
+  .search-input.expanded {
+    width: 120px; /* 移动端搜索框更窄 */
+  }
+  
+  .btn {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
+  .btn.pill {
+    padding: 6px 10px;
+  }
+  
+  .btn.pill span:last-child {
+    display: none; /* 移动端只显示图标 */
+  }
+  
+  .dropdown-menu {
+    right: 0;
+    left: auto;
+    min-width: 180px;
+  }
+  
+  .dropdown-item {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  
+  .dropdown-icon {
+    font-size: 14px;
+    width: 18px;
+  }
+}
+
+/* 平板端适配 */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .nav {
+    padding: 0 20px;
+  }
+  
+  .menu {
+    gap: 16px;
+  }
+  
+  .search-input.expanded {
+    width: 150px;
+  }
+  
+  .btn {
+    padding: 9px 14px;
+  }
+}
+
+/* 小屏幕手机端 (小于480px) */
+@media (max-width: 480px) {
+  .nav {
+    padding: 0 12px;
+    gap: 8px;
+  }
+  
+  .brand-logo {
+    height: 24px;
+  }
+  
+  .search-input.expanded {
+    width: 100px;
+  }
+  
+  .btn {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+  
+  .btn.pill span:first-child {
+    font-size: 16px;
+  }
+  
+  .dropdown-menu {
+    min-width: 160px;
+  }
+  
+  .dropdown-item {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+}
+
+/* 超小屏幕 (小于360px) */
+@media (max-width: 360px) {
+  .nav {
+    padding: 0 8px;
+  }
+  
+  .brand-logo {
+    height: 20px;
+  }
+  
+  .search-input.expanded {
+    width: 80px;
+  }
+  
+  .btn {
+    padding: 4px 6px;
+    font-size: 11px;
+  }
+  
+  .dropdown-menu {
+    min-width: 140px;
+  }
+}
 </style>

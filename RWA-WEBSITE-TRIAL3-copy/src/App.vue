@@ -12,16 +12,16 @@
 
 <script>
 import AppHeader from './components/AppHeader.vue'
-import HomeView from './views/HomeView.vue'
-import ProjectsView from './views/ProjectsView.vue'
-import PortfolioView from './views/PortfolioView.vue'
-import LoginView from './views/LoginView.vue'
-import SignupView from './views/SignupView.vue'
-import ProfileView from './views/ProfileView.vue'
-import WalletView from './views/WalletView.vue'
+import HomeView from './views/core/HomeView.vue'
+import ProjectsView from './views/core/ProjectsView.vue'
+import PortfolioView from './views/core/PortfolioView.vue'
+import LoginView from './views/auth/LoginView.vue'
+import SignupView from './views/auth/SignupView.vue'
+import ProfileView from './views/core/ProfileView.vue'
+import WalletView from './views/core/WalletView.vue'
 import kycService from './components/kycService.vue'
 import AppFooter from './components/AppFooter.vue'
-import DetailPage from './views/DetailPage.vue'
+import DetailPage from './views/core/DetailPage.vue'
 
 export default {
   name: 'App',

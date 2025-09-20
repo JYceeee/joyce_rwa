@@ -45,7 +45,7 @@
         <h3>{{ p.code }}</h3>
         <p>{{ p.subtitle }}</p>
         <div class="loan-actions">
-          <a href="#" class="btn small orange" @click.prevent="openTrade(p.code)">Trade</a>
+          <a href="#" class="btn small orange" @click.prevent="openTrade(p.code)" >Trade</a>
           <a href="#" class="btn small" @click.prevent="openDetail(p.code)">Detail</a>
         </div>
       </article>
@@ -158,7 +158,10 @@ export default {
 </script>
 
 <style scoped>
-/* 页面容器深色主题 */
+:root{
+  --orange:#f59e0b;
+}
+
 .container {
   background: #0a0a1a;
   min-height: 100vh;
@@ -267,13 +270,13 @@ export default {
 
 .btn.small.orange {
   color: #ffffff !important;
-  background: var(--orange);
-  border-color: var(--orange);
+  background: #f97316;
+  border-color: #f97316;
 }
 
 .btn.small.orange:hover {
-  background: var(--orange);
-  border-color: var(--orange);
-  opacity: 0.9;
+  background: #ea580c;
+  border-color: #ea580c;
+  opacity: 1;
 }
 </style>
