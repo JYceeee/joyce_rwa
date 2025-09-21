@@ -5,9 +5,9 @@
       <p class="subline">First-lien mortgages · LTV control · Monthly interest</p>
     </header>
 
-    <!-- 筛选栏：保留你的交互 -->
+    <!-- 筛选栏：根据ProductDetailsInfo字段优化 -->
     <div class="filters" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0 6px;">
-      <input v-model="filters.q" class="input" placeholder="Search code/name" style="max-width:220px;height:38px" />
+      <input v-model="filters.q" class="input" placeholder="Search code/name/subtitle" style="max-width:240px;height:38px" />
       <select v-model="filters.type" class="input" style="max-width:160px;height:38px">
         <option value="">All Types</option>
         <option value="residential">Residential</option>
@@ -15,8 +15,10 @@
       </select>
       <select v-model="filters.region" class="input" style="max-width:160px;height:38px">
         <option value="">All Regions</option>
+        <option value="St Ives NSW">St Ives NSW</option>
         <option value="CBD">CBD</option>
         <option value="Suburban">Suburban</option>
+        <option value="Sydney">Sydney</option>
       </select>
       <select v-model="filters.risk" class="input" style="max-width:160px;height:38px">
         <option value="">All Risk</option>
@@ -24,13 +26,34 @@
         <option value="medium">Medium</option>
         <option value="high">High</option>
       </select>
+      <select v-model="filters.status" class="input" style="max-width:160px;height:38px">
+        <option value="">All Status</option>
+        <option value="active">Active</option>
+        <option value="upcoming">Upcoming</option>
+        <option value="research">Research</option>
+        <option value="planning">Planning</option>
+        <option value="completed">Completed</option>
+      </select>
       <select v-model.number="filters.minYield" class="input" style="max-width:180px;height:38px">
         <option :value="0">Min Yield: Any</option>
         <option :value="5">≥ 5%</option>
         <option :value="6">≥ 6%</option>
         <option :value="7">≥ 7%</option>
+        <option :value="8">≥ 8%</option>
+        <option :value="9">≥ 9%</option>
+        <option :value="10">≥ 10%</option>
       </select>
       <button class="btn" @click="resetFilters">Reset</button>
+    </div>
+    
+    <!-- 筛选结果统计 -->
+    <div class="filter-stats" style="margin: 8px 0; color: var(--muted); font-size: 14px;">
+      Showing {{ filteredProducts.length }} of {{ products.length }} projects
+      <span v-if="hasActiveFilters" style="margin-left: 12px;">
+        <button @click="resetFilters" style="background: none; border: none; color: #3b82f6; text-decoration: underline; cursor: pointer;">
+          Clear filters
+        </button>
+      </span>
     </div>
 
     <!-- 文档式列表：每个项目像一页 memo -->
@@ -151,7 +174,7 @@ export default {
   name: 'ProjectsView',
   data(){
     return {
-      filters: { q: '', type: '', region: '', risk: '', minYield: 0 },
+      filters: { q: '', type: '', region: '', risk: '', status: '', minYield: 0 },
       products: products
     }
   },
@@ -159,17 +182,43 @@ export default {
     filteredProducts(){
       const q = this.filters.q.trim().toLowerCase()
       return this.products.filter(p => {
-        const matchQ = !q || p.code.toLowerCase().includes(q) || (p.name || '').toLowerCase().includes(q)
+        // 搜索匹配：代码、名称、副标题
+        const matchQ = !q || 
+          p.code.toLowerCase().includes(q) || 
+          (p.name || '').toLowerCase().includes(q) ||
+          (p.subtitle || '').toLowerCase().includes(q)
+        
+        // 类型匹配
         const matchType = !this.filters.type || p.type === this.filters.type
+        
+        // 地区匹配
         const matchRegion = !this.filters.region || p.region === this.filters.region
+        
+        // 风险等级匹配
         const matchRisk = !this.filters.risk || p.risk === this.filters.risk
+        
+        // 状态匹配
+        const matchStatus = !this.filters.status || p.status === this.filters.status
+        
+        // 最小收益率匹配
         const matchYield = !this.filters.minYield || (p.targetYield || 0) >= this.filters.minYield
-        return matchQ && matchType && matchRegion && matchRisk && matchYield
+        
+        return matchQ && matchType && matchRegion && matchRisk && matchStatus && matchYield
       })
+    },
+    
+    // 检查是否有激活的筛选条件
+    hasActiveFilters() {
+      return this.filters.q.trim() !== '' || 
+             this.filters.type !== '' || 
+             this.filters.region !== '' || 
+             this.filters.risk !== '' || 
+             this.filters.status !== '' || 
+             this.filters.minYield > 0
     }
   },
   methods: {
-    resetFilters(){ this.filters = { q: '', type: '', region: '', risk: '', minYield: 0 } },
+    resetFilters(){ this.filters = { q: '', type: '', region: '', risk: '', status: '', minYield: 0 } },
     openDetail(code){
       const product = this.products.find(x => x.code === code)
       try { sessionStorage.setItem('lastProduct', JSON.stringify(product)) } catch(e) {}
