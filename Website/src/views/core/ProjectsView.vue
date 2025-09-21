@@ -1,0 +1,659 @@
+<template>
+  <div class="container">
+    <header class="doc-header">
+    <h1 class="headline">Property Loans</h1>
+      <p class="subline">First-lien mortgages · LTV control · Monthly interest</p>
+    </header>
+
+    <!-- 筛选栏：保留你的交互 -->
+    <div class="filters" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0 6px;">
+      <input v-model="filters.q" class="input" placeholder="Search code/name" style="max-width:220px;height:38px" />
+      <select v-model="filters.type" class="input" style="max-width:160px;height:38px">
+        <option value="">All Types</option>
+        <option value="residential">Residential</option>
+        <option value="commercial">Commercial</option>
+      </select>
+      <select v-model="filters.region" class="input" style="max-width:160px;height:38px">
+        <option value="">All Regions</option>
+        <option value="CBD">CBD</option>
+        <option value="Suburban">Suburban</option>
+      </select>
+      <select v-model="filters.risk" class="input" style="max-width:160px;height:38px">
+        <option value="">All Risk</option>
+        <option value="low">Low</option>
+        <option value="medium">Medium</option>
+        <option value="high">High</option>
+      </select>
+      <select v-model.number="filters.minYield" class="input" style="max-width:180px;height:38px">
+        <option :value="0">Min Yield: Any</option>
+        <option :value="5">≥ 5%</option>
+        <option :value="6">≥ 6%</option>
+        <option :value="7">≥ 7%</option>
+      </select>
+      <button class="btn" @click="resetFilters">Reset</button>
+    </div>
+
+    <!-- 文档式列表：每个项目像一页 memo -->
+    <section class="doc-list">
+      <article
+        v-for="p in filteredProducts"
+        :key="p.code"
+        class="doc-card"
+        aria-labelledby="title-{{p.code}}"
+      >
+         <!-- 主要内容区域 -->
+         <div class="main-content">
+           <!-- 左侧内容 -->
+           <div class="left-content">
+             <!-- 项目标题信息 -->
+             <section class="title-section">
+               <div class="title-header">
+                 <h2 :id="'title-' + p.code">
+                   <span class="doc-code">{{ p.code }}</span>
+                   <span class="doc-name">{{ p.name }}</span>
+                 </h2>
+                 <div class="status-badge" :class="'status-' + p.status">
+                   {{ getStatusText(p.status) }}
+                 </div>
+               </div>
+               <p class="doc-subtitle">{{ p.subtitle }}</p>
+             </section>
+
+             <hr class="sep" />
+
+             <!-- 摘要 -->
+             <section class="summary-section">
+               <h3 class="doc-h3">Summary</h3>
+               <p class="doc-text">
+                 {{ p.summary || 'Mortgage-backed loan project with controlled LTV and monthly coupon schedule. Suitable for investors seeking income with real-asset collateral.' }}
+               </p>
+             </section>
+           </div>
+
+           <!-- 右侧图片 -->
+           <div class="right-content">
+             <img :src="p.image" class="doc-cover" :alt="p.code" />
+           </div>
+         </div>
+
+         <!-- 投资信息 -->
+         <section class="doc-section">
+           <h3 class="doc-h3">Investment Details</h3>
+           <div class="investment-grid">
+             <div class="investment-item">
+               <div class="investment-label">Collateral Value</div>
+               <div class="investment-value">{{ p.metrics?.collateralPropertyValue || 'TBA' }}</div>
+             </div>
+             <div class="investment-item">
+               <div class="investment-label">Loan Coupon</div>
+               <div class="investment-value">{{ p.metrics?.targetLoanYield || (p.targetYield ? p.targetYield.toFixed(1) + '% p.a.' : 'TBA') }}</div>
+             </div>
+             <div class="investment-item">
+               <div class="investment-label">Total Offering</div>
+               <div class="investment-value">{{ p.totalOffering || 'A$1,000,000' }}</div>
+             </div>
+             <div class="investment-item">
+               <div class="investment-label">Subscribed</div>
+               <div class="investment-value">{{ p.subscribed || 'A$350,000' }}</div>
+             </div>
+           </div>
+           
+           <!-- 按钮与进度条在同一行 -->
+           <div class="progress-actions-row">
+             <div class="progress-container">
+               <div class="progress-bar">
+                 <div class="progress-fill" :style="{ width: getProgressPercentage(p) + '%' }"></div>
+                 <div class="progress-empty" :style="{ width: (100 - getProgressPercentage(p)) + '%' }"></div>
+               </div>
+               <span class="progress-text">{{ getProgressPercentage(p) }}%</span>
+             </div>
+             <div class="doc-actions">
+               <!-- Active状态: Trade and Detail -->
+               <template v-if="p.status === 'active'">
+                 <a href="#" class="btn small orange" @click.prevent="openTrade(p.code)">Trade</a>
+                 <a href="#" class="btn small" @click.prevent="openDetail(p.code)">Detail</a>
+               </template>
+               
+               <!-- Upcoming状态: Preview and Join Waitlist -->
+               <template v-else-if="p.status === 'upcoming'">
+                 <a href="#" class="btn small" @click.prevent="openDetail(p.code)">Preview</a>
+                 <a href="#" class="btn small orange" @click.prevent="joinWaitlist(p.code)">Join Waitlist</a>
+               </template>
+               
+               <!-- Research状态: Preview and Register -->
+               <template v-else-if="p.status === 'research'">
+                 <a href="#" class="btn small" @click.prevent="openDetail(p.code)">Preview</a>
+                 <a href="#" class="btn small orange" @click.prevent="registerInterest(p.code)">Register</a>
+               </template>
+               
+               <!-- Planning状态: Preview and Register -->
+               <template v-else-if="p.status === 'planning'">
+                 <a href="#" class="btn small" @click.prevent="openDetail(p.code)">Preview</a>
+                 <a href="#" class="btn small orange" @click.prevent="registerInterest(p.code)">Register</a>
+               </template>
+               
+               <!-- Completed状态: 只显示Detail -->
+               <template v-else-if="p.status === 'completed'">
+          <a href="#" class="btn small" @click.prevent="openDetail(p.code)">Detail</a>
+               </template>
+             </div>
+        </div>
+         </section>
+      </article>
+    </section>
+  </div>
+</template>
+
+<script>
+import { products } from '@/data/ProductDetailsInfo.js'
+
+export default { 
+  name: 'ProjectsView',
+  data(){
+    return {
+      filters: { q: '', type: '', region: '', risk: '', minYield: 0 },
+      products: products
+    }
+  },
+  computed: {
+    filteredProducts(){
+      const q = this.filters.q.trim().toLowerCase()
+      return this.products.filter(p => {
+        const matchQ = !q || p.code.toLowerCase().includes(q) || (p.name || '').toLowerCase().includes(q)
+        const matchType = !this.filters.type || p.type === this.filters.type
+        const matchRegion = !this.filters.region || p.region === this.filters.region
+        const matchRisk = !this.filters.risk || p.risk === this.filters.risk
+        const matchYield = !this.filters.minYield || (p.targetYield || 0) >= this.filters.minYield
+        return matchQ && matchType && matchRegion && matchRisk && matchYield
+      })
+    }
+  },
+  methods: {
+    resetFilters(){ this.filters = { q: '', type: '', region: '', risk: '', minYield: 0 } },
+    openDetail(code){
+      const product = this.products.find(x => x.code === code)
+      try { sessionStorage.setItem('lastProduct', JSON.stringify(product)) } catch(e) {}
+      const projectId = product.project_id || code
+      this.$router.push({ name: 'detail', params: { id: projectId } })
+    },
+    openTrade(code){
+      const product = this.products.find(x => x.code === code)
+      try { sessionStorage.setItem('lastProduct', JSON.stringify(product)) } catch(e) {}
+      this.$router.push({ name: 'tradeProject', params: { code } })
+    },
+    getProgressPercentage(product) {
+      if (!product.totalOffering || !product.subscribed) return 0
+      
+      // 提取数字部分（移除货币符号和逗号）
+      const totalStr = product.totalOffering.replace(/[A$,]/g, '')
+      const subscribedStr = product.subscribed.replace(/[A$,]/g, '')
+      
+      const total = parseFloat(totalStr)
+      const subscribed = parseFloat(subscribedStr)
+      
+      if (total === 0) return 0
+      
+      const percentage = (subscribed / total) * 100
+      return Math.min(Math.round(percentage), 100)
+    },
+    getStatusText(status) {
+      const statusMap = {
+        'active': 'Active',
+        'upcoming': 'Upcoming',
+        'research': 'Research',
+        'planning': 'Planning',
+        'completed': 'Completed'
+      }
+      return statusMap[status] || 'Unknown'
+    },
+    joinWaitlist(code) {
+      const product = this.products.find(x => x.code === code)
+      // 这里可以添加加入等待列表的逻辑
+      alert(`已加入 ${product.name} 的等待列表！`)
+      console.log('Join waitlist for:', code)
+    },
+    registerInterest(code) {
+      const product = this.products.find(x => x.code === code)
+      // 这里可以添加注册兴趣的逻辑
+      alert(`已注册对 ${product.name} 的投资兴趣！`)
+      console.log('Register interest for:', code)
+    }
+  }
+}
+</script>
+
+<style scoped>
+:root{
+  --orange:#f59e0b;
+  --ink:#e5e7eb;         /* 文档纸张文本色 */
+  --paper:#0e0f1b;       /* 深色“纸张” */
+  --rule:#2a2c3f;        /* 分隔线 */
+  --muted:#9ca3af;
+}
+
+.container {
+  background: #0a0a1a;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* 顶部文档页眉 */
+.doc-header{
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 10px;
+  margin-bottom: 16px;
+}
+.headline {
+  color: #ffffff !important;
+  margin: 0 0 6px 0;
+}
+.subline{
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* 筛选栏 */
+.filters {
+  background: transparent;
+  padding: 16px 0;
+  border: none;
+  margin-bottom: 8px;
+}
+.filters .input {
+  background: #141426;
+  border: 1px solid #374151;
+  color: #ffffff;
+}
+.filters .input::placeholder { color: #9ca3af; }
+.filters .btn {
+  background: #374151;
+  border: 1px solid #4b5563;
+  color: #ffffff;
+}
+.filters .btn:hover { background: #4b5563; }
+
+/* 文档式列表 */
+.doc-list{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+/* 单页文档卡 */
+.doc-card{
+  background: #141426;
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: 18px;
+  color: var(--ink);
+  box-shadow: 0 6px 18px rgba(0,0,0,.25);
+}
+
+/* 主要内容区域布局 */
+.main-content {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 20px;
+  align-items: start;
+}
+
+/* 左侧内容区域 */
+.left-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 项目标题信息section */
+.title-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.title-section h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #fff;
+  letter-spacing: .2px;
+  flex: 1;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.status-active {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-upcoming {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.status-research {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.status-planning {
+  background: rgba(139, 92, 246, 0.2);
+  color: #8b5cf6;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.status-completed {
+  background: rgba(107, 114, 128, 0.2);
+  color: #6b7280;
+  border: 1px solid rgba(107, 114, 128, 0.3);
+}
+
+.doc-code {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  margin-right: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.doc-name { 
+  font-weight: 700;
+}
+
+.doc-subtitle {
+  margin: 6px 0 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* 摘要section */
+.summary-section {
+  margin: 6px 0 2px;
+}
+
+/* 右侧图片区域 */
+.right-content {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.doc-cover {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--rule);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* 分隔线像纸张的横线 */
+.sep{
+  border: none;
+  border-top: 1px dashed var(--rule);
+  margin: 14px 0;
+}
+
+/* 文档段落标题与内容 */
+.doc-section{ margin: 6px 0 2px; }
+.doc-h3{
+  margin: 0 0 8px 0;
+  color: #eaeaf0;
+  font-size: 14px;
+  letter-spacing: .2px;
+  text-transform: uppercase;
+}
+.doc-text{
+  margin: 0;
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+/* 两栏要点 */
+.grid-two{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* 投资信息网格布局 */
+.investment-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.investment-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.investment-label {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.investment-value {
+  font-size: 14px;
+  color: #fff;
+  font-weight: 600;
+}
+
+.progress-item {
+  grid-column: span 2;
+}
+
+.progress-item .progress-container {
+  margin-top: 2px;
+}
+
+/* 进度条和按钮同行布局 */
+.progress-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule);
+}
+
+.progress-actions-row .progress-container {
+  flex: 1;
+  margin-top: 0;
+}
+
+.progress-actions-row .doc-actions {
+  display: flex;
+  gap: 12px;
+  margin: 0;
+}
+
+/* 目录式 key-value */
+.kv{ margin: 0; }
+.kv .row{
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--rule);
+}
+.kv dt{
+  color: var(--muted);
+  font-weight: 600;
+}
+.kv dd{
+  margin: 0;
+  color: #fff;
+}
+.badge{
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  color: #d1d5db;
+  text-transform: capitalize;
+}
+.badge[data-risk="low"]{ border-color:#10b98133; }
+.badge[data-risk="medium"]{ border-color:#f59e0b33; }
+.badge[data-risk="high"]{ border-color:#ef444433; }
+
+/* 进度条样式 */
+.progress-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background: transparent;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+  transition: width 0.3s ease;
+}
+
+.progress-empty {
+  height: 100%;
+  background: #374151;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  color: #10b981;
+  font-weight: 600;
+  font-size: 13px;
+  min-width: 35px;
+  text-align: right;
+}
+
+/* 文档页脚：按钮区域（保留你的按钮） */
+.doc-card__footer{
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule);
+}
+.doc-actions{
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+.btn.small {
+  color: #ffffff !important;
+  background: #1f2937;
+  border: 1px solid #374151;
+  padding: 8px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.btn.small:hover { background: #374151; border-color: #4b5563; }
+.btn.small.orange { color:#fff !important; background:#f97316; border-color:#f97316; }
+.btn.small.orange:hover { background:#ea580c; border-color:#ea580c; }
+
+@media (max-width: 980px){
+  .main-content {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .right-content {
+    justify-content: flex-start;
+  }
+  
+  .doc-cover {
+    width: 200px;
+    height: 140px;
+  }
+}
+
+@media (max-width: 768px){
+  .investment-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .progress-actions-row {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .progress-actions-row .progress-container {
+    order: 1;
+  }
+  
+  .progress-actions-row .doc-actions {
+    order: 2;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 640px){
+  .grid-two{ grid-template-columns: 1fr; }
+  
+  .investment-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .progress-item {
+    grid-column: span 1;
+  }
+  
+  .investment-label {
+    font-size: 11px;
+  }
+  
+  .investment-value {
+    font-size: 13px;
+  }
+  
+  .main-content {
+    gap: 12px;
+  }
+  
+  .doc-cover {
+    width: 100%;
+    height: 120px;
+  }
+  
+  .title-section h2 {
+    font-size: 18px;
+  }
+  
+  .doc-subtitle {
+    font-size: 13px;
+  }
+}
+</style>
