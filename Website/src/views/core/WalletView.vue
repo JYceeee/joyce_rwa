@@ -141,8 +141,8 @@
     </div> -->
     <!-- 自定义代币输入 -->
     <div class="mm-custom">
+      <span class="mm-net-left">Insert your contract address here:</span>
       <form class="mm-custom-form" @submit.prevent="addToken">
-        <span class="mm-net-left">Insert your contract address here:</span>
         <input v-model="customAddress" class="mm-input" placeholder="Paste ERC20 contract address" />
         <input v-model="customLabel" class="mm-input" placeholder="Label (optional)" />
         <button class="mm-btn mm-outline" type="submit" :disabled="!customAddress">Add Token</button>
@@ -188,8 +188,8 @@
       <div class="mm-net-right" style="position:relative;">
         <button class="mm-btn mm-outline" @click="toggleSortMenu" style="height:28px;padding:2px 10px;">Sort</button>
         <div v-if="sortOpen" class="mm-sort-menu">
-          <button class="mm-sort-item" :class="{active: sortOrder==='desc'}" @click="setSort('desc')">按余额 降序</button>
-          <button class="mm-sort-item" :class="{active: sortOrder==='asc'}" @click="setSort('asc')">按余额 升序</button>
+          <button class="mm-sort-item" :class="{active: sortOrder==='desc'}" @click="setSort('desc')">descending by balance</button>
+          <button class="mm-sort-item" :class="{active: sortOrder==='asc'}" @click="setSort('asc')">ascending by balance</button>
         </div>
       </div>
     </div>
@@ -200,9 +200,10 @@
           <div class="mm-token-icon mm-eth"></div>
           <div>
             <div class="mm-token-title">
-              Ethereum <span class="mm-dim">• Stake</span>
+              SepoliaETH 
+              <!-- <span class="mm-dim"></span> -->
             </div>
-            <div class="mm-rise">+2.48%</div>
+            <!-- <div class="mm-rise">+2.48%</div> -->
           </div>
         </div>
         <div class="mm-token-right">
@@ -537,7 +538,7 @@ max-width: 420px;
 }
 .modal-container {
 background: #1d1d36;
-border: 1px solid #2a2a4a;
+border: 1px solid #2f2f3a;
 border-radius: 12px;
 box-shadow: 0 2px 16px rgba(0,0,0,0.3);
 padding: 28px 24px 18px;
@@ -548,13 +549,13 @@ color: #ffffff;
 .mm-wallet-management {
 margin-bottom: 12px;
 margin-top: 12px;
-border: 1px solid var(--border);
+border: 1px solid #34383d;
 border-radius: 16px;
 background: #0f172a;
 padding: 18px 20px 12px 20px;
 display: flex;
 align-items: center;
-box-shadow: 0 2px 8px rgba(15,23,42,.04);
+box-shadow: 0 2px 8px rgba(94, 103, 124, 0.04);
 }
 .mm-wallet-management .field {
 width: 100%;

@@ -195,7 +195,6 @@
           </div>
         </div>
 
-
         <!-- 提交按钮 -->
         <div class="form-actions">
           <button class="btn secondary" @click="cancelTrade" :disabled="loading">Cancel</button>
@@ -203,13 +202,13 @@
             <span v-if="loading">Processing...</span>
             <span v-else>{{ tradeType === 'buy' ? 'Buy Tokens' : 'Sell Tokens' }}</span>
           </button>
-          </div>
+        </div>
           
         <!-- 错误信息显示 -->
         <div v-if="error" class="error-message">
           {{ error }}
           </div>
-        </div>
+      </div>
 
       <!-- 交易历史 -->
       <div class="trade-history-card">
@@ -221,7 +220,7 @@
             <div class="trade-header">
               <span class="trade-type" :class="trade.type">{{ trade.type.toUpperCase() }}</span>
               <span class="trade-time">{{ formatTime(trade.timestamp) }}</span>
-          </div>
+            </div>
             <div class="trade-info">
               <div class="trade-amount-section">
                 <span class="label">Token数量:</span>
@@ -230,7 +229,7 @@
               <div class="trade-price-section">
                 <span class="label">价格:</span>
                 <span class="value">A${{ trade.price }}</span>
-              </div>
+        </div>
               <div class="trade-total-section">
                 <span class="label">总额:</span>
                 <span class="value">A${{ trade.total }}</span>
@@ -263,7 +262,7 @@
         <!-- 测试区域：按钮和结果并排显示 -->
         <div class="test-area">
           <!-- 测试按钮组 -->
-          <div class="test-buttons">
+          <!-- <div class="test-buttons">
             <button 
               class="test-btn" 
               @click="initializeContract" 
@@ -320,7 +319,7 @@
               <span class="btn-icon">📉</span>
               <span class="btn-text">Test Sell</span>
           </button>
-        </div>
+        </div> -->
 
           <!-- 测试结果显示 -->
           <div class="test-results">
@@ -513,10 +512,12 @@ export default {
       // 如果没有输入金额，提示用户输入
       if (!this.tradeAmount || this.tradeAmount <= 0) {
         this.error = `请先输入${type === 'buy' ? '购买' : '出售'}数量`
+        this.addTestResult('error', 'Input Required', `请先输入${type === 'buy' ? '购买' : '出售'}数量`)
         return
       }
 
       console.log(`🚀 开始${type}交易流程...`)
+      this.addTestResult('info', `🚀 开始${type}交易流程...`, `正在处理${type}交易，数量: ${this.tradeAmount} tokens`)
       
       try {
         this.loading = true
@@ -525,41 +526,52 @@ export default {
         // 1. 合约初始化
         this.loadingStatus = '正在初始化智能合约...'
         this.showLoadingModal = true
+        this.addTestResult('info', '🚀 Initializing Contract', '正在初始化智能合约...')
         
         await this.initializeContract()
         console.log('✅ 合约初始化完成')
+        this.addTestResult('success', 'Contract Initialized', '智能合约初始化完成')
 
         // 2. 获取钱包地址
         this.loadingStatus = '正在获取钱包地址...'
+        this.addTestResult('info', '👤 Getting User Address', '正在获取钱包地址...')
         const userAddress = await this.getUserAddress()
         if (!userAddress) {
           this.showLoadingModal = false
           this.loading = false
           this.error = '无法获取钱包地址，请检查钱包连接'
+          this.addTestResult('error', 'Address Retrieval Failed', '无法获取钱包地址，请检查钱包连接')
           return
         }
         console.log('✅ 钱包地址获取完成:', userAddress)
+        this.addTestResult('success', 'User Address Retrieved', `地址: ${userAddress}`)
 
         // 3. 获取钱包代币余额
         this.loadingStatus = '正在获取代币余额...'
+        this.addTestResult('info', '💰 Getting Token Balance', '正在获取代币余额...')
         const balance = await contractService.getUserTokenBalance(userAddress)
         this.userTokenBalance = parseInt(balance) || 0
         console.log('✅ 代币余额获取完成:', this.userTokenBalance)
+        this.addTestResult('success', 'Token Balance Retrieved', `余额: ${this.userTokenBalance} tokens`)
 
         // 4. 比较余额与认购金额（仅对buy操作）
         if (type === 'buy') {
           console.log(`💰 余额检查: ${this.userTokenBalance} vs ${this.tradeAmount}`)
+          this.addTestResult('info', '💰 Checking Balance', `检查余额: ${this.userTokenBalance} vs ${this.tradeAmount}`)
           if (this.userTokenBalance < parseInt(this.tradeAmount)) {
             this.showLoadingModal = false
             this.loading = false
             this.showInsufficientBalanceModal = true
+            this.addTestResult('error', 'Insufficient Balance', `余额不足: 当前${this.userTokenBalance}，需要${this.tradeAmount}`)
             return
           }
           console.log('✅ 余额充足，可以继续交易')
+          this.addTestResult('success', 'Balance Check Passed', `余额充足: ${this.userTokenBalance} >= ${this.tradeAmount}`)
         }
 
         // 5. 签订智能合约
         this.loadingStatus = `正在与智能合约签订${type === 'buy' ? '购买' : '出售'}协议...`
+        this.addTestResult('info', `📝 Executing ${type.toUpperCase()} Transaction`, `正在与智能合约签订${type === 'buy' ? '购买' : '出售'}协议...`)
         
         let result
         if (type === 'buy') {
@@ -588,6 +600,7 @@ export default {
           }
           
           // 保存到MySQL数据库
+          this.addTestResult('info', '💾 Saving to Database', '正在保存交易记录到数据库...')
           const dbResult = await this.saveTransactionToDatabase(tradeData)
           
           if (dbResult.success) {
@@ -613,18 +626,30 @@ export default {
               transactionHash: result.transactionHash,
               blockNumber: result.blockNumber
             }
+            
+            // 添加成功测试结果
+            this.addTestResult('success', `${type.toUpperCase()} Transaction Successful`, `交易成功完成`, {
+              transactionHash: result.transactionHash,
+              blockNumber: result.blockNumber,
+              amount: tradeData.amount,
+              price: result.tokenPrice,
+              totalCost: result.totalCost,
+              userAddress: userAddress
+            })
       
             // 重置表单
             this.tradeAmount = ''
           } else {
             console.error('❌ 保存到数据库失败:', dbResult.error)
             this.error = '交易成功但保存到数据库失败'
+            this.addTestResult('warning', 'Database Save Failed', `交易成功但保存失败: ${dbResult.error}`)
           }
         } else {
           // 关闭加载弹窗
           this.showLoadingModal = false
           console.error(`❌ ${type}交易失败:`, result.error)
           this.error = result.error || `${type}交易失败`
+          this.addTestResult('error', `${type.toUpperCase()} Transaction Failed`, result.error || `${type}交易失败`)
         }
         
       } catch (error) {
@@ -632,6 +657,7 @@ export default {
         this.showLoadingModal = false
         console.error('❌ 交易流程失败:', error)
         this.error = error.message
+        this.addTestResult('error', 'Transaction Error', error.message)
       } finally {
         this.loading = false
       }
@@ -643,34 +669,44 @@ export default {
       this.error = null
       
       try {
-        // 1. 验证用户是否已登录
+        // 添加测试结果 - 开始交易
+        this.addTestResult('info', `🚀 开始${this.tradeType}交易...`, `正在处理${this.tradeType}交易，数量: ${this.tradeAmount} tokens`)
+        
+        // 1. 合约初始化
+        this.addTestResult('info', '🚀 Initializing Contract', '正在初始化智能合约...')
+        await this.initializeContract()
+        this.addTestResult('success', 'Contract Initialized', '智能合约初始化完成')
+        
+        // 2. 验证用户是否已登录
         if (!isLoggedIn()) {
-          this.error = '请先登录账户'
+          this.addTestResult('error', 'Authentication Required', '请先登录账户')
           this.loading = false
           return
         }
         
-        // 2. 验证钱包是否已连接
+        // 3. 验证钱包是否已连接
         if (!this.isWalletConnected()) {
-          this.error = '请先连接钱包'
+          this.addTestResult('error', 'Wallet Connection Required', '请先连接钱包')
           this.loading = false
           return
         }
         
-        // 3. 获取用户钱包地址
+        // 4. 获取用户钱包地址
         const userAddress = await this.getUserAddress()
         if (!userAddress) {
-          this.error = '无法获取钱包地址，请检查钱包连接'
+          this.addTestResult('error', 'Address Retrieval Failed', '无法获取钱包地址，请检查钱包连接')
           this.loading = false
           return
         }
         
-        // 4. 验证并设置KYC状态
+        this.addTestResult('success', 'User Address Retrieved', `地址: ${userAddress}`)
+        
+        // 5. 验证并设置KYC状态
         const kycStatus = getKycStatus()
         const kycLevel = getKycLevel()
         
         if (kycStatus !== KYC_STATUS.VERIFIED) {
-          this.error = '请先完成KYC身份验证'
+          this.addTestResult('error', 'KYC Verification Required', '请先完成KYC身份验证')
           this.loading = false
           return
         }
@@ -679,21 +715,22 @@ export default {
         if (kycLevel < KYC_LEVELS.LEVEL_2) {
           console.log(`🔧 KYC验证成功，自动升级级别从 ${kycLevel} 到 ${KYC_LEVELS.LEVEL_2}`)
           setKycLevel(KYC_LEVELS.LEVEL_2)
-          console.log('✅ KYC级别已更新为Level 2')
+          this.addTestResult('info', 'KYC Level Updated', `KYC级别已自动从${kycLevel}升级到${KYC_LEVELS.LEVEL_2}`)
         }
         
-        // 5. 验证是否在白名单中
+        // 6. 验证是否在白名单中
         const isWhitelisted = await this.checkWhitelistStatus(userAddress)
         if (!isWhitelisted) {
-          this.error = '您的钱包地址尚未加入白名单，请联系管理员'
+          this.addTestResult('error', 'Whitelist Required', '您的钱包地址尚未加入白名单，请联系管理员')
           this.loading = false
           return
         }
 
-        // 6. 如果是Buy操作，检查代币余额
+        // 7. 如果是Buy操作，检查代币余额
         if (this.tradeType === 'buy') {
           this.loadingStatus = '正在获取用户代币余额...'
           this.showLoadingModal = true
+          this.addTestResult('info', '💰 Checking Token Balance', '正在获取用户代币余额...')
           
           // 获取用户代币余额
           const balance = await contractService.getUserTokenBalance(userAddress)
@@ -706,22 +743,26 @@ export default {
             this.showLoadingModal = false
             this.loading = false
             this.showInsufficientBalanceModal = true
+            this.addTestResult('error', 'Insufficient Balance', `余额不足: 当前${this.userTokenBalance}，需要${this.tradeAmount}`)
             return
           }
           
           // 余额足够，继续交易
           this.loadingStatus = '余额充足，正在处理交易...'
+          this.addTestResult('success', 'Balance Check Passed', `余额充足: ${this.userTokenBalance} >= ${this.tradeAmount}`)
         }
       
         console.log(`🚀 开始${this.tradeType}交易...`)
         
-        // 7. 执行交易
+        // 8. 执行交易
         let result
         if (this.tradeType === 'buy') {
           this.loadingStatus = '正在与智能合约签订购买协议...'
+          this.addTestResult('info', '📈 Executing Buy Transaction', '正在与智能合约签订购买协议...')
           result = await contractService.buyTokens(parseInt(this.tradeAmount))
         } else {
           this.loadingStatus = '正在与智能合约签订出售协议...'
+          this.addTestResult('info', '📉 Executing Sell Transaction', '正在与智能合约签订出售协议...')
           result = await contractService.sellTokens(parseInt(this.tradeAmount))
         }
         
@@ -745,6 +786,7 @@ export default {
           }
           
           // 保存到MySQL数据库
+          this.addTestResult('info', '💾 Saving to Database', '正在保存交易记录到数据库...')
           const dbResult = await this.saveTransactionToDatabase(tradeData)
           
           if (dbResult.success) {
@@ -770,18 +812,30 @@ export default {
               transactionHash: result.transactionHash,
               blockNumber: result.blockNumber
             }
+            
+            // 添加成功测试结果
+            this.addTestResult('success', `${this.tradeType.toUpperCase()} Transaction Successful`, `交易成功完成`, {
+              transactionHash: result.transactionHash,
+              blockNumber: result.blockNumber,
+              amount: tradeData.amount,
+              price: result.tokenPrice,
+              totalCost: result.totalCost,
+              userAddress: userAddress
+      })
       
       // 重置表单
       this.tradeAmount = ''
           } else {
             console.error('❌ 保存到数据库失败:', dbResult.error)
             this.error = '交易成功但保存到数据库失败'
+            this.addTestResult('warning', 'Database Save Failed', `交易成功但保存失败: ${dbResult.error}`)
           }
         } else {
           // 关闭加载弹窗
           this.showLoadingModal = false
           console.error(`❌ ${this.tradeType}交易失败:`, result.error)
           this.error = result.error || `${this.tradeType}交易失败`
+          this.addTestResult('error', `${this.tradeType.toUpperCase()} Transaction Failed`, result.error || `${this.tradeType}交易失败`)
         }
         
       } catch (error) {
@@ -789,6 +843,7 @@ export default {
         this.showLoadingModal = false
         console.error('❌ 交易失败:', error)
         this.error = error.message
+        this.addTestResult('error', 'Transaction Error', error.message)
         this.$emit('notify', `Trade failed: ${error.message}`)
       } finally {
         this.loading = false
@@ -2102,8 +2157,11 @@ export default {
   background: #1d1d36;
   border: 1px solid #2a2a4a;
   border-radius: 16px;
+  width: 70%;
   padding: 30px;
-  box-shadow: var(--shadow);
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 2px 8px rgba(94, 103, 124, 0.04);
   max-height: 800px;
   overflow-y: auto;
 }

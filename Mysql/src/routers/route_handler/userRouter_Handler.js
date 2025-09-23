@@ -206,43 +206,95 @@ exports.saveTransactionHistory = (req, res) => {
     }
   }
   
-  // 准备插入数据 - 映射到你的表结构
-  const insertData = {
-    user_id: transactionData.userId || 'default_user', // 使用默认值或从其他地方获取
-    wallet_address: transactionData.userAddress,
-    token_symbol: transactionData.projectCode || 'RWA', // 使用项目代码作为token符号
-    amount: transactionData.amount,
-    price: transactionData.price,
-    totalCost: transactionData.total,
-    transaction_type: transactionData.tradeType.toUpperCase(), // 转换为大写
-    status: 'SUCCESS', // 默认状态为成功
-    transactionHash: transactionData.transactionHash || null,
-    blockNumber: transactionData.blockNumber || null
+  // 根据wallet_address查找或创建用户
+  const findOrCreateUser = (walletAddress, callback) => {
+    // 首先尝试根据wallet_address查找现有用户
+    const findSql = 'SELECT user_id FROM user WHERE user_wallet = ?';
+    db.query(findSql, [walletAddress], (err, results) => {
+      if (err) {
+        console.error('❌ 查找用户失败:', err);
+        return callback(err, null);
+      }
+      
+      if (results.length > 0) {
+        // 找到现有用户
+        console.log('✅ 找到现有用户:', results[0].user_id);
+        return callback(null, results[0].user_id);
+      } else {
+        // 没有找到用户，创建一个新用户
+        console.log('🆕 创建新用户，钱包地址:', walletAddress);
+        
+        // 生成新的用户ID
+        const newUserId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        
+        // 创建用户记录
+        const createUserSql = 'INSERT INTO user (user_id, user_wallet, user_email, user_phone, user_name, created_at) VALUES (?, ?, ?, ?, ?, NOW())';
+        const userData = [
+          newUserId,
+          walletAddress,
+          walletAddress + '@wallet.local', // 临时邮箱
+          '00000000000', // 临时电话
+          'Wallet User ' + walletAddress.slice(-6) // 临时用户名
+        ];
+        
+        db.query(createUserSql, userData, (err, results) => {
+          if (err) {
+            console.error('❌ 创建用户失败:', err);
+            return callback(err, null);
+          }
+          
+          console.log('✅ 新用户创建成功:', newUserId);
+          return callback(null, newUserId);
+        });
+      }
+    });
   };
   
-  console.log('💾 准备插入交易数据:', insertData);
-  
-  // 插入交易历史记录
-  const sql = 'INSERT INTO transactionhistory SET ?';
-  db.query(sql, insertData, (err, results) => {
+  // 获取用户ID后保存交易记录
+  findOrCreateUser(transactionData.userAddress, (err, userId) => {
     if (err) {
-      console.error('❌ 插入交易历史失败:', err);
-      return res.cc('保存交易历史失败');
+      console.error('❌ 获取用户ID失败:', err);
+      return res.cc('获取用户ID失败');
     }
     
-    if (results.affectedRows !== 1) {
-      console.error('❌ 插入交易历史影响行数不为1:', results.affectedRows);
-      return res.cc('保存交易历史失败');
-    }
+    // 准备插入数据 - 映射到你的表结构
+    const insertData = {
+      user_id: userId,
+      wallet_address: transactionData.userAddress,
+      token_symbol: transactionData.projectCode || 'RWA', // 使用项目代码作为token符号
+      amount: transactionData.amount,
+      price: transactionData.price,
+      totalCost: transactionData.total,
+      transaction_type: transactionData.tradeType.toUpperCase(), // 转换为大写
+      status: 'SUCCESS', // 默认状态为成功
+      transactionHash: transactionData.transactionHash || null,
+      blockNumber: transactionData.blockNumber || null
+    };
     
-    console.log('✅ 交易历史保存成功');
-    res.send({
-      status: 0,
-      message: '交易历史保存成功',
-      data: {
-        id: results.insertId,
-        transactionHash: insertData.transaction_hash
+    console.log('💾 准备插入交易数据:', insertData);
+    
+    // 插入交易历史记录
+    const sql = 'INSERT INTO transactionhistory SET ?';
+    db.query(sql, insertData, (err, results) => {
+      if (err) {
+        console.error('❌ 插入交易历史失败:', err);
+        return res.cc('保存交易历史失败');
       }
+      
+      if (results.affectedRows !== 1) {
+        console.error('❌ 插入交易历史影响行数不为1:', results.affectedRows);
+        return res.cc('保存交易历史失败');
+      }
+      
+      console.log('✅ 交易历史保存成功');
+      res.send({
+        status: 0,
+        message: '交易历史保存成功',
+        data: {
+          id: results.insertId,
+          transactionHash: insertData.transactionHash
+        }
+      });
     });
   });
 }
