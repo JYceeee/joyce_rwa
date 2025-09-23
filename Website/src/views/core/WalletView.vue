@@ -207,28 +207,27 @@
           </div>
         </div>
         <div class="mm-token-right">
-          <div class="mm-token-amount">A${{ nativeToAudDisplay || 0 }}</div>
           <div class="mm-token-sub">{{ nativeBalanceDisplay }} {{ nativeSymbol }}</div>
+          <div class="mm-token-amount">A${{ nativeToAudDisplay || 0 }}</div>
         </div>
       </div>
       <div v-for="t in sortedTokens" :key="t.address" class="mm-token" @click="$router.push({ name: 'tokenDetail', params: { address: t.address } })">
         <div class="mm-token-left">
           <div class="mm-token-icon">{{ (t.symbol || 'T').slice(0,1) }}</div>
           <div>
+          <div class="mm-token-sub">{{ t.symbol }}</div>
             <div class="mm-token-title">{{ t.symbol || 'Token' }}</div>
             <div class="mm-token-sub">{{ t.name }}</div>
           </div>
         </div>
         <div class="mm-token-right">
-          <div class="mm-token-amount">{{ t.displayBalance }}</div>
           <div class="mm-token-sub">{{ t.symbol }}</div>
+          <div class="mm-token-amount">{{ t.displayBalance }}</div>
         </div>
       </div>
       <div class="mm-token-footer">
-        <!-- Refresh button removed -->
       </div>
     </div>
-    <!-- 其它区块可继续补充 -->
   </section>
 
   <!-- 提示/错误 -->
@@ -681,8 +680,8 @@ color:#FFFFFF;
 .mm-dim{color:#94a3b8;}
 .mm-rise{color:#10b981;font-size:12px;margin-top:2px;}
 .mm-token-right{text-align:right;}
-.mm-token-amount{font-weight:600;color:#ffffff;}
-.mm-token-sub{font-size:12px;color:#94a3b8;margin-top:2px;}
+.mm-token-amount{font-size:12px;color:#94a3b8;margin-top:2px;}
+.mm-token-sub{font-weight:600;color:#ffffff;}
 .mm-token-footer{display:flex;align-items:center;justify-content:space-between;padding:10px 2px;color:#94a3b8;font-size:12px;}
 .mm-tip{color:#94a3b8}
 

@@ -715,7 +715,7 @@ export class ContractService {
   }
 
   // 获取用户代币余额
-  async getUserTokenBalance(userAddress = null) {
+  async getUserTokenBalance(userAddress = null, tokenSymbol = null) {
     try {
       if (!this.tradeContract) {
         await this.initialize()
@@ -725,24 +725,50 @@ export class ContractService {
         userAddress = await this.getUserAddress()
       }
 
-      console.log('🔍 Attempting to get user token balance for:', userAddress)
+      console.log(`🔍 Attempting to get ${tokenSymbol || 'token'} balance for:`, userAddress)
       
       // 检查合约地址是否有效
       if (!CONTRACT_CONFIG.TRADE_CONTRACT_ADDRESS || CONTRACT_CONFIG.TRADE_CONTRACT_ADDRESS === '0x1234567890123456789012345678901234567890') {
-        console.warn('⚠️ Trade contract address is not configured, returning default balance')
-        return '1000' // 默认余额
+        console.warn(`⚠️ Trade contract address is not configured, returning default ${tokenSymbol || 'token'} balance`)
+        // 根据代币符号返回不同的默认余额
+        const defaultBalances = {
+          'TYMU': '500',
+          'SQNB': '300',
+          'LZYT': '200',
+          'YYD': '400'
+        }
+        return defaultBalances[tokenSymbol] || '1000'
       }
 
-      const balance = await this.tradeContract.getUserBalance(userAddress)
-      console.log('✅ User token balance retrieved:', balance.toString())
+      // 根据代币符号调用不同的合约方法
+      let balance
+      if (tokenSymbol) {
+        // 尝试调用特定代币的余额查询方法
+        try {
+          balance = await this.tradeContract.getUserTokenBalance(userAddress, tokenSymbol)
+        } catch (tokenError) {
+          console.warn(`⚠️ Token-specific balance method failed for ${tokenSymbol}, using general method`)
+          balance = await this.tradeContract.getUserBalance(userAddress)
+        }
+      } else {
+        balance = await this.tradeContract.getUserBalance(userAddress)
+      }
+      
+      console.log(`✅ ${tokenSymbol || 'User'} token balance retrieved:`, balance.toString())
       return balance.toString()
     } catch (error) {
-      console.error('❌ Failed to get user token balance:', error)
+      console.error(`❌ Failed to get ${tokenSymbol || 'user'} token balance:`, error)
       
       // 如果合约方法不存在，返回默认余额
       if (error.message.includes('BAD_DATA') || error.message.includes('UNSUPPORTED_OPERATION')) {
-        console.warn('⚠️ Contract method not available, using default balance')
-        return '1000'
+        console.warn(`⚠️ Contract method not available, using default ${tokenSymbol || 'token'} balance`)
+        const defaultBalances = {
+          'TYMU': '500',
+          'SQNB': '300', 
+          'LZYT': '200',
+          'YYD': '400'
+        }
+        return defaultBalances[tokenSymbol] || '1000'
       }
       
       return '0'

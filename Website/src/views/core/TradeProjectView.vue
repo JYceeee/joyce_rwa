@@ -9,9 +9,9 @@
         </div>
         <div class="modal-body">
           <div class="error-message">
-            <p>您的代币余额不足以完成此交易。</p>
-            <p><strong>当前余额:</strong> {{ userTokenBalance }} 代币</p>
-            <p><strong>所需数量:</strong> {{ tradeAmount }} 代币</p>
+            <p>您的{{ projectCode }}代币余额不足以完成此交易。</p>
+            <p><strong>当前余额:</strong> {{ userTokenBalance }} {{ projectCode }}代币</p>
+            <p><strong>所需数量:</strong> {{ tradeAmount }} {{ projectCode }}代币</p>
           </div>
         </div>
         <div class="modal-footer">
@@ -118,10 +118,10 @@
         
         <!-- 项目指标 -->
         <div class="project-metrics">
-          <div class="metric-item">
+          <!-- <div class="metric-item">
             <span class="metric-label">Current Price</span>
             <span class="metric-value">{{ projectData.metrics.currentElaraPrice }}</span>
-          </div>
+          </div> -->
           <div class="metric-item">
             <span class="metric-label">Property Value</span>
             <span class="metric-value">{{ projectData.metrics.collateralPropertyValue }}</span>
@@ -202,13 +202,13 @@
             <span v-if="loading">Processing...</span>
             <span v-else>{{ tradeType === 'buy' ? 'Buy Tokens' : 'Sell Tokens' }}</span>
           </button>
-        </div>
+          </div>
           
         <!-- 错误信息显示 -->
         <div v-if="error" class="error-message">
           {{ error }}
           </div>
-      </div>
+        </div>
 
       <!-- 交易历史 -->
       <div class="trade-history-card">
@@ -220,28 +220,24 @@
             <div class="trade-header">
               <span class="trade-type" :class="trade.type">{{ trade.type.toUpperCase() }}</span>
               <span class="trade-time">{{ formatTime(trade.timestamp) }}</span>
-            </div>
-            <div class="trade-info">
-              <div class="trade-amount-section">
-                <span class="label">Token数量:</span>
-                <span class="value">{{ trade.amount }} tokens</span>
           </div>
-              <div class="trade-price-section">
-                <span class="label">价格:</span>
-                <span class="value">A${{ trade.price }}</span>
-        </div>
-              <div class="trade-total-section">
-                <span class="label">总额:</span>
-                <span class="value">A${{ trade.total }}</span>
+            <div class="trade-info">
+              <div class="trade-project-section">
+                <span class="label">Project:</span>
+                <span class="value">{{ trade.project_code }} - {{ trade.project_name }}</span>
+              </div>
+              <div class="trade-amount-section">
+                <span class="label">Token Amount:</span>
+                <span class="value"> {{ tradeAmount }} tokens</span>
               </div>
             </div>
-            <div class="trade-footer" v-if="trade.transactionHash">
+            <!-- <div class="trade-footer" v-if="trade.transactionHash">
               <a :href="`https://etherscan.io/tx/${trade.transactionHash}`" 
                  target="_blank" 
                  class="tx-link">
                 🔗 在Etherscan查看
               </a>
-            </div>
+            </div> -->
           </div>
           </div>
           </div>
@@ -256,8 +252,8 @@
           <div v-if="contractStatus" class="status-indicator" :class="contractStatus.type">
             <span class="status-icon">{{ contractStatus.icon }}</span>
             <span class="status-text">{{ contractStatus.message }}</span>
-          </div>
         </div>
+      </div>
 
         <!-- 测试区域：按钮和结果并排显示 -->
         <div class="test-area">
@@ -326,7 +322,7 @@
             <div v-if="contractLoading" class="loading-indicator">
               <span class="spinner"></span>
               <span>Testing contract...</span>
-      </div>
+            </div>
 
             <div v-if="testResults.length > 0" class="results-list">
               <div v-for="(result, index) in testResults" :key="index" class="result-item" :class="result.type">
@@ -337,9 +333,9 @@
             </div>
                 <div v-if="result.data" class="result-data">
                   <pre>{{ JSON.stringify(result.data, null, 2) }}</pre>
-            </div>
-                <div v-if="result.message" class="result-message">{{ result.message }}</div>
           </div>
+                <div v-if="result.message" class="result-message">{{ result.message }}</div>
+        </div>
         </div>
 
             <div v-if="testResults.length === 0 && !contractLoading" class="no-results">
@@ -494,7 +490,7 @@ export default {
     calculateTotal() {
       if (!this.tradeAmount) return '0.00'
       const amount = parseFloat(this.tradeAmount)
-      const price = 1.00 // 固定价格，从项目数据获取
+      // const price = 1.00 // 固定价格，从项目数据获取
       return (amount * price).toFixed(2)
     },
     formatTime(timestamp) {
@@ -547,26 +543,26 @@ export default {
         this.addTestResult('success', 'User Address Retrieved', `地址: ${userAddress}`)
 
         // 3. 获取钱包代币余额
-        this.loadingStatus = '正在获取代币余额...'
-        this.addTestResult('info', '💰 Getting Token Balance', '正在获取代币余额...')
-        const balance = await contractService.getUserTokenBalance(userAddress)
+        this.loadingStatus = `正在获取${this.projectCode}代币余额...`
+        this.addTestResult('info', '💰 Getting Token Balance', `正在获取${this.projectCode}代币余额...`)
+        const balance = await contractService.getUserTokenBalance(userAddress, this.projectCode)
         this.userTokenBalance = parseInt(balance) || 0
-        console.log('✅ 代币余额获取完成:', this.userTokenBalance)
-        this.addTestResult('success', 'Token Balance Retrieved', `余额: ${this.userTokenBalance} tokens`)
+        console.log(`✅ ${this.projectCode}代币余额获取完成:`, this.userTokenBalance)
+        this.addTestResult('success', 'Token Balance Retrieved', `${this.projectCode}余额: ${this.userTokenBalance} tokens`)
 
         // 4. 比较余额与认购金额（仅对buy操作）
         if (type === 'buy') {
-          console.log(`💰 余额检查: ${this.userTokenBalance} vs ${this.tradeAmount}`)
-          this.addTestResult('info', '💰 Checking Balance', `检查余额: ${this.userTokenBalance} vs ${this.tradeAmount}`)
+          console.log(`💰 ${this.projectCode}余额检查: ${this.userTokenBalance} vs ${this.tradeAmount}`)
+          this.addTestResult('info', '💰 Checking Balance', `检查${this.projectCode}余额: ${this.userTokenBalance} vs ${this.tradeAmount}`)
           if (this.userTokenBalance < parseInt(this.tradeAmount)) {
             this.showLoadingModal = false
             this.loading = false
             this.showInsufficientBalanceModal = true
-            this.addTestResult('error', 'Insufficient Balance', `余额不足: 当前${this.userTokenBalance}，需要${this.tradeAmount}`)
+            this.addTestResult('error', 'Insufficient Balance', `${this.projectCode}余额不足: 当前${this.userTokenBalance}，需要${this.tradeAmount}`)
             return
           }
           console.log('✅ 余额充足，可以继续交易')
-          this.addTestResult('success', 'Balance Check Passed', `余额充足: ${this.userTokenBalance} >= ${this.tradeAmount}`)
+          this.addTestResult('success', 'Balance Check Passed', `${this.projectCode}余额充足: ${this.userTokenBalance} >= ${this.tradeAmount}`)
         }
 
         // 5. 签订智能合约
@@ -587,8 +583,8 @@ export default {
           this.showLoadingModal = false
           
           // 准备交易数据
-          const tradeData = {
-            projectCode: this.projectCode,
+      const tradeData = {
+        projectCode: this.projectCode,
             tradeType: type,
             amount: parseInt(this.tradeAmount),
             price: result.tokenPrice || 1.00,
@@ -607,12 +603,13 @@ export default {
             console.log('✅ 交易数据已保存到数据库')
             
             // 更新本地交易历史
-            this.recentTrades.unshift({
-              id: Date.now(),
-              type: type,
-              amount: tradeData.amount,
-              price: tradeData.price.toString(),
-              timestamp: tradeData.timestamp,
+      this.recentTrades.unshift({
+        id: Date.now(),
+              type: type, // 交易类型 (buy/sell)
+              amount: this.tradeAmount, // 用户输入的token amount
+              project_code: this.projectCode, // 项目代码
+              project_name: this.projectData.name, // 项目名称
+              timestamp: Date.now(), // 当前时间戳
               transactionHash: result.transactionHash
             })
             
@@ -620,7 +617,7 @@ export default {
             this.showSuccessModal = true
             this.successData = {
               tradeType: type,
-              amount: tradeData.amount,
+              amount: this.tradeAmount, // 使用用户输入的token amount
               price: tradeData.price,
               total: tradeData.total,
               transactionHash: result.transactionHash,
@@ -733,23 +730,23 @@ export default {
           this.addTestResult('info', '💰 Checking Token Balance', '正在获取用户代币余额...')
           
           // 获取用户代币余额
-          const balance = await contractService.getUserTokenBalance(userAddress)
+          const balance = await contractService.getUserTokenBalance(userAddress, this.projectCode)
           this.userTokenBalance = parseInt(balance) || 0
           
-          console.log(`💰 用户代币余额: ${this.userTokenBalance}, 认购数量: ${this.tradeAmount}`)
+          console.log(`💰 用户${this.projectCode}代币余额: ${this.userTokenBalance}, 认购数量: ${this.tradeAmount}`)
           
           // 检查余额是否足够
           if (this.userTokenBalance < parseInt(this.tradeAmount)) {
             this.showLoadingModal = false
             this.loading = false
             this.showInsufficientBalanceModal = true
-            this.addTestResult('error', 'Insufficient Balance', `余额不足: 当前${this.userTokenBalance}，需要${this.tradeAmount}`)
+            this.addTestResult('error', 'Insufficient Balance', `${this.projectCode}余额不足: 当前${this.userTokenBalance}，需要${this.tradeAmount}`)
             return
           }
           
           // 余额足够，继续交易
           this.loadingStatus = '余额充足，正在处理交易...'
-          this.addTestResult('success', 'Balance Check Passed', `余额充足: ${this.userTokenBalance} >= ${this.tradeAmount}`)
+          this.addTestResult('success', 'Balance Check Passed', `${this.projectCode}余额充足: ${this.userTokenBalance} >= ${this.tradeAmount}`)
         }
       
         console.log(`🚀 开始${this.tradeType}交易...`)
@@ -776,13 +773,13 @@ export default {
       const tradeData = {
         projectCode: this.projectCode,
         tradeType: this.tradeType,
-            amount: parseInt(this.tradeAmount),
+        amount: parseInt(this.tradeAmount),
             price: result.tokenPrice || 1.00,
             total: result.totalCost || parseFloat(this.calculateTotal()),
             userAddress: userAddress,
             transactionHash: result.transactionHash,
             blockNumber: result.blockNumber,
-            timestamp: Date.now()
+        timestamp: Date.now()
           }
           
           // 保存到MySQL数据库
@@ -795,18 +792,19 @@ export default {
             // 更新本地交易历史
       this.recentTrades.unshift({
         id: Date.now(),
-        type: this.tradeType,
-              amount: tradeData.amount,
-              price: tradeData.price.toString(),
-              timestamp: tradeData.timestamp,
-              transactionHash: result.transactionHash
-            })
+        type: this.tradeType, // 交易类型 (buy/sell)
+        amount: this.tradeAmount, // 用户输入的token amount
+        project_code: this.projectCode, // 项目代码
+        project_name: this.projectData.name, // 项目名称
+        timestamp: Date.now(), // 当前时间戳
+        transactionHash: result.transactionHash
+      })
             
             // 显示成功弹窗
             this.showSuccessModal = true
             this.successData = {
               tradeType: this.tradeType,
-              amount: tradeData.amount,
+              amount: this.tradeAmount, // 使用用户输入的token amount
               price: tradeData.price,
               total: tradeData.total,
               transactionHash: result.transactionHash,
@@ -912,11 +910,11 @@ export default {
         if (result.status === 0 && result.data) {
           this.recentTrades = result.data.map(trade => ({
             id: trade.id,
-            type: trade.trade_type, // 注意数据库字段名是trade_type
-            amount: trade.amount,
-            price: trade.price.toString(),
-            total: trade.total,
-            timestamp: trade.timestamp,
+            type: trade.trade_type, // 交易类型 (buy/sell)
+            amount: trade.amount, // 用户输入的token amount
+            project_code: this.projectCode, // 项目代码
+            project_name: this.projectData?.name || 'Unknown Project', // 项目名称
+            timestamp: trade.timestamp, // 当前时间戳
             transactionHash: trade.transaction_hash, // 注意数据库字段名是transaction_hash
             blockNumber: trade.block_number,
             userAddress: trade.user_address,
@@ -1170,13 +1168,14 @@ export default {
     async getUserTokenBalance() {
       try {
         this.contractLoading = true
-        this.addTestResult('info', '💳 Fetching user token balance...', 'Getting user token balance')
+        this.addTestResult('info', '💳 Fetching user token balance...', `Getting ${this.projectCode} token balance`)
         
-        this.userTokenBalance = await contractService.getUserTokenBalance()
+        this.userTokenBalance = await contractService.getUserTokenBalance(null, this.projectCode)
         
-        this.addTestResult('success', 'User Token Balance Retrieved', `Balance: ${this.userTokenBalance}`, {
+        this.addTestResult('success', 'User Token Balance Retrieved', `${this.projectCode} Balance: ${this.userTokenBalance}`, {
           balance: this.userTokenBalance,
-          address: this.userAddress
+          address: this.userAddress,
+          tokenSymbol: this.projectCode
         })
         
       } catch (error) {
@@ -1477,6 +1476,35 @@ export default {
         console.error('检查钱包连接状态失败:', error)
         return false
       }
+    },
+    
+    // 添加演示交易记录
+    addDemoTrades() {
+      // 如果recentTrades为空，添加一些演示数据
+      if (this.recentTrades.length === 0) {
+        const demoTime = Date.now()
+        this.recentTrades = [
+          {
+            id: demoTime - 3600000, // 1小时前
+            type: 'buy', // 交易类型
+            amount: 100, // 用户输入的token amount
+            project_code: this.projectCode || 'TYMU', // 项目代码
+            project_name: this.projectData?.name || 'St Ives NSW Residential Project', // 项目名称
+            timestamp: demoTime - 3600000, // 当前时间戳
+            transactionHash: '0xabc123def4567890...'
+          },
+          {
+            id: demoTime - 1800000, // 30分钟前
+            type: 'sell', // 交易类型
+            amount: 50, // 用户输入的token amount
+            project_code: this.projectCode || 'TYMU', // 项目代码
+            project_name: this.projectData?.name || 'St Ives NSW Residential Project', // 项目名称
+            timestamp: demoTime - 1800000, // 当前时间戳
+            transactionHash: '0xdef456abc1237890...'
+          }
+        ]
+        console.log('📊 添加了演示交易记录:', this.recentTrades.length, '条')
+      }
     }
   },
   async mounted() {
@@ -1499,6 +1527,9 @@ export default {
     } catch (e) {
       console.log('No project data in session storage')
     }
+    
+    // 添加演示交易记录（如果没有真实数据）
+    this.addDemoTrades()
     
     // 加载交易记录
     await this.loadRecentTrades()
@@ -1654,6 +1685,7 @@ export default {
 
 .project-metrics {
   display: grid;
+  justify-content: center;
   grid-template-columns: repeat(6, 1fr);
   gap: 12px;
 }
@@ -1692,7 +1724,7 @@ export default {
   background: var(--dark-panel);
   border: 1px solid var(--dark-border);
   border-radius: 16px;
-  padding: 30px;
+  padding: 0px;
   box-shadow: var(--shadow);
 }
 
@@ -1781,7 +1813,7 @@ export default {
   border: 1px solid var(--dark-border);
   border-radius: 8px;
   font-size: 16px;
-  background: var(--dark-bg);
+  background: #374151;
   color: var(--dark-text);
 }
 
@@ -2157,7 +2189,7 @@ export default {
   background: #1d1d36;
   border: 1px solid #2a2a4a;
   border-radius: 16px;
-  width: 70%;
+  width: 50%;
   padding: 30px;
   margin-left: auto;
   margin-right: auto;

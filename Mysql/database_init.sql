@@ -8,6 +8,7 @@ USE rwa;
 CREATE TABLE IF NOT EXISTS user (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id VARCHAR(50) UNIQUE NOT NULL COMMENT '用户ID',
+    user_wallet VARCHAR(255) UNIQUE COMMENT '用户钱包地址',
     user_name VARCHAR(100) NOT NULL COMMENT '用户名',
     user_email VARCHAR(100) UNIQUE NOT NULL COMMENT '邮箱',
     user_password VARCHAR(255) NOT NULL COMMENT '密码(加密)',
@@ -15,7 +16,10 @@ CREATE TABLE IF NOT EXISTS user (
     email_verified TINYINT(1) DEFAULT 0 COMMENT '邮箱是否已验证',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    is_active TINYINT(1) DEFAULT 1 COMMENT '是否激活'
+    is_active TINYINT(1) DEFAULT 1 COMMENT '是否激活',
+    
+    -- 添加索引
+    INDEX idx_user_wallet (user_wallet)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
 
 -- 创建邮箱验证表
@@ -146,98 +150,34 @@ INSERT INTO projects (
     'This premium residential property project is located in the St Ives area of Sydney\'s North Shore. Boasting an exceptional location with comprehensive surrounding amenities, it represents an outstanding RWA investment opportunity. The project developer is a renowned real estate company with extensive experience in residential property development and management.'
 );
 
--- 插入RWA贷款产品测试数据
-INSERT INTO rwa_loan_product (
-    product_id, name, code, subtitle, image, type, region, risk,
-    target_yield, current_price, collateral_property_value, loan_amount,
-    target_loan_yield, rental_income, status
-) VALUES (
-    'RWA001', 
-    'St Ives NSW 住宅地产项目',
-    'RWA001',
-    'Prosper Way Holdings Ltd - 住宅抵押贷款',
-    '/pics/TYMU.png',
-    'residential',
-    'St Ives NSW',
-    'low',
-    9.90,
-    1.00,
-    1500000.00,
-    1000000.00,
-    '9.9% p.a.',
-    NULL,
-    'active'
-),
-(
-    'SQNB',
-    'SQNB Property Loan',
-    'SQNB',
-    'Commercial Mortgage Loan',
-    '/pics/SQNB.png',
-    'commercial',
-    'CBD',
-    'medium',
-    7.20,
-    1.02,
-    2400000.00,
-    1800000.00,
-    '7.2% p.a.',
-    'A$12,800 / month',
-    'active'
-),
-(
-    'LZYT',
-    'LZYT Property Loan',
-    'LZYT',
-    'Suburban Residential Loan',
-    '/pics/LZYT.png',
-    'residential',
-    'Suburban',
-    'medium',
-    8.50,
-    1.05,
-    1200000.00,
-    900000.00,
-    '8.5% p.a.',
-    'A$8,500 / month',
-    'active'
-),
-(
-    'YYD',
-    'YYD Property Loan',
-    'YYD',
-    'High-Yield Commercial Investment',
-    '/pics/YYD.png',
-    'commercial',
-    'CBD',
-    'high',
-    12.00,
-    1.08,
-    3000000.00,
-    2400000.00,
-    '12.0% p.a.',
-    'A$18,000 / month',
-    'active'
-);
+
 
 -- 创建交易历史表
 CREATE TABLE IF NOT EXISTS transactionhistory (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    project_code VARCHAR(50) NOT NULL COMMENT '项目代码',
-    trade_type ENUM('buy', 'sell') NOT NULL COMMENT '交易类型',
-    amount INT NOT NULL COMMENT '交易数量',
-    price DECIMAL(10,2) NOT NULL COMMENT '交易价格',
-    total DECIMAL(15,2) NOT NULL COMMENT '交易总额',
-    user_address VARCHAR(42) NOT NULL COMMENT '用户钱包地址',
-    transaction_hash VARCHAR(66) COMMENT '区块链交易哈希',
-    block_number BIGINT COMMENT '区块号',
-    timestamp BIGINT NOT NULL COMMENT '交易时间戳',
+    user_id VARCHAR(50) NOT NULL COMMENT '用户ID',
+    wallet_address VARCHAR(255) NOT NULL COMMENT '钱包地址',
+    token_symbol VARCHAR(20) NOT NULL COMMENT '代币符号',
+    amount DECIMAL(18,6) NOT NULL COMMENT '交易数量',
+    price DECIMAL(18,6) NOT NULL COMMENT '交易价格',
+    totalCost DECIMAL(18,6) NOT NULL DEFAULT 0.000000 COMMENT '总成本',
+    transaction_type ENUM('BUY','SELL') NOT NULL COMMENT '交易类型',
+    status ENUM('BUY','SELL','FAILED') DEFAULT 'PENDING' COMMENT '交易状态',
+    transactionHash VARCHAR(100) COMMENT '交易哈希',
+    blockNumber BIGINT COMMENT '区块号',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     
-    INDEX idx_project_code (project_code),
-    INDEX idx_user_address (user_address),
-    INDEX idx_transaction_hash (transaction_hash),
-    INDEX idx_timestamp (timestamp),
+    -- 添加外键约束，连接到user表
+    CONSTRAINT fk_transactionhistory_user_id 
+        FOREIGN KEY (user_id) REFERENCES user(user_id) 
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    
+    -- 添加索引
+    INDEX idx_user_id (user_id),
+    INDEX idx_wallet_address (wallet_address),
+    INDEX idx_token_symbol (token_symbol),
+    INDEX idx_transaction_type (transaction_type),
+    INDEX idx_status (status),
     INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='交易历史表';

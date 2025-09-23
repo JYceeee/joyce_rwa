@@ -33,6 +33,10 @@
             <div class="fact-value">{{ p.loanAmount }}</div>
           </div>
           <div class="fact-item">
+            <div class="fact-label">Total Token</div>
+            <div class="fact-value">{{ getTotalToken() }}</div>
+          </div>
+          <div class="fact-item">
             <div class="fact-label">Annual Interest Rate</div>
             <div class="fact-value">{{ p.loanInterest }}</div>
           </div>
@@ -262,6 +266,28 @@ export default {
         return 'Available after 6 months'
       }
       return 'Not available'
+    },
+
+    // 获取Total Token数量（与Loan Amount保持一致）
+    getTotalToken() {
+      if (!this.model?.loanAmount) return '-'
+      
+      // 从loanAmount中提取数字，例如 "AUD 1,000,000" -> 1000000
+      const loanAmountStr = this.model.loanAmount.toString()
+      const numbers = loanAmountStr.match(/[\d,]+/g)
+      
+      if (numbers && numbers.length > 0) {
+        // 取第一个数字，移除逗号
+        const amount = numbers[0].replace(/,/g, '')
+        // 转换为数字并格式化为token数量
+        const tokenAmount = parseInt(amount)
+        
+        // 如果loan amount很大，可能需要转换为更小的token单位
+        // 例如：1,000,000 AUD -> 1,000,000 tokens (1:1比例)
+        return `${tokenAmount.toLocaleString()} tokens`
+      }
+      
+      return '-'
     },
 
     // 处理投资按钮点击

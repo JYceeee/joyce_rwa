@@ -534,9 +534,9 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 const { fullAddress, shortAddress, connected, nativeBalanceDisplay, nativeSymbol } = useWallet()
 
-// 检查是否有绑定的钱包
+// 检查是否有绑定的钱包 - 移除限制，允许页面完全展示
 const hasBoundWallets = computed(() => {
-  return accounts.value.length > 0
+  return true // 总是返回true，移除钱包绑定限制
 })
 
 // 基础数据
@@ -596,63 +596,102 @@ function loadBoundAccounts() {
           name: 'Main Account',
           balance: 0
         }]
+      } else {
+        // 如果也没有连接的钱包，提供默认的演示账户
+        accounts.value = [{
+          address: '0x1234567890123456789012345678901234567890',
+          name: 'Demo Account',
+          balance: 1.5
+        }]
+        console.log('📂 Portfolio using demo account for display')
       }
     }
+    
+    // 初始化交易数据
+    initializeTransactionData()
+    
   } catch (error) {
     console.error('❌ Failed to load bound accounts:', error)
-    accounts.value = []
+    // 即使出错也提供默认演示账户
+    accounts.value = [{
+      address: '0x1234567890123456789012345678901234567890',
+      name: 'Demo Account',
+      balance: 1.5
+    }]
+    // 初始化交易数据
+    initializeTransactionData()
   }
 }
 
-// 交易数据（按账户分组）
-const accountTransactions = ref({
-  [accounts.value[0].address]: [
-    {
-      id: 1,
-      type: 'buy',
-      projectCode: 'TYMU',
-      amount: 100,
-      price: 1.00,
-      timestamp: Date.now() - 3600000,
-    },
-    {
-      id: 2,
-      type: 'buy',
-      projectCode: 'SQNB',
-      amount: 50,
-      price: 1.02,
-      timestamp: Date.now() - 7200000,
+// 初始化交易数据
+function initializeTransactionData() {
+  if (accounts.value.length === 0) return
+  
+  // 为每个账户初始化交易数据
+  const newAccountTransactions = {}
+  
+  accounts.value.forEach((account, index) => {
+    if (index === 0) {
+      // 第一个账户的交易数据
+      newAccountTransactions[account.address] = [
+        {
+          id: 1,
+          type: 'buy',
+          projectCode: 'TYMU',
+          amount: 100,
+          price: 1.00,
+          timestamp: Date.now() - 3600000,
+        },
+        {
+          id: 2,
+          type: 'buy',
+          projectCode: 'SQNB',
+          amount: 50,
+          price: 1.02,
+          timestamp: Date.now() - 7200000,
+        }
+      ]
+    } else if (index === 1) {
+      // 第二个账户的交易数据
+      newAccountTransactions[account.address] = [
+        {
+          id: 3,
+          type: 'sell',
+          projectCode: 'LZYT',
+          amount: 25,
+          price: 0.98,
+          timestamp: Date.now() - 10800000,
+        },
+        {
+          id: 4,
+          type: 'buy',
+          projectCode: 'YYD',
+          amount: 75,
+          price: 1.05,
+          timestamp: Date.now() - 14400000,
+        }
+      ]
+    } else {
+      // 其他账户的交易数据
+      newAccountTransactions[account.address] = [
+        {
+          id: 5,
+          type: 'buy',
+          projectCode: 'TYMU',
+          amount: 200,
+          price: 0.99,
+          timestamp: Date.now() - 18000000,
+        }
+      ]
     }
-  ],
-  [accounts.value[1].address]: [
-    {
-      id: 3,
-      type: 'sell',
-      projectCode: 'LZYT',
-      amount: 25,
-      price: 0.98,
-      timestamp: Date.now() - 10800000,
-    },
-    {
-      id: 4,
-      type: 'buy',
-      projectCode: 'YYD',
-      amount: 75,
-      price: 1.05,
-      timestamp: Date.now() - 14400000,
-    }
-  ],
-  [accounts.value[2].address]: [
-    {
-      id: 5,
-      type: 'buy',
-      projectCode: 'TYMU',
-      amount: 200,
-      price: 0.99,
-      timestamp: Date.now() - 18000000,
-    }
-  ]
-})
+  })
+  
+  accountTransactions.value = newAccountTransactions
+  console.log('📊 Portfolio initialized transaction data:', accountTransactions.value)
+}
+
+// 交易数据（按账户分组）- 初始化为空，在loadBoundAccounts后填充
+const accountTransactions = ref({})
 
 
 // 项目数据
@@ -709,9 +748,47 @@ const projects = ref([
 
 // 计算属性
 const filteredTransactions = computed(() => {
-  if (!selectedAccount.value) return []
+  let filtered = []
   
-  let filtered = accountTransactions.value[selectedAccount.value] || []
+  if (selectedAccount.value) {
+    filtered = accountTransactions.value[selectedAccount.value] || []
+  } else {
+    // 如果没有选中账户，返回默认的演示交易数据
+    filtered = [
+      {
+        id: 1,
+        type: 'buy',
+        projectCode: 'TYMU',
+        amount: 100,
+        price: 1.00,
+        timestamp: Date.now() - 3600000,
+      },
+      {
+        id: 2,
+        type: 'buy',
+        projectCode: 'SQNB',
+        amount: 50,
+        price: 1.02,
+        timestamp: Date.now() - 7200000,
+      },
+      {
+        id: 3,
+        type: 'sell',
+        projectCode: 'LZYT',
+        amount: 25,
+        price: 0.98,
+        timestamp: Date.now() - 10800000,
+      },
+      {
+        id: 4,
+        type: 'buy',
+        projectCode: 'YYD',
+        amount: 75,
+        price: 1.05,
+        timestamp: Date.now() - 14400000,
+      }
+    ]
+  }
   
   if (filterType.value) {
     filtered = filtered.filter(t => t.type === filterType.value)
@@ -790,16 +867,50 @@ const getAccountROI = (accountAddress) => {
   return totalInvestment > 0 ? (totalGain / totalInvestment) * 100 : 0
 }
 
-// 为了兼容性，保留原有的计算属性（基于当前选中账户）
-const holdings = computed(() => getAccountHoldings(selectedAccount.value))
-const totalInvestment = computed(() => getAccountTotalInvestment(selectedAccount.value))
-const currentValue = computed(() => getAccountCurrentValue(selectedAccount.value))
-const totalGain = computed(() => getAccountTotalGain(selectedAccount.value))
-const roi = computed(() => getAccountROI(selectedAccount.value))
+// 为了兼容性，保留原有的计算属性（基于当前选中账户或默认数据）
+const holdings = computed(() => {
+  if (selectedAccount.value) {
+    return getAccountHoldings(selectedAccount.value)
+  }
+  // 如果没有选中账户，返回默认的演示数据
+  return [
+    { code: 'TYMU', amount: 100, totalCost: 100, currentPrice: 1.00, change: 2.5 },
+    { code: 'SQNB', amount: 50, totalCost: 51, currentPrice: 1.02, change: -1.2 },
+    { code: 'LZYT', amount: 25, totalCost: 24.5, currentPrice: 0.98, change: 0.8 },
+    { code: 'YYD', amount: 75, totalCost: 78.75, currentPrice: 1.05, change: 3.1 }
+  ]
+})
+const totalInvestment = computed(() => {
+  if (selectedAccount.value) {
+    return getAccountTotalInvestment(selectedAccount.value)
+  }
+  return 254.25 // 默认总投资
+})
+const currentValue = computed(() => {
+  if (selectedAccount.value) {
+    return getAccountCurrentValue(selectedAccount.value)
+  }
+  return 267.75 // 默认当前价值
+})
+const totalGain = computed(() => {
+  if (selectedAccount.value) {
+    return getAccountTotalGain(selectedAccount.value)
+  }
+  return 13.5 // 默认总收益
+})
+const roi = computed(() => {
+  if (selectedAccount.value) {
+    return getAccountROI(selectedAccount.value)
+  }
+  return 5.31 // 默认ROI
+})
 
 // 获取当前账户下购买的项目
 const accountProjects = computed(() => {
-  if (!selectedAccount.value) return []
+  if (!selectedAccount.value) {
+    // 如果没有选中账户，返回所有项目作为演示
+    return projects.value
+  }
   
   const accountHoldings = getAccountHoldings(selectedAccount.value)
   const projectCodes = accountHoldings.map(holding => holding.code)
@@ -837,6 +948,45 @@ const allTransactions = computed(() => {
   Object.values(accountTransactions.value).forEach(accountTxs => {
     allTxs.push(...accountTxs)
   })
+  
+  // 如果没有交易数据，返回默认的演示数据
+  if (allTxs.length === 0) {
+    return [
+      {
+        id: 1,
+        type: 'buy',
+        projectCode: 'TYMU',
+        amount: 100,
+        price: 1.00,
+        timestamp: Date.now() - 3600000,
+      },
+      {
+        id: 2,
+        type: 'buy',
+        projectCode: 'SQNB',
+        amount: 50,
+        price: 1.02,
+        timestamp: Date.now() - 7200000,
+      },
+      {
+        id: 3,
+        type: 'sell',
+        projectCode: 'LZYT',
+        amount: 25,
+        price: 0.98,
+        timestamp: Date.now() - 10800000,
+      },
+      {
+        id: 4,
+        type: 'buy',
+        projectCode: 'YYD',
+        amount: 75,
+        price: 1.05,
+        timestamp: Date.now() - 14400000,
+      }
+    ]
+  }
+  
   return allTxs
 })
 
@@ -1594,7 +1744,7 @@ window.addEventListener('storage', (e) => {
 .pf-transaction-total{font-size:12px;color:#9ca3af;margin-top:2px;}
 
 /* 资产总结图表样式 */
-.pf-asset-summary{margin-bottom:24px;padding:20px;border-radius:16px;background:#141426;border:1px solid var(--border);}
+.pf-asset-summary{margin-bottom:24px;padding:20px;border-radius:16px;background:#141426;border:1px solid var(--border);max-width: 820px;}
 .pf-summary-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
 .pf-summary-header h3{margin:0;font-size:20px;font-weight:700;color:#ffffff;}
 .pf-summary-stats{display:flex;gap:24px;}

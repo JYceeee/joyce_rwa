@@ -208,6 +208,8 @@ exports.saveTransactionHistory = (req, res) => {
   
   // 根据wallet_address查找或创建用户
   const findOrCreateUser = (walletAddress, callback) => {
+    console.log('🔍 开始查找用户，钱包地址:', walletAddress);
+    
     // 首先尝试根据wallet_address查找现有用户
     const findSql = 'SELECT user_id FROM user WHERE user_wallet = ?';
     db.query(findSql, [walletAddress], (err, results) => {
@@ -216,7 +218,9 @@ exports.saveTransactionHistory = (req, res) => {
         return callback(err, null);
       }
       
-      if (results.length > 0) {
+      console.log('🔍 查找结果:', results);
+      
+      if (results && results.length > 0) {
         // 找到现有用户
         console.log('✅ 找到现有用户:', results[0].user_id);
         return callback(null, results[0].user_id);
@@ -224,18 +228,21 @@ exports.saveTransactionHistory = (req, res) => {
         // 没有找到用户，创建一个新用户
         console.log('🆕 创建新用户，钱包地址:', walletAddress);
         
-        // 生成新的用户ID
-        const newUserId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        // 生成新的用户ID（格式：user + 时间戳 + 随机字符串）
+        const newUserId = 'user' + Date.now() + Math.random().toString(36).substr(2, 9);
         
         // 创建用户记录
-        const createUserSql = 'INSERT INTO user (user_id, user_wallet, user_email, user_phone, user_name, created_at) VALUES (?, ?, ?, ?, ?, NOW())';
+        const createUserSql = 'INSERT INTO user (user_id, user_wallet, user_email, user_phone, user_name, user_password, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())';
         const userData = [
           newUserId,
           walletAddress,
           walletAddress + '@wallet.local', // 临时邮箱
           '00000000000', // 临时电话
-          'Wallet User ' + walletAddress.slice(-6) // 临时用户名
+          'Wallet User ' + walletAddress.slice(-6), // 临时用户名
+          'temp_password_' + Date.now() // 临时密码
         ];
+        
+        console.log('🆕 创建用户数据:', userData);
         
         db.query(createUserSql, userData, (err, results) => {
           if (err) {
@@ -243,7 +250,7 @@ exports.saveTransactionHistory = (req, res) => {
             return callback(err, null);
           }
           
-          console.log('✅ 新用户创建成功:', newUserId);
+          console.log('✅ 新用户创建成功:', newUserId, '插入ID:', results.insertId);
           return callback(null, newUserId);
         });
       }
@@ -266,7 +273,7 @@ exports.saveTransactionHistory = (req, res) => {
       price: transactionData.price,
       totalCost: transactionData.total,
       transaction_type: transactionData.tradeType.toUpperCase(), // 转换为大写
-      status: 'SUCCESS', // 默认状态为成功
+      status: transactionData.tradeType.toUpperCase(), // 使用交易类型作为状态
       transactionHash: transactionData.transactionHash || null,
       blockNumber: transactionData.blockNumber || null
     };
@@ -275,24 +282,38 @@ exports.saveTransactionHistory = (req, res) => {
     
     // 插入交易历史记录
     const sql = 'INSERT INTO transactionhistory SET ?';
+    console.log('💾 执行SQL:', sql);
+    console.log('💾 插入数据:', JSON.stringify(insertData, null, 2));
+    
     db.query(sql, insertData, (err, results) => {
       if (err) {
         console.error('❌ 插入交易历史失败:', err);
-        return res.cc('保存交易历史失败');
+        console.error('❌ 错误详情:', {
+          code: err.code,
+          errno: err.errno,
+          sqlState: err.sqlState,
+          sqlMessage: err.sqlMessage,
+          sql: err.sql
+        });
+        return res.cc(`保存交易历史失败: ${err.sqlMessage || err.message}`);
       }
       
       if (results.affectedRows !== 1) {
         console.error('❌ 插入交易历史影响行数不为1:', results.affectedRows);
-        return res.cc('保存交易历史失败');
+        return res.cc('保存交易历史失败: 影响行数异常');
       }
       
-      console.log('✅ 交易历史保存成功');
+      console.log('✅ 交易历史保存成功，插入ID:', results.insertId);
       res.send({
         status: 0,
         message: '交易历史保存成功',
         data: {
           id: results.insertId,
-          transactionHash: insertData.transactionHash
+          userId: userId,
+          transactionHash: insertData.transactionHash,
+          transactionType: insertData.transaction_type,
+          amount: insertData.amount,
+          totalCost: insertData.totalCost
         }
       });
     });
