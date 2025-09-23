@@ -17,7 +17,7 @@ git remote add origin https://github.com/JYceeee/RWA-WEBSITE-TRIAL4.git
 git push -u origin main
 
 <!--新建并切换到新分支、保存修改、提交、推送到 GitHub-->
-git checkout -b 2025924-trading
+git checkout -b 2025924-trading-2
 git add .
-git commit -m "2025924-trading"
-git push origin 2025924-trading
+git commit -m "2025924-trading-2"
+git push origin 2025924-trading-2
