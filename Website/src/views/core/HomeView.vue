@@ -120,4 +120,8 @@ export default {
   background: #0A0A19;
 }
 
+.input{
+  background: #242435;
+}
+
 </style>

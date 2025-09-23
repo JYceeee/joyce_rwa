@@ -12,7 +12,7 @@
         </button>
         
         <a class="brand" href="#" @click.prevent="go('/')">
-          <img src="/icons/RWA-logo.png" alt="Mortgage RWA" class="brand-logo" />
+          <img src="/icons/RWA-logo.jpg" alt="Mortgage RWA" class="brand-logo" />
         </a>
         <nav class="menu" aria-label="Primary">
           <a href="#" @click.prevent="go('/home')" class="menu-item">Home</a>

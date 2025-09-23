@@ -109,7 +109,7 @@ export default {
   position: fixed;
   top: 0;
   left: 0;
-  width: 180px;
+  width: 220px;
   height: 100vh;
   background: var(--bg, #1a1a2e);
   border-right: 1px solid var(--border, #2a2a4a);
@@ -156,7 +156,7 @@ export default {
   text-decoration: none;
   transition: all 0.2s ease;
   border-left: 3px solid transparent;
-  font-weight: 800;
+  font-weight: 500;
   font-size: 16px;
   letter-spacing: 0.01em;
 }
