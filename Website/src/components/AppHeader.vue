@@ -69,8 +69,8 @@
               v-model="searchText"
             />
             <button type="button" class="search-toggle" @click="toggleSearch">
-              <!-- <img src="/icons/search-icon.png" alt="Search" /> -->
-            🔍</button>
+              <img src="/icons/search-icon.png" alt="Search" />
+            </button>
           </form>
         </div>
       
@@ -107,7 +107,7 @@
           <span class="mobile-menu-icon">💼</span>
           <span>Portfolio</span>
         </a>
-        <div class="mobile-menu-divider"></div>
+        <!-- <div class="mobile-menu-divider"></div>
         <a href="#" @click.prevent="go('/about')" class="mobile-menu-item">
           <span class="mobile-menu-icon">🏢</span>
           <span>About Us</span>
@@ -123,7 +123,7 @@
         <a href="#" @click.prevent="go('/help')" class="mobile-menu-item">
           <span class="mobile-menu-icon">❓</span>
           <span>Help Center</span>
-        </a>
+        </a> -->
       </div>
     </div>
     

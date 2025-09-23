@@ -7,23 +7,27 @@ import ProjectsView from '../views/core/ProjectsView.vue'
 import DetailPage from '../views/core/DetailPage.vue'
 import ProfileView from '../views/core/ProfileView.vue'
 import TradeProjectView from '../views/core/TradeProjectView.vue'
-import BridgeView from '../views/core/BridgeView.vue'
-import SendView from '../views/core/SendView.vue'
-import SwapView from '../views/core/SwapView.vue'
+import BridgeView from '../views/FunctionalModule/otherinteractbutton/BridgeView.vue'
+import SendView from '../views/FunctionalModule/otherinteractbutton/SendView.vue'
+import SwapView from '../views/FunctionalModule/otherinteractbutton/SwapView.vue'
 import TokenDetailView from '../views/core/TokenDetailView.vue'
 // Auth pages
 import LoginView from '../views/auth/LoginView.vue'
 import SignupView from '../views/auth/SignupView.vue'
 // Info pages
-import OverviewView from '../views/info/OverviewView.vue'
-import FeaturesView from '../views/info/FeaturesView.vue'
-import SolutionsView from '../views/info/SolutionsView.vue'
-import TutorialsView from '../views/info/TutorialsView.vue'
-import PricingView from '../views/info/PricingView.vue'
-import AboutUsView from '../views/info/AboutUsView.vue'
-import ContactView from '../views/info/ContactView.vue'
-import OptionsView from '../views/info/OptionsView.vue'
-import SettingsView from '../views/info/SettingsView.vue'
+import OverviewView from '../views/info/aboutus/OverviewView.vue'
+import FeaturesView from '../views/info/aboutus/FeaturesView.vue'
+import SolutionsView from '../views/info/aboutus/SolutionsView.vue'
+import TutorialsView from '../views/info/aboutus/TutorialsView.vue'
+import PricingView from '../views/info/aboutus/PricingView.vue'
+import AboutUsView from '../views/info/aboutus/AboutUsView.vue'
+import ContactView from '../views/info/aboutus/ContactView.vue'
+import TermView from '../views/info/aboutus/Term.vue'
+import PrivacyPolicyView from '../views/info/aboutus/PrivacyPolicy.vue'
+import OptionsView from '../views/settings/OptionsView.vue'
+import SettingsView from '../views/settings/SettingsView.vue'
+// Test pages
+import ContractTestView from '../views/test/ContractTestView.vue'
 // Other components
 import kycService from '../components/kycService.vue'
 
@@ -65,12 +69,19 @@ const router = createRouter({
     { path: '/events', name: 'events', component: OverviewView },
     { path: '/help', name: 'help', component: OverviewView },
     { path: '/support', name: 'support', component: ContactView },
-    { path: '/terms', name: 'terms', component: OverviewView },
-    { path: '/privacy', name: 'privacy', component: OverviewView },
+    { path: '/terms', name: 'terms', component: TermView },
+    { path: '/privacy', name: 'privacy', component: PrivacyPolicyView },
     { path: '/cookies', name: 'cookies', component: OverviewView },
     { path: '/licenses', name: 'licenses', component: OverviewView },
     { path: '/settings', name: 'settings', component: SettingsView },
     { path: '/options', name: 'options', component: OptionsView },
+    // // Test routes
+    // { path: '/test/routes', name: 'routeTest', component: () => import('@/views/test/RouteTestView.vue') },
+    // { path: '/test/wallet-debug', name: 'walletConnectionDebug', component: () => import('@/views/test/WalletConnectionDebugView.vue') },
+    // { path: '/test/contract', name: 'contractTest', component: ContractTestView },
+    // { path: '/test/config', name: 'contractConfig', component: () => import('@/views/test/ContractConfigView.vue') },
+    // { path: '/test/trade-database', name: 'tradeDatabaseTest', component: () => import('@/views/test/TradeDatabaseTestView.vue') },
+    { path: '/test/contract-address', name: 'contractAddressTest', component: () => import('@/views/test/ContractAddressTestView.vue') },
   ],
 })
 

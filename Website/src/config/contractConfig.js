@@ -1,0 +1,55 @@
+// 智能合约配置文件
+// 优先从环境变量读取配置，如果没有则使用默认值
+
+// 从环境变量获取配置，如果没有则使用默认值
+const getEnvConfig = (key, defaultValue) => {
+  return import.meta.env[key] || defaultValue
+}
+
+// 开发环境配置 (Sepolia测试网)
+export const DEV_CONFIG = {
+  KYC_REGISTRY_ADDRESS: getEnvConfig('VITE_KYC_REGISTRY_ADDRESS', '0x4533f47BE0ce8b80F7bbdF02939f81F4A15b7A45'),
+  LOAN_ISSUER_ADDRESS: getEnvConfig('VITE_LOAN_ISSUER_ADDRESS', '0x1234567890123456789012345678901234567890'),
+  PRINCIPAL_TOKEN_ADDRESS: getEnvConfig('VITE_PRINCIPAL_TOKEN_ADDRESS', '0x45b1eCb3D9af651244eC656ed15B86404924c354'),
+  INTEREST_TOKEN_ADDRESS: getEnvConfig('VITE_INTEREST_TOKEN_ADDRESS', '0xE6aeE4a898c6d99033ee5380Df407C5DD470fb17'),
+  TRADE_CONTRACT_ADDRESS: getEnvConfig('VITE_TRADE_CONTRACT_ADDRESS', '0x1234567890123456789012345678901234567890'),
+  NETWORK: {
+    chainId: parseInt(getEnvConfig('VITE_NETWORK_CHAIN_ID', '11155111')),
+    name: getEnvConfig('VITE_NETWORK_NAME', 'Sepolia Testnet')
+  },
+  // KYC配置
+  KYC: {
+    DEFAULT_SUCCESS: getEnvConfig('VITE_KYC_DEFAULT_SUCCESS', 'false') === 'true',
+    DEFAULT_LEVEL: parseInt(getEnvConfig('VITE_KYC_DEFAULT_LEVEL', '0'))
+  }
+}
+
+// 生产环境配置 (Ethereum主网)
+export const PROD_CONFIG = {
+    KYC_REGISTRY_ADDRESS: getEnvConfig('VITE_KYC_REGISTRY_ADDRESS', '0x4533f47BE0ce8b80F7bbdF02939f81F4A15b7A45'),
+    LOAN_ISSUER_ADDRESS: getEnvConfig('VITE_LOAN_ISSUER_ADDRESS', '0x1234567890123456789012345678901234567890'),
+    PRINCIPAL_TOKEN_ADDRESS: getEnvConfig('VITE_PRINCIPAL_TOKEN_ADDRESS', '0x45b1eCb3D9af651244eC656ed15B86404924c354'),
+    INTEREST_TOKEN_ADDRESS: getEnvConfig('VITE_INTEREST_TOKEN_ADDRESS', '0xE6aeE4a898c6d99033ee5380Df407C5DD470fb17'),
+    TRADE_CONTRACT_ADDRESS: getEnvConfig('VITE_TRADE_CONTRACT_ADDRESS', '0x1234567890123456789012345678901234567890'),
+  NETWORK: {
+    chainId: parseInt(getEnvConfig('VITE_NETWORK_CHAIN_ID_PROD', '1')),
+    name: getEnvConfig('VITE_NETWORK_NAME_PROD', 'Ethereum Mainnet')
+  },
+  // KYC配置
+  KYC: {
+    DEFAULT_SUCCESS: getEnvConfig('VITE_KYC_DEFAULT_SUCCESS_PROD', 'false') === 'true',
+    DEFAULT_LEVEL: parseInt(getEnvConfig('VITE_KYC_DEFAULT_LEVEL_PROD', '0'))
+  }
+}
+
+// 根据环境变量选择配置
+const isProduction = import.meta.env.PROD
+
+// 当前使用的配置
+export const CONTRACT_CONFIG = isProduction ? PROD_CONFIG : DEV_CONFIG
+
+// 导出当前配置供其他文件使用
+export default CONTRACT_CONFIG
+
+// 导出KYC配置
+export const KYC_CONFIG = CONTRACT_CONFIG.KYC

@@ -13,10 +13,10 @@
 
     <!-- 标题块 -->
     <div class="container head">
-      <div class="avatar"><span class="avatar-initial">O</span></div>
+      <div class="avatar"><span class="avatar-initial">{{ userInitial }}</span></div>
       <div>
-        <h1 class="title">Olivia Rhye</h1>
-        <!-- <p class="subtitle">@olivia</p> -->
+        <h1 class="title">{{ userName }}</h1>
+        <!-- <p class="subtitle">@{{ userEmail }}</p> -->
       </div>
     </div>
 
@@ -42,6 +42,16 @@
           <button v-else class="link danger" type="button" @click="cancelKYC">Cancel verification</button>
         </div>
       </div>
+
+      <!-- Whitelist Application Component -->
+      <WhitelistApplication 
+        v-if="isVerified"
+        :is-kyc-verified="isVerified"
+        :user-info="userInfo"
+        @success="handleWhitelistSuccess"
+        @error="handleWhitelistError"
+        @info="handleWhitelistInfo"
+      />
 
       <!-- Email with verification -->
       <div class="field">
@@ -88,6 +98,7 @@
         <button class="btn light" type="button" @click="logout" style="margin-left:auto;">Log out</button>
       </div>
     </form>
+
   </section>
 </template>
 
@@ -95,11 +106,25 @@
 import {
   getKycStatus,
   setKycStatus,
-  KYC_STATUS
+  setKycLevel,
+  KYC_STATUS,
+  KYC_LEVELS
 } from '/src/service/kycService'
+import WhitelistApplication from '@/views/FunctionalModule/whitelist/WhitelistApplication.vue'
+import {
+  getUserInfo,
+  getUserName,
+  getUserInitial,
+  getUserEmail,
+  setUserInfo,
+  USER_INFO_EVENT
+} from '@/service/userService'
 
 export default {
   name: 'ProfileView',
+  components: {
+    WhitelistApplication
+  },
   emits: ['navigate','notify'],
   data(){
     return {
@@ -116,33 +141,56 @@ export default {
   _offVis: null,
   _offStorage: null,
   _offAfterEach: null,
-  showEmailModal: false
+  showEmailModal: false,
+  // 用户信息，传递给白名单组件
+  userInfo: getUserInfo()
     }
   },
   computed:{
     isVerified(){ return this.kycStatus === KYC_STATUS.VERIFIED },
-    isPending(){ return this.kycStatus === KYC_STATUS.PENDING }
+    isPending(){ return this.kycStatus === KYC_STATUS.PENDING },
+    // 用户信息计算属性
+    userName(){ return getUserName() },
+    userInitial(){ return getUserInitial() },
+    userEmail(){ return getUserEmail() }
   },
   mounted(){
     // 刷新函数：从 localStorage 读取最新状态
     const refresh = () => { this.kycStatus = getKycStatus() }
+    const refreshUserInfo = () => { this.userInfo = getUserInfo() }
 
     // 1) 初次进入
     refresh()
+    refreshUserInfo()
+    
     // 2) 标签激活（从 /kycService 返回就会触发）
-    const onVis = () => document.visibilityState === 'visible' && refresh()
+    const onVis = () => document.visibilityState === 'visible' && (refresh(), refreshUserInfo())
     document.addEventListener('visibilitychange', onVis)
     this._offVis = () => document.removeEventListener('visibilitychange', onVis)
 
     // 3) 跨标签同步（若多标签页同时登录）
-    const onStore = (e) => { if (e.key === 'kycStatus') refresh() }
+    const onStore = (e) => { 
+      if (e.key === 'kycStatus') refresh()
+      if (e.key === 'userInfo') refreshUserInfo()
+    }
     window.addEventListener('storage', onStore)
     this._offStorage = () => window.removeEventListener('storage', onStore)
 
     // 4) 路由返回时（从 KYC 页面 push 回来）
     this._offAfterEach = this.$router.afterEach((to) => {
-      if (to.path === '/profile') refresh()
+      if (to.path === '/profile') {
+        refresh()
+        refreshUserInfo()
+      }
     })
+
+    // 5) 监听用户信息更新事件
+    const onUserInfoChange = () => {
+      refreshUserInfo()
+      this.$forceUpdate() // 强制更新组件
+    }
+    window.addEventListener(USER_INFO_EVENT, onUserInfoChange)
+    this._offUserInfo = () => window.removeEventListener(USER_INFO_EVENT, onUserInfoChange)
   },
   activated(){
     // keep-alive 场景下也会被调用
@@ -152,6 +200,7 @@ export default {
     this._offVis && this._offVis()
     this._offStorage && this._offStorage()
     this._offAfterEach && this._offAfterEach()
+    this._offUserInfo && this._offUserInfo()
   },
   methods:{
     // 校验邮箱格式
@@ -218,6 +267,10 @@ export default {
       if (!confirm('Are you sure you want to cancel KYC verification?')) return
       setKycStatus(KYC_STATUS.UNVERIFIED)     // 写入存储
       this.kycStatus = KYC_STATUS.UNVERIFIED  // 立刻刷新 UI
+      
+      // 清除KYC级别
+      setKycLevel(KYC_LEVELS.LEVEL_0)
+      
       this.$emit('notify','KYC verification has been cancelled.')
     },
 
@@ -246,6 +299,19 @@ export default {
 
     // 4) 跳转到登录页
     this.$router.push('/login');
+  },
+
+  // 白名单组件事件处理
+  handleWhitelistSuccess(message) {
+    this.$emit('notify', message);
+  },
+
+  handleWhitelistError(message) {
+    this.$emit('notify', message);
+  },
+
+  handleWhitelistInfo(message) {
+    this.$emit('notify', message);
   }
 }
 }
@@ -324,9 +390,12 @@ export default {
   width:28px; height:28px; border-radius:10px; background:#374151; display:grid; place-items:center;
   box-shadow:0 2px 6px rgba(0, 0, 0, 0.2), inset 0 0 0 1px #4b5563; opacity:.9;
 }
+
+
 .link{ margin-left:auto; color:inherit; background:transparent; border:0; cursor:pointer; text-decoration:underline; }
 .link.danger{ color:#dc2626; }
 .verified{ margin-left:4px; display:inline-flex; align-items:center; gap:6px; font-weight:600; }
+
 
 /* 底部按钮 */
 .actions { display:flex; gap:12px; }

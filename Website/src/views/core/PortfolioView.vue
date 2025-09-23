@@ -1,27 +1,90 @@
 <template>
   <div class="container pf-page">
-    <!-- 顶部操作按钮行 -->
-    <div class="pf-topbar">
-      <div class="pf-actions">
-        <button v-for="a in actions" :key="a.text" class="pf-pill" @click="handleAction(a.text)">
-          <span class="pf-pill-ico">{{ a.icon }}</span>
-          <span>{{ a.text }}</span>
+    <!-- 没有绑定钱包时的提示页 -->
+    <!-- <div v-if="!hasBoundWallets" class="pf-no-wallet-page">
+      <div class="pf-no-wallet-container">
+        <div class="pf-no-wallet-hero">
+          <div class="pf-no-wallet-icon">
+            <svg viewBox="0 0 24 24" class="pf-wallet-icon">
+              <path fill="#F6851B" d="M21 18v1c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v1h-2V5H5v14h14v-1h2z"/>
+              <path fill="#F6851B" d="M15 9l-3 3 3 3 3-3-3-3zm-6 0L6 12l3 3 3-3-3-3z"/>
+            </svg>
+          </div>
+          <h1 class="pf-no-wallet-title">No Wallets Connected</h1>
+          <p class="pf-no-wallet-description">
+            You need to connect and bind your wallet to view your portfolio and manage your assets.
+          </p>
+        </div>
+
+        <div class="pf-no-wallet-features">
+          <div class="pf-feature-card">
+            <div class="pf-feature-icon">💼</div>
+            <h3>Portfolio Overview</h3>
+            <p>Track all your assets across multiple wallets in one unified view</p>
+          </div>
+          <div class="pf-feature-card">
+            <div class="pf-feature-icon">📊</div>
+            <h3>Transaction History</h3>
+            <p>View detailed transaction records and trading history</p>
+          </div>
+          <div class="pf-feature-card">
+            <div class="pf-feature-icon">📈</div>
+            <h3>Performance Analytics</h3>
+            <p>Analyze your investment performance with comprehensive charts</p>
+          </div>
+        </div>
+
+        <div class="pf-no-wallet-actions">
+          <button class="pf-btn pf-btn-primary" @click="goToWallet">
+            <svg viewBox="0 0 24 24" class="pf-btn-icon">
+              <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+            Go to Wallet Page
+          </button>
+          <button class="pf-btn pf-btn-secondary" @click="refreshBoundWallets">
+            <svg viewBox="0 0 24 24" class="pf-btn-icon">
+              <path fill="currentColor" d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+            </svg>
+            Refresh Wallet Status
+          </button>
+        </div>
+
+        <div class="pf-no-wallet-help">
+          <h4>How to Connect Your Wallet:</h4>
+          <ol>
+            <li>Go to the <strong>Wallet</strong> page using the navigation menu</li>
+            <li>Click <strong>"Connect MetaMask"</strong> to connect your wallet</li>
+            <li>Approve the connection in your MetaMask extension</li>
+            <li>Your wallet will be automatically added to your portfolio</li>
+          </ol>
+        </div>
+      </div>
+    </div> -->
+
+    <!-- 有绑定钱包时显示Portfolio页面 -->
+    <div class="pf-main-content">
+      <!-- 顶部操作按钮行 -->
+      <div class="pf-topbar">
+        <div class="pf-actions">
+          <button v-for="a in actions" :key="a.text" class="pf-pill" @click="handleAction(a.text)">
+            <span class="pf-pill-ico">{{ a.icon }}</span>
+            <span>{{ a.text }}</span>
+          </button>
+        </div>
+        <button class="pf-add" @click="refreshPortfolio">
+          <span class="pf-add-ico">🔄</span>
+          Refresh
         </button>
       </div>
-      <button class="pf-add" @click="refreshPortfolio">
-        <span class="pf-add-ico">🔄</span>
-        Refresh
-      </button>
-    </div>
 
     <div class="pf-body">
       <!-- 侧栏：Accounts -->
       <aside class="pf-sidebar">
         <div class="pf-side-head">
-          <h2>Accounts</h2>
+          <h2>Bound Wallets</h2>
           <div class="pf-side-tools">
             <span class="gear" @click="showSettings = !showSettings">⚙️</span>
-            <span class="plus" @click="addAccount">＋</span>
+            <span class="plus" @click="addAccount" title="Add wallets in Wallet page">＋</span>
           </div>
         </div>
 
@@ -109,7 +172,6 @@
         <div class="pf-hero">
           <div class="pf-balance">
              A${{ currentValue.toFixed(2) }}
-            <!-- <button class="pf-eye" title="toggle visibility">👁️</button> -->
           </div>
           <div class="pf-change" :class="{ positive: totalGain >= 0, negative: totalGain < 0 }">
             {{ totalGain >= 0 ? '+' : '' }}A${{ totalGain.toFixed(2) }} ({{ roi >= 0 ? '+' : '' }}{{ roi.toFixed(2) }}%)
@@ -151,6 +213,66 @@
               </div>
             </div>
             
+            <!-- 交易记录柱状图 -->
+            <div class="pf-transaction-chart">
+              <div class="pf-chart-header">
+                <h4>Transaction History</h4>
+                <div class="pf-chart-controls">
+                  <select v-model="chartTimeframe" class="pf-select">
+                    <option value="7d">Last 7 Days</option>
+                    <option value="30d">Last 30 Days</option>
+                    <option value="90d">Last 3 Months</option>
+                    <option value="1y">Last Year</option>
+                  </select>
+                  <button @click="refreshTransactionData" class="pf-refresh-btn">🔄</button>
+                </div>
+              </div>
+              
+              <div class="pf-bar-chart-container">
+                <div v-if="loadingTransactions" class="pf-chart-loading">
+                  <div class="pf-spinner"></div>
+                  <span>Loading transaction data...</span>
+                </div>
+                <div v-else-if="transactionChartData.length === 0" class="pf-chart-empty">
+                  <div class="pf-empty-icon">📊</div>
+                  <p>No transaction data available</p>
+                </div>
+                <div v-else class="pf-bar-chart">
+                  <div 
+                    class="pf-chart-bars"
+                    :style="{ '--bar-count': transactionChartData.length }"
+                  >
+                    <div 
+                      v-for="(item, index) in transactionChartData" 
+                      :key="index"
+                      class="pf-bar-item"
+                    >
+                      <div class="pf-bar-container">
+                        <div class="pf-bar-buy" :style="{ height: getBarHeight(item.buy, maxTransactions) + '%' }"></div>
+                        <div class="pf-bar-sell" :style="{ height: getBarHeight(item.sell, maxTransactions) + '%' }"></div>
+                      </div>
+                      <div class="pf-bar-label">{{ item.date }}</div>
+                      <div class="pf-bar-tooltip">
+                        <div class="pf-tooltip-buy">Buy: {{ item.buy }}</div>
+                        <div class="pf-tooltip-sell">Sell: {{ item.sell }}</div>
+                        <div class="pf-tooltip-total">Total: {{ item.buy + item.sell }}</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="pf-chart-legend">
+                    <div class="pf-legend-item">
+                      <div class="pf-legend-color pf-buy-color"></div>
+                      <span>Buy Transactions</span>
+                    </div>
+                    <div class="pf-legend-item">
+                      <div class="pf-legend-color pf-sell-color"></div>
+                      <span>Sell Transactions</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- 图表容器 - 折线图在左侧，饼图在右侧 -->
             <div class="pf-charts-row">
               <!-- 价格变化折线图 -->
@@ -289,7 +411,7 @@
               <div class="pf-chart-placeholder">
                 <div class="pf-chart-bars">
                   <div v-for="holding in holdings" :key="holding.code" class="pf-chart-bar">
-                    <div class="pf-chart-bar-fill" :style="{ height: getBarHeight(holding.change) + '%' }"></div>
+                    <div class="pf-chart-bar-fill" :style="{ height: getPriceBarHeight(holding.change) + '%' }"></div>
                     <div class="pf-chart-bar-label">{{ holding.code }}</div>
                   </div>
                 </div>
@@ -400,16 +522,22 @@
         </div>
       </main>
     </div>
+    </div> <!-- 结束 pf-main-content -->
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useWallet } from '/src/composables/useWallet'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const { fullAddress, shortAddress, connected, nativeBalanceDisplay, nativeSymbol } = useWallet()
+
+// 检查是否有绑定的钱包
+const hasBoundWallets = computed(() => {
+  return accounts.value.length > 0
+})
 
 // 基础数据
 const actions = [
@@ -432,6 +560,11 @@ const timeframes = [
 ]
 const selectedTimeframe = ref('1d')
 
+// 交易图表相关数据
+const chartTimeframe = ref('30d')
+const loadingTransactions = ref(false)
+const transactionChartData = ref([])
+
 // 状态管理
 const showSettings = ref(false)
 const showFilters = ref(false)
@@ -440,24 +573,36 @@ const filterProject = ref('')
 const accGroupOpen = ref(true)
 const selectedAccount = ref('')
 
-// 账户数据
-const accounts = ref([
-  {
-    address: fullAddress.value || '0x1234...5678',
-    name: 'Main Account',
-    balance: 2.5 //替换
-  },
-  {
-    address: '0xabcd...efgh',
-    name: 'Trading Account',
-    balance: 1.2
-  },
-  {
-    address: '0x9876...5432',
-    name: 'Savings Account',
-    balance: 5.8
+// 账户数据 - 从localStorage加载绑定的钱包账户
+const accounts = ref([])
+
+// 从localStorage加载绑定的钱包账户
+function loadBoundAccounts() {
+  try {
+    const savedAccounts = localStorage.getItem('walletBoundAccounts')
+    if (savedAccounts) {
+      const boundAddresses = JSON.parse(savedAccounts)
+      accounts.value = boundAddresses.map((address, index) => ({
+        address: address,
+        name: `Wallet ${index + 1}`,
+        balance: 0 // 初始余额，后续会更新
+      }))
+      console.log('📂 Portfolio loaded bound accounts:', accounts.value)
+    } else {
+      // 如果没有绑定的账户，使用当前连接的钱包
+      if (fullAddress.value) {
+        accounts.value = [{
+          address: fullAddress.value,
+          name: 'Main Account',
+          balance: 0
+        }]
+      }
+    }
+  } catch (error) {
+    console.error('❌ Failed to load bound accounts:', error)
+    accounts.value = []
   }
-])
+}
 
 // 交易数据（按账户分组）
 const accountTransactions = ref({
@@ -685,6 +830,21 @@ const diversification = computed(() => {
   return maxDiversification > 0 ? Math.min((holdingCount / maxDiversification) * 100, 100) : 0
 })
 
+// 交易图表相关计算属性
+const allTransactions = computed(() => {
+  // 获取所有账户的交易记录
+  const allTxs = []
+  Object.values(accountTransactions.value).forEach(accountTxs => {
+    allTxs.push(...accountTxs)
+  })
+  return allTxs
+})
+
+const maxTransactions = computed(() => {
+  if (transactionChartData.value.length === 0) return 1
+  return Math.max(...transactionChartData.value.map(item => item.buy + item.sell))
+})
+
 const tradingInsights = computed(() => {
   const insights = []
   
@@ -752,14 +912,28 @@ const selectAccount = (accountAddress) => {
 }
 
 const addAccount = () => {
-  const newAddress = prompt('Enter wallet address:')
-  if (newAddress && !accounts.value.find(acc => acc.address === newAddress)) {
-    accounts.value.push({
-      address: newAddress,
-      name: `Account ${accounts.value.length + 1}`,
-      balance: 0
-    })
-    accountTransactions.value[newAddress] = []
+  // 在Portfolio中不能添加新账户，只能显示在Wallet中绑定的账户
+  alert('请在Wallet页面绑定新的钱包账户。Portfolio只显示已绑定的钱包。')
+}
+
+// 跳转到Wallet页面
+const goToWallet = () => {
+  router.push('/wallet')
+}
+
+// 刷新绑定钱包状态
+const refreshBoundWallets = () => {
+  console.log('🔄 Refreshing bound wallets...')
+  loadBoundAccounts()
+  
+  if (accounts.value.length > 0) {
+    console.log('✅ Found bound wallets:', accounts.value.length)
+    // 如果有绑定的钱包，选择第一个
+    if (accounts.value.length > 0) {
+      selectedAccount.value = accounts.value[0].address
+    }
+  } else {
+    console.log('ℹ️ No bound wallets found')
   }
 }
 
@@ -782,6 +956,82 @@ const refreshPortfolio = () => {
   })
 }
 
+// 交易图表相关方法
+const refreshTransactionData = async () => {
+  loadingTransactions.value = true
+  try {
+    await generateTransactionChartData()
+  } catch (error) {
+    console.error('Failed to refresh transaction data:', error)
+  } finally {
+    loadingTransactions.value = false
+  }
+}
+
+const generateTransactionChartData = async () => {
+  // 获取时间范围
+  const days = getDaysFromTimeframe(chartTimeframe.value)
+  const endDate = new Date()
+  const startDate = new Date(endDate.getTime() - (days * 24 * 60 * 60 * 1000))
+  
+  // 按日期分组交易数据
+  const groupedData = new Map()
+  
+  // 初始化所有日期
+  for (let i = 0; i < days; i++) {
+    const date = new Date(startDate.getTime() + (i * 24 * 60 * 60 * 1000))
+    const dateKey = date.toISOString().split('T')[0]
+    groupedData.set(dateKey, { date: formatDateLabel(date), buy: 0, sell: 0 })
+  }
+  
+  // 统计交易数据
+  allTransactions.value.forEach(tx => {
+    const txDate = new Date(tx.timestamp)
+    const dateKey = txDate.toISOString().split('T')[0]
+    
+    if (groupedData.has(dateKey)) {
+      const dayData = groupedData.get(dateKey)
+      if (tx.type === 'buy') {
+        dayData.buy++
+      } else if (tx.type === 'sell') {
+        dayData.sell++
+      }
+    }
+  })
+  
+  // 转换为数组并排序
+  transactionChartData.value = Array.from(groupedData.values()).sort((a, b) => {
+    return new Date(a.date) - new Date(b.date)
+  })
+}
+
+const getDaysFromTimeframe = (timeframe) => {
+  switch (timeframe) {
+    case '7d': return 7
+    case '30d': return 30
+    case '90d': return 90
+    case '1y': return 365
+    default: return 30
+  }
+}
+
+const formatDateLabel = (date) => {
+  const now = new Date()
+  const diffTime = now - date
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+  
+  if (diffDays === 0) return 'Today'
+  if (diffDays === 1) return 'Yesterday'
+  if (diffDays < 7) return `${diffDays}d ago`
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
+const getBarHeight = (value, max) => {
+  if (max === 0) return 0
+  return Math.max((value / max) * 100, value > 0 ? 5 : 0) // 最小高度5%用于显示
+}
+
 const formatTime = (timestamp) => {
   const now = Date.now()
   const diff = now - timestamp
@@ -795,7 +1045,7 @@ const formatTime = (timestamp) => {
   return 'Just now'
 }
 
-const getBarHeight = (change) => {
+const getPriceBarHeight = (change) => {
   const maxChange = Math.max(...holdings.value.map(h => Math.abs(h.change)), 1)
   return Math.min(Math.abs(change) / maxChange * 100, 100)
 }
@@ -948,10 +1198,16 @@ const goToDetail = (code) => {
 let priceUpdateInterval
 
 onMounted(() => {
+  // 加载绑定的钱包账户
+  loadBoundAccounts()
+  
   // 初始化选中账户
   if (accounts.value.length > 0) {
     selectedAccount.value = accounts.value[0].address
   }
+  
+  // 初始化交易图表数据
+  refreshTransactionData()
   
   // 每30秒更新一次价格
   priceUpdateInterval = setInterval(refreshPortfolio, 30000)
@@ -962,11 +1218,277 @@ onUnmounted(() => {
     clearInterval(priceUpdateInterval)
   }
 })
+
+// 监听时间范围变化，更新交易图表数据
+watch(chartTimeframe, () => {
+  refreshTransactionData()
+})
+
+// 监听localStorage中绑定账户的变化
+window.addEventListener('storage', (e) => {
+  if (e.key === 'walletBoundAccounts') {
+    console.log('🔄 Detected wallet bound accounts change, reloading...')
+    loadBoundAccounts()
+    // 如果当前选中的账户被移除，选择第一个可用账户
+    if (accounts.value.length > 0 && !accounts.value.find(acc => acc.address === selectedAccount.value)) {
+      selectedAccount.value = accounts.value[0].address
+    }
+  }
+})
 </script>
 
 <style scoped>
 /* —— 这里保持你原来的样式 —— */
 :root { --bg:#f6f7fb; --panel:#fff; --text:#0b1020; --muted:#6b7280; --muted-2:#9aa3b2; --border:#e6e8ef; --shadow:0 6px 20px rgba(15,23,42,.06); --primary:#3b82f6; --primary-ink:#1e40af; --danger:#ef4444; }
+
+/* No Wallet Page Styles */
+.pf-no-wallet-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: linear-gradient(135deg, var(--bg) 0%, #e0e7ff 100%);
+}
+
+.pf-no-wallet-container {
+  max-width: 800px;
+  width: 100%;
+  text-align: center;
+}
+
+.pf-no-wallet-hero {
+  margin-bottom: 40px;
+}
+
+.pf-no-wallet-icon {
+  margin-bottom: 24px;
+}
+
+.pf-wallet-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto;
+  display: block;
+}
+
+.pf-no-wallet-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pf-no-wallet-description {
+  font-size: 1.2rem;
+  color: var(--muted);
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.pf-no-wallet-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+  margin: 40px 0;
+}
+
+.pf-feature-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pf-feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(15,23,42,.15);
+}
+
+.pf-feature-icon {
+  font-size: 2.5rem;
+  margin-bottom: 16px;
+}
+
+.pf-feature-card h3 {
+  color: var(--text);
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.pf-feature-card p {
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.pf-no-wallet-actions {
+  margin: 40px 0;
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.pf-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  text-decoration: none;
+}
+
+.pf-btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.pf-btn-primary:hover {
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.pf-btn-secondary {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.pf-btn-secondary:hover {
+  background: #f8fafc;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(15,23,42,.1);
+}
+
+.pf-btn-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.pf-no-wallet-help {
+  margin-top: 40px;
+  padding: 24px;
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  border-radius: 12px;
+  text-align: left;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.pf-no-wallet-help h4 {
+  color: var(--text);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.pf-no-wallet-help ol {
+  list-style: none;
+  padding: 0;
+  counter-reset: step-counter;
+}
+
+.pf-no-wallet-help li {
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 12px;
+  padding-left: 32px;
+  position: relative;
+  counter-increment: step-counter;
+}
+
+.pf-no-wallet-help li::before {
+  content: counter(step-counter);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  background: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.pf-no-wallet-help strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .pf-no-wallet-page {
+    padding: 16px;
+  }
+  
+  .pf-no-wallet-title {
+    font-size: 2rem;
+  }
+  
+  .pf-no-wallet-description {
+    font-size: 1.1rem;
+  }
+  
+  .pf-no-wallet-features {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .pf-feature-card {
+    padding: 20px;
+  }
+  
+  .pf-no-wallet-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .pf-btn {
+    width: 100%;
+    max-width: 280px;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .pf-no-wallet-title {
+    font-size: 1.8rem;
+  }
+  
+  .pf-no-wallet-description {
+    font-size: 1rem;
+  }
+  
+  .pf-no-wallet-help {
+    padding: 20px;
+  }
+}
 .pf-page{background:var(--bg);min-height:100vh;color:var(--text);}
 .pf-topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;position:sticky;top:0;z-index:10;background:var(--bg);}
 .pf-actions{display:flex;gap:12px;flex-wrap:wrap;}
@@ -1081,6 +1603,315 @@ onUnmounted(() => {
 .pf-stat-number.positive{color:#16a34a;}
 .pf-stat-number.negative{color:#dc2626;}
 .pf-stat-label{font-size:12px;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;}
+
+/* 交易图表样式 */
+.pf-transaction-chart{
+  margin-bottom: 24px;
+  padding: 20px;
+  border-radius: 16px;
+  background: #141426;
+  border: 1px solid var(--border);
+}
+
+.pf-chart-controls{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pf-select{
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #374151;
+  background: #1f2937;
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.pf-refresh-btn{
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #374151;
+  background: #1f2937;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pf-refresh-btn:hover{
+  background: #374151;
+  color: #ffffff;
+}
+
+.pf-bar-chart-container{
+  margin-top: 16px;
+}
+
+.pf-chart-loading{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px;
+  color: #9ca3af;
+}
+
+.pf-spinner{
+  width: 20px;
+  height: 20px;
+  border: 2px solid #374151;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.pf-chart-empty{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px;
+  color: #9ca3af;
+}
+
+.pf-empty-icon{
+  font-size: 32px;
+  opacity: 0.5;
+}
+
+.pf-bar-chart{
+  position: relative;
+}
+
+.pf-chart-bars{
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 200px;
+  padding: 0 16px;
+  border-bottom: 1px solid #374151;
+  border-left: 1px solid #374151;
+  min-width: 100%;
+  overflow-x: auto;
+}
+
+.pf-bar-item{
+  flex: 0 0 auto;
+  min-width: 32px;
+  max-width: 120px;
+  width: calc(100% / var(--bar-count, 7));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  transition: width 0.3s ease;
+}
+
+/* 根据数据点数量调整柱状图宽度 */
+.pf-chart-bars[style*="--bar-count: 7"] .pf-bar-item {
+  width: calc(100% / 7);
+  min-width: 40px;
+}
+
+.pf-chart-bars[style*="--bar-count: 30"] .pf-bar-item {
+  width: calc(100% / 30);
+  min-width: 20px;
+}
+
+.pf-chart-bars[style*="--bar-count: 90"] .pf-bar-item {
+  width: calc(100% / 90);
+  min-width: 12px;
+}
+
+.pf-chart-bars[style*="--bar-count: 365"] .pf-bar-item {
+  width: calc(100% / 365);
+  min-width: 8px;
+}
+
+.pf-bar-container{
+  position: relative;
+  width: 100%;
+  height: 160px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.pf-bar-buy{
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 50%;
+  background: #10b981;
+  border-radius: 4px 4px 0 0;
+  transition: all 0.2s ease;
+  min-height: 2px;
+}
+
+.pf-bar-sell{
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 50%;
+  background: #ef4444;
+  border-radius: 4px 4px 0 0;
+  transition: all 0.2s ease;
+  min-height: 2px;
+}
+
+.pf-bar-item:hover .pf-bar-buy{
+  background: #059669;
+}
+
+.pf-bar-item:hover .pf-bar-sell{
+  background: #dc2626;
+}
+
+.pf-bar-label{
+  margin-top: 8px;
+  font-size: 12px;
+  color: #9ca3af;
+  text-align: center;
+}
+
+.pf-bar-tooltip{
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #ffffff;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 10;
+}
+
+.pf-bar-item:hover .pf-bar-tooltip{
+  opacity: 1;
+}
+
+.pf-tooltip-buy{
+  color: #10b981;
+  margin-bottom: 2px;
+}
+
+.pf-tooltip-sell{
+  color: #ef4444;
+  margin-bottom: 2px;
+}
+
+.pf-tooltip-total{
+  color: #ffffff;
+  font-weight: 600;
+  border-top: 1px solid #374151;
+  padding-top: 4px;
+  margin-top: 4px;
+}
+
+.pf-chart-legend{
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 16px;
+}
+
+.pf-legend-item{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #ffffff;
+}
+
+.pf-legend-color{
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.pf-buy-color{
+  background: #10b981;
+}
+
+.pf-sell-color{
+  background: #ef4444;
+}
+
+/* 响应式设计 - 移动设备 */
+@media (max-width: 768px) {
+  .pf-chart-bars {
+    gap: 4px;
+    padding: 0 8px;
+  }
+  
+  .pf-bar-item {
+    min-width: 24px;
+    max-width: 60px;
+  }
+  
+  .pf-chart-bars[style*="--bar-count: 7"] .pf-bar-item {
+    min-width: 32px;
+  }
+  
+  .pf-chart-bars[style*="--bar-count: 30"] .pf-bar-item {
+    min-width: 16px;
+  }
+  
+  .pf-chart-bars[style*="--bar-count: 90"] .pf-bar-item {
+    min-width: 10px;
+  }
+  
+  .pf-chart-bars[style*="--bar-count: 365"] .pf-bar-item {
+    min-width: 6px;
+  }
+  
+  .pf-bar-label {
+    font-size: 10px;
+  }
+}
+
+/* 小屏幕设备 */
+@media (max-width: 480px) {
+  .pf-chart-bars {
+    gap: 2px;
+    padding: 0 4px;
+  }
+  
+  .pf-bar-item {
+    min-width: 20px;
+    max-width: 40px;
+  }
+  
+  .pf-chart-bars[style*="--bar-count: 7"] .pf-bar-item {
+    min-width: 28px;
+  }
+  
+  .pf-chart-bars[style*="--bar-count: 30"] .pf-bar-item {
+    min-width: 12px;
+  }
+  
+  .pf-chart-bars[style*="--bar-count: 90"] .pf-bar-item {
+    min-width: 8px;
+  }
+  
+  .pf-chart-bars[style*="--bar-count: 365"] .pf-bar-item {
+    min-width: 4px;
+  }
+}
 
 /* 图表行布局 */
 .pf-charts-row{display:flex;gap:24px;align-items:flex-start;}

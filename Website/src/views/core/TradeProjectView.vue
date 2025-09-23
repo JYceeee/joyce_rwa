@@ -1,5 +1,89 @@
 <template>
   <div class="trade-page">
+    <!-- 余额不足弹窗 -->
+    <div v-if="showInsufficientBalanceModal" class="modal-overlay" @click="closeInsufficientBalanceModal">
+      <div class="modal-content error-modal" @click.stop>
+        <div class="modal-header">
+          <div class="error-icon">⚠️</div>
+          <h2 class="modal-title">余额不足</h2>
+        </div>
+        <div class="modal-body">
+          <div class="error-message">
+            <p>您的代币余额不足以完成此交易。</p>
+            <p><strong>当前余额:</strong> {{ userTokenBalance }} 代币</p>
+            <p><strong>所需数量:</strong> {{ tradeAmount }} 代币</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn primary" @click="closeInsufficientBalanceModal">确定</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 加载中弹窗 -->
+    <div v-if="showLoadingModal" class="modal-overlay">
+      <div class="modal-content loading-modal" @click.stop>
+        <div class="modal-header">
+          <div class="loading-icon">
+            <div class="spinner"></div>
+          </div>
+          <h2 class="modal-title">处理中...</h2>
+        </div>
+        <div class="modal-body">
+          <div class="loading-message">
+            <p>正在处理您的交易请求，请稍候...</p>
+            <p class="loading-status">{{ loadingStatus }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 交易成功弹窗 -->
+    <div v-if="showSuccessModal" class="modal-overlay" @click="closeSuccessModal">
+      <div class="modal-content success-modal" @click.stop>
+        <div class="modal-header">
+          <div class="success-icon">✅</div>
+          <h2 class="modal-title">交易成功！</h2>
+        </div>
+        <div class="modal-body">
+          <div class="success-details">
+            <div class="detail-item">
+              <span class="detail-label">交易类型:</span>
+              <span class="detail-value">{{ successData.tradeType === 'buy' ? '买入' : '卖出' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">交易数量:</span>
+              <span class="detail-value">{{ successData.amount }} 代币</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">交易价格:</span>
+              <span class="detail-value">A${{ successData.price }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">交易总额:</span>
+              <span class="detail-value">A${{ successData.total }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">交易哈希:</span>
+              <span class="detail-value hash-value" @click="copyHash">{{ formatHash(successData.transactionHash) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">区块号:</span>
+              <span class="detail-value">{{ successData.blockNumber }}</span>
+            </div>
+          </div>
+          <div class="success-message">
+            <p>🎉 恭喜！您的交易已成功完成并记录在区块链上。</p>
+            <p>您可以在右侧的"Recent Trades"中查看交易记录。</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn secondary" @click="closeSuccessModal">关闭</button>
+          <button class="btn primary" @click="viewOnEtherscan">在Etherscan查看</button>
+        </div>
+      </div>
+    </div>
+
     <!-- 顶部面包屑导航 -->
     <header class="topbar container">
       <nav class="breadcrumb" aria-label="Breadcrumb">
@@ -43,12 +127,20 @@
             <span class="metric-value">{{ projectData.metrics.collateralPropertyValue }}</span>
           </div>
           <div class="metric-item">
-            <span class="metric-label">Rental Income</span>
-            <span class="metric-value">{{ projectData.metrics.rentalIncome }}</span>
+            <span class="metric-label">Loan Amount</span>
+            <span class="metric-value">{{ projectData.loanAmount || 'TBA' }}</span>
           </div>
           <div class="metric-item">
             <span class="metric-label">Target Yield</span>
             <span class="metric-value">{{ projectData.metrics.targetLoanYield }}</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">LTV</span>
+            <span class="metric-value">{{ projectData.ltv || 'TBA' }}</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Loan Term</span>
+            <span class="metric-value">{{ projectData.loanTerm || 'TBA' }}</span>
           </div>
         </div>
       </div>
@@ -64,17 +156,19 @@
             <button 
               class="trade-type-btn" 
               :class="{ active: tradeType === 'buy' }"
-              @click="tradeType = 'buy'"
+              @click="selectTradeType('buy')"
+              :disabled="loading"
             >
-              <span class="btn-icon">📈</span>
+              <!-- <span class="btn-icon">📈</span> -->
               <span class="btn-text">Buy</span>
             </button>
             <button 
               class="trade-type-btn" 
               :class="{ active: tradeType === 'sell' }"
-              @click="tradeType = 'sell'"
+              @click="selectTradeType('sell')"
+              :disabled="loading"
             >
-              <span class="btn-icon">📉</span>
+              <!-- <span class="btn-icon">📉</span> -->
               <span class="btn-text">Sell</span>
             </button>
           </div>
@@ -95,85 +189,184 @@
             <span class="amount-unit">tokens</span>
           </div>
           <div class="amount-info">
-            <span class="info-text">
+            <!-- <span class="info-text">
               Current Price: {{ projectData.metrics.currentElaraPrice }} per token
-            </span>
+            </span> -->
           </div>
         </div>
 
-        <!-- 价格设置 -->
-        <div class="form-section">
-          <h3 class="section-title">Price Settings</h3>
-          <div class="price-options">
-            <label class="price-option">
-              <input type="radio" v-model="priceType" value="market" />
-              <span>Market Price</span>
-            </label>
-            <label class="price-option">
-              <input type="radio" v-model="priceType" value="limit" />
-              <span>Limit Price</span>
-            </label>
-          </div>
-          
-          <div v-if="priceType === 'limit'" class="limit-price-input">
-            <input 
-              type="number" 
-              v-model="limitPrice" 
-              class="price-input"
-              placeholder="Enter limit price"
-              step="0.01"
-            />
-            <span class="price-unit">AUD</span>
-          </div>
-        </div>
-
-        <!-- 交易总结 -->
-        <div class="trade-summary">
-          <h3 class="section-title">Trade Summary</h3>
-          <div class="summary-item">
-            <span class="summary-label">Action:</span>
-            <span class="summary-value">{{ tradeType === 'buy' ? 'Buying' : 'Selling' }} {{ tradeAmount }} tokens</span>
-          </div>
-          <div class="summary-item">
-            <span class="summary-label">Price:</span>
-            <span class="summary-value">{{ priceType === 'market' ? 'Market Price' : `A$ ${limitPrice}` }}</span>
-          </div>
-          <div class="summary-item">
-            <span class="summary-label">Total:</span>
-            <span class="summary-value">A$ {{ calculateTotal() }}</span>
-          </div>
-        </div>
 
         <!-- 提交按钮 -->
         <div class="form-actions">
-          <button class="btn secondary" @click="cancelTrade">Cancel</button>
+          <button class="btn secondary" @click="cancelTrade" :disabled="loading">Cancel</button>
           <button class="btn primary" @click="submitTrade" :disabled="!canSubmit">
-            {{ tradeType === 'buy' ? 'Buy Tokens' : 'Sell Tokens' }}
+            <span v-if="loading">Processing...</span>
+            <span v-else>{{ tradeType === 'buy' ? 'Buy Tokens' : 'Sell Tokens' }}</span>
           </button>
+          </div>
+          
+        <!-- 错误信息显示 -->
+        <div v-if="error" class="error-message">
+          {{ error }}
+          </div>
         </div>
-      </div>
 
       <!-- 交易历史 -->
       <div class="trade-history-card">
         <h2 class="card-title">Recent Trades</h2>
-        <div class="trade-list">
+        <div v-if="loading" class="loading-message">Loading trades...</div>
+        <div v-else-if="recentTrades.length === 0" class="no-trades">No recent trades</div>
+        <div v-else class="trade-list">
           <div v-for="trade in recentTrades" :key="trade.id" class="trade-item">
-            <div class="trade-info">
+            <div class="trade-header">
               <span class="trade-type" :class="trade.type">{{ trade.type.toUpperCase() }}</span>
-              <span class="trade-amount">{{ trade.amount }} tokens</span>
-            </div>
-            <div class="trade-details">
-              <span class="trade-price">A$ {{ trade.price }}</span>
               <span class="trade-time">{{ formatTime(trade.timestamp) }}</span>
+          </div>
+            <div class="trade-info">
+              <div class="trade-amount-section">
+                <span class="label">Token数量:</span>
+                <span class="value">{{ trade.amount }} tokens</span>
+          </div>
+              <div class="trade-price-section">
+                <span class="label">价格:</span>
+                <span class="value">A${{ trade.price }}</span>
+              </div>
+              <div class="trade-total-section">
+                <span class="label">总额:</span>
+                <span class="value">A${{ trade.total }}</span>
+              </div>
+            </div>
+            <div class="trade-footer" v-if="trade.transactionHash">
+              <a :href="`https://etherscan.io/tx/${trade.transactionHash}`" 
+                 target="_blank" 
+                 class="tx-link">
+                🔗 在Etherscan查看
+              </a>
+            </div>
+          </div>
+          </div>
+          </div>
+        </div>
+
+    <!-- 合约测试面板 -->
+    <div class="contract-test-panel">
+        <h2 class="card-title">🔧 Contract Testing</h2>
+        
+        <!-- 测试状态显示 -->
+        <div class="test-status">
+          <div v-if="contractStatus" class="status-indicator" :class="contractStatus.type">
+            <span class="status-icon">{{ contractStatus.icon }}</span>
+            <span class="status-text">{{ contractStatus.message }}</span>
+          </div>
+        </div>
+
+        <!-- 测试区域：按钮和结果并排显示 -->
+        <div class="test-area">
+          <!-- 测试按钮组 -->
+          <div class="test-buttons">
+            <button 
+              class="test-btn" 
+              @click="initializeContract" 
+              :disabled="contractLoading || contractInitialized"
+              :class="{ active: contractInitialized }">
+              <span class="btn-icon">🚀</span>
+              <span class="btn-text">Initialize Contract</span>
+            </button>
+
+            <button 
+              class="test-btn" 
+              @click="testGetUserAddress" 
+              :disabled="!contractInitialized || contractLoading">
+              <span class="btn-icon">👤</span>
+              <span class="btn-text">Get User Address</span>
+            </button>
+
+            <button 
+              class="test-btn" 
+              @click="getTokenPrice" 
+              :disabled="!contractInitialized || contractLoading">
+              <span class="btn-icon">💰</span>
+              <span class="btn-text">Get Token Price</span>
+            </button>
+
+            <button 
+              class="test-btn" 
+              @click="getUserTokenBalance" 
+              :disabled="!contractInitialized || contractLoading">
+              <span class="btn-icon">💳</span>
+              <span class="btn-text">Get Token Balance</span>
+            </button>
+
+            <button 
+              class="test-btn" 
+              @click="getTradeHistory" 
+              :disabled="!contractInitialized || contractLoading">
+              <span class="btn-icon">📊</span>
+              <span class="btn-text">Get Trade History</span>
+            </button>
+
+            <button 
+              class="test-btn" 
+              @click="testBuyTransaction" 
+              :disabled="!contractInitialized || contractLoading">
+              <span class="btn-icon">📈</span>
+              <span class="btn-text">Test Buy</span>
+            </button>
+
+            <button 
+              class="test-btn" 
+              @click="testSellTransaction" 
+              :disabled="!contractInitialized || contractLoading">
+              <span class="btn-icon">📉</span>
+              <span class="btn-text">Test Sell</span>
+          </button>
+        </div>
+
+          <!-- 测试结果显示 -->
+          <div class="test-results">
+            <div v-if="contractLoading" class="loading-indicator">
+              <span class="spinner"></span>
+              <span>Testing contract...</span>
+      </div>
+
+            <div v-if="testResults.length > 0" class="results-list">
+              <div v-for="(result, index) in testResults" :key="index" class="result-item" :class="result.type">
+                <div class="result-header">
+                  <span class="result-icon">{{ result.icon }}</span>
+                  <span class="result-title">{{ result.title }}</span>
+                  <span class="result-time">{{ formatTime(result.timestamp) }}</span>
+            </div>
+                <div v-if="result.data" class="result-data">
+                  <pre>{{ JSON.stringify(result.data, null, 2) }}</pre>
+            </div>
+                <div v-if="result.message" class="result-message">{{ result.message }}</div>
+          </div>
+        </div>
+
+            <div v-if="testResults.length === 0 && !contractLoading" class="no-results">
+              <span class="no-results-icon">🧪</span>
+              <span class="no-results-text">No test results yet. Click a test button to start.</span>
             </div>
           </div>
         </div>
+
+        <!-- 快速操作 -->
+        <div class="quick-actions">
+          <button class="action-btn secondary" @click="clearResults">Clear Results</button>
+          <button class="action-btn secondary" @click="runAllTests">Run All Tests</button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { products, productUtils } from '@/data/ProductDetailsInfo.js'
+import { contractService } from '@/service/contractService.js'
+import { getKycStatus, isKycVerified, getKycLevel, setKycLevel, KYC_STATUS, KYC_LEVELS } from '@/service/kycService.js'
+import { useAuth } from '@/composables/useAuth.js'
+import { useWallet } from '@/composables/useWallet.js'
+import { isLoggedIn } from '@/utils/auth.js'
+
 export default {
   name: 'TradeProjectView',
   props: {
@@ -186,13 +379,33 @@ export default {
     return {
       tradeType: 'buy',
       tradeAmount: '',
-      priceType: 'market',
-      limitPrice: '',
-      recentTrades: [
-        { id: 1, type: 'buy', amount: 100, price: '1.02', timestamp: Date.now() - 3600000 },
-        { id: 2, type: 'sell', amount: 50, price: '1.01', timestamp: Date.now() - 7200000 },
-        { id: 3, type: 'buy', amount: 200, price: '1.00', timestamp: Date.now() - 10800000 }
-      ]
+      recentTrades: [],
+      loading: false,
+      error: null,
+      // 交易成功弹窗相关
+      showSuccessModal: false,
+      showInsufficientBalanceModal: false,
+      showLoadingModal: false,
+      loadingStatus: '',
+      userTokenBalance: 0,
+      successData: {
+        tradeType: '',
+        amount: 0,
+        price: 0,
+        total: 0,
+        transactionHash: '',
+        blockNumber: 0
+      },
+      // 合约测试相关
+      contractInitialized: false,
+      contractLoading: false,
+      contractStatus: null,
+      testResults: [],
+      userAddress: '',
+      tokenPrice: '',
+      userTokenBalance: '',
+      tradeHistory: [],
+      testAmount: 1
     }
   },
   computed: {
@@ -200,85 +413,89 @@ export default {
       return this.code || this.$route.params.code || 'TYMU'
     },
     projectData() {
-      // 模拟项目数据，实际应该从API获取
-      const projects = {
-        'TYMU': {
-          code: 'TYMU',
-          name: 'TYMU Property Loan',
-          image: '/pics/TYMU.png',
-          subtitle: 'Prime Residential Mortgage Backed Loan',
-          type: 'residential',
-          region: 'Suburban',
-          risk: 'low',
-          targetYield: 6.5,
+      // 从ProductDetailsInfo获取项目数据
+      const product = productUtils.getProductByCode(this.projectCode)
+      
+      if (product) {
+        // 构建符合模板需求的数据结构
+        return {
+          code: product.code,
+          name: product.name,
+          image: product.image,
+          subtitle: product.subtitle,
+          type: product.type,
+          region: product.region,
+          risk: product.risk,
+          targetYield: product.targetYield,
+          status: product.status,
           metrics: {
-            currentElaraPrice: 'A$1.00',
-            collateralPropertyValue: 'A$1,250,000',
-            rentalIncome: 'A$4,500 / month',
-            targetLoanYield: '6.5% p.a.'
-          }
-        },
-        'SQNB': {
-          code: 'SQNB',
-          name: 'SQNB Property Loan',
-          image: '/pics/SQNB.png',
-          subtitle: 'Commercial Mortgage Loan',
-          type: 'commercial',
-          region: 'CBD',
-          risk: 'medium',
-          targetYield: 7.2,
-          metrics: {
-            currentElaraPrice: 'A$1.02',
-            collateralPropertyValue: 'A$2,400,000',
-            rentalIncome: 'A$12,800 / month',
-            targetLoanYield: '7.2% p.a.'
-          }
-        },
-        'LZYT': {
-          code: 'LZYT',
-          name: 'LZYT Property Loan',
-          image: '/pics/LZYT.png',
-          subtitle: 'Suburban Residential Loan',
-          type: 'residential',
-          region: 'Suburban',
-          risk: 'medium',
-          targetYield: 6.9,
-          metrics: {
-            currentElaraPrice: 'A$0.98',
-            collateralPropertyValue: 'A$980,000',
-            rentalIncome: 'A$3,600 / month',
-            targetLoanYield: '6.9% p.a.'
-          }
-        },
-        'YYD': {
-          code: 'YYD',
-          name: 'YYD Property Loan',
-          image: '/pics/YYD.png',
-          subtitle: 'CBD Apartment Mortgage',
-          type: 'residential',
-          region: 'CBD',
-          risk: 'low',
-          targetYield: 6.1,
-          metrics: {
-            currentElaraPrice: 'A$1.05',
-            collateralPropertyValue: 'A$1,650,000',
-            rentalIncome: 'A$5,700 / month',
-            targetLoanYield: '6.1% p.a.'
-          }
+            currentElaraPrice: this.calculateTokenPrice(product),
+            collateralPropertyValue: product.valuation || 'TBA',
+            rentalIncome: this.calculateRentalIncome(product),
+            targetLoanYield: `${product.targetYield}% p.a.`
+          },
+          // 添加更多ProductDetailsInfo中的字段
+          loanAmount: product.loanAmount,
+          annualInterestRate: product.annualInterestRate,
+          loanTerm: product.loanTerm,
+          ltv: product.ltv,
+          drawdownDate: product.drawdownDate,
+          propertyAddress: product.propertyAddress,
+          totalOffering: product.totalOffering,
+          subscribed: product.subscribed,
+          totalSubscriptionTokens: product.totalSubscriptionTokens,
+          subscribedTokens: product.subscribedTokens
         }
       }
-      return projects[this.projectCode] || projects['TYMU']
+      
+      // 如果找不到对应产品，返回默认数据
+      return {
+        code: this.projectCode,
+        name: `${this.projectCode} Property Loan`,
+        image: '/pics/TYMU.png',
+        subtitle: 'Property Investment Opportunity',
+        type: 'residential',
+        region: 'Unknown',
+        risk: 'medium',
+        targetYield: 6.0,
+        status: 'active',
+        metrics: {
+          currentElaraPrice: 'A$1.00',
+          collateralPropertyValue: 'TBA',
+          rentalIncome: 'TBA',
+          targetLoanYield: '6.0% p.a.'
+        }
+      }
     },
     canSubmit() {
-      return this.tradeAmount && this.tradeAmount > 0 && 
-             (this.priceType === 'market' || (this.priceType === 'limit' && this.limitPrice && this.limitPrice > 0))
+      return this.tradeAmount && this.tradeAmount > 0 && !this.loading
     }
   },
   methods: {
+    calculateTokenPrice(product) {
+      // 基于目标收益率计算代币价格
+      const basePrice = 1.00
+      const yieldMultiplier = (product.targetYield || 6.0) / 6.0
+      const adjustedPrice = basePrice * yieldMultiplier
+      return `A$${adjustedPrice.toFixed(2)}`
+    },
+    
+    calculateRentalIncome(product) {
+      // 基于房产价值和收益率估算租金收入
+      if (!product.valuation) return 'TBA'
+      
+      const valuationStr = product.valuation.replace(/[A$,]/g, '')
+      const valuation = parseFloat(valuationStr)
+      const monthlyYield = (product.targetYield || 6.0) / 12 / 100
+      const estimatedRental = valuation * monthlyYield
+      
+      return `A$${estimatedRental.toLocaleString('en-AU', { maximumFractionDigits: 0 })} / month`
+    },
+    
     calculateTotal() {
       if (!this.tradeAmount) return '0.00'
       const amount = parseFloat(this.tradeAmount)
-      const price = this.priceType === 'market' ? 1.00 : parseFloat(this.limitPrice || 0)
+      const price = 1.00 // 固定价格，从项目数据获取
       return (amount * price).toFixed(2)
     },
     formatTime(timestamp) {
@@ -287,40 +504,936 @@ export default {
     cancelTrade() {
       this.$router.back()
     },
-    submitTrade() {
+
+    // 选择交易类型并执行完整流程
+    async selectTradeType(type) {
+      // 设置交易类型
+      this.tradeType = type
+      
+      // 如果没有输入金额，提示用户输入
+      if (!this.tradeAmount || this.tradeAmount <= 0) {
+        this.error = `请先输入${type === 'buy' ? '购买' : '出售'}数量`
+        return
+      }
+
+      console.log(`🚀 开始${type}交易流程...`)
+      
+      try {
+        this.loading = true
+        this.error = null
+
+        // 1. 合约初始化
+        this.loadingStatus = '正在初始化智能合约...'
+        this.showLoadingModal = true
+        
+        await this.initializeContract()
+        console.log('✅ 合约初始化完成')
+
+        // 2. 获取钱包地址
+        this.loadingStatus = '正在获取钱包地址...'
+        const userAddress = await this.getUserAddress()
+        if (!userAddress) {
+          this.showLoadingModal = false
+          this.loading = false
+          this.error = '无法获取钱包地址，请检查钱包连接'
+          return
+        }
+        console.log('✅ 钱包地址获取完成:', userAddress)
+
+        // 3. 获取钱包代币余额
+        this.loadingStatus = '正在获取代币余额...'
+        const balance = await contractService.getUserTokenBalance(userAddress)
+        this.userTokenBalance = parseInt(balance) || 0
+        console.log('✅ 代币余额获取完成:', this.userTokenBalance)
+
+        // 4. 比较余额与认购金额（仅对buy操作）
+        if (type === 'buy') {
+          console.log(`💰 余额检查: ${this.userTokenBalance} vs ${this.tradeAmount}`)
+          if (this.userTokenBalance < parseInt(this.tradeAmount)) {
+            this.showLoadingModal = false
+            this.loading = false
+            this.showInsufficientBalanceModal = true
+            return
+          }
+          console.log('✅ 余额充足，可以继续交易')
+        }
+
+        // 5. 签订智能合约
+        this.loadingStatus = `正在与智能合约签订${type === 'buy' ? '购买' : '出售'}协议...`
+        
+        let result
+        if (type === 'buy') {
+          result = await contractService.buyTokens(parseInt(this.tradeAmount))
+        } else {
+          result = await contractService.sellTokens(parseInt(this.tradeAmount))
+        }
+
+        if (result.success) {
+          console.log(`✅ ${type}交易成功:`, result)
+          
+          // 关闭加载弹窗
+          this.showLoadingModal = false
+          
+          // 准备交易数据
+          const tradeData = {
+            projectCode: this.projectCode,
+            tradeType: type,
+            amount: parseInt(this.tradeAmount),
+            price: result.tokenPrice || 1.00,
+            total: result.totalCost || parseFloat(this.calculateTotal()),
+            userAddress: userAddress,
+            transactionHash: result.transactionHash,
+            blockNumber: result.blockNumber,
+            timestamp: Date.now()
+          }
+          
+          // 保存到MySQL数据库
+          const dbResult = await this.saveTransactionToDatabase(tradeData)
+          
+          if (dbResult.success) {
+            console.log('✅ 交易数据已保存到数据库')
+            
+            // 更新本地交易历史
+            this.recentTrades.unshift({
+              id: Date.now(),
+              type: type,
+              amount: tradeData.amount,
+              price: tradeData.price.toString(),
+              timestamp: tradeData.timestamp,
+              transactionHash: result.transactionHash
+            })
+            
+            // 显示成功弹窗
+            this.showSuccessModal = true
+            this.successData = {
+              tradeType: type,
+              amount: tradeData.amount,
+              price: tradeData.price,
+              total: tradeData.total,
+              transactionHash: result.transactionHash,
+              blockNumber: result.blockNumber
+            }
+      
+            // 重置表单
+            this.tradeAmount = ''
+          } else {
+            console.error('❌ 保存到数据库失败:', dbResult.error)
+            this.error = '交易成功但保存到数据库失败'
+          }
+        } else {
+          // 关闭加载弹窗
+          this.showLoadingModal = false
+          console.error(`❌ ${type}交易失败:`, result.error)
+          this.error = result.error || `${type}交易失败`
+        }
+        
+      } catch (error) {
+        // 关闭加载弹窗
+        this.showLoadingModal = false
+        console.error('❌ 交易流程失败:', error)
+        this.error = error.message
+      } finally {
+        this.loading = false
+      }
+    },
+    async submitTrade() {
       if (!this.canSubmit) return
       
+      this.loading = true
+      this.error = null
+      
+      try {
+        // 1. 验证用户是否已登录
+        if (!isLoggedIn()) {
+          this.error = '请先登录账户'
+          this.loading = false
+          return
+        }
+        
+        // 2. 验证钱包是否已连接
+        if (!this.isWalletConnected()) {
+          this.error = '请先连接钱包'
+          this.loading = false
+          return
+        }
+        
+        // 3. 获取用户钱包地址
+        const userAddress = await this.getUserAddress()
+        if (!userAddress) {
+          this.error = '无法获取钱包地址，请检查钱包连接'
+          this.loading = false
+          return
+        }
+        
+        // 4. 验证并设置KYC状态
+        const kycStatus = getKycStatus()
+        const kycLevel = getKycLevel()
+        
+        if (kycStatus !== KYC_STATUS.VERIFIED) {
+          this.error = '请先完成KYC身份验证'
+          this.loading = false
+          return
+        }
+        
+        // KYC验证成功时，如果级别不足，自动设置为Level 2
+        if (kycLevel < KYC_LEVELS.LEVEL_2) {
+          console.log(`🔧 KYC验证成功，自动升级级别从 ${kycLevel} 到 ${KYC_LEVELS.LEVEL_2}`)
+          setKycLevel(KYC_LEVELS.LEVEL_2)
+          console.log('✅ KYC级别已更新为Level 2')
+        }
+        
+        // 5. 验证是否在白名单中
+        const isWhitelisted = await this.checkWhitelistStatus(userAddress)
+        if (!isWhitelisted) {
+          this.error = '您的钱包地址尚未加入白名单，请联系管理员'
+          this.loading = false
+          return
+        }
+
+        // 6. 如果是Buy操作，检查代币余额
+        if (this.tradeType === 'buy') {
+          this.loadingStatus = '正在获取用户代币余额...'
+          this.showLoadingModal = true
+          
+          // 获取用户代币余额
+          const balance = await contractService.getUserTokenBalance(userAddress)
+          this.userTokenBalance = parseInt(balance) || 0
+          
+          console.log(`💰 用户代币余额: ${this.userTokenBalance}, 认购数量: ${this.tradeAmount}`)
+          
+          // 检查余额是否足够
+          if (this.userTokenBalance < parseInt(this.tradeAmount)) {
+            this.showLoadingModal = false
+            this.loading = false
+            this.showInsufficientBalanceModal = true
+            return
+          }
+          
+          // 余额足够，继续交易
+          this.loadingStatus = '余额充足，正在处理交易...'
+        }
+      
+        console.log(`🚀 开始${this.tradeType}交易...`)
+        
+        // 7. 执行交易
+        let result
+        if (this.tradeType === 'buy') {
+          this.loadingStatus = '正在与智能合约签订购买协议...'
+          result = await contractService.buyTokens(parseInt(this.tradeAmount))
+        } else {
+          this.loadingStatus = '正在与智能合约签订出售协议...'
+          result = await contractService.sellTokens(parseInt(this.tradeAmount))
+        }
+        
+        if (result.success) {
+          console.log(`✅ ${this.tradeType}交易成功:`, result)
+          
+          // 关闭加载弹窗
+          this.showLoadingModal = false
+          
+          // 准备交易数据
       const tradeData = {
         projectCode: this.projectCode,
         tradeType: this.tradeType,
-        amount: this.tradeAmount,
-        priceType: this.priceType,
-        price: this.priceType === 'market' ? 1.00 : this.limitPrice,
-        total: this.calculateTotal()
-      }
-      
-      // 这里应该调用实际的交易API
-      console.log('Trade data:', tradeData)
-      
-      // 模拟交易成功
-      alert(`Trade ${this.tradeType === 'buy' ? 'Buy' : 'Sell'} order placed successfully!`)
-      
-      // 添加到交易历史
+            amount: parseInt(this.tradeAmount),
+            price: result.tokenPrice || 1.00,
+            total: result.totalCost || parseFloat(this.calculateTotal()),
+            userAddress: userAddress,
+            transactionHash: result.transactionHash,
+            blockNumber: result.blockNumber,
+            timestamp: Date.now()
+          }
+          
+          // 保存到MySQL数据库
+          const dbResult = await this.saveTransactionToDatabase(tradeData)
+          
+          if (dbResult.success) {
+            console.log('✅ 交易数据已保存到数据库')
+            
+            // 更新本地交易历史
       this.recentTrades.unshift({
         id: Date.now(),
         type: this.tradeType,
-        amount: parseInt(this.tradeAmount),
-        price: this.priceType === 'market' ? '1.00' : this.limitPrice,
-        timestamp: Date.now()
-      })
+              amount: tradeData.amount,
+              price: tradeData.price.toString(),
+              timestamp: tradeData.timestamp,
+              transactionHash: result.transactionHash
+            })
+            
+            // 显示成功弹窗
+            this.showSuccessModal = true
+            this.successData = {
+              tradeType: this.tradeType,
+              amount: tradeData.amount,
+              price: tradeData.price,
+              total: tradeData.total,
+              transactionHash: result.transactionHash,
+              blockNumber: result.blockNumber
+            }
       
       // 重置表单
       this.tradeAmount = ''
-      this.limitPrice = ''
-      this.priceType = 'market'
+          } else {
+            console.error('❌ 保存到数据库失败:', dbResult.error)
+            this.error = '交易成功但保存到数据库失败'
+          }
+        } else {
+          // 关闭加载弹窗
+          this.showLoadingModal = false
+          console.error(`❌ ${this.tradeType}交易失败:`, result.error)
+          this.error = result.error || `${this.tradeType}交易失败`
+        }
+        
+      } catch (error) {
+        // 关闭加载弹窗
+        this.showLoadingModal = false
+        console.error('❌ 交易失败:', error)
+        this.error = error.message
+        this.$emit('notify', `Trade failed: ${error.message}`)
+      } finally {
+        this.loading = false
+      }
+    },
+    
+    // 保存交易到数据库
+    async saveTransactionToDatabase(transactionData) {
+      try {
+        console.log('💾 准备保存交易数据到数据库:', transactionData)
+        
+        // 验证必需字段
+        const requiredFields = ['projectCode', 'tradeType', 'amount', 'price', 'total', 'userAddress', 'timestamp']
+        for (const field of requiredFields) {
+          if (transactionData[field] === undefined || transactionData[field] === null) {
+            console.error(`❌ 缺少必需字段: ${field}`)
+            return { success: false, error: `缺少必需字段: ${field}` }
+          }
+        }
+        
+        const response = await fetch('http://localhost:3000/user/transactionhistory', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(transactionData)
+        })
+        
+        if (!response.ok) {
+          console.error('❌ HTTP请求失败:', response.status, response.statusText)
+          return { success: false, error: `HTTP请求失败: ${response.status}` }
+        }
+        
+        const result = await response.json()
+        console.log('📥 后端响应:', result)
+        
+        if (result.status === 0) {
+          console.log('✅ 交易数据已保存到数据库')
+          return { success: true }
+        } else {
+          console.error('❌ 数据库保存失败:', result.message)
+          return { success: false, error: result.message }
+        }
+        
+      } catch (error) {
+        console.error('❌ 保存交易数据失败:', error)
+        return { success: false, error: error.message }
+      }
+    },
+    
+    // 从数据库获取交易记录
+    async loadRecentTrades() {
+      try {
+        console.log('📊 正在加载交易记录，项目代码:', this.projectCode)
+        
+        const response = await fetch(`http://localhost:3000/user/transactionhistory?projectCode=${this.projectCode}&limit=20`)
+        
+        if (!response.ok) {
+          console.error('❌ HTTP请求失败:', response.status, response.statusText)
+          return
+        }
+        
+        const result = await response.json()
+        console.log('📥 后端响应:', result)
+        
+        if (result.status === 0 && result.data) {
+          this.recentTrades = result.data.map(trade => ({
+            id: trade.id,
+            type: trade.trade_type, // 注意数据库字段名是trade_type
+            amount: trade.amount,
+            price: trade.price.toString(),
+            total: trade.total,
+            timestamp: trade.timestamp,
+            transactionHash: trade.transaction_hash, // 注意数据库字段名是transaction_hash
+            blockNumber: trade.block_number,
+            userAddress: trade.user_address,
+            createdAt: trade.created_at
+          }))
+          
+          console.log('✅ 成功加载交易记录:', this.recentTrades.length, '条')
+        } else {
+          console.log('ℹ️ 没有交易记录或查询失败:', result.message)
+          this.recentTrades = []
+        }
+        
+      } catch (error) {
+        console.error('❌ 加载交易记录失败:', error)
+        this.recentTrades = []
+      }
+    },
+    
+    // 获取用户地址（用于交易验证）
+    async getUserAddress() {
+      try {
+        console.log('🔍 TradeProjectView: 正在获取用户钱包地址...')
+        
+        // 1. 优先从localStorage获取WalletView绑定的钱包地址
+        const savedAccounts = localStorage.getItem('walletBoundAccounts')
+        if (savedAccounts) {
+          try {
+            const boundAddresses = JSON.parse(savedAccounts)
+            if (boundAddresses && boundAddresses.length > 0) {
+              // 使用第一个绑定的钱包地址（或者可以根据需要选择特定的地址）
+              const selectedAddress = boundAddresses[0]
+              console.log('✅ TradeProjectView: 从WalletView获取绑定地址:', selectedAddress)
+              return selectedAddress
+            }
+          } catch (parseError) {
+            console.warn('⚠️ TradeProjectView: 解析walletBoundAccounts失败:', parseError)
+          }
+        }
+        
+        // 2. 如果localStorage中没有绑定地址，尝试从useWallet获取
+        const { fullAddress, connected } = useWallet()
+        if (connected.value && fullAddress.value) {
+          console.log('⚠️ TradeProjectView: 使用useWallet地址作为备用:', fullAddress.value)
+          return fullAddress.value
+        }
+        
+        // 3. 最后的备用方案：直接从ethereum获取
+        if (typeof window.ethereum !== 'undefined') {
+          const accounts = await window.ethereum.request({ method: 'eth_accounts' })
+          if (accounts && accounts.length > 0) {
+            console.log('⚠️ TradeProjectView: 使用ethereum地址作为最后备用:', accounts[0])
+            return accounts[0]
+          }
+        }
+        
+        console.error('❌ TradeProjectView: 无法从任何来源获取用户地址')
+        return null
+        
+      } catch (error) {
+        console.error('❌ TradeProjectView: 获取用户地址失败:', error)
+        return null
+      }
+    },
+    
+    // 关闭成功弹窗
+    closeSuccessModal() {
+      this.showSuccessModal = false
+      this.successData = {
+        tradeType: '',
+        amount: 0,
+        price: 0,
+        total: 0,
+        transactionHash: '',
+        blockNumber: 0
+      }
+    },
+
+    // 关闭余额不足弹窗
+    closeInsufficientBalanceModal() {
+      this.showInsufficientBalanceModal = false
+    },
+    
+    // 格式化哈希地址
+    formatHash(hash) {
+      if (!hash) return ''
+      return `${hash.slice(0, 6)}...${hash.slice(-4)}`
+    },
+    
+    // 复制哈希到剪贴板
+    async copyHash() {
+      try {
+        await navigator.clipboard.writeText(this.successData.transactionHash)
+        this.$emit('notify', '交易哈希已复制到剪贴板')
+      } catch (error) {
+        console.error('复制失败:', error)
+        this.$emit('notify', '复制失败，请手动复制')
+      }
+    },
+    
+    // 在Etherscan查看交易
+    viewOnEtherscan() {
+      const chainId = this.getCurrentChainId()
+      let baseUrl = 'https://etherscan.io'
+      
+      // 根据网络选择正确的区块浏览器
+      if (chainId === 11155111) {
+        baseUrl = 'https://sepolia.etherscan.io'
+      } else if (chainId === 5) {
+        baseUrl = 'https://goerli.etherscan.io'
+      } else if (chainId === 137) {
+        baseUrl = 'https://polygonscan.com'
+      } else if (chainId === 80001) {
+        baseUrl = 'https://mumbai.polygonscan.com'
+      }
+      
+      const url = `${baseUrl}/tx/${this.successData.transactionHash}`
+      window.open(url, '_blank')
+    },
+    
+    // 获取当前链ID
+    getCurrentChainId() {
+      // 这里可以从合约配置中获取
+      return 11155111 // Sepolia测试网
+    },
+
+    // ========== 合约测试方法 ==========
+    
+    // 初始化合约
+    async initializeContract() {
+      try {
+        this.contractLoading = true
+        this.addTestResult('info', '🚀 Initializing contract service...', 'Starting contract initialization')
+        
+        await contractService.initialize()
+        this.contractInitialized = true
+        
+        this.contractStatus = {
+          type: 'success',
+          icon: '✅',
+          message: 'Contract service initialized successfully!'
+        }
+        
+        this.addTestResult('success', 'Contract Initialized', 'Contract service is ready', {
+          initialized: true,
+          timestamp: Date.now()
+        })
+        
+      } catch (error) {
+        this.contractStatus = {
+          type: 'error',
+          icon: '❌',
+          message: `Initialization failed: ${error.message}`
+        }
+        
+        this.addTestResult('error', 'Contract Initialization Failed', error.message)
+        console.error('Contract initialization failed:', error)
+      } finally {
+        this.contractLoading = false
+      }
+    },
+
+    // 获取用户地址（测试用）
+    async testGetUserAddress() {
+      try {
+        this.contractLoading = true
+        this.addTestResult('info', '👤 Fetching user address...', 'Getting connected wallet address')
+        
+        // 1. 优先从localStorage获取WalletView绑定的钱包地址
+        const savedAccounts = localStorage.getItem('walletBoundAccounts')
+        if (savedAccounts) {
+          try {
+            const boundAddresses = JSON.parse(savedAccounts)
+            if (boundAddresses && boundAddresses.length > 0) {
+              this.userAddress = boundAddresses[0]
+              this.addTestResult('success', 'User Address from WalletView', `Address: ${this.userAddress}`, {
+                address: this.userAddress,
+                shortAddress: this.formatAddress(this.userAddress),
+                source: 'WalletView Bound Accounts',
+                boundAccountsCount: boundAddresses.length
+              })
+              return
+            }
+          } catch (parseError) {
+            this.addTestResult('warning', 'Parse walletBoundAccounts failed', parseError.message)
+          }
+        }
+        
+        // 2. 如果localStorage中没有绑定地址，尝试从useWallet获取
+        const { fullAddress, connected } = useWallet()
+        if (connected.value && fullAddress.value) {
+          this.userAddress = fullAddress.value
+          this.addTestResult('warning', 'Address from useWallet (No bound accounts)', `Address: ${this.userAddress}`, {
+            address: this.userAddress,
+            shortAddress: this.formatAddress(this.userAddress),
+            source: 'useWallet composable'
+          })
+          return
+        }
+        
+        // 3. 最后的备用方案：直接从ethereum获取
+        if (typeof window.ethereum !== 'undefined') {
+          const accounts = await window.ethereum.request({ method: 'eth_accounts' })
+          if (accounts && accounts.length > 0) {
+            this.userAddress = accounts[0]
+            this.addTestResult('warning', 'Address from ethereum (Fallback)', `Address: ${this.userAddress}`, {
+              address: this.userAddress,
+              shortAddress: this.formatAddress(this.userAddress),
+              source: 'ethereum.accounts'
+            })
+            return
+          }
+        }
+        
+        this.addTestResult('error', 'No Wallet Address Found', 'Please connect your wallet in WalletView first', {
+          localStorageEmpty: !savedAccounts,
+          useWalletConnected: connected.value,
+          useWalletAddress: fullAddress.value,
+          ethereumAvailable: typeof window.ethereum !== 'undefined'
+        })
+        
+      } catch (error) {
+        this.addTestResult('error', 'Failed to Get User Address', error.message)
+        console.error('Failed to get user address:', error)
+      } finally {
+        this.contractLoading = false
+      }
+    },
+
+    // 获取代币价格
+    async getTokenPrice() {
+      try {
+        this.contractLoading = true
+        this.addTestResult('info', '💰 Fetching token price...', 'Getting current token price')
+        
+        this.tokenPrice = await contractService.getTokenPrice()
+        
+        this.addTestResult('success', 'Token Price Retrieved', `Price: ${this.tokenPrice} ETH`, {
+          price: this.tokenPrice,
+          currency: 'ETH'
+        })
+        
+      } catch (error) {
+        this.addTestResult('error', 'Failed to Get Token Price', error.message)
+        console.error('Failed to get token price:', error)
+      } finally {
+        this.contractLoading = false
+      }
+    },
+
+    // 获取用户代币余额
+    async getUserTokenBalance() {
+      try {
+        this.contractLoading = true
+        this.addTestResult('info', '💳 Fetching user token balance...', 'Getting user token balance')
+        
+        this.userTokenBalance = await contractService.getUserTokenBalance()
+        
+        this.addTestResult('success', 'User Token Balance Retrieved', `Balance: ${this.userTokenBalance}`, {
+          balance: this.userTokenBalance,
+          address: this.userAddress
+        })
+        
+      } catch (error) {
+        this.addTestResult('error', 'Failed to Get User Token Balance', error.message)
+        console.error('Failed to get user token balance:', error)
+      } finally {
+        this.contractLoading = false
+      }
+    },
+
+    // 获取交易历史
+    async getTradeHistory() {
+      try {
+        this.contractLoading = true
+        this.addTestResult('info', ' Fetching trade history...', 'Getting recent trade records')
+        
+        this.tradeHistory = await contractService.getTradeHistory()
+        
+        this.addTestResult('success', 'Trade History Retrieved', `Found ${this.tradeHistory.length} trade records`, {
+          trades: this.tradeHistory,
+          count: this.tradeHistory.length
+        })
+        
+      } catch (error) {
+        this.addTestResult('error', 'Failed to Get Trade History', error.message)
+        console.error('Failed to get trade history:', error)
+      } finally {
+        this.contractLoading = false
+      }
+    },
+
+    // 测试买入交易
+    async testBuyTransaction() {
+      try {
+        this.contractLoading = true
+        this.addTestResult('info', '📈 Testing buy transaction...', `Testing buy of ${this.testAmount} tokens`)
+        
+        // 验证权限
+        if (!isLoggedIn()) {
+          this.addTestResult('error', 'Authentication Required', '请先登录账户')
+          return
+        }
+        
+        if (!this.isWalletConnected()) {
+          this.addTestResult('error', 'Wallet Connection Required', '请先连接钱包')
+          return
+        }
+        
+        const userAddress = await this.getUserAddress()
+        if (!userAddress) {
+          this.addTestResult('error', 'Address Retrieval Failed', '无法获取钱包地址，请检查钱包连接')
+          return
+        }
+        
+        const kycStatus = getKycStatus()
+        const kycLevel = getKycLevel()
+        
+        if (kycStatus !== KYC_STATUS.VERIFIED) {
+          this.addTestResult('error', 'KYC Verification Required', '请先完成KYC身份验证')
+          return
+        }
+        
+        // KYC验证成功时，如果级别不足，自动设置为Level 2
+        if (kycLevel < KYC_LEVELS.LEVEL_2) {
+          console.log(`🔧 KYC验证成功，自动升级级别从 ${kycLevel} 到 ${KYC_LEVELS.LEVEL_2}`)
+          setKycLevel(KYC_LEVELS.LEVEL_2)
+          this.addTestResult('info', 'KYC Level Updated', `KYC级别已自动从${kycLevel}升级到${KYC_LEVELS.LEVEL_2}`)
+        }
+        
+        const isWhitelisted = await this.checkWhitelistStatus(userAddress)
+        if (!isWhitelisted) {
+          this.addTestResult('error', 'Whitelist Required', '您的钱包地址尚未加入白名单')
+          return
+        }
+        
+        const result = await contractService.buyTokens(this.testAmount)
+        
+        if (result.success) {
+          this.addTestResult('success', 'Buy Transaction Successful', `Tx Hash: ${result.transactionHash}`, {
+            transactionHash: result.transactionHash,
+            blockNumber: result.blockNumber,
+            amount: this.testAmount,
+            price: result.tokenPrice,
+            totalCost: result.totalCost
+          })
+          
+          // 保存到数据库
+          const userAddress = await this.getUserAddress()
+          if (userAddress) {
+            const tradeData = {
+              projectCode: this.projectCode,
+              tradeType: 'buy',
+              amount: this.testAmount,
+              price: result.tokenPrice || 1.00,
+              total: result.totalCost || this.testAmount * 1.00,
+              userAddress: userAddress,
+              transactionHash: result.transactionHash,
+              blockNumber: result.blockNumber,
+              timestamp: Date.now()
+            }
+            
+            const dbResult = await this.saveTransactionToDatabase(tradeData)
+            if (dbResult.success) {
+              this.addTestResult('success', 'Database Save Successful', 'Transaction saved to MySQL database')
+            } else {
+              this.addTestResult('warning', 'Database Save Failed', dbResult.error)
+            }
+          }
+        } else {
+          this.addTestResult('error', 'Buy Transaction Failed', result.error)
+        }
+        
+      } catch (error) {
+        this.addTestResult('error', 'Buy Transaction Error', error.message)
+        console.error('Buy transaction failed:', error)
+      } finally {
+        this.contractLoading = false
+      }
+    },
+
+    // 测试卖出交易
+    async testSellTransaction() {
+      try {
+        this.contractLoading = true
+        this.addTestResult('info', '📉 Testing sell transaction...', `Testing sell of ${this.testAmount} tokens`)
+        
+        // 验证权限
+        if (!isLoggedIn()) {
+          this.addTestResult('error', 'Authentication Required', '请先登录账户')
+          return
+        }
+        
+        if (!this.isWalletConnected()) {
+          this.addTestResult('error', 'Wallet Connection Required', '请先连接钱包')
+          return
+        }
+        
+        const userAddress = await this.getUserAddress()
+        if (!userAddress) {
+          this.addTestResult('error', 'Address Retrieval Failed', '无法获取钱包地址，请检查钱包连接')
+          return
+        }
+        
+        const kycStatus = getKycStatus()
+        const kycLevel = getKycLevel()
+        
+        if (kycStatus !== KYC_STATUS.VERIFIED) {
+          this.addTestResult('error', 'KYC Verification Required', '请先完成KYC身份验证')
+          return
+        }
+        
+        // KYC验证成功时，如果级别不足，自动设置为Level 2
+        if (kycLevel < KYC_LEVELS.LEVEL_2) {
+          console.log(`🔧 KYC验证成功，自动升级级别从 ${kycLevel} 到 ${KYC_LEVELS.LEVEL_2}`)
+          setKycLevel(KYC_LEVELS.LEVEL_2)
+          this.addTestResult('info', 'KYC Level Updated', `KYC级别已自动从${kycLevel}升级到${KYC_LEVELS.LEVEL_2}`)
+        }
+        
+        const isWhitelisted = await this.checkWhitelistStatus(userAddress)
+        if (!isWhitelisted) {
+          this.addTestResult('error', 'Whitelist Required', '您的钱包地址尚未加入白名单')
+          return
+        }
+        
+        const result = await contractService.sellTokens(this.testAmount)
+        
+        if (result.success) {
+          this.addTestResult('success', 'Sell Transaction Successful', `Tx Hash: ${result.transactionHash}`, {
+            transactionHash: result.transactionHash,
+            blockNumber: result.blockNumber,
+            amount: this.testAmount,
+            price: result.tokenPrice,
+            totalCost: result.totalCost
+          })
+          
+          // 保存到数据库
+          const userAddress = await this.getUserAddress()
+          if (userAddress) {
+            const tradeData = {
+              projectCode: this.projectCode,
+              tradeType: 'sell',
+              amount: this.testAmount,
+              price: result.tokenPrice || 1.00,
+              total: result.totalCost || this.testAmount * 1.00,
+              userAddress: userAddress,
+              transactionHash: result.transactionHash,
+              blockNumber: result.blockNumber,
+              timestamp: Date.now()
+            }
+            
+            const dbResult = await this.saveTransactionToDatabase(tradeData)
+            if (dbResult.success) {
+              this.addTestResult('success', 'Database Save Successful', 'Transaction saved to MySQL database')
+            } else {
+              this.addTestResult('warning', 'Database Save Failed', dbResult.error)
+            }
+          }
+        } else {
+          this.addTestResult('error', 'Sell Transaction Failed', result.error)
+        }
+        
+      } catch (error) {
+        this.addTestResult('error', 'Sell Transaction Error', error.message)
+        console.error('Sell transaction failed:', error)
+      } finally {
+        this.contractLoading = false
+      }
+    },
+
+    // 添加测试结果
+    addTestResult(type, title, message, data = null) {
+      const result = {
+        type,
+        title,
+        message,
+        data,
+        timestamp: Date.now(),
+        icon: this.getResultIcon(type)
+      }
+      
+      this.testResults.unshift(result)
+      
+      // 限制结果数量
+      if (this.testResults.length > 20) {
+        this.testResults = this.testResults.slice(0, 20)
+      }
+    },
+
+    // 获取结果图标
+    getResultIcon(type) {
+      const icons = {
+        success: '✅',
+        error: '❌',
+        info: 'ℹ️',
+        warning: '⚠️'
+      }
+      return icons[type] || '📝'
+    },
+
+    // 清除测试结果
+    clearResults() {
+      this.testResults = []
+    },
+
+    // 运行所有测试
+    async runAllTests() {
+      if (!this.contractInitialized) {
+        await this.initializeContract()
+      }
+      
+      if (this.contractInitialized) {
+        await this.testGetUserAddress()
+        await this.getTokenPrice()
+        await this.getUserTokenBalance()
+        await this.getTradeHistory()
+      }
+    },
+
+    // 格式化地址
+    formatAddress(address) {
+      if (!address) return ''
+      return `${address.slice(0, 6)}...${address.slice(-4)}`
+    },
+    
+    // 检查白名单状态
+    async checkWhitelistStatus(address) {
+      try {
+        // 这里应该调用后端API检查白名单状态
+        // 暂时返回true用于测试，实际应该调用API
+        console.log('检查白名单状态:', address)
+        
+        // TODO: 实现真实的白名单检查API调用
+        // const response = await fetch(`/api/whitelist/check?address=${address}`)
+        // const result = await response.json()
+        // return result.isWhitelisted
+        
+        // 临时返回true，实际部署时需要实现真实的白名单检查
+        return true
+      } catch (error) {
+        console.error('检查白名单状态失败:', error)
+        return false
+      }
+    },
+
+    // 检查钱包连接状态
+    isWalletConnected() {
+      try {
+        const { connected, fullAddress } = useWallet()
+        const isConnected = connected.value && fullAddress.value
+        console.log('TradeProjectView: 钱包连接状态检查:', {
+          connected: connected.value,
+          hasAddress: !!fullAddress.value,
+          address: fullAddress.value,
+          isConnected
+        })
+        return isConnected
+      } catch (error) {
+        console.error('检查钱包连接状态失败:', error)
+        return false
+      }
     }
   },
-  mounted() {
+  async mounted() {
+    // 初始化useWallet
+    try {
+      const { connected, fullAddress } = useWallet()
+      console.log('TradeProjectView: Wallet connection status:', connected.value)
+      console.log('TradeProjectView: Wallet address:', fullAddress.value)
+    } catch (error) {
+      console.error('TradeProjectView: Failed to initialize wallet:', error)
+    }
+
     // 可以从sessionStorage获取项目信息
     try {
       const storedProject = sessionStorage.getItem('lastProduct')
@@ -331,6 +1444,9 @@ export default {
     } catch (e) {
       console.log('No project data in session storage')
     }
+    
+    // 加载交易记录
+    await this.loadRecentTrades()
   }
 }
 </script>
@@ -483,8 +1599,8 @@ export default {
 
 .project-metrics {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
 }
 
 .metric-item {
@@ -492,23 +1608,27 @@ export default {
   flex-direction: column;
   gap: 4px;
   background: #141426;
-  padding: 16px;
-  border-radius: 12px;
+  padding: 12px;
+  border-radius: 8px;
   border: 1px solid #2a2a4a;
+  min-width: 0; /* 允许flex item收缩 */
 }
 
 .metric-label {
-  font-size: 12px;
+  font-size: 10px;
   color: #94a3b8;
   text-transform: uppercase;
   font-weight: 500;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
 }
 
 .metric-value {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 600;
   color: #ffffff;
+  line-height: 1.2;
+  word-break: break-word; /* 处理长文本换行 */
 }
 
 /* 交易表单 */
@@ -563,7 +1683,7 @@ export default {
   color: #ffffff;
 }
 
-.trade-type-btn:hover {
+.trade-type-btn:hover:not(:disabled) {
   border-color: var(--primary);
   background: #2a2a4a;
 }
@@ -572,6 +1692,17 @@ export default {
   border-color: var(--primary);
   background: var(--primary);
   color: white;
+}
+
+.trade-type-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.trade-type-btn:disabled:hover {
+  border-color: #2a2a4a;
+  background: #1d1d36;
+  transform: none;
 }
 
 .btn-icon {
@@ -710,29 +1841,29 @@ export default {
 }
 
 .btn.secondary {
-  background: var(--dark-border);
-  color: var(--dark-text);
-  border: 1px solid var(--dark-border);
+  background: #1d1d36;
+  color: #ffffff;
+  border: 1px solid #2a2a4a;
 }
 
 .btn.secondary:hover {
-  background: var(--dark-muted);
+  background: #2a2a4a;
 }
 
 .btn.primary {
-  background: var(--primary);
+  background: #f59e0b;
   color: white;
-  border: 1px solid var(--primary);
+  border: 1px solid #f59e0b;
 }
 
 .btn.primary:hover {
-  background: var(--primary-ink);
-  border-color: var(--primary-ink);
+  background: #d97706;
+  border-color: #d97706;
 }
 
 .btn.primary:disabled {
-  background: var(--dark-border);
-  border-color: var(--dark-border);
+  background: #6b7280;
+  border-color: #6b7280;
   cursor: not-allowed;
   opacity: 0.5;
 }
@@ -761,13 +1892,11 @@ export default {
 }
 
 .trade-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  background: #141426;
+  padding: 16px;
   border: 1px solid #2a2a4a;
-  border-radius: 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  background: #141426;
   transition: all 0.2s ease;
 }
 
@@ -776,33 +1905,90 @@ export default {
   border-color: var(--primary);
 }
 
+.trade-item:last-child {
+  margin-bottom: 0;
+}
+
+.trade-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
 .trade-info {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
 .trade-type {
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 12px;
   font-weight: 600;
+  font-size: 14px;
+  padding: 6px 12px;
+  border-radius: 6px;
   text-transform: uppercase;
 }
 
 .trade-type.buy {
-  background: #dcfce7;
-  color: #16a34a;
+  background: #10b981;
+  color: white;
 }
 
 .trade-type.sell {
-  background: #fee2e2;
-  color: #dc2626;
+  background: #ef4444;
+  color: white;
 }
 
-.trade-amount {
+.trade-time {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.trade-amount-section,
+.trade-price-section,
+.trade-total-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.label {
+  font-size: 13px;
+  color: #9ca3af;
   font-weight: 500;
-  color: #ffffff;
+}
+
+.value {
+  font-size: 14px;
+  color: #e5e7eb;
+  font-weight: 600;
+}
+
+.trade-total-section .value {
+  color: #10b981;
+  font-size: 16px;
+}
+
+.trade-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.tx-link {
+  font-size: 12px;
+  color: #3b82f6;
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(59, 130, 246, 0.1);
+  transition: all 0.2s ease;
+}
+
+.tx-link:hover {
+  background: rgba(59, 130, 246, 0.2);
+  text-decoration: none;
 }
 
 .trade-details {
@@ -822,6 +2008,38 @@ export default {
   color: #94a3b8;
 }
 
+/* 错误信息样式 */
+.error-message {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+/* 加载和空状态样式 */
+.loading-message, .no-trades {
+  text-align: center;
+  padding: 40px 20px;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* 交易链接样式 */
+.tx-link {
+  color: #3b82f6;
+  text-decoration: none;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+.tx-link:hover {
+  text-decoration: underline;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .main-content {
@@ -838,11 +2056,436 @@ export default {
   }
   
   .project-metrics {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  
+  .metric-item {
+    padding: 8px;
+  }
+  
+  .metric-label {
+    font-size: 9px;
+  }
+  
+  .metric-value {
+    font-size: 12px;
   }
   
   .trade-type-buttons {
     flex-direction: column;
   }
+}
+
+/* 小屏幕设备 */
+@media (max-width: 480px) {
+  .project-metrics {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+  
+  .metric-item {
+    padding: 6px;
+  }
+  
+  .metric-label {
+    font-size: 8px;
+  }
+  
+  .metric-value {
+    font-size: 11px;
+  }
+}
+
+/* ========== 合约测试面板样式 ========== */
+.contract-test-panel {
+  background: #1d1d36;
+  border: 1px solid #2a2a4a;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: var(--shadow);
+  max-height: 800px;
+  overflow-y: auto;
+}
+
+.test-status {
+  margin-bottom: 20px;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.status-indicator.success {
+  background: #064e3b;
+  color: #10b981;
+  border: 1px solid #10b981;
+}
+
+.status-indicator.error {
+  background: #7f1d1d;
+  color: #ef4444;
+  border: 1px solid #ef4444;
+}
+
+.status-indicator.info {
+  background: #1e3a8a;
+  color: #3b82f6;
+  border: 1px solid #3b82f6;
+}
+
+.status-icon {
+  font-size: 16px;
+}
+
+.status-text {
+  font-size: 14px;
+}
+
+/* 测试区域布局 */
+.test-area {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.test-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 200px;
+  flex-shrink: 0;
+}
+
+.test-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid #2a2a4a;
+  border-radius: 8px;
+  background: #141426;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.test-btn:hover:not(:disabled) {
+  border-color: #4f46e5;
+  background: #1e1e3a;
+  transform: translateX(4px);
+}
+
+.test-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.test-btn.active {
+  border-color: #10b981;
+  background: #064e3b;
+  color: #10b981;
+}
+
+.btn-icon {
+  font-size: 18px;
+  width: 20px;
+  text-align: center;
+}
+
+.btn-text {
+  flex: 1;
+}
+
+.test-results {
+  flex: 1;
+  max-height: 400px;
+  overflow-y: auto;
+  background: #141426;
+  border: 1px solid #2a2a4a;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #2a2a4a;
+  border-top: 2px solid #4f46e5;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.result-item {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid;
+  font-size: 13px;
+}
+
+.result-item.success {
+  background: #064e3b;
+  border-color: #10b981;
+  color: #d1fae5;
+}
+
+.result-item.error {
+  background: #7f1d1d;
+  border-color: #ef4444;
+  color: #fecaca;
+}
+
+.result-item.info {
+  background: #1e3a8a;
+  border-color: #3b82f6;
+  color: #dbeafe;
+}
+
+.result-item.warning {
+  background: #78350f;
+  border-color: #f59e0b;
+  color: #fef3c7;
+}
+
+.result-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.result-icon {
+  font-size: 14px;
+}
+
+.result-title {
+  font-weight: 600;
+  flex: 1;
+}
+
+.result-time {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.result-data {
+  margin: 8px 0;
+}
+
+.result-data pre {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.result-message {
+  margin-top: 4px;
+  opacity: 0.9;
+}
+
+.no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 40px 20px;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.no-results-icon {
+  font-size: 32px;
+  opacity: 0.5;
+}
+
+.no-results-text {
+  font-size: 14px;
+  font-style: italic;
+}
+
+.quick-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.action-btn {
+  padding: 8px 16px;
+  border: 1px solid #2a2a4a;
+  border-radius: 6px;
+  background: #141426;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.action-btn:hover {
+  border-color: #4f46e5;
+  background: #1e1e3a;
+}
+
+.action-btn.secondary {
+  border-color: #6b7280;
+  color: #9ca3af;
+}
+
+.action-btn.secondary:hover {
+  border-color: #9ca3af;
+  background: #374151;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .contract-test-panel {
+    margin-top: 20px;
+  }
+  
+  .test-area {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .test-buttons {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .test-area {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .test-buttons {
+    gap: 6px;
+  }
+  
+  .test-btn {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  
+  .btn-icon {
+    font-size: 16px;
+  }
+  
+  .test-results {
+    max-height: 300px;
+    padding: 12px;
+  }
+  
+  .result-item {
+    padding: 10px;
+    font-size: 12px;
+  }
+  
+  .quick-actions {
+    flex-direction: column;
+  }
+  
+  .action-btn {
+    padding: 10px;
+    font-size: 13px;
+  }
+}
+
+/* 余额不足弹窗样式 */
+.error-modal {
+  border-left: 4px solid #ef4444;
+}
+
+.error-icon {
+  font-size: 24px;
+  color: #ef4444;
+}
+
+.error-message {
+  text-align: center;
+}
+
+.error-message p {
+  margin: 8px 0;
+  color: #64748b;
+}
+
+.error-message strong {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+/* 加载中弹窗样式 */
+.loading-modal {
+  border-left: 4px solid #3b82f6;
+}
+
+.loading-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.loading-icon .spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e2e8f0;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-message {
+  text-align: center;
+}
+
+.loading-message p {
+  margin: 8px 0;
+  color: #64748b;
+}
+
+.loading-status {
+  font-weight: 600;
+  color: #3b82f6;
+  font-style: italic;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>

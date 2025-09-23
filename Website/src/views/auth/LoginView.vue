@@ -51,6 +51,8 @@
 </template>
 
 <script>
+import { setUserInfoFromLogin } from '@/service/userService'
+
 export default {
   name: 'LoginView',
   emits: ['notify','navigate'],
@@ -112,6 +114,9 @@ export default {
           // 记住邮箱（可选）
           if (this.remember) localStorage.setItem('remember_email', this.user_email);
           
+          // 保存用户信息到本地存储
+          this.saveUserInfo(data);
+          
           // 触发全局登录状态更新事件
           window.dispatchEvent(new CustomEvent('auth-changed'));
           
@@ -133,6 +138,20 @@ export default {
         this.$emit('notify', `Network error: ${error.message}`);
       } finally {
         this.loading = false;
+      }
+    },
+
+    // 保存用户信息到本地存储
+    saveUserInfo(loginData) {
+      try {
+        setUserInfoFromLogin({
+          user_email: this.user_email,
+          user_name: loginData.user_name || '', // 如果后端返回用户名
+          ...loginData // 包含其他可能的用户信息
+        });
+        console.log('User info saved from login:', this.user_email);
+      } catch (error) {
+        console.error('Failed to save user info from login:', error);
       }
     }
   }

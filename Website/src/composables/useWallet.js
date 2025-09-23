@@ -108,19 +108,56 @@ async function fetchAudPriceSafely() {
 
 // ===== Public actions =====
 async function connect() {
+  console.log('🔄 useWallet connect() called')
   error.value = ''; warning.value = ''
   try {
-    if (!window.ethereum) { warning.value = 'MetaMask not detected.'; return }
+    if (!window.ethereum) { 
+      console.log('❌ MetaMask not detected')
+      warning.value = 'MetaMask not detected. Please install MetaMask extension.'; 
+      return 
+    }
+    
+    console.log('🔗 Creating provider...')
     provider = new ethers.BrowserProvider(window.ethereum, 'any')
+    
+    console.log('📝 Requesting accounts...')
     const accounts = await provider.send('eth_requestAccounts', [])
+    console.log('📋 Received accounts:', accounts)
+    
+    if (!accounts || accounts.length === 0) {
+      console.log('❌ No accounts found')
+      error.value = 'No accounts found. Please unlock your wallet or create a new account.'
+      return
+    }
+    
+    console.log('🔐 Getting signer...')
     signer = await provider.getSigner()
     address.value = accounts[0]
     connected.value = true
+    
+    console.log('🔄 Refreshing wallet data...')
     await refreshNetwork()
     await refreshNative()
     await refreshTokens()
     attachEventListeners()
-  } catch (e) { error.value = normalizeErr(e) }
+    
+    console.log('✅ Wallet connected successfully:', accounts[0])
+  } catch (e) { 
+    console.error('❌ Wallet connection failed:', e)
+    
+    // 提供更具体的错误消息
+    if (e.code === 4001) {
+      error.value = 'User rejected the connection request.'
+    } else if (e.code === -32002) {
+      error.value = 'Connection request already pending. Please check your MetaMask.'
+    } else if (e.message.includes('User denied')) {
+      error.value = 'Connection was denied. Please approve the connection in MetaMask.'
+    } else if (e.message.includes('Already processing')) {
+      error.value = 'MetaMask is already processing a request. Please wait and try again.'
+    } else {
+      error.value = normalizeErr(e)
+    }
+  }
 }
 function disconnect() {
   connected.value = false
@@ -214,21 +251,46 @@ function removeCustomToken(addr){
 function initIfNeeded() {
   if (initialized) return
   initialized = true
-  if (!window.ethereum) { warning.value = 'MetaMask not detected.'; return }
-  provider = new ethers.BrowserProvider(window.ethereum, 'any')
-  provider.send('eth_accounts', []).then(async (accs) => {
-    if (accs && accs.length > 0) {
-      signer = await provider.getSigner()
-      address.value = accs[0]
-      connected.value = true
-      await refreshAll()
-      attachEventListeners()
-    }
-  })
+  if (!window.ethereum) { 
+    warning.value = 'MetaMask not detected.'; 
+    return 
+  }
+  
+  try {
+    provider = new ethers.BrowserProvider(window.ethereum, 'any')
+    provider.send('eth_accounts', []).then(async (accs) => {
+      if (accs && accs.length > 0) {
+        try {
+          signer = await provider.getSigner()
+          address.value = accs[0]
+          connected.value = true
+          await refreshAll()
+          attachEventListeners()
+        } catch (err) {
+          console.error('Failed to initialize wallet:', err)
+          error.value = normalizeErr(err)
+        }
+      }
+    }).catch(err => {
+      console.error('Failed to get accounts:', err)
+      error.value = normalizeErr(err)
+    })
+  } catch (err) {
+    console.error('Failed to create provider:', err)
+    error.value = normalizeErr(err)
+  }
 }
 
 export function useWallet() {
-  onMounted(() => { initIfNeeded() })
+  // 立即尝试初始化，而不是等待onMounted
+  initIfNeeded()
+  
+  onMounted(() => { 
+    // 如果还没有初始化，再次尝试
+    if (!initialized) {
+      initIfNeeded()
+    }
+  })
   onBeforeUnmount(() => { /* keep listeners; profile & wallet share them */ })
   return {
     // state

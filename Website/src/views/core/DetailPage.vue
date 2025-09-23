@@ -266,10 +266,26 @@ export default {
 
     // 处理投资按钮点击
     handleInvest() {
-      // 这里可以添加投资逻辑
-      // alert('Investment functionality coming soon!')
-      // 或者跳转到投资页面
-      this.$router.push('/TradeProjectView/' + this.model?.project_id)
+      if (!this.model) {
+        console.error('No project data available')
+        return
+      }
+      
+      // 获取项目代码，优先使用code字段，然后是project_id
+      const projectCode = this.model.code || this.model.project_id || this.model.projectCode
+      
+      if (!projectCode) {
+        console.error('No project code found')
+        return
+      }
+      
+      console.log('🚀 跳转到交易页面，项目代码:', projectCode)
+      
+      // 跳转到交易页面，使用正确的路由格式
+      this.$router.push({
+        name: 'tradeProject',
+        params: { code: projectCode }
+      })
     }
   },
   

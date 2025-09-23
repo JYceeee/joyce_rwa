@@ -55,7 +55,7 @@
           </div>
 
           <div class="actions">
-            <button type="button" class="btn light" @click="goProfile">Cancel</button>
+            <button type="button" class="btn light" @click="cancelKYC">Cancel</button>
             <button type="submit" class="btn orange" :disabled="!readyExtract">Continue</button>
           </div>
         </form>
@@ -64,33 +64,93 @@
 
 
     <!-- Step 3：活体检测（占位，接第三方时替换） -->
-    <div v-if="step===3" class="modal">
+     <div v-if="step===3" class="modal">
       <div class="card">
         <h2>Liveness detection</h2>
         <p>Center your face in the frame and follow the instruction.</p>
-        <div class="face-ring"></div>
+        <!-- <div class="face-ring"></div> -->
 
         <div class="camera-block">
           <video v-if="cameraEnabled" ref="videoEl" autoplay playsinline class="cam-preview"></video>
           <button v-else class="btn orange" @click="enableCamera">Enable Camera</button>
           <p v-if="camError" class="cam-error">{{ camError }}</p>
+          
+          <!-- 检测状态显示 -->
+          <div v-if="livenessDetecting" class="liveness-status">
+            <div class="detection-spinner"></div>
+            <p class="detection-text">{{ livenessStatus }}</p>
+          </div>
         </div>
         <small class="hint">接入 Sumsub/Persona/Onfido 时，把此区域替换为他们的组件，并在成功回调里调用 <code>complete()</code>。</small>
         <div class="actions">
           <button type="button" class="btn light" @click="prev">Back</button>
-          <button class="btn orange" @click="complete">Finish</button>
+          <button v-if="!cameraEnabled" class="btn light danger" @click="cancelLiveness">Cancel</button>
         </div>
       </div>
-    </div>
+    </div> 
 
     <!-- Step 4：完成 -->
     <div v-if="step===4" class="modal">
       <div class="card success">
         <div class="bigcheck">✓</div>
         <h2>Your profile has been verified</h2>
-        <p>You may close this page.</p>
+        <p>Please wait for the whitelist application...</p>
         <div class="actions">
           <button class="btn orange" @click="goProfile">Back to Profile</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 白名单申请资格弹窗 -->
+    <div v-if="showWhitelistEligibility" class="modal">
+      <div class="card">
+        <div class="success-icon">🎉</div>
+        <h2 style="color: #16a34a;">Congratulations!</h2>
+        <p style="font-weight: bold; color:#000;">Your KYC verification has been completed successfully.</p>
+        <p style="font-weight: bold; color:#000;">Now you are eligible to apply for the whitelist and start trading!</p>
+        <div class="actions">
+          <button class="btn light" @click="goProfile">Maybe Later</button>
+          <button class="btn orange" @click="applyWhitelist">Apply for Whitelist</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 白名单申请处理弹窗 -->
+    <div v-if="showWhitelistApplication" class="modal">
+      <div class="card">
+        <div class="loading-icon">
+          <div class="spinner"></div>
+        </div>
+        <h2>Applying for Whitelist...</h2>
+        <p>Please wait while we process your whitelist application.</p>
+        <div class="loading-text">{{ loadingMessage }}</div>
+      </div>
+    </div>
+
+    <!-- 白名单申请成功弹窗 -->
+    <div v-if="showWhitelistSuccess" class="modal">
+      <div class="card success">
+        <div class="bigcheck">✓</div>
+        <h2>Welcome to the Whitelist!</h2>
+        <p>You have successfully joined the whitelist.</p>
+        <p><strong>Now you can go to the Projects page to subscribe to your preferred assets!</strong></p>
+        <!-- <div class="actions">
+          <button class="btn orange" @click="goToProjects">Go to Projects</button>
+          <!-- <button class="btn light" @click="goProfile">Back to Profile</button> -->
+        <!-- </div> -->
+      </div>
+    </div>
+
+    <!-- KYC取消确认弹窗 -->
+    <div v-if="showCancelConfirm" class="modal">
+      <div class="card">
+        <div class="warning-icon">⚠️</div>
+        <h2>Cancel KYC Verification</h2>
+        <p>Canceling KYC will revoke your subscription eligibility.</p>
+        <p><strong>Are you sure you want to cancel KYC verification?</strong></p>
+        <div class="actions">
+          <button class="btn light" @click="hideCancelConfirm">Continue KYC</button>
+          <button class="btn danger" @click="confirmCancelKYC">Yes, Cancel KYC</button>
         </div>
       </div>
     </div>
@@ -98,7 +158,8 @@
 </template>
 
 <script>
-import { setKycStatus, KYC_STATUS } from '/src/service/kycService'
+import { setKycStatus, KYC_STATUS } from '@/service/kycService'
+import { contractService } from '@/service/contractService'
 
 export default {
   name: 'KycServicePage',
@@ -112,6 +173,16 @@ export default {
       },
       cameraEnabled:false,
       camError:'',
+      // 活体检测状态
+      livenessDetecting: false,
+      livenessStatus: '正在检测...',
+      // 白名单相关状态
+      showWhitelistEligibility: false,
+      showWhitelistApplication: false,
+      showWhitelistSuccess: false,
+      loadingMessage: 'Processing...',
+      // 取消确认状态
+      showCancelConfirm: false,
     }
   },
   computed:{
@@ -122,6 +193,25 @@ export default {
   methods:{
     goProfile(){ this.$router.push('/profile') },
     prev(){ this.step = Math.max(1, this.step - 1) },
+    
+    // 显示取消确认弹窗
+    cancelKYC(){ 
+      this.showCancelConfirm = true 
+    },
+    
+    // 隐藏取消确认弹窗
+    hideCancelConfirm(){
+      this.showCancelConfirm = false
+    },
+    
+    // 确认取消KYC
+    confirmCancelKYC(){
+      this.showCancelConfirm = false
+      // 重置KYC状态
+      setKycStatus(KYC_STATUS.UNVERIFIED)
+      // 返回个人资料页面
+      this.$router.push('/profile')
+    },
 
     goDoc(){
       // Step1 完成后直接进入活体（原 Step2 已移除）
@@ -151,6 +241,14 @@ export default {
       // 第三方成功回调时应写入最终状态；此处做 demo：直接标记为 VERIFIED
       setKycStatus(KYC_STATUS.VERIFIED)
       this.step = 4
+      
+      // KYC验证完成后禁用镜头功能
+      this.disableCamera()
+      
+      // 延迟显示白名单申请资格弹窗
+      setTimeout(() => {
+        this.showWhitelistEligibility = true
+      }, 1500) // 1.5秒后显示
     },
     async enableCamera(){
       this.camError = ''
@@ -158,9 +256,147 @@ export default {
         const stream = await navigator.mediaDevices.getUserMedia({ video:true })
         this.cameraEnabled = true
         this.$nextTick(()=>{ if(this.$refs.videoEl) this.$refs.videoEl.srcObject = stream })
+        
+        // 开始自动检测流程
+        this.startLivenessDetection()
       }catch(e){
         this.camError = '无法访问摄像头，请检查浏览器权限设置。'
       }
+    },
+    
+    // 开始活体检测
+    async startLivenessDetection() {
+      this.livenessDetecting = true
+      this.livenessStatus = '正在检测...'
+      
+      // 3秒后显示验证成功
+      setTimeout(() => {
+        this.livenessStatus = '验证成功，进入下一步'
+        
+        // 再延迟1秒后自动完成验证
+        setTimeout(() => {
+          this.complete()
+        }, 1000)
+      }, 3000)
+    },
+    
+    // 取消活体检测
+    cancelLiveness() {
+      this.cameraEnabled = false
+      this.livenessDetecting = false
+      this.livenessStatus = '正在检测...'
+      // 停止摄像头流
+      if (this.$refs.videoEl && this.$refs.videoEl.srcObject) {
+        const tracks = this.$refs.videoEl.srcObject.getTracks()
+        tracks.forEach(track => track.stop())
+        this.$refs.videoEl.srcObject = null
+      }
+      // 返回上一步
+      this.prev()
+    },
+    
+    // 禁用镜头功能
+    disableCamera() {
+      console.log('🔒 KYC验证完成，禁用镜头功能')
+      this.cameraEnabled = false
+      this.livenessDetecting = false
+      this.livenessStatus = '验证已完成'
+      
+      // 停止摄像头流
+      if (this.$refs.videoEl && this.$refs.videoEl.srcObject) {
+        const tracks = this.$refs.videoEl.srcObject.getTracks()
+        tracks.forEach(track => {
+          track.stop()
+          console.log('📹 摄像头流已停止')
+        })
+        this.$refs.videoEl.srcObject = null
+      }
+      
+      // 清除摄像头错误信息
+      this.camError = ''
+      
+      console.log('✅ 镜头功能已完全禁用')
+    },
+    
+    // 白名单申请相关方法
+    async applyWhitelist() {
+      this.showWhitelistEligibility = false
+      this.showWhitelistApplication = true
+      
+      try {
+        // 设置加载消息
+        this.loadingMessage = 'Connecting to blockchain...'
+        await this.delay(1000)
+        
+        this.loadingMessage = 'Submitting whitelist application...'
+        await this.delay(1000)
+        
+        this.loadingMessage = 'Processing transaction...'
+        await this.delay(1500)
+        
+        // 调用智能合约接口
+        const result = await this.submitWhitelistToContract()
+        
+        if (result.success) {
+          this.loadingMessage = 'Whitelist application successful!'
+          await this.delay(1000)
+          
+          this.showWhitelistApplication = false
+          this.showWhitelistSuccess = true
+        } else {
+          throw new Error(result.error || 'Whitelist application failed')
+        }
+      } catch (error) {
+        console.error('Whitelist application error:', error)
+        this.loadingMessage = 'Application failed. Please try again.'
+        await this.delay(2000)
+        
+        // 返回白名单申请资格弹窗
+        this.showWhitelistApplication = false
+        this.showWhitelistEligibility = true
+      }
+    },
+    
+    // 智能合约对接接口 - 使用合约服务
+    async submitWhitelistToContract() {
+      try {
+        console.log('Calling whitelist contract...')
+        
+        // 准备KYC数据
+        const kycData = {
+          firstName: this.form.firstName,
+          lastName: this.form.lastName,
+          dob: this.form.dob,
+          country: this.form.country,
+          docType: this.form.docType,
+          docNumber: this.form.docNumber
+        }
+        
+        // 调用合约服务申请KYC验证
+        const result = await contractService.applyForKYC(kycData)
+        
+        if (result.success) {
+          console.log('Whitelist application successful:', result.transactionHash)
+          return result
+        } else {
+          throw new Error(result.error || 'Whitelist application failed')
+        }
+        
+      } catch (error) {
+        console.error('Contract call failed:', error)
+        return { success: false, error: error.message }
+      }
+    },
+    
+    // 辅助方法：延迟
+    delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms))
+    },
+    
+    // 导航到项目页面
+    goToProjects() {
+      this.showWhitelistSuccess = false
+      this.$router.push('/projects')
     }
   }
 }
@@ -189,4 +425,126 @@ export default {
 .btn.light { background:#f1f5f9; color:#0f172a; border-color:#e2e8f0; }
 .face-ring { width:220px; height:220px; border-radius:999px; margin:18px auto; border:10px solid #e2e8f0; background:#eee; }
 .hint { display:block; margin-top:8px; color:#64748b; }
+
+/* 白名单相关样式 */
+.success-icon { 
+  font-size: 48px; 
+  margin-bottom: 16px; 
+  text-align: center; 
+}
+
+.loading-icon { 
+  text-align: center; 
+  margin-bottom: 16px; 
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #ea7a2e;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  text-align: center;
+  color: #64748b;
+  font-size: 14px;
+  margin-top: 8px;
+  font-style: italic;
+}
+
+.card h2 {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.card p {
+  text-align: center;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.card strong {
+  color: #ea7a2e;
+}
+
+/* 取消确认弹窗样式 */
+.warning-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.btn.danger {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
+}
+
+.btn.danger:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
+/* 活体检测状态样式 */
+.liveness-status {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  z-index: 10;
+}
+
+.detection-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid #ea7a2e;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 12px;
+}
+
+.detection-text {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.camera-block {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.cam-preview {
+  width: 100%;
+  max-width: 400px;
+  height: 300px;
+  background: #000;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.cam-error {
+  color: #ef4444;
+  font-size: 14px;
+  margin-top: 8px;
+  text-align: center;
+}
 </style>

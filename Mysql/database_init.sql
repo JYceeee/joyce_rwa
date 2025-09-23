@@ -219,3 +219,25 @@ INSERT INTO rwa_loan_product (
     'A$18,000 / month',
     'active'
 );
+
+-- 创建交易历史表
+CREATE TABLE IF NOT EXISTS transactionhistory (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    project_code VARCHAR(50) NOT NULL COMMENT '项目代码',
+    trade_type ENUM('buy', 'sell') NOT NULL COMMENT '交易类型',
+    amount INT NOT NULL COMMENT '交易数量',
+    price DECIMAL(10,2) NOT NULL COMMENT '交易价格',
+    total DECIMAL(15,2) NOT NULL COMMENT '交易总额',
+    user_address VARCHAR(42) NOT NULL COMMENT '用户钱包地址',
+    transaction_hash VARCHAR(66) COMMENT '区块链交易哈希',
+    block_number BIGINT COMMENT '区块号',
+    timestamp BIGINT NOT NULL COMMENT '交易时间戳',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    
+    INDEX idx_project_code (project_code),
+    INDEX idx_user_address (user_address),
+    INDEX idx_transaction_hash (transaction_hash),
+    INDEX idx_timestamp (timestamp),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='交易历史表';
