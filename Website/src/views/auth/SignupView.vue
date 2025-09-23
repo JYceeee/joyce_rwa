@@ -41,7 +41,7 @@
         required
       />
       
-      <label for="sname" class="auth-label">Full Name (Optional)</label>
+      <label for="sname" class="auth-label">Full Name</label>
       <input
         id="sname"
         v-model.trim="user_name"
@@ -343,7 +343,6 @@ export default {
 .auth-sub { margin: 0 0 20px; color: #666; text-align: center; }
 .auth-label { 
   display: block; 
-  margin-bottom: 5px; 
   font-weight: 500; 
   color: #333; 
 }

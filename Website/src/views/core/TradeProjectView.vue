@@ -225,11 +225,48 @@
               <div class="trade-project-section">
                 <span class="label">Project:</span>
                 <span class="value">{{ trade.project_code }} - {{ trade.project_name }}</span>
-              </div>
+          </div>
               <div class="trade-amount-section">
                 <span class="label">Token Amount:</span>
-                <span class="value"> {{ tradeAmount }} tokens</span>
+                <span class="value"> {{ trade.amount }} tokens</span>
               </div>
+              <!-- Etherscan详情 -->
+              <div v-if="trade.etherscan" class="trade-etherscan-section">
+                <div class="etherscan-info">
+                  <span class="label">From:</span>
+                  <span class="value">{{ formatAddress(trade.etherscan.from) }}</span>
+                </div>
+                <div class="etherscan-info">
+                  <span class="label">To:</span>
+                  <span class="value">{{ formatAddress(trade.etherscan.to) }}</span>
+                </div>
+                <div class="etherscan-info">
+                  <span class="label">Value:</span>
+                  <span class="value">{{ formatEtherValue(trade.etherscan.value) }} ETH</span>
+                </div>
+                <div class="etherscan-info">
+                  <span class="label">Gas Used:</span>
+                  <span class="value">{{ trade.etherscan.gasUsed ? parseInt(trade.etherscan.gasUsed, 16).toLocaleString() : 'N/A' }}</span>
+                </div>
+                <div class="etherscan-info">
+                  <span class="label">Block:</span>
+                  <span class="value">{{ trade.etherscan.blockNumber ? parseInt(trade.etherscan.blockNumber, 16).toLocaleString() : 'N/A' }}</span>
+                </div>
+                <div class="etherscan-info">
+                  <span class="label">Status:</span>
+                  <span class="value" :class="{ 'status-success': trade.etherscan.status === '0x1', 'status-failed': trade.etherscan.status === '0x0' }">
+                    {{ trade.etherscan.status === '0x1' ? 'Success' : trade.etherscan.status === '0x0' ? 'Failed' : 'Pending' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <!-- Etherscan链接 -->
+            <div v-if="trade.etherscan && trade.etherscan.etherscanUrl" class="trade-footer">
+              <a :href="trade.etherscan.etherscanUrl" 
+                 target="_blank" 
+                 class="etherscan-link">
+                🔗 View on Etherscan
+              </a>
             </div>
             <!-- <div class="trade-footer" v-if="trade.transactionHash">
               <a :href="`https://etherscan.io/tx/${trade.transactionHash}`" 
@@ -244,19 +281,19 @@
         </div>
 
     <!-- 合约测试面板 -->
-    <div class="contract-test-panel">
+    <!-- <div class="contract-test-panel">
         <h2 class="card-title">🔧 Contract Testing</h2>
         
-        <!-- 测试状态显示 -->
-        <div class="test-status">
+        测试状态显示
+        <!-- <div class="test-status">
           <div v-if="contractStatus" class="status-indicator" :class="contractStatus.type">
             <span class="status-icon">{{ contractStatus.icon }}</span>
             <span class="status-text">{{ contractStatus.message }}</span>
         </div>
-      </div>
+      </div> -->
 
         <!-- 测试区域：按钮和结果并排显示 -->
-        <div class="test-area">
+        <!-- <div class="test-area"> -->
           <!-- 测试按钮组 -->
           <!-- <div class="test-buttons">
             <button 
@@ -318,11 +355,11 @@
         </div> -->
 
           <!-- 测试结果显示 -->
-          <div class="test-results">
+          <!-- <div class="test-results">
             <div v-if="contractLoading" class="loading-indicator">
               <span class="spinner"></span>
               <span>Testing contract...</span>
-            </div>
+      </div>
 
             <div v-if="testResults.length > 0" class="results-list">
               <div v-for="(result, index) in testResults" :key="index" class="result-item" :class="result.type">
@@ -333,9 +370,9 @@
             </div>
                 <div v-if="result.data" class="result-data">
                   <pre>{{ JSON.stringify(result.data, null, 2) }}</pre>
-          </div>
+            </div>
                 <div v-if="result.message" class="result-message">{{ result.message }}</div>
-        </div>
+          </div>
         </div>
 
             <div v-if="testResults.length === 0 && !contractLoading" class="no-results">
@@ -343,14 +380,15 @@
               <span class="no-results-text">No test results yet. Click a test button to start.</span>
             </div>
           </div>
-        </div>
+        </div> -->
 
         <!-- 快速操作 -->
-        <div class="quick-actions">
+        <!-- <div class="quick-actions">
           <button class="action-btn secondary" @click="clearResults">Clear Results</button>
           <button class="action-btn secondary" @click="runAllTests">Run All Tests</button>
-      </div>
-    </div>
+      </div> -->
+      
+    <!-- </div> -->
   </div>
 </template>
 
@@ -377,7 +415,6 @@ export default {
       recentTrades: [],
       loading: false,
       error: null,
-      // 交易成功弹窗相关
       showSuccessModal: false,
       showInsufficientBalanceModal: false,
       showLoadingModal: false,
@@ -386,8 +423,6 @@ export default {
       successData: {
         tradeType: '',
         amount: 0,
-        price: 0,
-        total: 0,
         transactionHash: '',
         blockNumber: 0
       },
@@ -400,7 +435,7 @@ export default {
       tokenPrice: '',
       userTokenBalance: '',
       tradeHistory: [],
-      testAmount: 1
+      testAmount: ''
     }
   },
   computed: {
@@ -412,8 +447,11 @@ export default {
       const product = productUtils.getProductByCode(this.projectCode)
       
       if (product) {
-        // 构建符合模板需求的数据结构
+        console.log('📊 TradeProjectView: 从ProductDetailsInfo获取项目数据:', product)
+        
+        // 构建符合模板需求的数据结构，完整映射ProductDetailsInfo.js中的所有字段
         return {
+          // 基本信息
           code: product.code,
           name: product.name,
           image: product.image,
@@ -423,44 +461,81 @@ export default {
           risk: product.risk,
           targetYield: product.targetYield,
           status: product.status,
+          summary: product.summary,
+          
+          // 投资信息
+          totalOffering: product.totalOffering,
+          subscribed: product.subscribed,
+          totalSubscriptionTokens: product.totalSubscriptionTokens,
+          subscribedTokens: product.subscribedTokens,
+          
+          // 计算指标
           metrics: {
             currentElaraPrice: this.calculateTokenPrice(product),
             collateralPropertyValue: product.valuation || 'TBA',
             rentalIncome: this.calculateRentalIncome(product),
             targetLoanYield: `${product.targetYield}% p.a.`
           },
-          // 添加更多ProductDetailsInfo中的字段
+          
+          // Key Facts 关键信息
           loanAmount: product.loanAmount,
           annualInterestRate: product.annualInterestRate,
           loanTerm: product.loanTerm,
           ltv: product.ltv,
           drawdownDate: product.drawdownDate,
+          earlyRepayment: product.earlyRepayment,
+          repaymentArrangement: product.repaymentArrangement,
+          
+          // Parties 相关主体
+          issuer: product.issuer,
+          pwShareholders: product.pwShareholders,
+          lender: product.lender,
+          borrower: product.borrower,
+          guarantor: product.guarantor,
+          
+          // Disbursement & Interest 放款和利息
+          disbursementMethod: product.disbursementMethod,
+          interest: product.interest,
+          earlyRepaymentDetails: product.earlyRepaymentDetails,
+          maturityDate: product.maturityDate,
+          
+          // Collateral 抵押品
           propertyAddress: product.propertyAddress,
-          totalOffering: product.totalOffering,
-          subscribed: product.subscribed,
-          totalSubscriptionTokens: product.totalSubscriptionTokens,
-          subscribedTokens: product.subscribedTokens
+          valuation: product.valuation,
+          securityRank: product.securityRank,
+          lvr: product.lvr,
+          
+          // Default & Remedies 违约和补救措施
+          defaultInterestRate: product.defaultInterestRate,
+          defaultTriggers: product.defaultTriggers,
+          defaultProcess: product.defaultProcess,
+          
+          // On-Chain & Documents 链上和文档
+          issuerToken: product.issuerToken,
+          loanToken: product.loanToken,
+          valuationReport: product.valuationReport,
+          mortgageDeed: product.mortgageDeed
         }
       }
       
       // 如果找不到对应产品，返回默认数据
-      return {
-        code: this.projectCode,
-        name: `${this.projectCode} Property Loan`,
-        image: '/pics/TYMU.png',
-        subtitle: 'Property Investment Opportunity',
-        type: 'residential',
-        region: 'Unknown',
-        risk: 'medium',
-        targetYield: 6.0,
-        status: 'active',
-        metrics: {
-          currentElaraPrice: 'A$1.00',
-          collateralPropertyValue: 'TBA',
-          rentalIncome: 'TBA',
-          targetLoanYield: '6.0% p.a.'
-        }
-      }
+      // return {
+      //   code: this.projectCode,
+      //   name: `${this.projectCode} Property Loan`,
+      //   image: '/pics/TYMU.png',
+      //   subtitle: 'Property Investment Opportunity',
+      //   type: 'residential',
+      //   region: 'Unknown',
+      //   risk: 'medium',
+      //   targetYield: 6.0,
+      //   status: 'active',
+      //   metrics: {
+      //     currentElaraPrice: 'A$1.00',
+      //     collateralPropertyValue: 'TBA',
+      //     rentalIncome: 'TBA',
+      //     targetLoanYield: '6.0% p.a.'
+      //   }
+      // }
     },
     canSubmit() {
       return this.tradeAmount && this.tradeAmount > 0 && !this.loading
@@ -495,6 +570,94 @@ export default {
     },
     formatTime(timestamp) {
       return new Date(timestamp).toLocaleString()
+    },
+
+    // 从Etherscan API获取交易详情
+    async fetchTransactionDetails(txHash) {
+      try {
+        console.log('🔍 正在从Etherscan获取交易详情:', txHash)
+        
+        // Etherscan Sepolia API (使用免费API，无需API Key)
+        const apiUrl = `https://api-sepolia.etherscan.io/api?module=proxy&action=eth_getTransactionByHash&txhash=${txHash}`
+        
+        const response = await fetch(apiUrl)
+        const data = await response.json()
+        
+        if (data.result) {
+          console.log('✅ 成功获取交易详情:', data.result)
+          
+          // 获取交易收据
+          const receiptUrl = `https://api-sepolia.etherscan.io/api?module=proxy&action=eth_getTransactionReceipt&txhash=${txHash}`
+          const receiptResponse = await fetch(receiptUrl)
+          const receiptData = await receiptResponse.json()
+          
+          return {
+            success: true,
+            transaction: data.result,
+            receipt: receiptData.result,
+            // 提取关键信息
+            from: data.result.from,
+            to: data.result.to,
+            value: data.result.value,
+            gasUsed: receiptData.result ? receiptData.result.gasUsed : null,
+            gasPrice: data.result.gasPrice,
+            blockNumber: data.result.blockNumber,
+            blockHash: data.result.blockHash,
+            status: receiptData.result ? receiptData.result.status : null
+          }
+        } else {
+          console.warn('⚠️ 交易详情获取失败:', data.message)
+          return {
+            success: false,
+            error: data.message || 'Failed to fetch transaction details'
+          }
+        }
+      } catch (error) {
+        console.error('❌ 获取交易详情时发生错误:', error)
+        return {
+          success: false,
+          error: error.message
+        }
+      }
+    },
+
+    // 更新交易记录并获取Etherscan详情
+    async updateTradeWithEtherscanDetails(tradeData) {
+      try {
+        console.log('🔄 更新交易记录并获取Etherscan详情...')
+        
+        // 获取Etherscan交易详情
+        const etherscanData = await this.fetchTransactionDetails(tradeData.transactionHash)
+        
+        if (etherscanData.success) {
+          // 合并Etherscan数据到交易记录
+          const updatedTrade = {
+            ...tradeData,
+            // Etherscan数据
+            etherscan: {
+              from: etherscanData.from,
+              to: etherscanData.to,
+              value: etherscanData.value,
+              gasUsed: etherscanData.gasUsed,
+              gasPrice: etherscanData.gasPrice,
+              blockNumber: etherscanData.blockNumber,
+              blockHash: etherscanData.blockHash,
+              status: etherscanData.status,
+              // Etherscan链接
+              etherscanUrl: `https://sepolia.etherscan.io/tx/${tradeData.transactionHash}`
+            }
+          }
+          
+          console.log('✅ 交易记录已更新Etherscan详情:', updatedTrade)
+          return updatedTrade
+        } else {
+          console.warn('⚠️ 无法获取Etherscan详情，使用原始交易数据:', etherscanData.error)
+          return tradeData
+        }
+      } catch (error) {
+        console.error('❌ 更新交易记录时发生错误:', error)
+        return tradeData
+      }
     },
     cancelTrade() {
       this.$router.back()
@@ -632,10 +795,10 @@ export default {
               price: result.tokenPrice,
               totalCost: result.totalCost,
               userAddress: userAddress
-            })
+      })
       
-            // 重置表单
-            this.tradeAmount = ''
+      // 重置表单
+      this.tradeAmount = ''
           } else {
             console.error('❌ 保存到数据库失败:', dbResult.error)
             this.error = '交易成功但保存到数据库失败'
@@ -715,13 +878,13 @@ export default {
           this.addTestResult('info', 'KYC Level Updated', `KYC级别已自动从${kycLevel}升级到${KYC_LEVELS.LEVEL_2}`)
         }
         
-        // 6. 验证是否在白名单中
-        const isWhitelisted = await this.checkWhitelistStatus(userAddress)
-        if (!isWhitelisted) {
-          this.addTestResult('error', 'Whitelist Required', '您的钱包地址尚未加入白名单，请联系管理员')
-          this.loading = false
-          return
-        }
+        // 6. 验证是否在白名单中（注释掉以简化流程）
+        // const isWhitelisted = await this.checkWhitelistStatus(userAddress)
+        // if (!isWhitelisted) {
+        //   this.addTestResult('error', 'Whitelist Required', '您的钱包地址尚未加入白名单，请联系管理员')
+        //   this.loading = false
+        //   return
+        // }
 
         // 7. 如果是Buy操作，检查代币余额
         if (this.tradeType === 'buy') {
@@ -751,15 +914,15 @@ export default {
       
         console.log(`🚀 开始${this.tradeType}交易...`)
         
-        // 8. 执行交易
+        // 8. 执行交易 - 整合Test Buy/Test Sell的逻辑
         let result
         if (this.tradeType === 'buy') {
           this.loadingStatus = '正在与智能合约签订购买协议...'
-          this.addTestResult('info', '📈 Executing Buy Transaction', '正在与智能合约签订购买协议...')
+          this.addTestResult('info', '📈 Executing Buy Transaction', `正在购买 ${this.tradeAmount} tokens`)
           result = await contractService.buyTokens(parseInt(this.tradeAmount))
         } else {
           this.loadingStatus = '正在与智能合约签订出售协议...'
-          this.addTestResult('info', '📉 Executing Sell Transaction', '正在与智能合约签订出售协议...')
+          this.addTestResult('info', '📉 Executing Sell Transaction', `正在出售 ${this.tradeAmount} tokens`)
           result = await contractService.sellTokens(parseInt(this.tradeAmount))
         }
         
@@ -769,71 +932,67 @@ export default {
           // 关闭加载弹窗
           this.showLoadingModal = false
           
-          // 准备交易数据
-      const tradeData = {
-        projectCode: this.projectCode,
-        tradeType: this.tradeType,
-        amount: parseInt(this.tradeAmount),
+          // 添加成功测试结果 - 来自Test Buy/Sell的逻辑
+          this.addTestResult('success', `${this.tradeType.toUpperCase()} Transaction Successful`, `Tx Hash: ${result.transactionHash}`, {
+            transactionHash: result.transactionHash,
+            blockNumber: result.blockNumber,
+            amount: this.tradeAmount,
+            price: result.tokenPrice,
+            totalCost: result.totalCost
+          })
+          
+          // 保存交易记录到数据库 - 仿照SignupView的方式
+          await this.saveTransactionToDatabase({
+            projectCode: this.projectCode,
+            tradeType: this.tradeType,
+            amount: parseInt(this.tradeAmount),
             price: result.tokenPrice || 1.00,
             total: result.totalCost || parseFloat(this.calculateTotal()),
             userAddress: userAddress,
             transactionHash: result.transactionHash,
             blockNumber: result.blockNumber,
-        timestamp: Date.now()
+            timestamp: Date.now()
+          })
+          
+          // 创建基础交易记录
+          const baseTradeData = {
+            id: Date.now(),
+            type: this.tradeType, // 交易类型 (buy/sell)
+            amount: this.tradeAmount, // 用户输入的token amount
+            project_code: this.projectCode, // 项目代码
+            project_name: this.projectData.name, // 项目名称
+            timestamp: Date.now(), // 当前时间戳
+            transactionHash: result.transactionHash
+          }
+
+          // 获取Etherscan详情并更新交易记录
+          const updatedTradeData = await this.updateTradeWithEtherscanDetails(baseTradeData)
+          
+          // 更新本地交易历史
+          this.recentTrades.unshift(updatedTradeData)
+          
+          // 通知WalletView更新活动记录
+          this.notifyWalletActivity(updatedTradeData)
+          
+          // 显示成功弹窗
+          this.showSuccessModal = true
+          this.successData = {
+            tradeType: this.tradeType,
+            amount: this.tradeAmount, // 使用用户输入的token amount
+            price: result.tokenPrice || 1.00,
+            total: result.totalCost || parseFloat(this.calculateTotal()),
+            transactionHash: result.transactionHash,
+            blockNumber: result.blockNumber
           }
           
-          // 保存到MySQL数据库
-          this.addTestResult('info', '💾 Saving to Database', '正在保存交易记录到数据库...')
-          const dbResult = await this.saveTransactionToDatabase(tradeData)
-          
-          if (dbResult.success) {
-            console.log('✅ 交易数据已保存到数据库')
-            
-            // 更新本地交易历史
-      this.recentTrades.unshift({
-        id: Date.now(),
-        type: this.tradeType, // 交易类型 (buy/sell)
-        amount: this.tradeAmount, // 用户输入的token amount
-        project_code: this.projectCode, // 项目代码
-        project_name: this.projectData.name, // 项目名称
-        timestamp: Date.now(), // 当前时间戳
-        transactionHash: result.transactionHash
-      })
-            
-            // 显示成功弹窗
-            this.showSuccessModal = true
-            this.successData = {
-              tradeType: this.tradeType,
-              amount: this.tradeAmount, // 使用用户输入的token amount
-              price: tradeData.price,
-              total: tradeData.total,
-              transactionHash: result.transactionHash,
-              blockNumber: result.blockNumber
-            }
-            
-            // 添加成功测试结果
-            this.addTestResult('success', `${this.tradeType.toUpperCase()} Transaction Successful`, `交易成功完成`, {
-              transactionHash: result.transactionHash,
-              blockNumber: result.blockNumber,
-              amount: tradeData.amount,
-              price: result.tokenPrice,
-              totalCost: result.totalCost,
-              userAddress: userAddress
-      })
-      
-      // 重置表单
-      this.tradeAmount = ''
-          } else {
-            console.error('❌ 保存到数据库失败:', dbResult.error)
-            this.error = '交易成功但保存到数据库失败'
-            this.addTestResult('warning', 'Database Save Failed', `交易成功但保存失败: ${dbResult.error}`)
-          }
+          // 重置表单
+          this.tradeAmount = ''
         } else {
           // 关闭加载弹窗
           this.showLoadingModal = false
           console.error(`❌ ${this.tradeType}交易失败:`, result.error)
           this.error = result.error || `${this.tradeType}交易失败`
-          this.addTestResult('error', `${this.tradeType.toUpperCase()} Transaction Failed`, result.error || `${this.tradeType}交易失败`)
+          this.addTestResult('error', `${this.tradeType.toUpperCase()} Transaction Failed`, result.error)
         }
         
       } catch (error) {
@@ -1245,11 +1404,11 @@ export default {
           this.addTestResult('info', 'KYC Level Updated', `KYC级别已自动从${kycLevel}升级到${KYC_LEVELS.LEVEL_2}`)
         }
         
-        const isWhitelisted = await this.checkWhitelistStatus(userAddress)
-        if (!isWhitelisted) {
-          this.addTestResult('error', 'Whitelist Required', '您的钱包地址尚未加入白名单')
-          return
-        }
+        // const isWhitelisted = await this.checkWhitelistStatus(userAddress)
+        // if (!isWhitelisted) {
+        //   this.addTestResult('error', 'Whitelist Required', '您的钱包地址尚未加入白名单')
+        //   return
+        // }
         
         const result = await contractService.buyTokens(this.testAmount)
         
@@ -1262,10 +1421,10 @@ export default {
             totalCost: result.totalCost
           })
           
-          // 保存到数据库
+          // 保存到数据库 - 仿照SignupView的方式
           const userAddress = await this.getUserAddress()
           if (userAddress) {
-            const tradeData = {
+            const dbResult = await this.saveTransactionToDatabase({
               projectCode: this.projectCode,
               tradeType: 'buy',
               amount: this.testAmount,
@@ -1275,15 +1434,32 @@ export default {
               transactionHash: result.transactionHash,
               blockNumber: result.blockNumber,
               timestamp: Date.now()
-            }
+            })
             
-            const dbResult = await this.saveTransactionToDatabase(tradeData)
-            if (dbResult.success) {
-              this.addTestResult('success', 'Database Save Successful', 'Transaction saved to MySQL database')
-            } else {
-              this.addTestResult('warning', 'Database Save Failed', dbResult.error)
+            if (!dbResult.success) {
+              console.error('❌ 保存交易数据到数据库失败:', dbResult.error)
             }
           }
+          
+          // 创建基础交易记录
+          const baseTradeData = {
+            id: Date.now(),
+            type: 'buy',
+            amount: this.testAmount, // 使用testAmount
+            project_code: this.projectCode,
+            project_name: this.projectData.name,
+            timestamp: Date.now(),
+            transactionHash: result.transactionHash
+          }
+
+          // 获取Etherscan详情并更新交易记录
+          const updatedTradeData = await this.updateTradeWithEtherscanDetails(baseTradeData)
+          
+          // 更新本地交易历史
+          this.recentTrades.unshift(updatedTradeData)
+          
+          // 通知WalletView更新活动记录
+          this.notifyWalletActivity(updatedTradeData)
         } else {
           this.addTestResult('error', 'Buy Transaction Failed', result.error)
         }
@@ -1351,10 +1527,10 @@ export default {
             totalCost: result.totalCost
           })
           
-          // 保存到数据库
+          // 保存到数据库 - 仿照SignupView的方式
           const userAddress = await this.getUserAddress()
           if (userAddress) {
-            const tradeData = {
+            const dbResult = await this.saveTransactionToDatabase({
               projectCode: this.projectCode,
               tradeType: 'sell',
               amount: this.testAmount,
@@ -1364,15 +1540,32 @@ export default {
               transactionHash: result.transactionHash,
               blockNumber: result.blockNumber,
               timestamp: Date.now()
-            }
+            })
             
-            const dbResult = await this.saveTransactionToDatabase(tradeData)
-            if (dbResult.success) {
-              this.addTestResult('success', 'Database Save Successful', 'Transaction saved to MySQL database')
-            } else {
-              this.addTestResult('warning', 'Database Save Failed', dbResult.error)
+            if (!dbResult.success) {
+              console.error('❌ 保存交易数据到数据库失败:', dbResult.error)
             }
           }
+          
+          // 创建基础交易记录
+          const baseTradeData = {
+            id: Date.now(),
+            type: 'sell',
+            amount: this.testAmount, // 使用testAmount
+            project_code: this.projectCode,
+            project_name: this.projectData.name,
+            timestamp: Date.now(),
+            transactionHash: result.transactionHash
+          }
+
+          // 获取Etherscan详情并更新交易记录
+          const updatedTradeData = await this.updateTradeWithEtherscanDetails(baseTradeData)
+          
+          // 更新本地交易历史
+          this.recentTrades.unshift(updatedTradeData)
+          
+          // 通知WalletView更新活动记录
+          this.notifyWalletActivity(updatedTradeData)
         } else {
           this.addTestResult('error', 'Sell Transaction Failed', result.error)
         }
@@ -1382,6 +1575,58 @@ export default {
         console.error('Sell transaction failed:', error)
       } finally {
         this.contractLoading = false
+      }
+    },
+
+    // 保存交易记录到数据库 - 仿照SignupView的方式
+    async saveTransactionToDatabase(transactionData) {
+      try {
+        // 收集交易数据
+        const payload = {
+          projectCode: transactionData.projectCode,
+          tradeType: transactionData.tradeType,
+          amount: transactionData.amount,
+          price: transactionData.price,
+          total: transactionData.total,
+          userAddress: transactionData.userAddress,
+          transactionHash: transactionData.transactionHash,
+          blockNumber: transactionData.blockNumber,
+          timestamp: transactionData.timestamp
+        };
+        
+        // 调试：检查交易数据
+        console.log('🔍 交易数据:', payload);
+        
+        // 发送交易数据到后端
+        console.log('🚀 发送交易请求:', payload);
+        
+        const response = await fetch('http://localhost:3000/user/transactionhistory', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          console.log('✅ 交易数据已保存到数据库');
+          console.log('📊 项目代码:', payload.projectCode);
+          console.log('💰 交易数量:', payload.amount);
+          console.log('💾 交易数据保存到MySQL transactionhistory表');
+          
+          this.addTestResult('success', 'Database Save Successful', 'Transaction saved to MySQL database');
+          return { success: true, data: data };
+        } else {
+          console.error('❌ 保存交易数据失败:', data.error);
+          this.addTestResult('warning', 'Database Save Failed', data.error || 'Failed to save transaction');
+          return { success: false, error: data.error };
+        }
+      } catch (error) {
+        console.error('🌐 网络错误:', error.message);
+        this.addTestResult('error', 'Network Error', `Failed to save transaction: ${error.message}`);
+        return { success: false, error: error.message };
       }
     },
 
@@ -1431,6 +1676,12 @@ export default {
         await this.getTokenPrice()
         await this.getUserTokenBalance()
         await this.getTradeHistory()
+        await this.testBuyTransaction(
+          this.tradeAmount=3
+        )
+        await this.testSellTransaction(
+          this.tradeAmount=3
+        )
       }
     },
 
@@ -1438,6 +1689,47 @@ export default {
     formatAddress(address) {
       if (!address) return ''
       return `${address.slice(0, 6)}...${address.slice(-4)}`
+    },
+
+    // 格式化ETH值
+    formatEtherValue(hexValue) {
+      if (!hexValue) return '0'
+      try {
+        const wei = BigInt(hexValue)
+        const eth = Number(wei) / Math.pow(10, 18)
+        return eth.toFixed(6)
+      } catch (error) {
+        console.error('Error formatting ETH value:', error)
+        return '0'
+      }
+    },
+
+    // 通知WalletView更新活动记录
+    notifyWalletActivity(activityData) {
+      try {
+        console.log('📢 通知WalletView更新活动记录:', activityData)
+        
+        // 通过localStorage存储活动记录，WalletView会监听这个变化
+        const currentActivity = JSON.parse(localStorage.getItem('walletActivity') || '[]')
+        currentActivity.unshift(activityData)
+        
+        // 限制最多保存50条记录
+        if (currentActivity.length > 50) {
+          currentActivity.splice(50)
+        }
+        
+        localStorage.setItem('walletActivity', JSON.stringify(currentActivity))
+        
+        // 触发自定义事件，通知WalletView刷新
+        window.dispatchEvent(new CustomEvent('walletActivityUpdated', {
+          detail: activityData
+        }))
+        
+        console.log('✅ WalletView活动记录更新通知已发送')
+        
+      } catch (error) {
+        console.error('❌ 通知WalletView更新活动记录失败:', error)
+      }
     },
     
     // 检查白名单状态

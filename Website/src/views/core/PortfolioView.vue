@@ -1,81 +1,22 @@
 <template>
   <div class="container pf-page">
-    <!-- 没有绑定钱包时的提示页 -->
-    <!-- <div v-if="!hasBoundWallets" class="pf-no-wallet-page">
-      <div class="pf-no-wallet-container">
-        <div class="pf-no-wallet-hero">
-          <div class="pf-no-wallet-icon">
-            <svg viewBox="0 0 24 24" class="pf-wallet-icon">
-              <path fill="#F6851B" d="M21 18v1c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v1h-2V5H5v14h14v-1h2z"/>
-              <path fill="#F6851B" d="M15 9l-3 3 3 3 3-3-3-3zm-6 0L6 12l3 3 3-3-3-3z"/>
-            </svg>
-          </div>
-          <h1 class="pf-no-wallet-title">No Wallets Connected</h1>
-          <p class="pf-no-wallet-description">
-            You need to connect and bind your wallet to view your portfolio and manage your assets.
-          </p>
-        </div>
-
-        <div class="pf-no-wallet-features">
-          <div class="pf-feature-card">
-            <div class="pf-feature-icon">💼</div>
-            <h3>Portfolio Overview</h3>
-            <p>Track all your assets across multiple wallets in one unified view</p>
-          </div>
-          <div class="pf-feature-card">
-            <div class="pf-feature-icon">📊</div>
-            <h3>Transaction History</h3>
-            <p>View detailed transaction records and trading history</p>
-          </div>
-          <div class="pf-feature-card">
-            <div class="pf-feature-icon">📈</div>
-            <h3>Performance Analytics</h3>
-            <p>Analyze your investment performance with comprehensive charts</p>
-          </div>
-        </div>
-
-        <div class="pf-no-wallet-actions">
-          <button class="pf-btn pf-btn-primary" @click="goToWallet">
-            <svg viewBox="0 0 24 24" class="pf-btn-icon">
-              <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-            </svg>
-            Go to Wallet Page
-          </button>
-          <button class="pf-btn pf-btn-secondary" @click="refreshBoundWallets">
-            <svg viewBox="0 0 24 24" class="pf-btn-icon">
-              <path fill="currentColor" d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
-            </svg>
-            Refresh Wallet Status
-          </button>
-        </div>
-
-        <div class="pf-no-wallet-help">
-          <h4>How to Connect Your Wallet:</h4>
-          <ol>
-            <li>Go to the <strong>Wallet</strong> page using the navigation menu</li>
-            <li>Click <strong>"Connect MetaMask"</strong> to connect your wallet</li>
-            <li>Approve the connection in your MetaMask extension</li>
-            <li>Your wallet will be automatically added to your portfolio</li>
-          </ol>
-        </div>
-      </div>
-    </div> -->
+   
 
     <!-- 有绑定钱包时显示Portfolio页面 -->
     <div class="pf-main-content">
       <!-- 顶部操作按钮行 -->
-      <div class="pf-topbar">
-        <div class="pf-actions">
+      <!-- <div class="pf-topbar"> -->
+        <!-- <div class="pf-actions">
           <button v-for="a in actions" :key="a.text" class="pf-pill" @click="handleAction(a.text)">
             <span class="pf-pill-ico">{{ a.icon }}</span>
             <span>{{ a.text }}</span>
           </button>
-        </div>
-        <button class="pf-add" @click="refreshPortfolio">
+        </div> -->
+        <!-- <button class="pf-add" @click="refreshPortfolio">
           <span class="pf-add-ico">🔄</span>
-          Refresh
-        </button>
-      </div>
+          Refresh -->
+        <!-- </button> -->
+      <!-- </div> -->
 
     <div class="pf-body">
       <!-- 侧栏：Accounts -->
@@ -116,7 +57,7 @@
             </div>
           </div>
         </div>
-
+        
         <!-- 当前选中账户的投资概览 -->
         <div v-if="selectedAccount" class="pf-account-overview">
           <h3>Account Overview</h3>
@@ -147,18 +88,76 @@
             </div>
           </div>
 
-          <!-- 项目持仓 -->
-          <div class="pf-holdings">
-            <h4>Holdings</h4>
-            <div v-for="holding in getAccountHoldings(selectedAccount)" :key="holding.code" class="pf-holding-item">
-              <div class="pf-holding-info">
-                <div class="pf-holding-code">{{ holding.code }}</div>
-                <div class="pf-holding-amount">{{ holding.amount }} tokens</div>
+        <!-- 资产分布饼图 -->
+        <div class="pf-sidebar-pie-section">
+          <div class="pf-chart-header">
+            <h4>Asset Distribution</h4>
+          </div>
+          
+          <div class="pf-pie-chart-container">
+            <div class="pf-pie-chart">
+              <svg viewBox="0 0 200 200" class="pf-pie-svg">
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="80"
+                  fill="none"
+                  stroke="#e5e7eb"
+                  stroke-width="20"
+                />
+                <circle
+                  v-for="(holding, index) in holdings"
+                  :key="holding.code"
+                  cx="100"
+                  cy="100"
+                  r="80"
+                  fill="none"
+                  :stroke="getPieColor(index)"
+                  stroke-width="20"
+                  :stroke-dasharray="getPieDashArray(holding)"
+                  :stroke-dashoffset="getPieDashOffset(index)"
+                  transform="rotate(-90 100 100)"
+                />
+              </svg>
+              <div class="pf-pie-center">
+                <div class="pf-pie-total">A${{ currentValue.toFixed(0) }}</div>
+                <div class="pf-pie-label">Total Value</div>
               </div>
-              <div class="pf-holding-value">
-                <div class="pf-holding-price">A${{ holding.currentPrice }}</div>
-                <div class="pf-holding-change" :class="{ positive: holding.change >= 0, negative: holding.change < 0 }">
-                  {{ holding.change >= 0 ? '+' : '' }}{{ holding.change.toFixed(2) }}%
+            </div>
+            
+            <!-- 图例 -->
+            <div class="pf-chart-legend">
+              <div v-for="(holding, index) in holdings" :key="holding.code" class="pf-legend-item">
+                <div class="pf-legend-color" :style="{ backgroundColor: getPieColor(index) }"></div>
+                <div class="pf-legend-info">
+                  <div class="pf-legend-code">{{ holding.code }}</div>
+                  <div class="pf-legend-value">A${{ (holding.amount * holding.currentPrice).toFixed(0) }}</div>
+                  <div class="pf-legend-percentage">{{ getAssetPercentage(holding).toFixed(1) }}%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+          
+          <!-- 最近交易记录 -->
+          <div class="pf-holdings">
+            <h4>Recent Trades</h4>
+            <div v-if="getRecentTransactions(selectedAccount).length === 0" class="no-trades">No recent trades</div>
+            <div v-else>
+              <div v-for="trade in getRecentTransactions(selectedAccount)" :key="trade.id" class="pf-trade-item">
+                <div class="pf-trade-header">
+                  <span class="pf-trade-type" :class="trade.type">{{ trade.type.toUpperCase() }}</span>
+                  <span class="pf-trade-time">{{ formatTime(trade.timestamp) }}</span>
+                </div>
+                <div class="pf-trade-info">
+                  <div class="pf-trade-project-section">
+                    <span class="pf-label">Project:</span>
+                    <span class="pf-value">{{ trade.project_code }} - {{ trade.project_name }}</span>
+                  </div>
+                  <div class="pf-trade-amount-section">
+                    <span class="pf-label">Token Amount:</span>
+                    <span class="pf-value">{{ trade.amount }} tokens</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -171,11 +170,11 @@
         <!-- 投资概览 -->
         <div class="pf-hero">
           <div class="pf-balance">
-             A${{ currentValue.toFixed(2) }}
+             A${{ nativeBalanceDisplay }}
           </div>
-          <div class="pf-change" :class="{ positive: totalGain >= 0, negative: totalGain < 0 }">
+          <!-- <div class="pf-change" :class="{ positive: totalGain >= 0, negative: totalGain < 0 }">
             {{ totalGain >= 0 ? '+' : '' }}A${{ totalGain.toFixed(2) }} ({{ roi >= 0 ? '+' : '' }}{{ roi.toFixed(2) }}%)
-          </div>
+          </div> -->
         </div>
 
         <!-- Tabs -->
@@ -273,135 +272,6 @@
               </div>
             </div>
 
-            <!-- 图表容器 - 折线图在左侧，饼图在右侧 -->
-            <div class="pf-charts-row">
-              <!-- 价格变化折线图 -->
-              <div class="pf-price-chart">
-                <div class="pf-chart-header">
-                  <h4>Price Trends</h4>
-                  <div class="pf-timeframe-selector">
-                    <button 
-                      v-for="timeframe in timeframes" 
-                      :key="timeframe.value"
-                      class="pf-timeframe-btn"
-                      :class="{ active: selectedTimeframe === timeframe.value }"
-                      @click="selectedTimeframe = timeframe.value"
-                    >
-                      {{ timeframe.label }}
-          </button>
-                  </div>
-                </div>
-                
-                <div class="pf-line-chart-container">
-                  <svg viewBox="0 0 400 200" class="pf-line-chart-svg">
-                    <!-- 网格线 -->
-                    <defs>
-                      <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#374151" stroke-width="1"/>
-                      </pattern>
-                    </defs>
-                    <rect width="100%" height="100%" fill="url(#grid)" />
-                    
-                    <!-- Y轴标签 -->
-                    <g class="pf-y-axis">
-                      <text v-for="(label, index) in yAxisLabels" :key="index" 
-                            x="15" :y="30 + index * 40" 
-                            class="pf-axis-label">{{ label }}</text>
-                    </g>
-                    
-                    <!-- X轴标签 -->
-                    <g class="pf-x-axis">
-                      <text v-for="(label, index) in xAxisLabels" :key="index" 
-                            :x="60 + index * 70" y="190" 
-                            class="pf-axis-label">{{ label }}</text>
-                    </g>
-                    
-                    <!-- 价格折线 -->
-                    <g v-for="(holding, holdingIndex) in holdings" :key="holding.code" class="pf-price-line">
-                      <polyline
-                        :points="getPriceLinePoints(holding, holdingIndex)"
-                        :stroke="getPieColor(holdingIndex)"
-                        stroke-width="2"
-                        fill="none"
-                        :opacity="0.8"
-                      />
-                      <circle
-                        v-for="(point, pointIndex) in getPriceLinePointsArray(holding)"
-                        :key="pointIndex"
-                        :cx="point.x"
-                        :cy="point.y"
-                        :r="3"
-                        :fill="getPieColor(holdingIndex)"
-                        class="pf-data-point"
-                      />
-                    </g>
-                  </svg>
-                </div>
-                
-                <!-- 图例 -->
-                <div class="pf-chart-legend-inline">
-                  <div v-for="(holding, index) in holdings" :key="holding.code" class="pf-legend-inline-item">
-                    <div class="pf-legend-inline-color" :style="{ backgroundColor: getPieColor(index) }"></div>
-                    <span class="pf-legend-inline-code">{{ holding.code }}</span>
-                    <span class="pf-legend-inline-price">A${{ holding.currentPrice.toFixed(2) }}</span>
-                    <span class="pf-legend-inline-change" :class="{ positive: holding.change >= 0, negative: holding.change < 0 }">
-                      {{ holding.change >= 0 ? '+' : '' }}{{ holding.change.toFixed(2) }}%
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 资产分布饼图 -->
-              <div class="pf-pie-chart-section">
-                <div class="pf-chart-header">
-                  <h4>Asset Distribution</h4>
-                </div>
-                
-                <div class="pf-pie-chart-container">
-                  <div class="pf-pie-chart">
-                    <svg viewBox="0 0 200 200" class="pf-pie-svg">
-                      <circle
-                        cx="100"
-                        cy="100"
-                        r="80"
-                        fill="none"
-                        stroke="#e5e7eb"
-                        stroke-width="20"
-                      />
-                      <circle
-                        v-for="(holding, index) in holdings"
-                        :key="holding.code"
-                        cx="100"
-                        cy="100"
-                        r="80"
-                        fill="none"
-                        :stroke="getPieColor(index)"
-                        stroke-width="20"
-                        :stroke-dasharray="getPieDashArray(holding)"
-                        :stroke-dashoffset="getPieDashOffset(index)"
-                        transform="rotate(-90 100 100)"
-                      />
-                    </svg>
-                    <div class="pf-pie-center">
-                      <div class="pf-pie-total">A${{ currentValue.toFixed(0) }}</div>
-                      <div class="pf-pie-label">Total Value</div>
-                    </div>
-                  </div>
-                  
-                  <!-- 图例 -->
-                  <div class="pf-chart-legend">
-                    <div v-for="(holding, index) in holdings" :key="holding.code" class="pf-legend-item">
-                      <div class="pf-legend-color" :style="{ backgroundColor: getPieColor(index) }"></div>
-                      <div class="pf-legend-info">
-                        <div class="pf-legend-code">{{ holding.code }}</div>
-                        <div class="pf-legend-value">A${{ (holding.amount * holding.currentPrice).toFixed(0) }}</div>
-                        <div class="pf-legend-percentage">{{ getAssetPercentage(holding).toFixed(1) }}%</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
 
           <div class="pf-analysis-grid">
@@ -434,7 +304,7 @@
             </div>
 
             <!-- 交易建议 -->
-            <div class="pf-analysis-card">
+            <!-- <div class="pf-analysis-card">
               <h4>Trading Insights</h4>
               <div class="pf-insights">
                 <div v-for="insight in tradingInsights" :key="insight.id" class="pf-insight-item">
@@ -442,7 +312,7 @@
                   <div class="pf-insight-text">{{ insight.text }}</div>
                 </div>
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
 
@@ -576,7 +446,7 @@ const selectedAccount = ref('')
 // 账户数据 - 从localStorage加载绑定的钱包账户
 const accounts = ref([])
 
-// 从localStorage加载绑定的钱包账户
+// 从localStorage加载绑定的钱包账户，与WalletView保持一致
 function loadBoundAccounts() {
   try {
     const savedAccounts = localStorage.getItem('walletBoundAccounts')
@@ -585,7 +455,7 @@ function loadBoundAccounts() {
       accounts.value = boundAddresses.map((address, index) => ({
         address: address,
         name: `Wallet ${index + 1}`,
-        balance: 0 // 初始余额，后续会更新
+        balance: 0 // 初始余额，后续会从useWallet更新
       }))
       console.log('📂 Portfolio loaded bound accounts:', accounts.value)
     } else {
@@ -596,6 +466,7 @@ function loadBoundAccounts() {
           name: 'Main Account',
           balance: 0
         }]
+        console.log('📂 Portfolio using current connected wallet:', fullAddress.value)
       } else {
         // 如果也没有连接的钱包，提供默认的演示账户
         accounts.value = [{
@@ -606,6 +477,9 @@ function loadBoundAccounts() {
         console.log('📂 Portfolio using demo account for display')
       }
     }
+    
+    // 更新余额信息
+    updateAccountBalances()
     
     // 初始化交易数据
     initializeTransactionData()
@@ -621,6 +495,24 @@ function loadBoundAccounts() {
     // 初始化交易数据
     initializeTransactionData()
   }
+}
+
+// 更新账户余额，从useWallet获取真实的余额数据
+function updateAccountBalances() {
+  accounts.value.forEach(account => {
+    // 如果当前账户是连接的钱包，使用useWallet的余额
+    if (account.address === fullAddress.value && connected.value) {
+      // 从useWallet获取余额
+      const balanceInEther = nativeBalanceDisplay.value
+      account.balance = parseFloat(balanceInEther) || 0
+      console.log(`💰 Updated balance for ${account.address}: ${account.balance} ${nativeSymbol.value}`)
+    } else {
+      // 对于其他账户，保持现有余额或使用默认值
+      if (account.balance === 0) {
+        account.balance = Math.random() * 2 // 随机演示余额
+      }
+    }
+  })
 }
 
 // 初始化交易数据
@@ -800,6 +692,40 @@ const filteredTransactions = computed(() => {
   
   return filtered.sort((a, b) => b.timestamp - a.timestamp)
 })
+
+// 获取指定账户的最近交易记录
+const getRecentTransactions = (accountAddress) => {
+  if (!accountAddress || !accountTransactions.value[accountAddress]) {
+    // 如果没有选中账户，返回默认的演示交易数据
+    return [
+      {
+        id: Date.now() - 3600000,
+        type: 'buy',
+        amount: 100,
+        projectCode: 'TYMU',
+        project_code: 'TYMU',
+        project_name: 'St Ives NSW Residential Project',
+        price: 1.00,
+        timestamp: Date.now() - 3600000
+      },
+      {
+        id: Date.now() - 1800000,
+        type: 'sell',
+        amount: 50,
+        projectCode: 'SQNB',
+        project_code: 'SQNB',
+        project_name: 'SQNB Property Loan',
+        price: 1.02,
+        timestamp: Date.now() - 1800000
+      }
+    ]
+  }
+  
+  // 返回最近的交易记录，按时间倒序排列
+  return accountTransactions.value[accountAddress]
+    .sort((a, b) => b.timestamp - a.timestamp)
+    .slice(0, 5) // 只显示最近5条记录
+}
 
 // 获取指定账户的持仓
 const getAccountHoldings = (accountAddress) => {
@@ -1082,6 +1008,8 @@ const refreshBoundWallets = () => {
     if (accounts.value.length > 0) {
       selectedAccount.value = accounts.value[0].address
     }
+    // 更新余额信息
+    updateAccountBalances()
   } else {
     console.log('ℹ️ No bound wallets found')
   }
@@ -1094,7 +1022,16 @@ const formatAddress = (address) => {
 
 const getAccountBalance = (accountAddress) => {
   const account = accounts.value.find(acc => acc.address === accountAddress)
-  return account ? account.balance.toFixed(4) : '0.0000'
+  if (!account) return '0.0000'
+  
+  // 如果当前账户是连接的钱包，使用useWallet的实时余额
+  if (accountAddress === fullAddress.value && connected.value) {
+    const balanceInEther = nativeBalanceDisplay.value
+    return parseFloat(balanceInEther).toFixed(4)
+  }
+  
+  // 对于其他账户，返回存储的余额
+  return account.balance.toFixed(4)
 }
 
 const refreshPortfolio = () => {
@@ -1255,86 +1192,6 @@ const generatePriceHistory = (holding, timeframe) => {
   return history
 }
 
-const getPriceHistory = (holding) => {
-  return generatePriceHistory(holding, selectedTimeframe.value)
-}
-
-const getPriceLinePoints = (holding, holdingIndex) => {
-  const history = getPriceHistory(holding)
-  const points = history.map((point, index) => {
-    const x = 60 + (index * 70) // 每点间隔70px，适配400px宽度
-    const y = 30 + (140 - ((point.price - getMinPrice()) / (getMaxPrice() - getMinPrice())) * 140) // 适配200px高度
-    return `${x},${y}`
-  })
-  return points.join(' ')
-}
-
-const getPriceLinePointsArray = (holding) => {
-  const history = getPriceHistory(holding)
-  return history.map((point, index) => {
-    const x = 60 + (index * 70)
-    const y = 30 + (140 - ((point.price - getMinPrice()) / (getMaxPrice() - getMinPrice())) * 140)
-    return { x, y }
-  })
-}
-
-const getMinPrice = () => {
-  let min = Infinity
-  holdings.value.forEach(holding => {
-    const history = getPriceHistory(holding)
-    history.forEach(point => {
-      if (point.price < min) min = point.price
-    })
-  })
-  return min
-}
-
-const getMaxPrice = () => {
-  let max = -Infinity
-  holdings.value.forEach(holding => {
-    const history = getPriceHistory(holding)
-    history.forEach(point => {
-      if (point.price > max) max = point.price
-    })
-  })
-  return max
-}
-
-const yAxisLabels = computed(() => {
-  const min = getMinPrice()
-  const max = getMaxPrice()
-  const range = max - min
-  const labels = []
-  
-  for (let i = 0; i <= 4; i++) {
-    const value = min + (range * i / 4)
-    labels.push(`A$${value.toFixed(2)}`)
-  }
-  
-  return labels
-})
-
-const xAxisLabels = computed(() => {
-  const labels = []
-  const points = 6
-  const timeframe = selectedTimeframe.value
-  
-  for (let i = 0; i < points; i++) {
-    if (timeframe === '1h') {
-      labels.push(`${i * 10}m`)
-    } else if (timeframe === '4h') {
-      labels.push(`${i * 40}m`)
-    } else if (timeframe === '1d') {
-      labels.push(`${i * 4}h`)
-    } else if (timeframe === '7d') {
-      labels.push(`Day ${i + 1}`)
-    } else if (timeframe === '30d') {
-      labels.push(`Week ${i + 1}`)
-    }
-  }
-  
-  return labels
-})
 
 const goToTrade = (code) => {
   router.push({ name: 'tradeProject', params: { code } })
@@ -1373,6 +1230,12 @@ onUnmounted(() => {
 watch(chartTimeframe, () => {
   refreshTransactionData()
 })
+
+// 监听useWallet状态变化，实时更新余额
+watch([fullAddress, nativeBalanceDisplay, connected], () => {
+  console.log('🔄 Wallet state changed, updating balances...')
+  updateAccountBalances()
+}, { deep: true })
 
 // 监听localStorage中绑定账户的变化
 window.addEventListener('storage', (e) => {
@@ -1647,7 +1510,7 @@ window.addEventListener('storage', (e) => {
 .pf-pill:hover{transform:translateY(-1px)}
 .pf-add{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:14px;background:var(--panel);border:1px solid var(--border);box-shadow:var(--shadow);font-weight:600;cursor:pointer;color:#ffffff;}
 .pf-add-ico{font-size:18px;line-height:1}
-.pf-body{display:grid;grid-template-columns:280px 1fr;gap:16px;padding:0 20px 24px;}
+.pf-body{display:grid;grid-template-columns:280px 1fr;gap:16px;padding:0 20px 24px;margin-top: 30px;;}
 .pf-sidebar{background:#141426;border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px;}
 .pf-side-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .pf-side-head h2{font-size:20px;font-weight:800;color:#ffffff;}
@@ -1710,18 +1573,20 @@ window.addEventListener('storage', (e) => {
 .pf-stat-value.positive{color:#16a34a;}
 .pf-stat-value.negative{color:#dc2626;}
 
-/* 持仓样式 */
+/* 最近交易记录样式 - 与TradeProjectView保持一致 */
 .pf-holdings{margin-top:16px;}
-.pf-holding-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #374151;}
-.pf-holding-item:last-child{border-bottom:none;}
-.pf-holding-info{flex:1;}
-.pf-holding-code{font-weight:600;color:#ffffff;font-size:14px;}
-.pf-holding-amount{font-size:12px;color:#9ca3af;margin-top:2px;}
-.pf-holding-value{text-align:right;}
-.pf-holding-price{font-weight:600;color:#ffffff;font-size:14px;}
-.pf-holding-change{font-size:12px;margin-top:2px;}
-.pf-holding-change.positive{color:#16a34a;}
-.pf-holding-change.negative{color:#dc2626;}
+.no-trades{text-align:center;color:#9ca3af;font-size:14px;padding:20px 0;}
+.pf-trade-item{padding:12px;border-radius:8px;background:#1f2937;border:1px solid #374151;margin-bottom:8px;}
+.pf-trade-item:last-child{margin-bottom:0;}
+.pf-trade-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.pf-trade-type{padding:4px 8px;border-radius:4px;font-size:11px;font-weight:600;text-transform:uppercase;}
+.pf-trade-type.buy{background:#dcfce7;color:#16a34a;}
+.pf-trade-type.sell{background:#fee2e2;color:#dc2626;}
+.pf-trade-time{font-size:11px;color:#9ca3af;}
+.pf-trade-info{display:flex;flex-direction:column;gap:4px;}
+.pf-trade-project-section,.pf-trade-amount-section{display:flex;justify-content:space-between;align-items:center;}
+.pf-label{font-size:12px;color:#9ca3af;font-weight:500;}
+.pf-value{font-size:12px;color:#ffffff;font-weight:600;}
 
 /* 交易历史样式 */
 .pf-transactions-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
@@ -2064,9 +1929,25 @@ window.addEventListener('storage', (e) => {
 }
 
 /* 图表行布局 */
-.pf-charts-row{display:flex;gap:24px;align-items:flex-start;}
+.pf-charts-row{display:flex;gap:24px;align-items:flex-start;justify-content:center;}
 .pf-price-chart{flex:1;min-width:0;}
-.pf-pie-chart-section{flex:0 0 320px;min-width:320px;}
+.pf-pie-chart-section{flex:0 0 400px;min-width:400px;max-width:500px;}
+
+/* 侧栏饼图样式 */
+.pf-sidebar-pie-section{margin-bottom:24px;padding:16px;border-radius:12px;background:#141426;border:1px solid #292e36;}
+.pf-sidebar-pie-section .pf-chart-header{margin-bottom:16px;}
+.pf-sidebar-pie-section .pf-chart-header h4{margin:0;font-size:16px;font-weight:700;color:#ffffff;}
+.pf-sidebar-pie-section .pf-pie-chart-container{display:flex;flex-direction:column;align-items:center;gap:16px;}
+.pf-sidebar-pie-section .pf-pie-chart{position:relative;width:160px;height:160px;}
+.pf-sidebar-pie-section .pf-pie-svg{width:100%;height:100%;}
+.pf-sidebar-pie-section .pf-chart-legend{width:100%;}
+.pf-sidebar-pie-section .pf-legend-item{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.pf-sidebar-pie-section .pf-legend-item:last-child{margin-bottom:0;}
+.pf-sidebar-pie-section .pf-legend-color{width:12px;height:12px;border-radius:2px;}
+.pf-sidebar-pie-section .pf-legend-info{flex:1;}
+.pf-sidebar-pie-section .pf-legend-code{font-weight:600;color:#ffffff;font-size:12px;margin-bottom:2px;}
+.pf-sidebar-pie-section .pf-legend-value{font-size:11px;color:#ffffff;margin-bottom:1px;}
+.pf-sidebar-pie-section .pf-legend-percentage{font-size:10px;color:#9ca3af;}
 
 .pf-chart-container{display:flex;align-items:center;gap:32px;}
 .pf-pie-chart{position:relative;width:200px;height:200px;}
@@ -2083,32 +1964,6 @@ window.addEventListener('storage', (e) => {
 .pf-legend-value{font-size:14px;color:#ffffff;margin-bottom:2px;}
 .pf-legend-percentage{font-size:12px;color:#9ca3af;}
 
-/* 价格变化折线图样式 */
-.pf-price-chart{padding:16px;border-radius:12px;background:#141426;border:1px solid var(--border);}
-.pf-chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.pf-chart-header h4{margin:0;font-size:16px;font-weight:700;color:#ffffff;}
-.pf-timeframe-selector{display:flex;gap:6px;}
-.pf-timeframe-btn{padding:4px 8px;border-radius:4px;border:1px solid #374151;background:#1f2937;color:#9ca3af;font-size:11px;font-weight:500;cursor:pointer;transition:all 0.2s;}
-.pf-timeframe-btn:hover{background:#374151;border-color:#4b5563;}
-.pf-timeframe-btn.active{background:#3b82f6;border-color:#3b82f6;color:#fff;}
-
-.pf-line-chart-container{width:100%;height:200px;margin-bottom:12px;}
-.pf-line-chart-svg{width:100%;height:100%;}
-.pf-y-axis{font-size:12px;color:#9ca3af;}
-.pf-x-axis{font-size:12px;color:#9ca3af;}
-.pf-axis-label{font-size:11px;fill:#9ca3af;text-anchor:middle;}
-.pf-price-line{transition:opacity 0.3s ease;}
-.pf-data-point{cursor:pointer;transition:r 0.2s ease;}
-.pf-data-point:hover{r:6;}
-
-.pf-chart-legend-inline{display:flex;flex-wrap:wrap;gap:16px;padding:16px;background:#1f2937;border-radius:8px;}
-.pf-legend-inline-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:6px;background:#374151;border:1px solid #4b5563;}
-.pf-legend-inline-color{width:12px;height:12px;border-radius:2px;}
-.pf-legend-inline-code{font-weight:600;color:#ffffff;font-size:12px;}
-.pf-legend-inline-price{color:#9ca3af;font-size:12px;margin-left:4px;}
-.pf-legend-inline-change{font-size:12px;font-weight:500;margin-left:8px;}
-.pf-legend-inline-change.positive{color:#16a34a;}
-.pf-legend-inline-change.negative{color:#dc2626;}
 
 /* 分析页面样式 */
 .pf-analysis-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:16px;}

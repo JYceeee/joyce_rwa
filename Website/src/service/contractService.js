@@ -589,9 +589,20 @@ export class ContractService {
         }
       }
 
-      // 获取代币价格
-      const tokenPrice = await this.tradeContract.getTokenPrice()
-      const totalCost = tokenPrice * BigInt(amount)
+      // 获取代币价格 - 处理可能的错误
+      let tokenPrice
+      let totalCost
+      
+      try {
+        tokenPrice = await this.tradeContract.getTokenPrice()
+        totalCost = tokenPrice * BigInt(amount)
+        console.log('💰 获取到代币价格:', tokenPrice.toString())
+      } catch (priceError) {
+        console.warn('⚠️ 无法获取代币价格，使用默认价格:', priceError.message)
+        // 使用默认价格 1 ETH per token
+        tokenPrice = ethers.parseEther('1.0')
+        totalCost = tokenPrice * BigInt(amount)
+      }
       
       console.log('💰 购买代币:', { amount, userAddress, tokenPrice: tokenPrice.toString(), totalCost: totalCost.toString() })
 
@@ -652,11 +663,20 @@ export class ContractService {
         }
       }
 
-      // 获取代币价格
-      const tokenPrice = await this.getTokenPrice()
+      // 获取代币价格 - 处理可能的错误
+      let tokenPrice
+      let totalRevenue
       
-      // 计算总收入
-      const totalRevenue = tokenPrice * BigInt(amount)
+      try {
+        tokenPrice = await this.tradeContract.getTokenPrice()
+        totalRevenue = tokenPrice * BigInt(amount)
+        console.log('💰 获取到代币价格:', tokenPrice.toString())
+      } catch (priceError) {
+        console.warn('⚠️ 无法获取代币价格，使用默认价格:', priceError.message)
+        // 使用默认价格 1 ETH per token
+        tokenPrice = ethers.parseEther('1.0')
+        totalRevenue = tokenPrice * BigInt(amount)
+      }
       
       console.log('💸 出售代币:', { amount, userAddress, tokenPrice: tokenPrice.toString(), totalRevenue: totalRevenue.toString() })
 

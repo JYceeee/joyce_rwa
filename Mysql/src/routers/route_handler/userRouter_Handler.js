@@ -264,18 +264,16 @@ exports.saveTransactionHistory = (req, res) => {
       return res.cc('获取用户ID失败');
     }
     
-    // 准备插入数据 - 映射到你的表结构
+    // 准备插入数据 - 映射到实际的表结构
     const insertData = {
       user_id: userId,
       wallet_address: transactionData.userAddress,
-      token_symbol: transactionData.projectCode || 'RWA', // 使用项目代码作为token符号
-      amount: transactionData.amount,
-      price: transactionData.price,
-      totalCost: transactionData.total,
-      transaction_type: transactionData.tradeType.toUpperCase(), // 转换为大写
-      status: transactionData.tradeType.toUpperCase(), // 使用交易类型作为状态
-      transactionHash: transactionData.transactionHash || null,
-      blockNumber: transactionData.blockNumber || null
+      project_code: transactionData.projectCode || 'RWA', // 使用项目代码
+      token_amount: transactionData.amount, // 用户输入的token amount
+      transaction_type: transactionData.tradeType.toLowerCase(), // 转换为小写 (buy/sell)
+      transaction_status: 'successful', // 交易成功状态
+      transaction_hash: transactionData.transactionHash || null,
+      block_number: transactionData.blockNumber || null
     };
     
     console.log('💾 准备插入交易数据:', insertData);

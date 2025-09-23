@@ -87,7 +87,7 @@
           </span>
           <select v-model="walletAction" style="border:0;outline:none;width:180px;height:38px;background:#1d1d36;color:#ffffff;border-radius:8px;padding:0 8px;">
             <option value="" disabled style="background:#1d1d36;color:#94a3b8;">Choose…</option>
-            <option value="link" style="background:#1d1d36;color:#ffffff;">Link new wallet</option>
+            <!-- <option value="link" style="background:#1d1d36;color:#ffffff;">Link new wallet</option> -->
             <!-- <option value="set-primary" style="background:#1d1d36;color:#ffffff;">Set primary wallet</option> -->
             <option value="disconnect" style="background:#1d1d36;color:#ffffff;">Disconnect my wallet</option>
           </select>
@@ -112,7 +112,7 @@
     <div class="mm-hero">
       <div class="mm-balance">{{ bigAudDisplay }}</div>
       <div class="mm-subline">
-        <span>+A$0 (+0.00%)</span> <!--需要修改为投资累计余额的动态数据-->
+        <!-- <span>+A$0 (+0.00%)</span> 需要修改为投资累计余额的动态数据 -->
         <a href="#" @click.prevent="$router.push('/portfolio')" class="mm-link">Portfolio ↗</a>
       </div>
     </div>
@@ -169,11 +169,11 @@
         :class="{ 'is-active': activeTab==='tokens' }"
         @click="activeTab='tokens'"
       >Tokens</button>
-      <button
+      <!-- <button
         class="mm-tab"
         :class="{ 'is-active': activeTab==='nfts' }"
         @click="activeTab='nfts'"
-      >NFTs</button>
+      >NFTs</button> -->
       <button
         class="mm-tab"
         :class="{ 'is-active': activeTab==='activity' }"
@@ -230,6 +230,150 @@
     </div>
   </section>
 
+  <!-- Activity 页签 -->
+  <div v-if="activeTab==='activity'" class="mm-activity-section">
+    <div class="mm-activity-header">
+      <h3>Wallet Activity Log</h3>
+      <div class="mm-activity-actions">
+        <button class="mm-btn mm-outline" @click="logCurrentWalletStatus" :disabled="!connected">
+          📝 Log Status
+        </button>
+        <button class="mm-btn mm-outline" @click="refreshActivity" :disabled="loadingActivity">
+          <span v-if="loadingActivity">🔄</span>
+          <span v-else>Refresh</span>
+        </button>
+      </div>
+    </div>
+    
+    <div v-if="loadingActivity" class="mm-loading">
+      <div class="mm-spinner"></div>
+      <span>Loading activity...</span>
+    </div>
+    
+    <div v-else-if="walletActivity.length === 0" class="mm-no-activity">
+      <div class="mm-no-activity-icon">📋</div>
+      <p>No transaction activity found</p>
+      <p class="mm-no-activity-sub">Your recent transactions will appear here</p>
+    </div>
+    
+    <div v-else class="mm-activity-list">
+      <div v-for="activity in walletActivity" :key="activity.id" class="mm-activity-item">
+        <div class="mm-activity-header-item">
+          <div class="mm-activity-type" :class="activity.type">
+            <span class="mm-activity-icon">
+              {{ getActivityIcon(activity.type) }}
+            </span>
+            <span class="mm-activity-title">{{ getActivityTitle(activity.type) }}</span>
+          </div>
+          <div class="mm-activity-time">{{ formatTime(activity.timestamp) }}</div>
+        </div>
+        
+        <div class="mm-activity-details">
+          <!-- 交易类型活动 -->
+          <div v-if="activity.type === 'buy' || activity.type === 'sell'" class="mm-activity-project">
+            <span class="mm-activity-label">Project:</span>
+            <span class="mm-activity-value">{{ activity.project_code }} - {{ activity.project_name }}</span>
+          </div>
+          <div v-if="activity.type === 'buy' || activity.type === 'sell'" class="mm-activity-amount">
+            <span class="mm-activity-label">Amount:</span>
+            <span class="mm-activity-value">{{ activity.amount }} tokens</span>
+          </div>
+          
+          <!-- 钱包连接/断开活动 -->
+          <div v-if="activity.type === 'wallet_connect' || activity.type === 'wallet_disconnect'" class="mm-activity-wallet">
+            <span class="mm-activity-label">Wallet Address:</span>
+            <span class="mm-activity-value">{{ formatAddress(activity.wallet_address) }}</span>
+          </div>
+          
+          <!-- 网络变化活动 -->
+          <div v-if="activity.type === 'network_change'" class="mm-activity-network">
+            <span class="mm-activity-label">Network:</span>
+            <span class="mm-activity-value">{{ activity.network_name }}</span>
+          </div>
+          <div v-if="activity.type === 'network_change'" class="mm-activity-network-id">
+            <span class="mm-activity-label">Chain ID:</span>
+            <span class="mm-activity-value">{{ activity.network_id }}</span>
+          </div>
+          
+          <!-- MetaMask连接活动 -->
+          <div v-if="activity.type === 'metamask_connect' || activity.type === 'metamask_disconnect'" class="mm-activity-metamask">
+            <span class="mm-activity-label">Extension:</span>
+            <span class="mm-activity-value">MetaMask</span>
+          </div>
+          <div v-if="activity.type === 'metamask_connect' && activity.chain_id" class="mm-activity-chain">
+            <span class="mm-activity-label">Chain ID:</span>
+            <span class="mm-activity-value">{{ activity.chain_id }}</span>
+          </div>
+          <div v-if="activity.type === 'metamask_disconnect' && activity.error" class="mm-activity-error">
+            <span class="mm-activity-label">Error:</span>
+            <span class="mm-activity-value">{{ activity.error }}</span>
+          </div>
+          
+          <!-- 状态检查活动 -->
+          <div v-if="activity.type === 'wallet_status_check' || activity.type === 'wallet_focus_check'" class="mm-activity-status">
+            <span class="mm-activity-label">Status:</span>
+            <span class="mm-activity-value">Checked</span>
+          </div>
+          <div v-if="activity.type === 'wallet_status_check' || activity.type === 'wallet_focus_check'" class="mm-activity-wallet">
+            <span class="mm-activity-label">Wallet:</span>
+            <span class="mm-activity-value">{{ formatAddress(activity.wallet_address) }}</span>
+          </div>
+          
+          <!-- 消息活动 -->
+          <div v-if="activity.type === 'metamask_message'" class="mm-activity-message">
+            <span class="mm-activity-label">Message Type:</span>
+            <span class="mm-activity-value">{{ activity.message_type }}</span>
+          </div>
+          
+          <!-- 通用消息显示 -->
+          <div v-if="activity.message" class="mm-activity-message-text">
+            <span class="mm-activity-label">Message:</span>
+            <span class="mm-activity-value">{{ activity.message }}</span>
+          </div>
+          
+          <!-- Etherscan详情 -->
+          <div v-if="activity.etherscan" class="mm-activity-etherscan">
+            <div class="mm-activity-etherscan-info">
+              <span class="mm-activity-label">From:</span>
+              <span class="mm-activity-value">{{ formatAddress(activity.etherscan.from) }}</span>
+            </div>
+            <div class="mm-activity-etherscan-info">
+              <span class="mm-activity-label">To:</span>
+              <span class="mm-activity-value">{{ formatAddress(activity.etherscan.to) }}</span>
+            </div>
+            <div class="mm-activity-etherscan-info">
+              <span class="mm-activity-label">Value:</span>
+              <span class="mm-activity-value">{{ formatEtherValue(activity.etherscan.value) }} ETH</span>
+            </div>
+            <div class="mm-activity-etherscan-info">
+              <span class="mm-activity-label">Gas:</span>
+              <span class="mm-activity-value">{{ activity.etherscan.gasUsed ? parseInt(activity.etherscan.gasUsed, 16).toLocaleString() : 'N/A' }}</span>
+            </div>
+            <div class="mm-activity-etherscan-info">
+              <span class="mm-activity-label">Block:</span>
+              <span class="mm-activity-value">{{ activity.etherscan.blockNumber ? parseInt(activity.etherscan.blockNumber, 16).toLocaleString() : 'N/A' }}</span>
+            </div>
+            <div class="mm-activity-etherscan-info">
+              <span class="mm-activity-label">Status:</span>
+              <span class="mm-activity-value" :class="{ 'mm-status-success': activity.etherscan.status === '0x1', 'mm-status-failed': activity.etherscan.status === '0x0' }">
+                {{ activity.etherscan.status === '0x1' ? 'Success' : activity.etherscan.status === '0x0' ? 'Failed' : 'Pending' }}
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Etherscan链接 -->
+        <div v-if="activity.etherscan && activity.etherscan.etherscanUrl" class="mm-activity-footer">
+          <a :href="activity.etherscan.etherscanUrl" 
+             target="_blank" 
+             class="mm-etherscan-link">
+            🔗 View on Etherscan
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 提示/错误 -->
   <p v-if="warning" class="mm-warn">{{ warning }}</p>
   <p v-if="error" class="mm-error">{{ error }}</p>
@@ -267,6 +411,10 @@ import { watch } from 'vue'
 const accounts = ref([fullAddress.value])
 const selectedAccount = ref(fullAddress.value)
 const walletAction = ref('')
+
+// Activity 相关
+const walletActivity = ref([])
+const loadingActivity = ref(false)
 
 // 监听 fullAddress 变化，自动添加到 accounts 列表（避免重复）
 watch(fullAddress, (newAddr) => {
@@ -471,8 +619,25 @@ if (accs && accs.length > 0) {
   await refreshAll()
   attachEventListeners()
 }
+
+// 加载钱包活动记录
+await loadWalletActivity()
+
+// 监听来自TradeProjectView的活动更新通知
+window.addEventListener('walletActivityUpdated', handleWalletActivityUpdate)
+
+// 设置MetaMask活动监听器
+setupMetaMaskActivityListeners()
+
+// 设置页面可见性和窗口焦点监听器
+setupPageVisibilityListener()
+setupWindowFocusListener()
 })
-onBeforeUnmount(() => { detachEventListeners() })
+
+onBeforeUnmount(() => { 
+  detachEventListeners()
+  window.removeEventListener('walletActivityUpdated', handleWalletActivityUpdate)
+})
 
 // 自定义代币输入
 const customAddress = ref('')
@@ -514,6 +679,438 @@ if (addr && !accounts.value.includes(addr)) {
   manualWalletInput.value = ''
   warning.value = `New wallet ${addr} added and selected.`
 }
+}
+
+// Activity 相关方法
+function formatTime(timestamp) {
+  return new Date(timestamp).toLocaleString()
+}
+
+function formatAddress(address) {
+  if (!address) return ''
+  return `${address.slice(0, 6)}...${address.slice(-4)}`
+}
+
+function formatEtherValue(hexValue) {
+  if (!hexValue) return '0'
+  try {
+    const wei = BigInt(hexValue)
+    const eth = Number(wei) / Math.pow(10, 18)
+    return eth.toFixed(6)
+  } catch (error) {
+    console.error('Error formatting ETH value:', error)
+    return '0'
+  }
+}
+
+// 获取活动图标
+function getActivityIcon(type) {
+  const icons = {
+    'buy': '📈',
+    'sell': '📉',
+    'wallet_connect': '🔗',
+    'wallet_disconnect': '❌',
+    'network_change': '🌐',
+    'metamask_connect': '🦊',
+    'metamask_disconnect': '🦊❌',
+    'wallet_status_check': '👁️',
+    'wallet_focus_check': '🎯',
+    'metamask_message': '💬'
+  }
+  return icons[type] || '📋'
+}
+
+// 获取活动标题
+function getActivityTitle(type) {
+  const titles = {
+    'buy': 'BUY TOKEN',
+    'sell': 'SELL TOKEN',
+    'wallet_connect': 'WALLET CONNECTED',
+    'wallet_disconnect': 'WALLET DISCONNECTED',
+    'network_change': 'NETWORK CHANGED',
+    'metamask_connect': 'METAMASK CONNECTED',
+    'metamask_disconnect': 'METAMASK DISCONNECTED',
+    'wallet_status_check': 'STATUS CHECKED',
+    'wallet_focus_check': 'FOCUS CHECKED',
+    'metamask_message': 'METAMASK MESSAGE'
+  }
+  return titles[type] || type.toUpperCase()
+}
+
+// 从Etherscan API获取交易详情
+async function fetchTransactionDetails(txHash) {
+  try {
+    console.log('🔍 正在从Etherscan获取交易详情:', txHash)
+    
+    // Etherscan Sepolia API
+    const apiUrl = `https://api-sepolia.etherscan.io/api?module=proxy&action=eth_getTransactionByHash&txhash=${txHash}`
+    
+    const response = await fetch(apiUrl)
+    const data = await response.json()
+    
+    if (data.result) {
+      console.log('✅ 成功获取交易详情:', data.result)
+      
+      // 获取交易收据
+      const receiptUrl = `https://api-sepolia.etherscan.io/api?module=proxy&action=eth_getTransactionReceipt&txhash=${txHash}`
+      const receiptResponse = await fetch(receiptUrl)
+      const receiptData = await receiptResponse.json()
+      
+      return {
+        success: true,
+        transaction: data.result,
+        receipt: receiptData.result,
+        from: data.result.from,
+        to: data.result.to,
+        value: data.result.value,
+        gasUsed: receiptData.result ? receiptData.result.gasUsed : null,
+        gasPrice: data.result.gasPrice,
+        blockNumber: data.result.blockNumber,
+        blockHash: data.result.blockHash,
+        status: receiptData.result ? receiptData.result.status : null
+      }
+    } else {
+      console.warn('⚠️ 交易详情获取失败:', data.message)
+      return {
+        success: false,
+        error: data.message || 'Failed to fetch transaction details'
+      }
+    }
+  } catch (error) {
+    console.error('❌ 获取交易详情时发生错误:', error)
+    return {
+      success: false,
+      error: error.message
+    }
+  }
+}
+
+// 加载钱包活动记录
+async function loadWalletActivity() {
+  try {
+    loadingActivity.value = true
+    console.log('🔄 正在加载钱包活动记录...')
+    
+    // 从localStorage获取交易记录
+    const savedActivity = localStorage.getItem('walletActivity')
+    if (savedActivity) {
+      const activityData = JSON.parse(savedActivity)
+      console.log('📂 从localStorage加载活动记录:', activityData.length, '条')
+      
+      // 为每条记录获取Etherscan详情
+      const updatedActivity = []
+      for (const activity of activityData) {
+        if (activity.transactionHash && activity.type !== 'wallet_connect' && activity.type !== 'wallet_disconnect') {
+          const etherscanData = await fetchTransactionDetails(activity.transactionHash)
+          if (etherscanData.success) {
+            activity.etherscan = {
+              from: etherscanData.from,
+              to: etherscanData.to,
+              value: etherscanData.value,
+              gasUsed: etherscanData.gasUsed,
+              gasPrice: etherscanData.gasPrice,
+              blockNumber: etherscanData.blockNumber,
+              blockHash: etherscanData.blockHash,
+              status: etherscanData.status,
+              etherscanUrl: `https://sepolia.etherscan.io/tx/${activity.transactionHash}`
+            }
+          }
+        }
+        updatedActivity.push(activity)
+      }
+      
+      walletActivity.value = updatedActivity
+    } else {
+      // 如果没有保存的活动记录，创建一些演示数据
+      walletActivity.value = [
+        {
+          id: Date.now() - 3600000,
+          type: 'buy',
+          amount: 100,
+          project_code: 'TYMU',
+          project_name: 'St Ives NSW Residential Project',
+          timestamp: Date.now() - 3600000,
+          transactionHash: '0xabc123def45678901234567890123456789012345678901234567890123456789012'
+        },
+        {
+          id: Date.now() - 1800000,
+          type: 'sell',
+          amount: 50,
+          project_code: 'SQNB',
+          project_name: 'SQNB Property Loan',
+          timestamp: Date.now() - 1800000,
+          transactionHash: '0xdef456abc12378901234567890123456789012345678901234567890123456789012'
+        },
+        {
+          id: Date.now() - 900000,
+          type: 'wallet_connect',
+          message: 'Wallet connected to MetaMask',
+          wallet_address: fullAddress.value,
+          timestamp: Date.now() - 900000
+        }
+      ]
+      
+      // 为演示数据获取Etherscan详情
+      for (const activity of walletActivity.value) {
+        if (activity.transactionHash) {
+          const etherscanData = await fetchTransactionDetails(activity.transactionHash)
+          if (etherscanData.success) {
+            activity.etherscan = {
+              from: etherscanData.from,
+              to: etherscanData.to,
+              value: etherscanData.value,
+              gasUsed: etherscanData.gasUsed,
+              gasPrice: etherscanData.gasPrice,
+              blockNumber: etherscanData.blockNumber,
+              blockHash: etherscanData.blockHash,
+              status: etherscanData.status,
+              etherscanUrl: `https://sepolia.etherscan.io/tx/${activity.transactionHash}`
+            }
+          }
+        }
+      }
+    }
+    
+    console.log('✅ 钱包活动记录加载完成:', walletActivity.value.length, '条')
+    
+  } catch (error) {
+    console.error('❌ 加载钱包活动记录失败:', error)
+    warning.value = 'Failed to load wallet activity'
+  } finally {
+    loadingActivity.value = false
+  }
+}
+
+// 刷新活动记录
+async function refreshActivity() {
+  await loadWalletActivity()
+}
+
+// 手动记录当前钱包状态
+function logCurrentWalletStatus() {
+  if (connected.value && fullAddress.value) {
+    logWalletActivity({
+      type: 'wallet_status_check',
+      message: 'Current wallet status logged',
+      wallet_address: fullAddress.value,
+      chain_id: chainId.value,
+      network_name: networkLabel.value,
+      timestamp: Date.now()
+    })
+  }
+}
+
+// 添加新的活动记录
+function addWalletActivity(activityData) {
+  console.log('➕ 添加新的钱包活动记录:', activityData)
+  
+  // 添加Etherscan详情
+  if (activityData.transactionHash) {
+    fetchTransactionDetails(activityData.transactionHash).then(etherscanData => {
+      if (etherscanData.success) {
+        activityData.etherscan = {
+          from: etherscanData.from,
+          to: etherscanData.to,
+          value: etherscanData.value,
+          gasUsed: etherscanData.gasUsed,
+          gasPrice: etherscanData.gasPrice,
+          blockNumber: etherscanData.blockNumber,
+          blockHash: etherscanData.blockHash,
+          status: etherscanData.status,
+          etherscanUrl: `https://sepolia.etherscan.io/tx/${activityData.transactionHash}`
+        }
+      }
+      
+      // 添加到活动列表
+      walletActivity.value.unshift(activityData)
+      
+      // 保存到localStorage
+      localStorage.setItem('walletActivity', JSON.stringify(walletActivity.value))
+    })
+  } else {
+    // 没有交易哈希，直接添加
+    walletActivity.value.unshift(activityData)
+    localStorage.setItem('walletActivity', JSON.stringify(walletActivity.value))
+  }
+}
+
+// 处理来自TradeProjectView的活动更新通知
+function handleWalletActivityUpdate(event) {
+  console.log('📨 收到WalletView活动更新通知:', event.detail)
+  
+  // 重新加载活动记录
+  loadWalletActivity()
+}
+
+// MetaMask活动监听器
+function setupMetaMaskActivityListeners() {
+  console.log('🎧 设置MetaMask活动监听器...')
+  
+  // 监听账户变化
+  if (window.ethereum) {
+    window.ethereum.on('accountsChanged', (accounts) => {
+      console.log('📱 账户变化检测到:', accounts)
+      
+      if (accounts.length > 0) {
+        // 账户连接
+        logWalletActivity({
+          type: 'wallet_connect',
+          message: 'Wallet account connected',
+          wallet_address: accounts[0],
+          timestamp: Date.now()
+        })
+      } else {
+        // 账户断开
+        logWalletActivity({
+          type: 'wallet_disconnect',
+          message: 'Wallet account disconnected',
+          wallet_address: fullAddress.value,
+          timestamp: Date.now()
+        })
+      }
+    })
+    
+    // 监听网络变化
+    window.ethereum.on('chainChanged', (chainId) => {
+      console.log('🌐 网络变化检测到:', chainId)
+      
+      const networkName = getNetworkName(chainId)
+      logWalletActivity({
+        type: 'network_change',
+        message: `Network changed to ${networkName}`,
+        network_id: chainId,
+        network_name: networkName,
+        timestamp: Date.now()
+      })
+    })
+    
+    // 监听连接状态
+    window.ethereum.on('connect', (connectInfo) => {
+      console.log('🔗 MetaMask连接检测到:', connectInfo)
+      
+      logWalletActivity({
+        type: 'metamask_connect',
+        message: 'MetaMask extension connected',
+        chain_id: connectInfo.chainId,
+        timestamp: Date.now()
+      })
+    })
+    
+    // 监听断开连接
+    window.ethereum.on('disconnect', (error) => {
+      console.log('❌ MetaMask断开连接:', error)
+      
+      logWalletActivity({
+        type: 'metamask_disconnect',
+        message: 'MetaMask extension disconnected',
+        error: error.message || 'Unknown error',
+        timestamp: Date.now()
+      })
+    })
+    
+    // 监听消息
+    window.ethereum.on('message', (message) => {
+      console.log('💬 MetaMask消息:', message)
+      
+      logWalletActivity({
+        type: 'metamask_message',
+        message: 'MetaMask message received',
+        message_type: message.type,
+        data: message.data,
+        timestamp: Date.now()
+      })
+    })
+  }
+}
+
+// 获取网络名称
+function getNetworkName(chainId) {
+  const networks = {
+    '0x1': 'Ethereum Mainnet',
+    '0x3': 'Ropsten Testnet',
+    '0x4': 'Rinkeby Testnet',
+    '0x5': 'Goerli Testnet',
+    '0xaa36a7': 'Sepolia Testnet',
+    '0x89': 'Polygon Mainnet',
+    '0x13881': 'Polygon Mumbai',
+    '0x38': 'BSC Mainnet',
+    '0x61': 'BSC Testnet'
+  }
+  
+  return networks[chainId] || `Unknown Network (${chainId})`
+}
+
+// 记录钱包活动
+function logWalletActivity(activityData) {
+  try {
+    console.log('📝 记录钱包活动:', activityData)
+    
+    // 添加到活动列表
+    walletActivity.value.unshift(activityData)
+    
+    // 保存到localStorage
+    const currentActivity = JSON.parse(localStorage.getItem('walletActivity') || '[]')
+    currentActivity.unshift(activityData)
+    
+    // 限制最多保存100条记录
+    if (currentActivity.length > 100) {
+      currentActivity.splice(100)
+    }
+    
+    localStorage.setItem('walletActivity', JSON.stringify(currentActivity))
+    
+    console.log('✅ 钱包活动记录已保存')
+    
+  } catch (error) {
+    console.error('❌ 记录钱包活动失败:', error)
+  }
+}
+
+// 监听页面可见性变化
+function setupPageVisibilityListener() {
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      console.log('👁️ 页面重新可见，刷新钱包状态')
+      
+      // 检查钱包连接状态
+      if (window.ethereum) {
+        window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
+          if (accounts.length > 0 && accounts[0] !== fullAddress.value) {
+            logWalletActivity({
+              type: 'wallet_status_check',
+              message: 'Wallet status checked on page visibility',
+              wallet_address: accounts[0],
+              timestamp: Date.now()
+            })
+          }
+        }).catch(error => {
+          console.error('检查钱包状态失败:', error)
+        })
+      }
+    }
+  })
+}
+
+// 监听窗口焦点变化
+function setupWindowFocusListener() {
+  window.addEventListener('focus', () => {
+    console.log('🎯 窗口获得焦点，检查钱包状态')
+    
+    if (window.ethereum) {
+      window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
+        if (accounts.length > 0) {
+          logWalletActivity({
+            type: 'wallet_focus_check',
+            message: 'Wallet status checked on window focus',
+            wallet_address: accounts[0],
+            timestamp: Date.now()
+          })
+        }
+      }).catch(error => {
+        console.error('检查钱包状态失败:', error)
+      })
+    }
+  })
 }
 </script>
 
@@ -657,6 +1254,236 @@ color:#FFFFFF;
 .mm-tab{appearance:none;border:none;background:none;padding:14px 0;cursor:pointer;color:#95a0af;font-weight:600;position:relative;}
 .mm-tab.is-active{color:#6b7280}
 .mm-tab.is-active::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;background:var(--text);border-radius:3px 3px 0 0;}
+
+/* Activity 页签样式 */
+.mm-activity-section {
+  background: #1d1d36;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.mm-activity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.mm-activity-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.mm-activity-header h3 {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.mm-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: #9ca3af;
+}
+
+.mm-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #374151;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.mm-no-activity {
+  text-align: center;
+  padding: 40px;
+  color: #9ca3af;
+}
+
+.mm-no-activity-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.mm-no-activity-sub {
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.mm-activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mm-activity-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 16px;
+  transition: background-color 0.2s ease;
+}
+
+.mm-activity-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.mm-activity-header-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.mm-activity-type {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mm-activity-icon {
+  font-size: 16px;
+}
+
+.mm-activity-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.mm-activity-type.buy .mm-activity-title {
+  color: #16a34a;
+}
+
+.mm-activity-type.sell .mm-activity-title {
+  color: #dc2626;
+}
+
+.mm-activity-type.wallet_connect .mm-activity-title {
+  color: #16a34a;
+}
+
+.mm-activity-type.wallet_disconnect .mm-activity-title {
+  color: #dc2626;
+}
+
+.mm-activity-type.network_change .mm-activity-title {
+  color: #3b82f6;
+}
+
+.mm-activity-type.metamask_connect .mm-activity-title {
+  color: #16a34a;
+}
+
+.mm-activity-type.metamask_disconnect .mm-activity-title {
+  color: #dc2626;
+}
+
+.mm-activity-type.wallet_status_check .mm-activity-title,
+.mm-activity-type.wallet_focus_check .mm-activity-title {
+  color: #6b7280;
+}
+
+.mm-activity-type.metamask_message .mm-activity-title {
+  color: #8b5cf6;
+}
+
+.mm-activity-time {
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+.mm-activity-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mm-activity-project,
+.mm-activity-amount,
+.mm-activity-wallet,
+.mm-activity-network,
+.mm-activity-network-id,
+.mm-activity-metamask,
+.mm-activity-chain,
+.mm-activity-error,
+.mm-activity-status,
+.mm-activity-message,
+.mm-activity-message-text {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mm-activity-label {
+  color: #9ca3af;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.mm-activity-value {
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+}
+
+.mm-activity-etherscan {
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mm-activity-etherscan-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 11px;
+}
+
+.mm-activity-etherscan-info:last-child {
+  margin-bottom: 0;
+}
+
+.mm-status-success {
+  color: #16a34a !important;
+}
+
+.mm-status-failed {
+  color: #dc2626 !important;
+}
+
+.mm-activity-footer {
+  margin-top: 12px;
+  text-align: right;
+}
+
+.mm-etherscan-link {
+  color: #3b82f6;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.mm-etherscan-link:hover {
+  color: #60a5fa;
+  text-decoration: underline;
+}
 
 /* 网络栏 */
 .mm-networkbar{display:flex;align-items:center;justify-content:space-between;margin-top:16px;}
