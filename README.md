@@ -13,7 +13,7 @@ git init
 git add .
 git commit -m "first commit"
 git branch -M main
-git remote add origin https://github.com/JYceeee/RWA-WEBSITE-TRIAL5.git
+git remote add origin https://github.com/JYceeee/joyce_rwa.git
 git push -u origin main
 
 <!--新建并切换到新分支、保存修改、提交、推送到 GitHub-->
