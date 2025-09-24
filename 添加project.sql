@@ -1,0 +1,34 @@
+USE rwa;
+select * from projects;
+-- INSERT INTO projects (
+--     project_id, name, issuer, pw_shareholders, lender, borrower,
+--     loan_amount, withdrawal_arrangement, loan_term, loan_withdrawal_date,
+--     loan_interest, interest_payment_method,
+--     collateral, collateral_value, collateral_grade, collateral_ratio,
+--     guarantor, default_interest_rate, default_circumstances, default_arrangement,
+--     intro_title, intro_content
+-- ) VALUES 
+-- (
+--     'RWA001', 
+--     'St Ives NSW Residential Real Estate Projects', 
+--     'Prosper Way Holdings Ltd',
+--     'A (25%), B (25%), C (25%), D (25%)',
+--     'CA Capital Pty Ltd',
+--     'Warby Street Development Pty Ltd',
+--     1000000.00,
+--     'One-time withdrawal',
+--     '12个月，6个月后可以提前还款',
+--     '2025-08-06',
+--     '9.9%/年',
+--     '每月付当月的，贷款起始日提前付当月的',
+--     '16 Cranford Avenue St Ives NSW 2075',
+--     1500000.00,
+--     '第一抵押权人',
+--     '67%',
+--     'D Song',
+--     '18%',
+--     '付息时间延后超过5天，还本时间延后超过5天',
+--     '违约情形发生后，贷款人书面通知后1个月内没有偿还本金，利息和违约金时，贷款公司的律师开始启动拍卖程序',
+--     'St Ives NSW 住宅地产项目介绍',
+--     '这个优质的住宅地产项目位于悉尼北岸的St Ives地区。拥有优越的地理位置和完善的周边配套设施，代表了出色的RWA投资机会。项目开发商是知名的房地产公司，在住宅地产开发和管理方面拥有丰富的经验。'
+-- );
