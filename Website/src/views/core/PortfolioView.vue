@@ -140,7 +140,7 @@
         </div>
           
           <!-- 最近交易记录 -->
-          <div class="pf-holdings">
+          <!-- <div class="pf-holdings">
             <h4>Recent Trades</h4>
             <div v-if="getRecentTransactions(selectedAccount).length === 0" class="no-trades">No recent trades</div>
             <div v-else>
@@ -161,7 +161,7 @@
                 </div>
               </div>
             </div>
-          </div>
+          </div> -->
         </div>
       </aside>
 
@@ -727,26 +727,54 @@ const getRecentTransactions = (accountAddress) => {
     .slice(0, 5) // 只显示最近5条记录
 }
 
-// 获取指定账户的持仓
+// 从WalletView获取wallet activity数据
+const getWalletActivityData = () => {
+  try {
+    const walletActivity = JSON.parse(localStorage.getItem('walletActivity') || '[]')
+    console.log('📊 PortfolioView: 获取到WalletView活动数据:', walletActivity.length, '条记录')
+    return walletActivity
+  } catch (error) {
+    console.error('❌ PortfolioView: 获取wallet activity数据失败:', error)
+    return []
+  }
+}
+
+// 获取指定账户的持仓 - 基于WalletView的transaction activity数据
 const getAccountHoldings = (accountAddress) => {
-  if (!accountAddress || !accountTransactions.value[accountAddress]) return []
+  if (!accountAddress) return []
+  
+  // 从WalletView获取wallet activity数据
+  const walletActivity = getWalletActivityData()
+  
+  // 筛选出该账户的transaction activity（buy/sell类型）
+  const transactionActivities = walletActivity.filter(activity => 
+    activity.type === 'buy' || activity.type === 'sell'
+  )
+  
+  console.log('📊 PortfolioView: 账户', accountAddress, '的交易活动:', transactionActivities.length, '条')
   
   const holdingMap = new Map()
   
   // 计算每个项目的持仓
-  accountTransactions.value[accountAddress].forEach(tx => {
-    const key = tx.projectCode
+  transactionActivities.forEach(tx => {
+    const key = tx.project_code || tx.projectCode
     if (!holdingMap.has(key)) {
-      holdingMap.set(key, { code: key, amount: 0, totalCost: 0 })
+      holdingMap.set(key, { code: key, amount: 0, totalCost: 0, totalInvestment: 0 })
     }
     
     const holding = holdingMap.get(key)
+    // 获取项目当前价格
+    const project = projects.value.find(p => p.code === key)
+    const currentPrice = project ? project.currentPrice : 1.00
+    
     if (tx.type === 'buy') {
       holding.amount += tx.amount
-      holding.totalCost += tx.amount * tx.price
+      holding.totalCost += tx.amount * currentPrice // 使用当前价格计算成本
+      holding.totalInvestment += tx.amount * (tx.price || currentPrice) // 使用交易时的价格计算投资
     } else {
       holding.amount -= tx.amount
-      holding.totalCost -= tx.amount * tx.price
+      holding.totalCost -= tx.amount * currentPrice // 使用当前价格计算成本
+      holding.totalInvestment -= tx.amount * (tx.price || currentPrice) // 使用交易时的价格计算投资
     }
   })
   
@@ -757,7 +785,7 @@ const getAccountHoldings = (accountAddress) => {
       const project = projects.value.find(p => p.code === holding.code)
       const currentPrice = project ? project.currentPrice : 1.00
       const currentValue = holding.amount * currentPrice
-      const change = holding.totalCost > 0 ? ((currentValue - holding.totalCost) / holding.totalCost) * 100 : 0
+      const change = holding.totalInvestment > 0 ? ((currentValue - holding.totalInvestment) / holding.totalInvestment) * 100 : 0
       
       return {
         ...holding,
@@ -767,30 +795,38 @@ const getAccountHoldings = (accountAddress) => {
     })
 }
 
-// 获取指定账户的总投资
+// 获取指定账户的总投资 - 基于transaction activity的投资总额
 const getAccountTotalInvestment = (accountAddress) => {
   const holdings = getAccountHoldings(accountAddress)
-  return holdings.reduce((sum, holding) => sum + holding.totalCost, 0)
+  const totalInvestment = holdings.reduce((sum, holding) => sum + (holding.totalInvestment || 0), 0)
+  console.log('💰 PortfolioView: 账户', accountAddress, '总投资:', totalInvestment)
+  return totalInvestment
 }
 
-// 获取指定账户的当前价值
+// 获取指定账户的当前价值 - 基于transaction activity的当前价值
 const getAccountCurrentValue = (accountAddress) => {
   const holdings = getAccountHoldings(accountAddress)
-  return holdings.reduce((sum, holding) => sum + (holding.amount * holding.currentPrice), 0)
+  const currentValue = holdings.reduce((sum, holding) => sum + (holding.amount * holding.currentPrice), 0)
+  console.log('📈 PortfolioView: 账户', accountAddress, '当前价值:', currentValue)
+  return currentValue
 }
 
-// 获取指定账户的总收益
+// 获取指定账户的总收益 - 基于transaction activity的收益计算
 const getAccountTotalGain = (accountAddress) => {
   const currentValue = getAccountCurrentValue(accountAddress)
   const totalInvestment = getAccountTotalInvestment(accountAddress)
-  return currentValue - totalInvestment
+  const totalGain = currentValue - totalInvestment
+  console.log('📊 PortfolioView: 账户', accountAddress, '总收益:', totalGain, '(当前价值:', currentValue, '- 总投资:', totalInvestment, ')')
+  return totalGain
 }
 
-// 获取指定账户的ROI
+// 获取指定账户的ROI - 基于transaction activity的ROI计算
 const getAccountROI = (accountAddress) => {
   const totalInvestment = getAccountTotalInvestment(accountAddress)
   const totalGain = getAccountTotalGain(accountAddress)
-  return totalInvestment > 0 ? (totalGain / totalInvestment) * 100 : 0
+  const roi = totalInvestment > 0 ? (totalGain / totalInvestment) * 100 : 0
+  console.log('📈 PortfolioView: 账户', accountAddress, 'ROI:', roi.toFixed(2) + '%', '(总收益:', totalGain, '/ 总投资:', totalInvestment, ')')
+  return roi
 }
 
 // 为了兼容性，保留原有的计算属性（基于当前选中账户或默认数据）
@@ -1218,12 +1254,53 @@ onMounted(() => {
   
   // 每30秒更新一次价格
   priceUpdateInterval = setInterval(refreshPortfolio, 30000)
+  
+  // 监听WalletView的wallet activity变化
+  window.addEventListener('walletActivityUpdated', handleWalletActivityUpdate)
+  
+  // 测试数据关联 - 检查是否能正确读取WalletView的transaction activity
+  const walletActivity = getWalletActivityData()
+  const transactionActivities = walletActivity.filter(activity => 
+    activity.type === 'buy' || activity.type === 'sell'
+  )
+  
+  console.log('🚀 PortfolioView初始化: 检测到WalletView交易活动数据:', transactionActivities.length, '条')
+  if (transactionActivities.length > 0) {
+    console.log('📊 PortfolioView: 交易活动详情:', transactionActivities)
+    console.log('💰 PortfolioView: 计算的总投资:', getAccountTotalInvestment(selectedAccount.value))
+    console.log('📈 PortfolioView: 计算的当前价值:', getAccountCurrentValue(selectedAccount.value))
+    console.log('📊 PortfolioView: 计算的总收益:', getAccountTotalGain(selectedAccount.value))
+    console.log('📈 PortfolioView: 计算的ROI:', getAccountROI(selectedAccount.value))
+  }
 })
+
+// 处理WalletView的wallet activity更新
+const handleWalletActivityUpdate = (event) => {
+  console.log('🔄 PortfolioView: 检测到WalletView交易活动更新:', event.detail)
+  
+  // 强制重新计算所有相关数据
+  // Vue的响应式系统会自动更新依赖这些数据的计算属性
+  
+  // 测试数据关联是否正确工作
+  const walletActivity = getWalletActivityData()
+  const transactionActivities = walletActivity.filter(activity => 
+    activity.type === 'buy' || activity.type === 'sell'
+  )
+  
+  console.log('📊 PortfolioView: 当前交易活动数据:', transactionActivities.length, '条')
+  console.log('💰 PortfolioView: 计算的总投资:', getAccountTotalInvestment(selectedAccount.value))
+  console.log('📈 PortfolioView: 计算的当前价值:', getAccountCurrentValue(selectedAccount.value))
+  console.log('📊 PortfolioView: 计算的总收益:', getAccountTotalGain(selectedAccount.value))
+  console.log('📈 PortfolioView: 计算的ROI:', getAccountROI(selectedAccount.value))
+}
 
 onUnmounted(() => {
   if (priceUpdateInterval) {
     clearInterval(priceUpdateInterval)
   }
+  
+  // 移除事件监听器
+  window.removeEventListener('walletActivityUpdated', handleWalletActivityUpdate)
 })
 
 // 监听时间范围变化，更新交易图表数据

@@ -347,8 +347,13 @@
       <div class="mm-activity-columns">
         <!-- 左侧：交易活动 (buy/sell) -->
         <div class="mm-activity-left">
-          <h4 class="mm-activity-section-title">交易活动</h4>
-          <div v-for="activity in leftColumnActivities" :key="activity.id" class="mm-activity-item">
+          <div class="mm-activity-section-header">
+            <h4 class="mm-activity-section-title">Transaction Activity</h4>
+            <button class="mm-btn mm-outline mm-clear-transaction-btn" @click="clearTransactionActivities">
+              🗑️ Clear Transactions
+            </button>
+          </div>
+          <div v-for="activity in paginatedTransactionActivities" :key="activity.id" class="mm-activity-item">
             <div class="mm-activity-header-item">
               <div class="mm-activity-type" :class="activity.type">
                 <span class="mm-activity-icon">
@@ -463,11 +468,54 @@
         </div>
         </div>
         </div>
+        
+        <!-- 交易活动分页控件 -->
+        <div v-if="transactionTotalPages > 1" class="mm-transaction-pagination">
+          <div class="mm-pagination-info">
+            <span class="mm-pagination-text">
+              Page {{ transactionPage }} of {{ transactionTotalPages }}
+            </span>
+            <span class="mm-pagination-count">
+              ({{ leftColumnActivities.length }} records)
+            </span>
+          </div>
+          
+          <div class="mm-pagination-controls">
+            <button 
+              class="mm-pagination-btn" 
+              @click="prevTransactionPage"
+              :disabled="transactionPage <= 1"
+            >
+              ← 
+            </button>
+            
+            <div class="mm-pagination-pages">
+              <button 
+                v-for="page in transactionTotalPages" 
+                :key="page"
+                class="mm-pagination-page"
+                :class="{ active: page === transactionPage }"
+                @click="goToTransactionPage(page)"
+              >
+                {{ page }}
+              </button>
+            </div>
+            
+            <button 
+              class="mm-pagination-btn" 
+              @click="nextTransactionPage"
+              :disabled="transactionPage >= transactionTotalPages"
+            >
+               →
+            </button>
+          </div>
+        </div>
+      </div>
       
       <!-- 右侧：状态检查活动 (wallet_status_check/wallet_focus_check) -->
       <div class="mm-activity-right">
         <div class="mm-activity-section-header">
-          <h4 class="mm-activity-section-title">状态检查</h4>
+          <h4 class="mm-activity-section-title">Status Check</h4>
           <button class="mm-btn mm-outline mm-clear-status-btn" @click="clearStatusActivities">
             🗑️ Clear Status
           </button>
@@ -506,10 +554,10 @@
         <div v-if="statusCheckTotalPages > 1" class="mm-status-pagination">
           <div class="mm-pagination-info">
             <span class="mm-pagination-text">
-              第 {{ statusCheckPage }} 页，共 {{ statusCheckTotalPages }} 页
+              Page {{ statusCheckPage }} of {{ statusCheckTotalPages }}
             </span>
             <span class="mm-pagination-count">
-              ({{ rightColumnActivities.length }} 条记录)
+              ({{ rightColumnActivities.length }} records)
             </span>
           </div>
           
@@ -519,7 +567,7 @@
               @click="prevStatusPage"
               :disabled="statusCheckPage <= 1"
             >
-              ← 上一页
+              ← 
             </button>
             
             <div class="mm-pagination-pages">
@@ -539,13 +587,13 @@
               @click="nextStatusPage"
               :disabled="statusCheckPage >= statusCheckTotalPages"
             >
-              下一页 →
+               →
             </button>
           </div>
         </div>
       </div>
+      
     </div>
-  </div>
   </div>
   <!-- 提示/错误 -->
   <p v-if="warning" class="mm-warn">{{ warning }}</p>
@@ -601,6 +649,10 @@ const activityFilters = ref({
 // 状态检查分页相关
 const statusCheckPage = ref(1)
 const statusCheckPageSize = 5
+
+// 交易活动分页相关
+const transactionPage = ref(1)
+const transactionPageSize = 5
 
 // 网络选择相关
 const selectedNetwork = ref('SepoliaETH')
@@ -700,6 +752,18 @@ const paginatedStatusActivities = computed(() => {
 // 状态检查总页数
 const statusCheckTotalPages = computed(() => {
   return Math.ceil(rightColumnActivities.value.length / statusCheckPageSize)
+})
+
+// 交易活动分页后的活动
+const paginatedTransactionActivities = computed(() => {
+  const startIndex = (transactionPage.value - 1) * transactionPageSize
+  const endIndex = startIndex + transactionPageSize
+  return leftColumnActivities.value.slice(startIndex, endIndex)
+})
+
+// 交易活动总页数
+const transactionTotalPages = computed(() => {
+  return Math.ceil(leftColumnActivities.value.length / transactionPageSize)
 })
 
 // 监听 fullAddress 变化，自动添加到 accounts 列表（避免重复）
@@ -1457,6 +1521,26 @@ function clearStatusActivities() {
   console.log('🗑️ 已清除状态检查活动，剩余活动数量:', filteredActivities.length)
 }
 
+// 清除交易活动
+function clearTransactionActivities() {
+  const filteredActivities = walletActivity.value.filter(activity => 
+    activity.type !== 'buy' && 
+    activity.type !== 'sell' && 
+    activity.type !== 'wallet_disconnect' && 
+    activity.type !== 'network_change' && 
+    activity.type !== 'metamask_connect' && 
+    activity.type !== 'metamask_disconnect' && 
+    activity.type !== 'metamask_message'
+  )
+  
+  walletActivity.value = filteredActivities
+  
+  // 重置分页到第一页
+  transactionPage.value = 1
+  
+  console.log('🗑️ 已清除交易活动，剩余活动数量:', filteredActivities.length)
+}
+
 // 状态检查分页控制方法
 function goToStatusPage(page) {
   if (page >= 1 && page <= statusCheckTotalPages.value) {
@@ -1476,6 +1560,28 @@ function prevStatusPage() {
   if (statusCheckPage.value > 1) {
     statusCheckPage.value--
     console.log(`📄 状态检查上一页: ${statusCheckPage.value}`)
+  }
+}
+
+// 交易活动分页控制方法
+function goToTransactionPage(page) {
+  if (page >= 1 && page <= transactionTotalPages.value) {
+    transactionPage.value = page
+    console.log(`📄 切换到交易活动第 ${page} 页`)
+  }
+}
+
+function nextTransactionPage() {
+  if (transactionPage.value < transactionTotalPages.value) {
+    transactionPage.value++
+    console.log(`📄 交易活动下一页: ${transactionPage.value}`)
+  }
+}
+
+function prevTransactionPage() {
+  if (transactionPage.value > 1) {
+    transactionPage.value--
+    console.log(`📄 交易活动上一页: ${transactionPage.value}`)
   }
 }
 
@@ -1766,6 +1872,15 @@ color:#FFFFFF;
 
 /* 状态检查分页样式 */
 .mm-status-pagination {
+  margin-top: 16px;
+  padding: 16px;
+  background: #141426;
+  border: 1px solid #374151;
+  border-radius: 8px;
+}
+
+/* 交易活动分页样式 */
+.mm-transaction-pagination {
   margin-top: 16px;
   padding: 16px;
   background: #141426;
@@ -2364,7 +2479,8 @@ background: #1d1d36;
   gap: 8px;
 }
 
-.mm-clear-status-btn {
+.mm-clear-status-btn,
+.mm-clear-transaction-btn {
   width: 100%;
   justify-content: center;
 }
