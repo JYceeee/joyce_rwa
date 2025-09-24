@@ -5,9 +5,15 @@ require("dotenv").config();
 const SEPOLIA_URL = process.env.SEPOLIA_URL;
 const SEPOLIA_PRIVATE_KEY = process.env.SEPOLIA_PRIVATE_KEY;
 
+// 导入私钥和RPC URL（从.env文件）!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+const PRIVATE_KEY = process.env.PRIVATE_KEY || "";
+const RPC_URL = process.env.RPC_URL || "";
+
+
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
-  solidity: "0.8.20",
+  solidity: {
+    version: "0.8.20"},
   networks: {
     sepolia: {
       url: SEPOLIA_URL,

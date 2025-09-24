@@ -177,13 +177,25 @@
       <button
         class="mm-tab"
         :class="{ 'is-active': activeTab==='activity' }"
-        @click="activeTab='activity'"
+        @click="switchToActivityTab"
       >Activity</button>
     </nav>
     <!-- 网络栏 -->
     <div class="mm-networkbar">
       <div class="mm-net-left">
-        {{ networkLabel }}
+        <select 
+          v-model="selectedNetwork" 
+          @change="switchNetwork(selectedNetwork)"
+          class="mm-network-select"
+        >
+          <option 
+            v-for="network in availableNetworks" 
+            :key="network.value" 
+            :value="network.value"
+          >
+            {{ network.label }}
+          </option>
+        </select>
       </div>
       <div class="mm-net-right" style="position:relative;">
         <button class="mm-btn mm-outline" @click="toggleSortMenu" style="height:28px;padding:2px 10px;">Sort</button>
@@ -235,13 +247,77 @@
     <div class="mm-activity-header">
       <h3>Wallet Activity Log</h3>
       <div class="mm-activity-actions">
+        <button class="mm-btn mm-outline" @click="toggleFilters" :class="{ active: showFilters }">
+          🔍 Filter
+        </button>
         <button class="mm-btn mm-outline" @click="logCurrentWalletStatus" :disabled="!connected">
           📝 Log Status
         </button>
-        <button class="mm-btn mm-outline" @click="refreshActivity" :disabled="loadingActivity">
+        <!-- <button class="mm-btn mm-outline" @click="refreshActivity" :disabled="loadingActivity">
           <span v-if="loadingActivity">🔄</span>
           <span v-else>Refresh</span>
-        </button>
+        </button> -->
+      </div>
+    </div>
+    
+    <!-- 筛选器面板 -->
+    <div v-if="showFilters" class="mm-activity-filters">
+      <div class="mm-filter-row">
+        <div class="mm-filter-group">
+          <label class="mm-filter-label">Type</label>
+          <select v-model="activityFilters.type" class="mm-filter-select">
+            <option value="">All Types</option>
+            <option value="buy">Buy</option>
+            <option value="sell">Sell</option>
+            <option value="wallet_connect">Wallet Connect</option>
+            <option value="wallet_disconnect">Wallet Disconnect</option>
+            <option value="network_change">Network Change</option>
+            <option value="metamask_connect">MetaMask Connect</option>
+            <option value="metamask_disconnect">MetaMask Disconnect</option>
+            <option value="wallet_status_check">Status Check</option>
+            <option value="wallet_focus_check">Focus Check</option>
+            <option value="metamask_message">MetaMask Message</option>
+          </select>
+        </div>
+        
+        <div class="mm-filter-group">
+          <label class="mm-filter-label">Project Code</label>
+          <select v-model="activityFilters.projectCode" class="mm-filter-select">
+            <option value="">All Projects</option>
+            <option v-for="project in uniqueProjectCodes" :key="project" :value="project">
+              {{ project }}
+            </option>
+          </select>
+        </div>
+        
+        <div class="mm-filter-group">
+          <label class="mm-filter-label">Date Range</label>
+          <div class="mm-date-range">
+            <input 
+              type="date" 
+              v-model="activityFilters.startDate" 
+              class="mm-date-input"
+              :max="activityFilters.endDate || getCurrentDate()"
+            />
+            <span class="mm-date-separator">to</span>
+            <input 
+              type="date" 
+              v-model="activityFilters.endDate" 
+              class="mm-date-input"
+              :min="activityFilters.startDate"
+              :max="getCurrentDate()"
+            />
+          </div>
+        </div>
+        
+        <div class="mm-filter-actions">
+          <button class="mm-btn mm-outline" @click="clearFilters">
+            Clear
+          </button>
+          <button class="mm-btn mm-primary" @click="applyFilters">
+            Apply
+          </button>
+        </div>
       </div>
     </div>
     
@@ -257,18 +333,33 @@
     </div>
     
     <div v-else class="mm-activity-list">
-      <div v-for="activity in walletActivity" :key="activity.id" class="mm-activity-item">
-        <div class="mm-activity-header-item">
-          <div class="mm-activity-type" :class="activity.type">
-            <span class="mm-activity-icon">
-              {{ getActivityIcon(activity.type) }}
-            </span>
-            <span class="mm-activity-title">{{ getActivityTitle(activity.type) }}</span>
-          </div>
-          <div class="mm-activity-time">{{ formatTime(activity.timestamp) }}</div>
-        </div>
-        
-        <div class="mm-activity-details">
+      <!-- 筛选结果统计 -->
+      <div v-if="showFilters" class="mm-filter-results">
+        <span class="mm-results-count">
+          Showing {{ filteredActivity.length }} of {{ walletActivity.length }} activities
+        </span>
+        <button v-if="hasActiveFilters" class="mm-clear-filters-btn" @click="clearFilters">
+          Clear all filters
+        </button>
+      </div>
+      
+      <!-- 左右分栏布局 -->
+      <div class="mm-activity-columns">
+        <!-- 左侧：交易活动 (buy/sell) -->
+        <div class="mm-activity-left">
+          <h4 class="mm-activity-section-title">交易活动</h4>
+          <div v-for="activity in leftColumnActivities" :key="activity.id" class="mm-activity-item">
+            <div class="mm-activity-header-item">
+              <div class="mm-activity-type" :class="activity.type">
+                <span class="mm-activity-icon">
+                  {{ getActivityIcon(activity.type) }}
+                </span>
+                <span class="mm-activity-title">{{ getActivityTitle(activity.type) }}</span>
+              </div>
+              <div class="mm-activity-time">{{ formatTime(activity.timestamp) }}</div>
+            </div>
+            
+            <div class="mm-activity-details">
           <!-- 交易类型活动 -->
           <div v-if="activity.type === 'buy' || activity.type === 'sell'" class="mm-activity-project">
             <span class="mm-activity-label">Project:</span>
@@ -370,10 +461,92 @@
             🔗 View on Etherscan
           </a>
         </div>
+        </div>
+        </div>
+      
+      <!-- 右侧：状态检查活动 (wallet_status_check/wallet_focus_check) -->
+      <div class="mm-activity-right">
+        <div class="mm-activity-section-header">
+          <h4 class="mm-activity-section-title">状态检查</h4>
+          <button class="mm-btn mm-outline mm-clear-status-btn" @click="clearStatusActivities">
+            🗑️ Clear Status
+          </button>
+        </div>
+        <div v-for="activity in paginatedStatusActivities" :key="activity.id" class="mm-activity-item">
+          <div class="mm-activity-header-item">
+            <div class="mm-activity-type" :class="activity.type">
+              <span class="mm-activity-icon">
+                {{ getActivityIcon(activity.type) }}
+              </span>
+              <span class="mm-activity-title">{{ getActivityTitle(activity.type) }}</span>
+            </div>
+            <div class="mm-activity-time">{{ formatTime(activity.timestamp) }}</div>
+          </div>
+          
+          <div class="mm-activity-details">
+            <!-- 状态检查活动 -->
+            <div v-if="activity.type === 'wallet_status_check' || activity.type === 'wallet_focus_check'" class="mm-activity-status">
+              <span class="mm-activity-label">Status:</span>
+              <span class="mm-activity-value">Checked</span>
+            </div>
+            <div v-if="activity.type === 'wallet_status_check' || activity.type === 'wallet_focus_check'" class="mm-activity-wallet">
+              <span class="mm-activity-label">Wallet:</span>
+              <span class="mm-activity-value">{{ formatAddress(activity.wallet_address) }}</span>
+            </div>
+            
+            <!-- 通用消息显示 -->
+            <div v-if="activity.message" class="mm-activity-message-text">
+              <span class="mm-activity-label">Message:</span>
+              <span class="mm-activity-value">{{ activity.message }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 状态检查分页控件 -->
+        <div v-if="statusCheckTotalPages > 1" class="mm-status-pagination">
+          <div class="mm-pagination-info">
+            <span class="mm-pagination-text">
+              第 {{ statusCheckPage }} 页，共 {{ statusCheckTotalPages }} 页
+            </span>
+            <span class="mm-pagination-count">
+              ({{ rightColumnActivities.length }} 条记录)
+            </span>
+          </div>
+          
+          <div class="mm-pagination-controls">
+            <button 
+              class="mm-pagination-btn" 
+              @click="prevStatusPage"
+              :disabled="statusCheckPage <= 1"
+            >
+              ← 上一页
+            </button>
+            
+            <div class="mm-pagination-pages">
+              <button 
+                v-for="page in statusCheckTotalPages" 
+                :key="page"
+                class="mm-pagination-page"
+                :class="{ active: page === statusCheckPage }"
+                @click="goToStatusPage(page)"
+              >
+                {{ page }}
+              </button>
+            </div>
+            
+            <button 
+              class="mm-pagination-btn" 
+              @click="nextStatusPage"
+              :disabled="statusCheckPage >= statusCheckTotalPages"
+            >
+              下一页 →
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-
+  </div>
   <!-- 提示/错误 -->
   <p v-if="warning" class="mm-warn">{{ warning }}</p>
   <p v-if="error" class="mm-error">{{ error }}</p>
@@ -415,6 +588,119 @@ const walletAction = ref('')
 // Activity 相关
 const walletActivity = ref([])
 const loadingActivity = ref(false)
+
+// Activity 筛选相关
+const showFilters = ref(false)
+const activityFilters = ref({
+  type: '',
+  projectCode: '',
+  startDate: '',
+  endDate: ''
+})
+
+// 状态检查分页相关
+const statusCheckPage = ref(1)
+const statusCheckPageSize = 5
+
+// 网络选择相关
+const selectedNetwork = ref('SepoliaETH')
+const availableNetworks = ref([
+  { value: 'SepoliaETH', label: 'SepoliaETH', chainId: 11155111 },
+  { value: 'Ethereum', label: 'Ethereum', chainId: 1 },
+  { value: 'Polygon', label: 'Polygon', chainId: 137 },
+  { value: 'Arbitrum', label: 'Arbitrum', chainId: 42161 },
+  { value: 'Optimism', label: 'Optimism', chainId: 10 }
+])
+
+// 筛选后的活动数据
+const filteredActivity = computed(() => {
+  let filtered = walletActivity.value
+
+  // 按类型筛选
+  if (activityFilters.value.type) {
+    filtered = filtered.filter(activity => activity.type === activityFilters.value.type)
+  }
+
+  // 按项目代码筛选
+  if (activityFilters.value.projectCode) {
+    filtered = filtered.filter(activity => 
+      activity.project_code === activityFilters.value.projectCode
+    )
+  }
+
+  // 按日期范围筛选
+  if (activityFilters.value.startDate) {
+    const startDate = new Date(activityFilters.value.startDate)
+    filtered = filtered.filter(activity => {
+      const activityDate = new Date(activity.timestamp)
+      return activityDate >= startDate
+    })
+  }
+
+  if (activityFilters.value.endDate) {
+    const endDate = new Date(activityFilters.value.endDate)
+    endDate.setHours(23, 59, 59, 999) // 包含结束日期的整天
+    filtered = filtered.filter(activity => {
+      const activityDate = new Date(activity.timestamp)
+      return activityDate <= endDate
+    })
+  }
+
+  return filtered
+})
+
+// 获取唯一的项目代码列表
+const uniqueProjectCodes = computed(() => {
+  const codes = new Set()
+  walletActivity.value.forEach(activity => {
+    if (activity.project_code) {
+      codes.add(activity.project_code)
+    }
+  })
+  return Array.from(codes).sort()
+})
+
+// 检查是否有激活的筛选条件
+const hasActiveFilters = computed(() => {
+  return activityFilters.value.type !== '' || 
+         activityFilters.value.projectCode !== '' || 
+         activityFilters.value.startDate !== '' || 
+         activityFilters.value.endDate !== ''
+})
+
+// 左侧活动（交易相关）
+const leftColumnActivities = computed(() => {
+  return filteredActivity.value.filter(activity => 
+    activity.type === 'buy' || 
+    activity.type === 'sell' || 
+    activity.type === 'wallet_disconnect' || 
+    activity.type === 'network_change' || 
+    activity.type === 'metamask_connect' || 
+    activity.type === 'metamask_disconnect' || 
+    activity.type === 'metamask_message'
+  )
+})
+
+// 右侧活动（状态检查相关）
+const rightColumnActivities = computed(() => {
+  return filteredActivity.value.filter(activity => 
+    activity.type === 'wallet_connect' || 
+    activity.type === 'wallet_status_check' || 
+    activity.type === 'wallet_focus_check'
+  )
+})
+
+// 状态检查分页后的活动
+const paginatedStatusActivities = computed(() => {
+  const startIndex = (statusCheckPage.value - 1) * statusCheckPageSize
+  const endIndex = startIndex + statusCheckPageSize
+  return rightColumnActivities.value.slice(startIndex, endIndex)
+})
+
+// 状态检查总页数
+const statusCheckTotalPages = computed(() => {
+  return Math.ceil(rightColumnActivities.value.length / statusCheckPageSize)
+})
 
 // 监听 fullAddress 变化，自动添加到 accounts 列表（避免重复）
 watch(fullAddress, (newAddr) => {
@@ -1070,7 +1356,10 @@ function logWalletActivity(activityData) {
 function setupPageVisibilityListener() {
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
-      console.log('👁️ 页面重新可见，刷新钱包状态')
+      console.log('👁️ 页面重新可见，刷新钱包状态和活动记录')
+      
+      // 刷新钱包活动记录
+      loadWalletActivity()
       
       // 检查钱包连接状态
       if (window.ethereum) {
@@ -1094,7 +1383,10 @@ function setupPageVisibilityListener() {
 // 监听窗口焦点变化
 function setupWindowFocusListener() {
   window.addEventListener('focus', () => {
-    console.log('🎯 窗口获得焦点，检查钱包状态')
+    console.log('🎯 窗口获得焦点，检查钱包状态和刷新活动记录')
+    
+    // 刷新钱包活动记录
+    loadWalletActivity()
     
     if (window.ethereum) {
       window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
@@ -1111,6 +1403,168 @@ function setupWindowFocusListener() {
       })
     }
   })
+}
+
+// Activity 筛选方法
+function toggleFilters() {
+  showFilters.value = !showFilters.value
+}
+
+function clearFilters() {
+  activityFilters.value = {
+    type: '',
+    projectCode: '',
+    startDate: '',
+    endDate: ''
+  }
+}
+
+function applyFilters() {
+  // 筛选逻辑已经在 computed 中处理，这里可以添加额外的逻辑
+  console.log('🔍 应用筛选条件:', activityFilters.value)
+}
+
+function getCurrentDate() {
+  return new Date().toISOString().split('T')[0]
+}
+
+// 切换到Activity tab并刷新活动记录
+async function switchToActivityTab() {
+  activeTab.value = 'activity'
+  console.log('🔄 切换到Activity tab，刷新活动记录')
+  await loadWalletActivity()
+}
+
+// 清除状态检查活动
+function clearStatusActivities() {
+  if (walletActivity.value.length === 0) {
+    console.log('📋 没有状态检查活动需要清除')
+    return
+  }
+  
+  // 过滤掉状态检查相关的活动（包括wallet_connect）
+  const filteredActivities = walletActivity.value.filter(activity => 
+    activity.type !== 'wallet_connect' && 
+    activity.type !== 'wallet_status_check' && 
+    activity.type !== 'wallet_focus_check'
+  )
+  
+  walletActivity.value = filteredActivities
+  
+  // 重置分页到第一页
+  statusCheckPage.value = 1
+  
+  console.log('🗑️ 已清除状态检查活动，剩余活动数量:', filteredActivities.length)
+}
+
+// 状态检查分页控制方法
+function goToStatusPage(page) {
+  if (page >= 1 && page <= statusCheckTotalPages.value) {
+    statusCheckPage.value = page
+    console.log(`📄 切换到状态检查第 ${page} 页`)
+  }
+}
+
+function nextStatusPage() {
+  if (statusCheckPage.value < statusCheckTotalPages.value) {
+    statusCheckPage.value++
+    console.log(`📄 状态检查下一页: ${statusCheckPage.value}`)
+  }
+}
+
+function prevStatusPage() {
+  if (statusCheckPage.value > 1) {
+    statusCheckPage.value--
+    console.log(`📄 状态检查上一页: ${statusCheckPage.value}`)
+  }
+}
+
+// 网络切换方法
+function switchNetwork(networkValue) {
+  const network = availableNetworks.value.find(n => n.value === networkValue)
+  if (network) {
+    selectedNetwork.value = networkValue
+    console.log(`🌐 切换到网络: ${network.label} (Chain ID: ${network.chainId})`)
+    
+    // 这里可以添加实际的网络切换逻辑
+    // 例如：调用MetaMask的wallet_switchEthereumChain方法
+    if (window.ethereum) {
+      window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: `0x${network.chainId.toString(16)}` }]
+      }).then(() => {
+        console.log(`✅ 成功切换到 ${network.label}`)
+      }).catch((error) => {
+        console.error(`❌ 网络切换失败:`, error)
+        // 如果网络不存在，可以尝试添加网络
+        if (error.code === 4902) {
+          addNetwork(network)
+        }
+      })
+    }
+  }
+}
+
+// 添加网络方法
+function addNetwork(network) {
+  const networkConfigs = {
+    'Ethereum': {
+      chainId: '0x1',
+      chainName: 'Ethereum Mainnet',
+      rpcUrls: ['https://mainnet.infura.io/v3/YOUR_PROJECT_ID'],
+      blockExplorerUrls: ['https://etherscan.io'],
+      nativeCurrency: {
+        name: 'ETH',
+        symbol: 'ETH',
+        decimals: 18
+      }
+    },
+    'Polygon': {
+      chainId: '0x89',
+      chainName: 'Polygon Mainnet',
+      rpcUrls: ['https://polygon-rpc.com'],
+      blockExplorerUrls: ['https://polygonscan.com'],
+      nativeCurrency: {
+        name: 'MATIC',
+        symbol: 'MATIC',
+        decimals: 18
+      }
+    },
+    'Arbitrum': {
+      chainId: '0xa4b1',
+      chainName: 'Arbitrum One',
+      rpcUrls: ['https://arb1.arbitrum.io/rpc'],
+      blockExplorerUrls: ['https://arbiscan.io'],
+      nativeCurrency: {
+        name: 'ETH',
+        symbol: 'ETH',
+        decimals: 18
+      }
+    },
+    'Optimism': {
+      chainId: '0xa',
+      chainName: 'Optimism',
+      rpcUrls: ['https://mainnet.optimism.io'],
+      blockExplorerUrls: ['https://optimistic.etherscan.io'],
+      nativeCurrency: {
+        name: 'ETH',
+        symbol: 'ETH',
+        decimals: 18
+      }
+    }
+  }
+  
+  const config = networkConfigs[network.value]
+  if (config && window.ethereum) {
+    window.ethereum.request({
+      method: 'wallet_addEthereumChain',
+      params: [config]
+    }).then(() => {
+      console.log(`✅ 成功添加网络 ${network.label}`)
+    }).catch((error) => {
+      console.error(`❌ 添加网络失败:`, error)
+    })
+  }
 }
 </script>
 
@@ -1251,8 +1705,8 @@ color:#FFFFFF;
 
 /* Tabs */
 .mm-tabs{display:flex;gap:28px;border-bottom:1px solid var(--border);margin-top:8px;}
-.mm-tab{appearance:none;border:none;background:none;padding:14px 0;cursor:pointer;color:#95a0af;font-weight:600;position:relative;}
-.mm-tab.is-active{color:#6b7280}
+.mm-tab{appearance:none;border:none;background:none;padding:14px 0;cursor:pointer;color:#95a0af;font-weight:600;position:relative;border-radius:8px 8px 0 0;transition:all 0.2s ease;}
+.mm-tab.is-active{color:#6b7280;background:#ffffff;padding:14px 16px;margin:0 -16px;}
 .mm-tab.is-active::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;background:var(--text);border-radius:3px 3px 0 0;}
 
 /* Activity 页签样式 */
@@ -1261,6 +1715,312 @@ color:#FFFFFF;
   border-radius: 12px;
   padding: 16px;
   margin-top: 16px;
+}
+
+/* Activity 左右分栏布局 */
+.mm-activity-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 16px;
+}
+
+.mm-activity-left,
+.mm-activity-right {
+  background: #141426;
+  border: 1px solid #374151;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.mm-activity-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #374151;
+}
+
+.mm-activity-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.mm-clear-status-btn {
+  font-size: 12px;
+  padding: 6px 12px;
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.mm-clear-status-btn:hover {
+  background: #b91c1c;
+  border-color: #b91c1c;
+  transform: translateY(-1px);
+}
+
+/* 状态检查分页样式 */
+.mm-status-pagination {
+  margin-top: 16px;
+  padding: 16px;
+  background: #141426;
+  border: 1px solid #374151;
+  border-radius: 8px;
+}
+
+.mm-pagination-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.mm-pagination-text {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.mm-pagination-count {
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+.mm-pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.mm-pagination-btn {
+  padding: 8px 16px;
+  background: #374151;
+  border: 1px solid #4b5563;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mm-pagination-btn:hover:not(:disabled) {
+  background: #4b5563;
+  border-color: #6b7280;
+}
+
+.mm-pagination-btn:disabled {
+  background: #1f2937;
+  border-color: #374151;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.mm-pagination-pages {
+  display: flex;
+  gap: 4px;
+}
+
+.mm-pagination-page {
+  width: 32px;
+  height: 32px;
+  background: #374151;
+  border: 1px solid #4b5563;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mm-pagination-page:hover {
+  background: #4b5563;
+  border-color: #6b7280;
+}
+
+.mm-pagination-page.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #ffffff;
+}
+
+/* 网络选择器样式 */
+.mm-network-select {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: inherit;
+  font-weight: inherit;
+  cursor: pointer;
+  outline: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.mm-network-select:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.mm-network-select:focus {
+  background: rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+.mm-network-select option {
+  background: #1d1d36;
+  color: #ffffff;
+  padding: 8px 12px;
+}
+
+/* Activity 筛选器样式 */
+.mm-activity-filters {
+  background: #141426;
+  border: 1px solid #374151;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.mm-filter-row {
+  display: flex;
+  gap: 16px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.mm-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 150px;
+}
+
+.mm-filter-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mm-filter-select {
+  padding: 8px 12px;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  background: #1f2937;
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mm-filter-select:hover {
+  border-color: #4b5563;
+}
+
+.mm-filter-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.mm-date-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mm-date-input {
+  padding: 8px 12px;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  background: #1f2937;
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mm-date-input:hover {
+  border-color: #4b5563;
+}
+
+.mm-date-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.mm-date-separator {
+  color: #9ca3af;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.mm-filter-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.mm-btn.mm-primary {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #ffffff;
+}
+
+.mm-btn.mm-primary:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.mm-btn.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #ffffff;
+}
+
+.mm-filter-results {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #141426;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.mm-results-count {
+  font-size: 14px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.mm-clear-filters-btn {
+  background: none;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  padding: 6px 12px;
+  color: #9ca3af;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mm-clear-filters-btn:hover {
+  background: #374151;
+  color: #ffffff;
 }
 
 .mm-activity-header {
@@ -1333,6 +2093,7 @@ color:#FFFFFF;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 16px;
+  margin:5px;
   transition: background-color 0.2s ease;
 }
 
@@ -1535,5 +2296,99 @@ background: #1d1d36;
 @media (max-width: 900px){
 .mm-actions{flex-wrap:wrap;}
 .mm-action{flex: 0 0 calc(20% - 16px);}
+
+/* 移动端筛选器适配 */
+.mm-filter-row {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.mm-filter-group {
+  min-width: auto;
+  width: 100%;
+}
+
+.mm-filter-actions {
+  justify-content: center;
+  margin-top: 8px;
+}
+}
+
+@media (max-width: 768px) {
+/* 移动端筛选器进一步优化 */
+.mm-activity-filters {
+  padding: 12px;
+}
+
+.mm-filter-row {
+  gap: 10px;
+}
+
+.mm-date-range {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.mm-date-separator {
+  text-align: center;
+  padding: 4px 0;
+}
+
+.mm-filter-actions {
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mm-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+/* 移动端Activity分栏布局 */
+.mm-activity-columns {
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.mm-activity-left,
+.mm-activity-right {
+  padding: 12px;
+}
+
+/* 移动端section header适配 */
+.mm-activity-section-header {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.mm-clear-status-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+/* 移动端分页控件适配 */
+.mm-pagination-info {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.mm-pagination-controls {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mm-pagination-btn {
+  flex: 1;
+  min-width: 80px;
+}
+
+.mm-pagination-pages {
+  flex-wrap: wrap;
+  justify-content: center;
+}
 }
 </style>
