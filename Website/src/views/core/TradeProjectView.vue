@@ -316,9 +316,7 @@ export default {
     return {
       tradeType: 'buy',
       tradeAmount: '',
-      recentTrades: [],
-      successfulTrades: [],
-      projectTrades: [],
+      walletActivity: [],
       loading: false,
       error: null,
       errorType: null, // 错误类型
@@ -472,6 +470,19 @@ export default {
       
       // 否则返回原始错误消息
       return this.error
+    },
+    
+    // 从Wallet Activity Log获取当前项目的交易记录
+    projectTrades() {
+      if (!this.walletActivity || !Array.isArray(this.walletActivity)) {
+        return []
+      }
+      
+      // 过滤出当前项目的buy/sell交易记录
+      return this.walletActivity.filter(activity => 
+        (activity.type === 'buy' || activity.type === 'sell') && 
+        activity.project_code === this.projectCode
+      ).sort((a, b) => b.timestamp - a.timestamp) // 按时间倒序排列
     }
   },
   methods: {
@@ -554,109 +565,7 @@ export default {
       }
     },
 
-    // 抓取用户在该项目中的所有交易记录
-    async fetchProjectTrades() {
-      try {
-        this.loading = true
-        console.log(`🔍 开始抓取用户${this.projectCode}项目的所有交易记录...`)
-        
-        // 获取用户地址
-        const userAddress = await this.getUserAddress()
-        if (!userAddress) {
-          console.error('❌ 无法获取用户地址')
-          return
-        }
-        
-        // 使用Etherscan API获取交易记录
-        const apiKey = 'YourEtherscanApiKey' // 需要替换为实际的API密钥
-        const baseUrl = 'https://api-sepolia.etherscan.io/api'
-        
-        const response = await fetch(`${baseUrl}?module=account&action=txlist&address=${userAddress}&startblock=0&endblock=99999999&page=1&offset=50&sort=desc&apikey=${apiKey}`)
-        const data = await response.json()
-        
-        if (data.status === '1' && data.result && data.result.length > 0) {
-          console.log(`✅ 找到 ${data.result.length} 条交易记录`)
-          
-          // 处理所有交易（包括成功和失败的）
-          this.projectTrades = []
-          for (const tx of data.result) {
-            const tradeData = {
-              id: `project_tx_${tx.hash}`,
-              type: tx.isError === '0' ? 'successful_trade' : 'failed_trade',
-              amount: 'N/A', // Etherscan API不提供token数量
-              project_code: this.projectCode,
-              project_name: this.projectData.name,
-              timestamp: parseInt(tx.timeStamp) * 1000,
-              transactionHash: tx.hash,
-              etherscan: {
-                hash: tx.hash,
-                from: tx.from,
-                to: tx.to,
-                value: tx.value,
-                gasUsed: tx.gasUsed,
-                gasPrice: tx.gasPrice,
-                blockNumber: tx.blockNumber,
-                status: tx.isError === '0' ? '0x1' : '0x0',
-                transactionFee: (parseInt(tx.gasUsed) * parseInt(tx.gasPrice)) / Math.pow(10, 18),
-                timestamp: parseInt(tx.timeStamp) * 1000
-              }
-            }
-            
-            this.projectTrades.push(tradeData)
-          }
-          
-          console.log(`✅ ${this.projectCode}项目交易记录抓取完成，共${this.projectTrades.length}条`)
-        } else {
-          console.log('📋 没有找到交易记录')
-          this.projectTrades = []
-        }
-        
-      } catch (error) {
-        console.error('❌ 抓取项目交易失败:', error)
-        this.projectTrades = []
-      } finally {
-        this.loading = false
-      }
-    },
 
-    // 更新交易记录并获取Etherscan详情
-    async updateTradeWithEtherscanDetails(tradeData) {
-      try {
-        console.log('🔄 更新交易记录并获取Etherscan详情...')
-        
-        // 获取Etherscan交易详情
-        const etherscanData = await this.fetchTransactionDetails(tradeData.transactionHash)
-        
-        if (etherscanData.success) {
-          // 合并Etherscan数据到交易记录
-          const updatedTrade = {
-            ...tradeData,
-            // Etherscan数据
-            etherscan: {
-              from: etherscanData.from,
-              to: etherscanData.to,
-              value: etherscanData.value,
-              gasUsed: etherscanData.gasUsed,
-              gasPrice: etherscanData.gasPrice,
-              blockNumber: etherscanData.blockNumber,
-              blockHash: etherscanData.blockHash,
-              status: etherscanData.status,
-              // Etherscan链接
-              etherscanUrl: `https://sepolia.etherscan.io/tx/${tradeData.transactionHash}`
-            }
-          }
-          
-          console.log('✅ 交易记录已更新Etherscan详情:', updatedTrade)
-          return updatedTrade
-        } else {
-          console.warn('⚠️ 无法获取Etherscan详情，使用原始交易数据:', etherscanData.error)
-          return tradeData
-        }
-      } catch (error) {
-        console.error('❌ 更新交易记录时发生错误:', error)
-        return tradeData
-      }
-    },
     cancelTrade() {
       this.$router.back()
     },
@@ -809,14 +718,8 @@ export default {
             transactionHash: result.transactionHash
           }
 
-          // 获取Etherscan详情并更新交易记录
-          const updatedTradeData = await this.updateTradeWithEtherscanDetails(baseTradeData)
-          
-          // 更新本地交易历史
-          this.recentTrades.unshift(updatedTradeData)
-          
           // 通知WalletView更新活动记录
-          this.notifyWalletActivity(updatedTradeData)
+          this.notifyWalletActivity(baseTradeData)
           
           // 显示成功弹窗
           this.showSuccessModal = true
@@ -998,14 +901,8 @@ export default {
             transactionHash: result.transactionHash
           }
 
-          // 获取Etherscan详情并更新交易记录
-          const updatedTradeData = await this.updateTradeWithEtherscanDetails(baseTradeData)
-          
-          // 更新本地交易历史
-          this.recentTrades.unshift(updatedTradeData)
-          
           // 通知WalletView更新活动记录
-          this.notifyWalletActivity(updatedTradeData)
+          this.notifyWalletActivity(baseTradeData)
           
           // 显示成功弹窗
           this.showSuccessModal = true
@@ -1044,6 +941,29 @@ export default {
     
     
     
+    // 从localStorage加载Wallet Activity数据
+    loadWalletActivity() {
+      try {
+        const savedActivity = localStorage.getItem('walletActivity')
+        if (savedActivity) {
+          this.walletActivity = JSON.parse(savedActivity)
+          console.log('📊 TradeProjectView: 加载Wallet Activity数据:', this.walletActivity.length, '条记录')
+        } else {
+          this.walletActivity = []
+          console.log('📊 TradeProjectView: 没有找到Wallet Activity数据')
+        }
+      } catch (error) {
+        console.error('❌ TradeProjectView: 加载Wallet Activity数据失败:', error)
+        this.walletActivity = []
+      }
+    },
+    
+    // 监听Wallet Activity更新事件
+    handleWalletActivityUpdate(event) {
+      console.log('📢 TradeProjectView: 收到Wallet Activity更新通知:', event.detail)
+      this.loadWalletActivity()
+    },
+
     // 获取用户地址（用于交易验证）
     async getUserAddress() {
       try {
@@ -1391,14 +1311,8 @@ export default {
             transactionHash: result.transactionHash
           }
 
-          // 获取Etherscan详情并更新交易记录
-          const updatedTradeData = await this.updateTradeWithEtherscanDetails(baseTradeData)
-          
-          // 更新本地交易历史
-          this.recentTrades.unshift(updatedTradeData)
-          
           // 通知WalletView更新活动记录
-          this.notifyWalletActivity(updatedTradeData)
+          this.notifyWalletActivity(baseTradeData)
         } else {
           this.addTestResult('error', 'Buy Transaction Failed', result.error)
         }
@@ -1478,14 +1392,8 @@ export default {
             transactionHash: result.transactionHash
           }
 
-          // 获取Etherscan详情并更新交易记录
-          const updatedTradeData = await this.updateTradeWithEtherscanDetails(baseTradeData)
-          
-          // 更新本地交易历史
-          this.recentTrades.unshift(updatedTradeData)
-          
           // 通知WalletView更新活动记录
-          this.notifyWalletActivity(updatedTradeData)
+          this.notifyWalletActivity(baseTradeData)
         } else {
           this.addTestResult('error', 'Sell Transaction Failed', result.error)
         }
@@ -1678,34 +1586,6 @@ export default {
       }
     },
     
-    // 添加演示交易记录
-    addDemoTrades() {
-      // 如果recentTrades为空，添加一些演示数据
-      if (this.recentTrades.length === 0) {
-        const demoTime = Date.now()
-        this.recentTrades = [
-          {
-            id: demoTime - 3600000, // 1小时前
-            type: 'buy', // 交易类型
-            amount: 100, // 用户输入的token amount
-            project_code: this.projectCode || 'TYMU', // 项目代码
-            project_name: this.projectData?.name || 'St Ives NSW Residential Project', // 项目名称
-            timestamp: demoTime - 3600000, // 当前时间戳
-            transactionHash: '0xabc123def4567890...'
-          },
-          {
-            id: demoTime - 1800000, // 30分钟前
-            type: 'sell', // 交易类型
-            amount: 50, // 用户输入的token amount
-            project_code: this.projectCode || 'TYMU', // 项目代码
-            project_name: this.projectData?.name || 'St Ives NSW Residential Project', // 项目名称
-            timestamp: demoTime - 1800000, // 当前时间戳
-            transactionHash: '0xdef456abc1237890...'
-          }
-        ]
-        console.log('📊 添加了演示交易记录:', this.recentTrades.length, '条')
-      }
-    }
   },
   async mounted() {
     // 初始化useWallet
@@ -1728,11 +1608,16 @@ export default {
       console.log('No project data in session storage')
     }
     
-    // 添加演示交易记录（如果没有真实数据）
-    this.addDemoTrades()
+    // 加载Wallet Activity数据
+    this.loadWalletActivity()
     
-    // 自动抓取用户在该项目中的所有交易记录
-    this.fetchProjectTrades()
+    // 监听Wallet Activity更新事件
+    window.addEventListener('walletActivityUpdated', this.handleWalletActivityUpdate)
+  },
+  
+  beforeUnmount() {
+    // 移除事件监听器
+    window.removeEventListener('walletActivityUpdated', this.handleWalletActivityUpdate)
   }
 }
 </script>
