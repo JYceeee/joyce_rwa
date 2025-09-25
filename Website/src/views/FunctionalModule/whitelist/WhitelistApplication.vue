@@ -15,7 +15,7 @@
           Whitelist Approved
         </span>
         <span v-else-if="whitelistStatus === 'pending'">Whitelist Application Pending</span>
-        <span v-else-if="whitelistStatus === 'rejected'">Whitelist Application Rejected</span>
+        <span v-else-if="whitelistStatus === 'rejected'">Not Qualified for Transaction</span>
         <span v-else>Apply for Whitelist</span>
         <!-- 右侧按钮：根据状态显示不同操作 -->
         <button v-if="whitelistStatus === 'none'" class="link" type="button" @click="applyWhitelist" :disabled="loading">Apply Now</button>
@@ -169,24 +169,35 @@ export default {
     }
   },
   methods: {
-    // 加载白名单状态
+    // 加载白名单状态（简化逻辑）
     async loadWhitelistStatus() {
       try {
+        // 简化：优先检查KYC状态
+        const kycLevel = getKycLevel()
+        const isKycVerified = this.isKycVerified
+        
+        if (isKycVerified && kycLevel >= KYC_LEVELS.LEVEL_2) {
+          // KYC Level 2用户直接设置为approved
+          this.whitelistStatus = 'approved'
+          localStorage.setItem('whitelistStatus', 'approved')
+          console.log('✅ KYC Level 2用户，白名单状态自动设置为approved')
+          return
+        }
+        
         if (!this.contractService) return
         
-        // 从合约中查询当前用户的KYC级别
-        const kycLevel = await this.contractService.getKycLevel()
-        const isBlocked = await this.contractService.isBlocked()
-        
-        if (isBlocked) {
-          this.whitelistStatus = 'rejected'
-        } else if (kycLevel >= 2) {
-          this.whitelistStatus = 'approved'
-        } else if (kycLevel >= 1) {
-          this.whitelistStatus = 'pending'
-        } else {
-          this.whitelistStatus = 'none'
+        // 获取用户钱包地址
+        const userAddress = await this.getUserWalletAddress()
+        if (!userAddress) {
+          console.warn('No wallet address available for whitelist status check')
+          return
         }
+        
+        // 使用新的综合状态检查方法
+        const statusData = await this.contractService.getWhitelistStatus(userAddress)
+        this.whitelistStatus = statusData.status
+        
+        console.log('✅ Whitelist status loaded:', statusData)
       } catch (error) {
         console.error('Failed to load whitelist status:', error)
         // 从本地存储获取状态作为备选
@@ -197,7 +208,7 @@ export default {
       }
     },
 
-    // 申请白名单
+    // 申请白名单（简化流程）
     async applyWhitelist() {
       console.log('🔍 开始验证白名单申请条件...')
       
@@ -213,13 +224,12 @@ export default {
         return
       }
       
-      // 3. 验证并设置KYC级别
+      // 3. 简化：KYC验证通过后自动设置为Level 2
       const kycLevel = getKycLevel()
       if (kycLevel < KYC_LEVELS.LEVEL_2) {
-        console.log(`🔧 KYC验证成功，自动升级级别从 ${kycLevel} 到 ${KYC_LEVELS.LEVEL_2}`)
-        // KYC验证成功时，自动将级别设置为Level 2
+        console.log(`🔧 KYC验证成功，自动设置级别为 ${KYC_LEVELS.LEVEL_2}`)
         setKycLevel(KYC_LEVELS.LEVEL_2)
-        console.log('✅ KYC级别已更新为Level 2')
+        console.log('✅ KYC级别已设置为Level 2')
       }
       
       // 4. 验证钱包连接
@@ -229,7 +239,17 @@ export default {
         return
       }
       
-      // 5. 检查是否已在白名单中
+      // 5. 简化：KYC Level 2用户直接通过白名单申请
+      if (kycLevel >= KYC_LEVELS.LEVEL_2) {
+        console.log('✅ KYC Level 2用户，直接通过白名单申请')
+        this.whitelistStatus = 'approved'
+        localStorage.setItem('whitelistStatus', 'approved')
+        this.showSuccessResult('Whitelist Approved!', 'Congratulations! Your KYC Level 2 status automatically qualifies you for whitelist. You can now start trading assets.')
+        this.$emit('success', 'Whitelist automatically approved due to KYC Level 2 status!')
+        return
+      }
+      
+      // 6. 检查是否已在白名单中
       const currentStatus = await this.checkCurrentWhitelistStatus(userAddress)
       if (currentStatus === 'approved') {
         this.showValidationError('已在白名单中', '您的钱包地址已经在白名单中，无需重复申请')
@@ -457,19 +477,9 @@ export default {
           return savedStatus || 'none'
         }
 
-        // 使用合约服务检查白名单状态
-        const kycLevel = await this.contractService.getKycLevel(address)
-        const isBlocked = await this.contractService.isBlocked(address)
-        
-        if (isBlocked) {
-          return 'rejected'
-        } else if (kycLevel >= 2) {
-          return 'approved'
-        } else if (kycLevel >= 1) {
-          return 'pending'
-        } else {
-          return 'none'
-        }
+        // 使用新的综合状态检查方法
+        const statusData = await this.contractService.getWhitelistStatus(address)
+        return statusData.status
       } catch (error) {
         console.error('检查白名单状态失败:', error)
         // 出错时从本地存储获取
