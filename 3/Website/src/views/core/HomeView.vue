@@ -7,40 +7,66 @@
           Access verified Real World Assets (RWA) — mortgage-backed loans, tokenized for secure and transparent investing.
         </p>
 
-        <!-- <form class="email-row" @submit.prevent="notify('Thanks! We will be in touch.')">
+        <form class="email-row" @submit.prevent="notify('Thanks! We will be in touch.')">
           <input class="input" id="email" name="email" type="email" placeholder="Enter your email" required />
           <button class="btn primary" type="submit">Get started</button>
         </form>
 
         <p class="foot">By continuing, you agree to our Terms and acknowledge our 
-          <a href="/src/components/privacypolicy.vue">Privacy Policy.</a></p> -->
+          <a href="/src/components/privacypolicy.vue">Privacy Policy.</a></p>
       </div>
+    </div>
+  </section>
 
-      <div class="cards" aria-label="Highlights">
-        <article class="card" aria-labelledby="listing-title">
-          <h3 id="listing-title">New Listing</h3>
-          <div v-if="newListingProject" class="list">
-            <div class="li"><span class="check" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span>{{ newListingProject.code }} • {{ newListingProject.name }}</span></div>
-            <div class="li"><span class="check" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span>Loan Size: {{ newListingProject.loanAmount }}</span></div>
-            <div class="li"><span class="check" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span>Est. Yield (IRR): {{ newListingProject.targetYield }}%</span></div>
-            <div class="li"><span class="check" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span>Term: {{ newListingProject.loanTerm }}</span></div>
-            <div class="li"><span class="check" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span>Status: {{ getStatusText(newListingProject.status) }}</span></div>
+  <section class="new-listing-section">
+    <div class="container">
+      <div class="listing-card">
+        <div class="card-header">
+          <h3 class="card-title">New Listing</h3>
+          <div class="status-badge" :class="newListingProject ? 'active' : 'inactive'">
+            {{ newListingProject ? 'Available' : 'Coming Soon' }}
           </div>
-          <div v-else class="list">
-            <div class="li"><span class="check" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span>No upcoming projects at the moment</span></div>
-            <div class="li"><span class="check" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span>Check back soon for new opportunities</span></div>
+        </div>
+        
+        <div v-if="newListingProject" class="card-content">
+          <div class="project-info">
+            <h4 class="project-name">{{ newListingProject.code }} • {{ newListingProject.name }}</h4>
+            <p class="project-description">Premium real estate investment opportunity</p>
           </div>
-        </article>
-
-        <!-- <article class="card" aria-labelledby="news-title">
-          <h3 id="news-title">News</h3>
-          <ul class="list">
-            <li class="li"><span class="check" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span>Daily accrual smart contract upgraded to V2 (more efficient gas usage).</span></li>
-            <li class="li"><span class="check" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span>New partnership with XYZ Audit for RWA loan verification.</span></li>
-            <li class="li"><span class="check" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span>Join over 4,000+ approvals already growing with Mortgage RWA.</span></li>
-            <li class="li"><span class="check" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span>Upcoming listing: Melbourne Office Loan AM-005.</span></li>
-          </ul>
-        </article> -->
+          
+          <div class="project-details">
+            <div class="detail-item">
+              <div class="detail-label">Loan Size</div>
+              <div class="detail-value">{{ newListingProject.loanAmount }}</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Est. Yield (IRR)</div>
+              <div class="detail-value highlight">{{ newListingProject.targetYield }}%</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Term</div>
+              <div class="detail-value">{{ newListingProject.loanTerm }}</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Status</div>
+              <div class="detail-value status">{{ getStatusText(newListingProject.status) }}</div>
+            </div>
+          </div>
+          
+          <div class="card-actions">
+            <button class="btn-primary">View Details</button>
+            <button class="btn-secondary">Add to Watchlist</button>
+          </div>
+        </div>
+        
+        <div v-else class="card-content empty">
+          <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <h4>No upcoming projects</h4>
+            <p>Check back soon for new investment opportunities</p>
+            <button class="btn-primary">Get Notified</button>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -154,6 +180,90 @@ export default {
 </script>
 
 <style scoped>
+/* 全局重置，确保全屏效果 */
+:deep(body) {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Hero section 深色背景样式 */
+.hero {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, 
+    #1a1a2e 0%, 
+    #16213e 25%, 
+    #2d1b69 50%, 
+    #1a1a2e 75%, 
+    #0f0f23 100%);
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  width: 100vw;
+  max-width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+}
+
+.hero::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(138, 43, 226, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(75, 0, 130, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(25, 25, 112, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero .grid {
+  position: relative;
+  z-index: 1;
+}
+
+.hero .headline {
+  color: #ffffff;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-size: 48px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero .sub {
+  color: #e0e0e0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.hero .card {
+  background: rgba(20, 20, 38, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(138, 43, 226, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.hero .card h3 {
+  color: #ffffff;
+}
+
+.hero .li {
+  color: #d0d0d0;
+}
+
+.hero .check svg {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
 .faq-grid {
   background: #141426;
   border-radius: 16px;
@@ -184,6 +294,236 @@ export default {
 
 .card{
   max-height: 280px;
+}
+
+/* New Listing Section 样式 */
+.new-listing-section {
+  background: #0A0A19;
+  padding: 60px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.new-listing-section .container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.listing-card {
+  width: 500px;
+  background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(138, 43, 226, 0.2);
+  border: 1px solid rgba(138, 43, 226, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.listing-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #8a2be2, #4b0082, #8a2be2);
+  border-radius: 20px 20px 0 0;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(138, 43, 226, 0.2);
+}
+
+.card-title {
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.status-badge {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.active {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.status-badge.inactive {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+  color: #d1d5db;
+}
+
+.card-content {
+  color: #e5e7eb;
+}
+
+.project-info {
+  margin-bottom: 24px;
+}
+
+.project-name {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+}
+
+.project-description {
+  color: #9ca3af;
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.project-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-label {
+  color: #9ca3af;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-value {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.detail-value.highlight {
+  color: #10b981;
+  font-size: 18px;
+}
+
+.detail-value.status {
+  color: #f59e0b;
+}
+
+.card-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn-primary, .btn-secondary {
+  flex: 1;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #8a2be2, #4b0082);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(138, 43, 226, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(138, 43, 226, 0.4);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #8a2be2;
+  border: 2px solid rgba(138, 43, 226, 0.3);
+}
+
+.btn-secondary:hover {
+  background: rgba(138, 43, 226, 0.1);
+  border-color: rgba(138, 43, 226, 0.5);
+}
+
+/* 空状态样式 */
+.card-content.empty {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  opacity: 0.6;
+}
+
+.empty-state h4 {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.empty-state p {
+  color: #9ca3af;
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .listing-card {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 20px;
+  }
+  
+  .project-details {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .card-actions {
+    flex-direction: column;
+  }
 }
 
 </style>

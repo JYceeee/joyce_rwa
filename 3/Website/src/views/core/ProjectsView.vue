@@ -58,7 +58,7 @@
       </div>
       <div style="display: flex; align-items: center; gap: 12px;">
         <span v-if="lastRefreshTime" style="font-size: 12px; color: #6b7280;">
-          最后更新: {{ formatTime(lastRefreshTime) }}
+          Last Updated: {{ formatTime(lastRefreshTime) }}
         </span>
         <button @click="refreshProducts" :disabled="loading" class="refresh-btn" style="background: #374151; border: 1px solid #4b5563; color: #ffffff; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease;" :style="{ opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer' }">
           {{ loading ? '刷新中...' : '刷新数据' }}
@@ -69,7 +69,7 @@
     <!-- 加载状态 -->
     <div v-if="loading" class="loading-container">
       <div class="loading-spinner"></div>
-      <p>正在加载产品数据...</p>
+      <p>Loading product data...</p>
     </div>
 
     <!-- 错误状态 -->
