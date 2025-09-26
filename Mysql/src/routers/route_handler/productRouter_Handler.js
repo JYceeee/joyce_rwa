@@ -1,126 +1,98 @@
-const db = require('../../database/dbConfig');
+const mysql = require('../../database/index');
 
-// 获取所有产品列表
-const getAllProducts = async (req, res) => {
+// 获取所有产品详情列表
+const getAllProductDetails = async (req, res) => {
   try {
     const sql = `
       SELECT 
-        product_id,
-        name,
-        code,
-        subtitle,
-        image,
-        type,
-        region,
-        risk,
-        target_yield,
-        current_price,
-        collateral_property_value,
-        loan_amount,
-        target_loan_yield,
-        rental_income,
-        status,
-        created_at,
-        updated_at
-      FROM rwa_loan_product 
-      WHERE status = 'active'
+        id, code, name, subtitle, type, region, risk, target_yield, status, summary,
+        total_offering, subscribed, total_subscription_tokens, subscribed_tokens,
+        current_subscription, total_subscription,
+        loan_amount, annual_interest_rate, loan_term, ltv, drawdown_date, early_repayment, repayment_arrangement,
+        issuer, pw_shareholders, lender, borrower, guarantor,
+        disbursement_method, interest, early_repayment_details, maturity_date,
+        property_address, valuation, security_rank, lvr,
+        default_interest_rate, default_triggers, default_process,
+        issuer_token, loan_token, valuation_report, mortgage_deed,
+        created_at, updated_at
+      FROM product_details 
       ORDER BY created_at DESC
     `;
     
-    const [rows] = await db.execute(sql);
+    const [rows] = await mysql.promise().execute(sql);
     
-    // 格式化数据以匹配前端字段名
+    // 格式化数据以匹配前端期望的字段名
     const formattedProducts = rows.map(product => ({
-      id: product.product_id,
+      id: product.id,
       code: product.code,
       name: product.name,
       subtitle: product.subtitle,
-      image: product.image,
       type: product.type,
       region: product.region,
       risk: product.risk,
       targetYield: product.target_yield,
-      metrics: {
-        currentElaraPrice: product.current_price ? `A$${product.current_price.toFixed(2)}` : '-',
-        collateralPropertyValue: product.collateral_property_value ? `A$${product.collateral_property_value.toLocaleString()}` : '-',
-        loanAmount: product.loan_amount ? `A$${product.loan_amount.toLocaleString()}` : '-',
-        targetLoanYield: product.target_loan_yield || '-',
-        rentalIncome: product.rental_income || '-'
-      },
       status: product.status,
+      summary: product.summary,
+      
+      // 投资信息
+      totalOffering: product.total_offering,
+      subscribed: product.subscribed,
+      totalSubscriptionTokens: product.total_subscription_tokens,
+      subscribedTokens: product.subscribed_tokens,
+      currentSubscription: product.current_subscription,
+      totalSubscription: product.total_subscription,
+      
+      // 关键事实
+      loanAmount: product.loan_amount,
+      annualInterestRate: product.annual_interest_rate,
+      loanTerm: product.loan_term,
+      ltv: product.ltv,
+      drawdownDate: product.drawdown_date,
+      earlyRepayment: product.early_repayment,
+      repaymentArrangement: product.repayment_arrangement,
+      
+      // 相关主体
+      issuer: product.issuer,
+      pwShareholders: product.pw_shareholders,
+      lender: product.lender,
+      borrower: product.borrower,
+      guarantor: product.guarantor,
+      
+      // 提款与利息
+      disbursementMethod: product.disbursement_method,
+      interest: product.interest,
+      earlyRepaymentDetails: product.early_repayment_details,
+      maturityDate: product.maturity_date,
+      
+      // 抵押物
+      propertyAddress: product.property_address,
+      valuation: product.valuation,
+      securityRank: product.security_rank,
+      lvr: product.lvr,
+      
+      // 违约与补救
+      defaultInterestRate: product.default_interest_rate,
+      defaultTriggers: product.default_triggers,
+      defaultProcess: product.default_process,
+      
+      // 链上与文档
+      issuerToken: product.issuer_token,
+      loanToken: product.loan_token,
+      valuationReport: product.valuation_report,
+      mortgageDeed: product.mortgage_deed,
+      
+      // 系统字段
       createdAt: product.created_at,
-      updatedAt: product.updated_at
+      updatedAt: product.updated_at,
+      
+      // 前端显示需要的字段
+      image: getProductImage(product.code)
     }));
     
-    res.cc('获取产品列表成功', 0, formattedProducts);
+    res.cc('获取产品详情列表成功', 0, formattedProducts);
   } catch (error) {
-    console.error('获取产品列表失败:', error);
-    res.cc('获取产品列表失败', 1);
-  }
-};
-
-// 根据产品ID获取产品详情
-const getProductById = async (req, res) => {
-  try {
-    const { productId } = req.params;
-    
-    const sql = `
-      SELECT 
-        product_id,
-        name,
-        code,
-        subtitle,
-        image,
-        type,
-        region,
-        risk,
-        target_yield,
-        current_price,
-        collateral_property_value,
-        loan_amount,
-        target_loan_yield,
-        rental_income,
-        status,
-        created_at,
-        updated_at
-      FROM rwa_loan_product 
-      WHERE product_id = ? AND status = 'active'
-    `;
-    
-    const [rows] = await db.execute(sql, [productId]);
-    
-    if (rows.length === 0) {
-      return res.cc('产品不存在或已下架', 1);
-    }
-    
-    // 格式化数据以匹配前端字段名
-    const product = rows[0];
-    const formattedProduct = {
-      id: product.product_id,
-      code: product.code,
-      name: product.name,
-      subtitle: product.subtitle,
-      image: product.image,
-      type: product.type,
-      region: product.region,
-      risk: product.risk,
-      targetYield: product.target_yield,
-      metrics: {
-        currentElaraPrice: product.current_price ? `A$${product.current_price.toFixed(2)}` : '-',
-        collateralPropertyValue: product.collateral_property_value ? `A$${product.collateral_property_value.toLocaleString()}` : '-',
-        loanAmount: product.loan_amount ? `A$${product.loan_amount.toLocaleString()}` : '-',
-        targetLoanYield: product.target_loan_yield || '-',
-        rentalIncome: product.rental_income || '-'
-      },
-      status: product.status,
-      createdAt: product.created_at,
-      updatedAt: product.updated_at
-    };
-    
-    res.cc('获取产品详情成功', 0, formattedProduct);
-  } catch (error) {
-    console.error('获取产品详情失败:', error);
-    res.cc('获取产品详情失败', 1);
+    console.error('获取产品详情列表失败:', error);
+    res.cc('获取产品详情列表失败', 1);
   }
 };
 
@@ -129,57 +101,87 @@ const getProductByCode = async (req, res) => {
   try {
     const { code } = req.params;
     
-    const sql = `
-      SELECT 
-        product_id,
-        name,
-        code,
-        subtitle,
-        image,
-        type,
-        region,
-        risk,
-        target_yield,
-        current_price,
-        collateral_property_value,
-        loan_amount,
-        target_loan_yield,
-        rental_income,
-        status,
-        created_at,
-        updated_at
-      FROM rwa_loan_product 
-      WHERE code = ? AND status = 'active'
-    `;
-    
-    const [rows] = await db.execute(sql, [code]);
-    
-    if (rows.length === 0) {
-      return res.cc('产品不存在或已下架', 1);
+    if (!code) {
+      return res.cc('缺少产品代码参数', 1);
     }
     
-    // 格式化数据以匹配前端字段名
+    const sql = `
+      SELECT * FROM product_details 
+      WHERE code = ?
+    `;
+    
+    const [rows] = await mysql.promise().execute(sql, [code]);
+    
+    if (rows.length === 0) {
+      return res.cc('产品不存在', 1);
+    }
+    
     const product = rows[0];
     const formattedProduct = {
-      id: product.product_id,
+      id: product.id,
       code: product.code,
       name: product.name,
       subtitle: product.subtitle,
-      image: product.image,
       type: product.type,
       region: product.region,
       risk: product.risk,
       targetYield: product.target_yield,
-      metrics: {
-        currentElaraPrice: product.current_price ? `A$${product.current_price.toFixed(2)}` : '-',
-        collateralPropertyValue: product.collateral_property_value ? `A$${product.collateral_property_value.toLocaleString()}` : '-',
-        loanAmount: product.loan_amount ? `A$${product.loan_amount.toLocaleString()}` : '-',
-        targetLoanYield: product.target_loan_yield || '-',
-        rentalIncome: product.rental_income || '-'
-      },
       status: product.status,
+      summary: product.summary,
+      
+      // 投资信息
+      totalOffering: product.total_offering,
+      subscribed: product.subscribed,
+      totalSubscriptionTokens: product.total_subscription_tokens,
+      subscribedTokens: product.subscribed_tokens,
+      currentSubscription: product.current_subscription,
+      totalSubscription: product.total_subscription,
+      
+      // 关键事实
+      loanAmount: product.loan_amount,
+      annualInterestRate: product.annual_interest_rate,
+      loanTerm: product.loan_term,
+      ltv: product.ltv,
+      drawdownDate: product.drawdown_date,
+      earlyRepayment: product.early_repayment,
+      repaymentArrangement: product.repayment_arrangement,
+      
+      // 相关主体
+      issuer: product.issuer,
+      pwShareholders: product.pw_shareholders,
+      lender: product.lender,
+      borrower: product.borrower,
+      guarantor: product.guarantor,
+      
+      // 提款与利息
+      disbursementMethod: product.disbursement_method,
+      interest: product.interest,
+      earlyRepaymentDetails: product.early_repayment_details,
+      maturityDate: product.maturity_date,
+      
+      // 抵押物
+      propertyAddress: product.property_address,
+      valuation: product.valuation,
+      securityRank: product.security_rank,
+      lvr: product.lvr,
+      
+      // 违约与补救
+      defaultInterestRate: product.default_interest_rate,
+      defaultTriggers: product.default_triggers,
+      defaultProcess: product.default_process,
+      
+      // 链上与文档
+      issuerToken: product.issuer_token,
+      loanToken: product.loan_token,
+      valuationReport: product.valuation_report,
+      mortgageDeed: product.mortgage_deed,
+      
+      // 系统字段
       createdAt: product.created_at,
-      updatedAt: product.updated_at
+      updatedAt: product.updated_at,
+      
+      // 前端显示需要的字段
+      image: getProductImage(product.code)
     };
     
     res.cc('获取产品详情成功', 0, formattedProduct);
@@ -189,53 +191,50 @@ const getProductByCode = async (req, res) => {
   }
 };
 
-// 创建新产品
-const createProduct = async (req, res) => {
+// 更新产品订阅信息
+const updateProductSubscription = async (req, res) => {
   try {
-    const {
-      product_id,
-      name,
-      code,
-      subtitle,
-      image,
-      type,
-      region,
-      risk,
-      target_yield,
-      current_price,
-      collateral_property_value,
-      loan_amount,
-      target_loan_yield,
-      rental_income,
-      status = 'active'
-    } = req.body;
+    const { code } = req.params;
+    const { subscribed, subscribed_tokens, current_subscription } = req.body;
+    
+    if (!code) {
+      return res.cc('缺少产品代码参数', 1);
+    }
     
     const sql = `
-      INSERT INTO rwa_loan_product (
-        product_id, name, code, subtitle, image, type, region, risk,
-        target_yield, current_price, collateral_property_value, loan_amount,
-        target_loan_yield, rental_income, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      UPDATE product_details 
+      SET subscribed = ?, subscribed_tokens = ?, current_subscription = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE code = ?
     `;
     
-    const values = [
-      product_id, name, code, subtitle, image, type, region, risk,
-      target_yield, current_price, collateral_property_value, loan_amount,
-      target_loan_yield, rental_income, status
-    ];
+    const [result] = await mysql.promise().execute(sql, [subscribed, subscribed_tokens, current_subscription, code]);
     
-    const [result] = await db.execute(sql, values);
-    
-    res.cc('创建产品成功', 0, { id: result.insertId, product_id });
+    if (result.affectedRows > 0) {
+      res.cc('更新产品订阅信息成功', 0);
+    } else {
+      res.cc('产品不存在或更新失败', 1);
+    }
   } catch (error) {
-    console.error('创建产品失败:', error);
-    res.cc('创建产品失败', 1);
+    console.error('更新产品订阅信息失败:', error);
+    res.cc('更新产品订阅信息失败', 1);
   }
 };
 
+// 根据产品代码获取对应的图片路径
+function getProductImage(code) {
+  const imageMap = {
+    'RWA001': '/pics/TYMU.png',
+    'RWA002': '/pics/SQNB.png',
+    'RWA003': '/pics/LZYT.png',
+    'YYD': '/pics/YYD.png',
+    'COMP': '/pics/TYMU.png'
+  };
+  
+  return imageMap[code] || '/pics/TYMU.png';
+}
+
 module.exports = {
-  getAllProducts,
-  getProductById,
+  getAllProductDetails,
   getProductByCode,
-  createProduct
+  updateProductSubscription
 };

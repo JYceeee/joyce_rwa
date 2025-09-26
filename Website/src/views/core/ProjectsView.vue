@@ -1,11 +1,11 @@
 <template>
   <div class="container">
     <header class="doc-header">
-    <h1 class="headline">Property Loans</h1>
+      <h1 class="headline">Property Loans</h1>
       <p class="subline">First-lien mortgages · LTV control · Monthly interest</p>
     </header>
 
-    <!-- 筛选栏：根据ProductDetailsInfo字段优化 -->
+    <!-- 筛选栏 -->
     <div class="filters" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0 6px;">
       <input v-model="filters.q" class="input" placeholder="Search code/name/subtitle" style="max-width:240px;height:38px" />
       <select v-model="filters.type" class="input" style="max-width:160px;height:38px">
@@ -56,13 +56,28 @@
       </span>
     </div>
 
-    <!-- 文档式列表：每个项目像一页 memo -->
-    <section class="doc-list">
+    <!-- 加载状态 -->
+    <div v-if="loading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>正在加载产品数据...</p>
+    </div>
+
+    <!-- 错误状态 -->
+    <div v-else-if="error" class="error-container">
+      <div class="error-message">
+        <h3>加载失败</h3>
+        <p>{{ error }}</p>
+        <button @click="loadProducts" class="btn retry-btn">重试</button>
+      </div>
+    </div>
+
+    <!-- 文档式列表 -->
+    <section v-else class="doc-list">
       <article
         v-for="p in filteredProducts"
         :key="p.code"
         class="doc-card"
-        aria-labelledby="title-{{p.code}}"
+        aria-labelledby="'title-' + p.code"
       >
          <!-- 主要内容区域 -->
          <div class="main-content">
@@ -105,19 +120,19 @@
            <div class="investment-grid">
              <div class="investment-item">
                <div class="investment-label">Collateral Value</div>
-               <div class="investment-value">{{ p.metrics?.collateralPropertyValue || 'TBA' }}</div>
+               <div class="investment-value">{{ p.valuation || 'TBA' }}</div>
              </div>
              <div class="investment-item">
                <div class="investment-label">Loan Coupon</div>
-               <div class="investment-value">{{ p.metrics?.targetLoanYield || (p.targetYield ? p.targetYield.toFixed(1) + '% p.a.' : 'TBA') }}</div>
+               <div class="investment-value">{{ p.annualInterestRate || (p.targetYield ? p.targetYield.toFixed(1) + '% p.a.' : 'TBA') }}</div>
              </div>
              <div class="investment-item">
                <div class="investment-label">Total Offering</div>
-               <div class="investment-value">{{ p.totalOffering || 'A$1,000,000' }}</div>
+               <div class="investment-value">{{ formatCurrency(p.totalOffering) || 'TBA' }}</div>
              </div>
              <div class="investment-item">
                <div class="investment-label">Subscribed</div>
-               <div class="investment-value">{{ p.subscribed || 'A$350,000' }}</div>
+               <div class="investment-value">{{ formatCurrency(p.subscribed) || 'TBA' }}</div>
              </div>
            </div>
            
@@ -157,10 +172,10 @@
                
                <!-- Completed状态: 只显示Detail -->
                <template v-else-if="p.status === 'completed'">
-          <a href="#" class="btn small" @click.prevent="openDetail(p.code)">Detail</a>
+                 <a href="#" class="btn small" @click.prevent="openDetail(p.code)">Detail</a>
                </template>
              </div>
-        </div>
+           </div>
          </section>
       </article>
     </section>
@@ -168,14 +183,93 @@
 </template>
 
 <script>
-import { products } from '@/data/ProductDetailsInfo.js'
+import { productAPI } from '@/service/api'
 
 export default { 
   name: 'ProjectsView',
   data(){
     return {
       filters: { q: '', type: '', region: '', risk: '', status: '', minYield: 0 },
-      products: products
+      products: [],
+      loading: true,
+      error: null
+    }
+  },
+  async mounted() {
+    await this.loadProducts()
+  },
+  methods: {
+    async loadProducts() {
+      try {
+        this.loading = true
+        this.error = null
+        const response = await productAPI.getAllProducts()
+        
+        if (response.status === 0) {
+          this.products = response.data || []
+        } else {
+          this.error = response.message || '获取产品数据失败'
+          console.error('API返回错误:', response)
+        }
+      } catch (error) {
+        this.error = '网络错误，无法获取产品数据'
+        console.error('加载产品数据失败:', error)
+      } finally {
+        this.loading = false
+      }
+    },
+    formatCurrency(value) {
+      if (!value) return null
+      const num = parseFloat(value)
+      if (isNaN(num)) return value
+      return `A$${num.toLocaleString()}`
+    },
+    resetFilters(){ this.filters = { q: '', type: '', region: '', risk: '', status: '', minYield: 0 } },
+    openDetail(code){
+      const product = this.products.find(x => x.code === code)
+      try { sessionStorage.setItem('lastProduct', JSON.stringify(product)) } catch(e) {}
+      const projectId = product.project_id || code
+      this.$router.push({ name: 'detail', params: { id: projectId } })
+    },
+    openTrade(code){
+      const product = this.products.find(x => x.code === code)
+      try { sessionStorage.setItem('lastProduct', JSON.stringify(product)) } catch(e) {}
+      this.$router.push({ name: 'tradeProject', params: { code } })
+    },
+    getProgressPercentage(product) {
+      if (!product.totalOffering || !product.subscribed) return 0
+      
+      // 提取数字部分（移除货币符号和逗号）
+      const totalStr = product.totalOffering.toString().replace(/[A$,]/g, '')
+      const subscribedStr = product.subscribed.toString().replace(/[A$,]/g, '')
+      
+      const total = parseFloat(totalStr)
+      const subscribed = parseFloat(subscribedStr)
+      
+      if (total === 0) return 0
+      
+      const percentage = (subscribed / total) * 100
+      return Math.min(Math.round(percentage), 100)
+    },
+    getStatusText(status) {
+      const statusMap = {
+        'active': 'Active',
+        'upcoming': 'Upcoming',
+        'research': 'Research',
+        'planning': 'Planning',
+        'completed': 'Completed'
+      }
+      return statusMap[status] || 'Unknown'
+    },
+    joinWaitlist(code) {
+      const product = this.products.find(x => x.code === code)
+      alert(`已加入 ${product.name} 的等待列表！`)
+      console.log('Join waitlist for:', code)
+    },
+    registerInterest(code) {
+      const product = this.products.find(x => x.code === code)
+      alert(`已注册对 ${product.name} 的投资兴趣！`)
+      console.log('Register interest for:', code)
     }
   },
   computed: {
@@ -216,57 +310,6 @@ export default {
              this.filters.status !== '' || 
              this.filters.minYield > 0
     }
-  },
-  methods: {
-    resetFilters(){ this.filters = { q: '', type: '', region: '', risk: '', status: '', minYield: 0 } },
-    openDetail(code){
-      const product = this.products.find(x => x.code === code)
-      try { sessionStorage.setItem('lastProduct', JSON.stringify(product)) } catch(e) {}
-      const projectId = product.project_id || code
-      this.$router.push({ name: 'detail', params: { id: projectId } })
-    },
-    openTrade(code){
-      const product = this.products.find(x => x.code === code)
-      try { sessionStorage.setItem('lastProduct', JSON.stringify(product)) } catch(e) {}
-      this.$router.push({ name: 'tradeProject', params: { code } })
-    },
-    getProgressPercentage(product) {
-      if (!product.totalOffering || !product.subscribed) return 0
-      
-      // 提取数字部分（移除货币符号和逗号）
-      const totalStr = product.totalOffering.replace(/[A$,]/g, '')
-      const subscribedStr = product.subscribed.replace(/[A$,]/g, '')
-      
-      const total = parseFloat(totalStr)
-      const subscribed = parseFloat(subscribedStr)
-      
-      if (total === 0) return 0
-      
-      const percentage = (subscribed / total) * 100
-      return Math.min(Math.round(percentage), 100)
-    },
-    getStatusText(status) {
-      const statusMap = {
-        'active': 'Active',
-        'upcoming': 'Upcoming',
-        'research': 'Research',
-        'planning': 'Planning',
-        'completed': 'Completed'
-      }
-      return statusMap[status] || 'Unknown'
-    },
-    joinWaitlist(code) {
-      const product = this.products.find(x => x.code === code)
-      // 这里可以添加加入等待列表的逻辑
-      alert(`已加入 ${product.name} 的等待列表！`)
-      console.log('Join waitlist for:', code)
-    },
-    registerInterest(code) {
-      const product = this.products.find(x => x.code === code)
-      // 这里可以添加注册兴趣的逻辑
-      alert(`已注册对 ${product.name} 的投资兴趣！`)
-      console.log('Register interest for:', code)
-    }
   }
 }
 </script>
@@ -274,9 +317,9 @@ export default {
 <style scoped>
 :root{
   --orange:#f59e0b;
-  --ink:#e5e7eb;         /* 文档纸张文本色 */
-  --paper:#0e0f1b;       /* 深色“纸张” */
-  --rule:#2a2c3f;        /* 分隔线 */
+  --ink:#e5e7eb;
+  --paper:#0e0f1b;
+  --rule:#2a2c3f;
   --muted:#9ca3af;
 }
 
@@ -286,7 +329,6 @@ export default {
   padding: 20px;
 }
 
-/* 顶部文档页眉 */
 .doc-header{
   border-bottom: 1px solid var(--rule);
   padding-bottom: 10px;
@@ -302,7 +344,6 @@ export default {
   font-size: 14px;
 }
 
-/* 筛选栏 */
 .filters {
   background: transparent;
   padding: 16px 0;
@@ -322,14 +363,65 @@ export default {
 }
 .filters .btn:hover { background: #4b5563; }
 
-/* 文档式列表 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--muted);
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #374151;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+.error-message {
+  text-align: center;
+  color: var(--muted);
+}
+
+.error-message h3 {
+  color: #ef4444;
+  margin-bottom: 8px;
+}
+
+.retry-btn {
+  background: #ef4444;
+  border: 1px solid #ef4444;
+  color: #ffffff;
+  margin-top: 12px;
+}
+
+.retry-btn:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
 .doc-list{
   display: grid;
   grid-template-columns: 1fr;
   gap: 18px;
 }
 
-/* 单页文档卡 */
 .doc-card{
   background: #141426;
   border: 1px solid var(--rule);
@@ -339,7 +431,6 @@ export default {
   box-shadow: 0 6px 18px rgba(0,0,0,.25);
 }
 
-/* 主要内容区域布局 */
 .main-content {
   display: grid;
   grid-template-columns: 1fr 260px;
@@ -347,14 +438,12 @@ export default {
   align-items: start;
 }
 
-/* 左侧内容区域 */
 .left-content {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-/* 项目标题信息section */
 .title-header {
   display: flex;
   align-items: flex-start;
@@ -430,12 +519,10 @@ export default {
   font-size: 14px;
 }
 
-/* 摘要section */
 .summary-section {
   margin: 6px 0 2px;
 }
 
-/* 右侧图片区域 */
 .right-content {
   display: flex;
   justify-content: center;
@@ -451,14 +538,12 @@ export default {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* 分隔线像纸张的横线 */
 .sep{
   border: none;
   border-top: 1px dashed var(--rule);
   margin: 14px 0;
 }
 
-/* 文档段落标题与内容 */
 .doc-section{ margin: 6px 0 2px; }
 .doc-h3{
   margin: 0 0 8px 0;
@@ -473,17 +558,9 @@ export default {
   line-height: 1.6;
 }
 
-/* 两栏要点 */
-.grid-two{
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-
-/* 投资信息网格布局 */
 .investment-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin-top: 8px;
 }
@@ -508,15 +585,6 @@ export default {
   font-weight: 600;
 }
 
-.progress-item {
-  grid-column: span 2;
-}
-
-.progress-item .progress-container {
-  margin-top: 2px;
-}
-
-/* 进度条和按钮同行布局 */
 .progress-actions-row {
   display: flex;
   align-items: center;
@@ -537,36 +605,6 @@ export default {
   margin: 0;
 }
 
-/* 目录式 key-value */
-.kv{ margin: 0; }
-.kv .row{
-  display: grid;
-  grid-template-columns: 140px 1fr;
-  gap: 10px;
-  padding: 8px 0;
-  border-bottom: 1px dashed var(--rule);
-}
-.kv dt{
-  color: var(--muted);
-  font-weight: 600;
-}
-.kv dd{
-  margin: 0;
-  color: #fff;
-}
-.badge{
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 999px;
-  border: 1px solid var(--rule);
-  color: #d1d5db;
-  text-transform: capitalize;
-}
-.badge[data-risk="low"]{ border-color:#10b98133; }
-.badge[data-risk="medium"]{ border-color:#f59e0b33; }
-.badge[data-risk="high"]{ border-color:#ef444433; }
-
-/* 进度条样式 */
 .progress-container {
   display: flex;
   align-items: center;
@@ -604,12 +642,6 @@ export default {
   text-align: right;
 }
 
-/* 文档页脚：按钮区域（保留你的按钮） */
-.doc-card__footer{
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid var(--rule);
-}
 .doc-actions{
   display: flex;
   gap: 12px;
@@ -669,15 +701,9 @@ export default {
 }
 
 @media (max-width: 640px){
-  .grid-two{ grid-template-columns: 1fr; }
-  
   .investment-grid {
     grid-template-columns: 1fr;
     gap: 10px;
-  }
-  
-  .progress-item {
-    grid-column: span 1;
   }
   
   .investment-label {

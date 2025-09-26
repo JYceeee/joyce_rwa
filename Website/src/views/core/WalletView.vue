@@ -227,14 +227,14 @@
             <option value="">All Types</option>
             <option value="buy">Buy</option>
             <option value="sell">Sell</option>
-            <option value="wallet_connect">Wallet Connect</option>
+            <!-- <option value="wallet_connect">Wallet Connect</option>
             <option value="wallet_disconnect">Wallet Disconnect</option>
             <option value="network_change">Network Change</option>
             <option value="metamask_connect">MetaMask Connect</option>
             <option value="metamask_disconnect">MetaMask Disconnect</option>
             <option value="wallet_status_check">Status Check</option>
             <option value="wallet_focus_check">Focus Check</option>
-            <option value="metamask_message">MetaMask Message</option>
+            <option value="metamask_message">MetaMask Message</option> -->
           </select>
         </div>
         
@@ -248,33 +248,14 @@
           </select>
         </div>
         
-        <!-- <div class="mm-filter-group">
-          <label class="mm-filter-label">Date Range</label>
-          <div class="mm-date-range">
-            <input 
-              type="date" 
-              v-model="activityFilters.startDate" 
-              class="mm-date-input"
-              :max="activityFilters.endDate || getCurrentDate()"
-            />
-            <span class="mm-date-separator">to</span>
-            <input 
-              type="date" 
-              v-model="activityFilters.endDate" 
-              class="mm-date-input"
-              :min="activityFilters.startDate"
-              :max="getCurrentDate()"
-            />
-          </div> -->
-        <!-- </div> -->
         
         <div class="mm-filter-actions">
           <button class="mm-btn mm-outline" @click="clearFilters">
             Clear
           </button>
-          <button class="mm-btn mm-primary" @click="applyFilters">
+          <!-- <button class="mm-btn mm-primary" @click="applyFilters">
             Apply
-          </button>
+          </button> -->
         </div>
       </div>
     </div>
@@ -301,131 +282,9 @@
         </button>
       </div>
       
-      <!-- 左右分栏布局 - 两个section都在wallet activity log里面 -->
+      <!-- 左右分栏布局  -->
       <div class="mm-activity-columns">
-        <!-- 左侧：交易活动 (buy/sell) - 始终在左侧 -->
-        <!-- <div class="mm-activity-left">
-          <div class="mm-activity-section-header">
-            <h4 class="mm-activity-section-title">Transaction Activity</h4>
-          </div>
-          <div v-for="activity in paginatedTransactionActivities" :key="activity.id" class="mm-activity-item">
-            <div class="mm-activity-header-item">
-              <div class="mm-activity-type" :class="activity.type">
-                <span class="mm-activity-icon">
-                  {{ getActivityIcon(activity.type) }}
-                </span>
-                <span class="mm-activity-title">{{ getActivityTitle(activity.type) }}</span>
-              </div>
-              <div class="mm-activity-time">{{ formatTime(activity.timestamp) }}</div>
-            </div>
-            
-            <div class="mm-activity-details"> -->
-          
-              <!-- 交易类型活动 -->
-          <!-- <div v-if="activity.type === 'buy' || activity.type === 'sell'" class="mm-activity-project">
-            <span class="mm-activity-label">Project:</span>
-            <span class="mm-activity-value">{{ activity.project_code }} - {{ activity.project_name }}</span>
-          </div>
-          <div v-if="activity.type === 'buy' || activity.type === 'sell'" class="mm-activity-amount">
-            <span class="mm-activity-label">Amount:</span>
-            <span class="mm-activity-value">{{ activity.amount }} tokens</span>
-          </div> -->
-          
-          <!-- 钱包连接/断开活动 -->
-          <!-- <div v-if="activity.type === 'wallet_connect' || activity.type === 'wallet_disconnect'" class="mm-activity-wallet">
-            <span class="mm-activity-label">Wallet Address:</span>
-            <span class="mm-activity-value">{{ formatAddress(activity.wallet_address) }}</span>
-          </div> -->
-          
-          <!-- 网络变化活动 -->
-          <!-- <div v-if="activity.type === 'network_change'" class="mm-activity-network">
-            <span class="mm-activity-label">Network:</span>
-            <span class="mm-activity-value">{{ activity.network_name }}</span>
-          </div>
-          <div v-if="activity.type === 'network_change'" class="mm-activity-network-id">
-            <span class="mm-activity-label">Chain ID:</span>
-            <span class="mm-activity-value">{{ activity.network_id }}</span>
-          </div> -->
-          
-          <!-- MetaMask连接活动 -->
-          <!-- <div v-if="activity.type === 'metamask_connect' || activity.type === 'metamask_disconnect'" class="mm-activity-metamask">
-            <span class="mm-activity-label">Extension:</span>
-            <span class="mm-activity-value">MetaMask</span>
-          </div>
-          <div v-if="activity.type === 'metamask_connect' && activity.chain_id" class="mm-activity-chain">
-            <span class="mm-activity-label">Chain ID:</span>
-            <span class="mm-activity-value">{{ activity.chain_id }}</span>
-          </div>
-          <div v-if="activity.type === 'metamask_disconnect' && activity.error" class="mm-activity-error">
-            <span class="mm-activity-label">Error:</span>
-            <span class="mm-activity-value">{{ activity.error }}</span>
-          </div> -->
-          
-          <!-- 状态检查活动 -->
-          <!-- <div v-if="activity.type === 'wallet_status_check' || activity.type === 'wallet_focus_check'" class="mm-activity-status">
-            <span class="mm-activity-label">Status:</span>
-            <span class="mm-activity-value">Checked</span>
-          </div>
-          <div v-if="activity.type === 'wallet_status_check' || activity.type === 'wallet_focus_check'" class="mm-activity-wallet">
-            <span class="mm-activity-label">Wallet:</span>
-            <span class="mm-activity-value">{{ formatAddress(activity.wallet_address) }}</span>
-          </div> -->
-          
-          <!-- 消息活动 -->
-          <!-- <div v-if="activity.type === 'metamask_message'" class="mm-activity-message">
-            <span class="mm-activity-label">Message Type:</span>
-            <span class="mm-activity-value">{{ activity.message_type }}</span>
-          </div> -->
-          
-          <!-- 通用消息显示 -->
-          <!-- <div v-if="activity.message" class="mm-activity-message-text">
-            <span class="mm-activity-label">Message:</span>
-            <span class="mm-activity-value">{{ activity.message }}</span>
-          </div> -->
-          
-          <!-- Etherscan详情 -->
-          <!-- <div v-if="activity.etherscan" class="mm-activity-etherscan">
-            <div class="mm-activity-etherscan-info">
-              <span class="mm-activity-label">From:</span>
-              <span class="mm-activity-value">{{ formatAddress(activity.etherscan.from) }}</span>
-            </div>
-            <div class="mm-activity-etherscan-info">
-              <span class="mm-activity-label">To:</span>
-              <span class="mm-activity-value">{{ formatAddress(activity.etherscan.to) }}</span>
-            </div>
-            <div class="mm-activity-etherscan-info">
-              <span class="mm-activity-label">Value:</span>
-              <span class="mm-activity-value">{{ formatEtherValue(activity.etherscan.value) }} ETH</span>
-            </div>
-            <div class="mm-activity-etherscan-info">
-              <span class="mm-activity-label">Gas:</span>
-              <span class="mm-activity-value">{{ activity.etherscan.gasUsed ? parseInt(activity.etherscan.gasUsed, 16).toLocaleString() : 'N/A' }}</span>
-            </div>
-            <div class="mm-activity-etherscan-info">
-              <span class="mm-activity-label">Block:</span>
-              <span class="mm-activity-value">{{ activity.etherscan.blockNumber ? parseInt(activity.etherscan.blockNumber, 16).toLocaleString() : 'N/A' }}</span>
-            </div>
-            <div class="mm-activity-etherscan-info">
-              <span class="mm-activity-label">Status:</span>
-              <span class="mm-activity-value" :class="{ 'mm-status-success': activity.etherscan.status === '0x1', 'mm-status-failed': activity.etherscan.status === '0x0' }">
-                {{ activity.etherscan.status === '0x1' ? 'Success' : activity.etherscan.status === '0x0' ? 'Failed' : 'Pending' }}
-              </span>
-            </div>
-          </div>
-        </div> -->
-        
-        <!-- Etherscan链接 -->
-        <!-- <div v-if="activity.etherscan && activity.etherscan.etherscanUrl" class="mm-activity-footer">
-          <a :href="activity.etherscan.etherscanUrl" 
-             target="_blank" 
-             class="mm-etherscan-link">
-            🔗 View on Etherscan
-          </a>
-        </div>
-        </div>
-        </div> -->
-
-        <!-- 左侧：交易活动 (buy/sell) -->
+                <!-- 左侧：交易活动 (buy/sell) -->
         <div class="mm-activity-left">
             <div class="mm-activity-section-header">
               <h4 class="mm-activity-section-title">Transaction Activity</h4>

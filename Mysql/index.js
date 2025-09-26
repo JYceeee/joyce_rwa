@@ -35,11 +35,13 @@ const { expressjwt: expressJWT } = require('express-jwt')
 const userRouter = require('./src/routers/userRouter')
 const transactionRouter = require('./src/routers/transactionRouter')
 const projectRouter = require('./src/routers/projectRouter')
+const productRouter = require('./src/routers/productRouter')
 
 // 使用路由模块
 app.use('/user', userRouter)
 app.use('/transaction', transactionRouter)
 app.use('/api', projectRouter)
+app.use('/api', productRouter)
 
 // 定义全局错误级别中间件
 app.use((err, req, res, next) => {
