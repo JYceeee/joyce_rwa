@@ -171,10 +171,6 @@
             <div class="collateral-label">Security Ranking</div>
             <div class="collateral-value">{{ p.security_rank }}</div>
           </div>
-          <div class="collateral-item">
-            <div class="collateral-label">LVR (Loan-to-Value Ratio)</div>
-            <div class="collateral-value">{{ p.lvr }}%</div>
-          </div>
           <div class="collateral-item full-width">
             <div class="collateral-label">Project Summary</div>
             <div class="collateral-value">{{ p.summary }}</div>

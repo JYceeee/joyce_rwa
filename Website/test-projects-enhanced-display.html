@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProjectsView增强显示测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .result {
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #28a745;
+        }
+        .error {
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #dc3545;
+            color: #721c24;
+        }
+        .doc-card {
+            background: #141426;
+            border: 1px solid #374151;
+            border-radius: 14px;
+            padding: 18px;
+            color: #ffffff;
+            box-shadow: 0 6px 18px rgba(0,0,0,.25);
+            margin-bottom: 16px;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 260px;
+            gap: 20px;
+            align-items: start;
+        }
+        .left-content {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .title-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .title-section h2 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .doc-code {
+            background: #007bff;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+        .doc-name {
+            color: #ffffff;
+        }
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-completed {
+            background: #cce5ff;
+            color: #004085;
+        }
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .doc-subtitle {
+            color: #9ca3af;
+            font-size: 14px;
+            margin: 8px 0 0 0;
+        }
+        .project-basic-info {
+            display: flex;
+            gap: 16px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .info-label {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .info-value {
+            font-size: 14px;
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .info-value.risk-low {
+            color: #059669;
+        }
+        .info-value.risk-medium {
+            color: #d97706;
+        }
+        .info-value.risk-high {
+            color: #dc2626;
+        }
+        .summary-section h3 {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+        }
+        .doc-text {
+            color: #d1d5db;
+            font-size: 14px;
+            line-height: 1.5;
+            margin: 0;
+        }
+        .right-content {
+            display: flex;
+            justify-content: center;
+        }
+        .doc-cover {
+            width: 240px;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .doc-section h3 {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0 0 16px 0;
+        }
+        .investment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .investment-item {
+            background: #1f2937;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #374151;
+        }
+        .investment-label {
+            font-size: 12px;
+            color: #9ca3af;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .investment-value {
+            font-size: 16px;
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .progress-actions-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+        .progress-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .progress-bar {
+            flex: 1;
+            height: 8px;
+            background: #374151;
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+        }
+        .progress-fill {
+            background: #10b981;
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        .progress-empty {
+            background: #374151;
+            height: 100%;
+        }
+        .progress-text {
+            font-size: 12px;
+            color: #9ca3af;
+            font-weight: 600;
+            min-width: 40px;
+        }
+        .doc-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>ProjectsView增强显示测试</h1>
+    <p>此页面用于测试ProjectsView页面的增强显示功能，包括更多产品详情字段。</p>
+
+    <div class="test-container">
+        <div class="test-section">
+            <div class="test-title">1. 数据获取和字段映射测试</div>
+            <div id="dataTestResult">
+                <div class="loading">正在测试数据获取...</div>
+            </div>
+            <button onclick="testDataMapping()">测试数据映射</button>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">2. 增强产品卡片显示测试</div>
+            <div id="productCardsDisplay">
+                <div class="loading">先进行数据映射测试</div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">3. 新增字段验证</div>
+            <div id="fieldValidation">
+                <div class="loading">等待数据映射测试完成</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let productsData = [];
+
+        // 测试数据映射
+        async function testDataMapping() {
+            const resultDiv = document.getElementById('dataTestResult');
+            resultDiv.innerHTML = '<div class="loading">正在获取和映射数据...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/product_details');
+                const data = await response.json();
+                
+                if (data.status === 0) {
+                    const rawProducts = data.data || [];
+                    
+                    // 模拟ProjectsView中的字段映射
+                    productsData = rawProducts.map(product => ({
+                        ...product,
+                        totalOffering: product.total_token,
+                        subscribed: product.current_subscribed_token,
+                        targetYield: product.target_yield,
+                        ltv: product.LTV,
+                        annualInterestRate: product.annual_interest_rate,
+                        loanAmount: product.loan_amount,
+                        valuation: product.valuation,
+                        image: getProductImage(product.code)
+                    }));
+                    
+                    resultDiv.innerHTML = `
+                        <div class="result">
+                            ✅ 数据映射成功<br>
+                            产品数量: ${productsData.length}<br>
+                            映射时间: ${new Date().toLocaleString()}
+                        </div>
+                    `;
+                    
+                    // 显示产品卡片
+                    displayProductCards();
+                    
+                    // 验证新增字段
+                    validateNewFields();
+                    
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            ❌ 获取数据失败<br>
+                            状态码: ${data.status}<br>
+                            错误消息: ${data.message}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ 网络错误<br>
+                        错误: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // 显示产品卡片
+        function displayProductCards() {
+            const displayDiv = document.getElementById('productCardsDisplay');
+            
+            if (productsData.length === 0) {
+                displayDiv.innerHTML = '<div class="loading">没有产品数据</div>';
+                return;
+            }
+            
+            let html = `<h3>产品列表 (${productsData.length} 个产品)</h3>`;
+            
+            productsData.forEach((product, index) => {
+                const progressPercentage = getProgressPercentage(product);
+                
+                html += `
+                    <div class="doc-card">
+                        <div class="main-content">
+                            <div class="left-content">
+                                <div class="title-section">
+                                    <div class="title-header">
+                                        <h2>
+                                            <span class="doc-code">${product.code}</span>
+                                            <span class="doc-name">${product.name}</span>
+                                        </h2>
+                                        <div class="status-badge status-${product.status}">${product.status}</div>
+                                    </div>
+                                    <p class="doc-subtitle">${product.subtitle}</p>
+                                    
+                                    <div class="project-basic-info">
+                                        <div class="info-item">
+                                            <span class="info-label">Type:</span>
+                                            <span class="info-value">${product.type}</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Region:</span>
+                                            <span class="info-value">${product.region}</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Risk:</span>
+                                            <span class="info-value risk-${product.risk}">${product.risk}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <hr style="border: none; border-top: 1px solid #374151; margin: 16px 0;">
+                                
+                                <div class="summary-section">
+                                    <h3>Summary</h3>
+                                    <p class="doc-text">${product.summary || 'Mortgage-backed loan project with controlled LTV and monthly coupon schedule. Suitable for investors seeking income with real-asset collateral.'}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="right-content">
+                                <img src="${product.image}" class="doc-cover" alt="${product.code}" />
+                            </div>
+                        </div>
+                        
+                        <div class="doc-section">
+                            <h3>Investment Details</h3>
+                            <div class="investment-grid">
+                                <div class="investment-item">
+                                    <div class="investment-label">Collateral Value</div>
+                                    <div class="investment-value">A$${formatNumber(product.valuation) || 'TBA'}</div>
+                                </div>
+                                <div class="investment-item">
+                                    <div class="investment-label">Loan Amount</div>
+                                    <div class="investment-value">A$${formatNumber(product.loanAmount) || 'TBA'}</div>
+                                </div>
+                                <div class="investment-item">
+                                    <div class="investment-label">Total Offering</div>
+                                    <div class="investment-value">A$${formatNumber(product.totalOffering) || 'TBA'}</div>
+                                </div>
+                                <div class="investment-item">
+                                    <div class="investment-label">Subscribed</div>
+                                    <div class="investment-value">A$${formatNumber(product.subscribed) || 'TBA'}</div>
+                                </div>
+                                <div class="investment-item">
+                                    <div class="investment-label">Loan Coupon</div>
+                                    <div class="investment-value">${product.annualInterestRate || (product.targetYield ? product.targetYield.toFixed(1) + '% p.a.' : 'TBA')}</div>
+                                </div>
+                                <div class="investment-item">
+                                    <div class="investment-label">LTV</div>
+                                    <div class="investment-value">${product.ltv || 'TBA'}%</div>
+                                </div>
+                                <div class="investment-item">
+                                    <div class="investment-label">Loan Term</div>
+                                    <div class="investment-value">${product.loanTerm || 'TBA'} months</div>
+                                </div>
+                                <div class="investment-item">
+                                    <div class="investment-label">Target Yield</div>
+                                    <div class="investment-value">${product.targetYield || 'TBA'}%</div>
+                                </div>
+                            </div>
+                            
+                            <div class="progress-actions-row">
+                                <div class="progress-container">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${progressPercentage}%"></div>
+                                        <div class="progress-empty" style="width: ${100 - progressPercentage}%"></div>
+                                    </div>
+                                    <span class="progress-text">${progressPercentage}%</span>
+                                </div>
+                                <div class="doc-actions">
+                                    <button class="btn btn-primary">Trade</button>
+                                    <button class="btn btn-secondary">Detail</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            displayDiv.innerHTML = html;
+        }
+
+        // 验证新增字段
+        function validateNewFields() {
+            const validationDiv = document.getElementById('fieldValidation');
+            
+            if (productsData.length === 0) {
+                validationDiv.innerHTML = '<div class="loading">没有数据可验证</div>';
+                return;
+            }
+            
+            const sampleProduct = productsData[0];
+            const newFields = [
+                { field: 'loanAmount', label: 'Loan Amount', value: sampleProduct.loanAmount },
+                { field: 'ltv', label: 'LTV', value: sampleProduct.ltv },
+                { field: 'loanTerm', label: 'Loan Term', value: sampleProduct.loanTerm },
+                { field: 'targetYield', label: 'Target Yield', value: sampleProduct.targetYield },
+                { field: 'type', label: 'Project Type', value: sampleProduct.type },
+                { field: 'region', label: 'Region', value: sampleProduct.region },
+                { field: 'risk', label: 'Risk Level', value: sampleProduct.risk }
+            ];
+            
+            let html = '<div class="result"><strong>新增字段验证结果:</strong><br>';
+            
+            newFields.forEach(field => {
+                const isValid = field.value !== undefined && field.value !== null && field.value !== '';
+                const status = isValid ? '✅' : '❌';
+                html += `${status} ${field.label}: ${field.value || 'N/A'}<br>`;
+            });
+            
+            html += '</div>';
+            validationDiv.innerHTML = html;
+        }
+
+        // 工具函数
+        function getProductImage(code) {
+            const imageMap = {
+                'RWA001': '/pics/TYMU.png',
+                'RWA002': '/pics/SQNB.png',
+                'RWA003': '/pics/LZYT.png',
+                'YYD': '/pics/YYD.png',
+                'COMP': '/pics/TYMU.png'
+            }
+            return imageMap[code] || '/pics/TYMU.png'
+        }
+
+        function formatNumber(value) {
+            if (!value) return '0'
+            const num = parseFloat(value)
+            if (isNaN(num)) return value
+            return num.toLocaleString()
+        }
+
+        function getProgressPercentage(product) {
+            if (!product.totalOffering || !product.subscribed) return 0
+            
+            const total = parseFloat(product.totalOffering.toString().replace(/[A$,]/g, ''))
+            const subscribed = parseFloat(product.subscribed.toString().replace(/[A$,]/g, ''))
+            
+            if (total === 0) return 0
+            
+            const percentage = (subscribed / total) * 100
+            return Math.min(Math.round(percentage), 100)
+        }
+
+        // 页面加载时自动测试
+        window.onload = function() {
+            testDataMapping();
+        };
+    </script>
+</body>
+</html>
+

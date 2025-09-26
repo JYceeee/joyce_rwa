@@ -309,7 +309,8 @@ export default {
   props: {
     code: {
       type: String,
-      required: true
+      required: false,
+      default: null
     }
   },
   data() {
@@ -362,7 +363,15 @@ export default {
   },
   computed: {
     projectCode() {
-      return this.code || this.$route.params.code || 'RWA001'
+      // 优先使用props，然后是路由参数，最后是默认值
+      const code = this.code || this.$route.params.code || this.$route.query.code
+      console.log('🔍 TradeProjectView: 获取项目代码:', {
+        props: this.code,
+        routeParams: this.$route.params.code,
+        routeQuery: this.$route.query.code,
+        final: code
+      })
+      return code || 'RWA001'
     },
     project() {
       // 使用从数据库加载的项目数据
@@ -433,7 +442,6 @@ export default {
           propertyAddress: product.propertyAddress,
           valuation: product.valuation,
           securityRank: product.securityRank,
-          lvr: product.lvr,
           
           // Default & Remedies 违约和补救措施
           defaultInterestRate: product.defaultInterestRate,
@@ -1632,6 +1640,26 @@ export default {
       }
     },
     
+  },
+  watch: {
+    // 监听路由变化，重新加载数据
+    '$route'(to, from) {
+      if (to.params.code !== from.params.code) {
+        console.log('🔄 TradeProjectView: 路由参数变化，重新加载数据')
+        this.loadProjectData()
+      }
+    },
+    
+    // 监听props变化
+    code: {
+      handler(newCode) {
+        if (newCode) {
+          console.log('🔄 TradeProjectView: Props代码变化，重新加载数据:', newCode)
+          this.loadProjectData()
+        }
+      },
+      immediate: true
+    }
   },
   async mounted() {
     // 加载项目数据

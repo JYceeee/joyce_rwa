@@ -3,6 +3,7 @@ const mysql = require('../../database/index');
 // 获取所有产品详情列表
 const getAllProductDetails = async (req, res) => {
   try {
+    console.log('🔍 开始查询所有产品详情...');
     const sql = `
       SELECT 
         id, code, name, subtitle, type, region, risk, target_yield, status, summary,
@@ -10,7 +11,7 @@ const getAllProductDetails = async (req, res) => {
         loan_amount, annual_interest_rate, loan_term, LTV, drawdown_date, early_repayment, repayment_arrangement,
         issuer, pw_shareholders, lender, borrower, guarantor,
         disbursement_method, interest, early_repayment_details, maturity_date,
-        property_address, valuation, security_rank, lvr,
+        property_address, valuation, security_rank, 
         default_interest_rate, default_triggers, default_process,
         issuer_token, loan_token, valuation_report, mortgage_deed,
         created_at, updated_at
@@ -63,7 +64,6 @@ const getAllProductDetails = async (req, res) => {
       propertyAddress: product.property_address,
       valuation: product.valuation,
       securityRank: product.security_rank,
-      lvr: product.lvr,
       
       // 违约与补救
       defaultInterestRate: product.default_interest_rate,
@@ -154,7 +154,6 @@ const getProductByCode = async (req, res) => {
       propertyAddress: product.property_address,
       valuation: product.valuation,
       securityRank: product.security_rank,
-      lvr: product.lvr,
       
       // 违约与补救
       defaultInterestRate: product.default_interest_rate,

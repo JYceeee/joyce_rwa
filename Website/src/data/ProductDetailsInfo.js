@@ -42,7 +42,6 @@ export const products = [
     propertyAddress: '16 Cranford Avenue, St Ives NSW 2075',
     valuation: 'AUD 1,500,000',
     securityRank: 'First mortgage',
-    lvr: '67%',
     
     // Default & Remedies
     defaultInterestRate: '18% p.a.',
@@ -98,7 +97,6 @@ export const products = [
     propertyAddress: '123 Collins Street, Melbourne VIC 3000',
     valuation: 'AUD 2,400,000',
     securityRank: 'First mortgage',
-    lvr: '75%',
     
     // Default & Remedies
     defaultInterestRate: '15% p.a.',
@@ -154,7 +152,6 @@ export const products = [
     propertyAddress: '456 Suburban Drive, Brisbane QLD 4000',
     valuation: 'AUD 980,000',
     securityRank: 'First mortgage',
-    lvr: '76.5%',
     
     // Default & Remedies
     defaultInterestRate: '12% p.a.',
@@ -209,7 +206,6 @@ export const products = [
     propertyAddress: '789 CBD Plaza, Sydney NSW 2000',
     valuation: 'AUD 1,650,000',
     securityRank: 'First mortgage',
-    lvr: '72.7%',
     
     // Default & Remedies
     defaultInterestRate: '10% p.a.',
@@ -264,7 +260,6 @@ export const products = [
     propertyAddress: '321 Premium Street, Sydney NSW 2000',
     valuation: 'AUD 2,800,000',
     securityRank: 'First mortgage',
-    lvr: '71.4%',
     
     // Default & Remedies
     defaultInterestRate: '16% p.a.',
@@ -336,7 +331,6 @@ export const productFields = {
     propertyAddress: '房产地址',
     valuation: '评估价值',
     securityRank: '抵押等级',
-    lvr: '贷款价值比'
   },
   
   // Default & Remedies 违约与补救措施字段

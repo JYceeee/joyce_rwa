@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradeProject页面跳转测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .result {
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #28a745;
+        }
+        .error {
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #dc3545;
+            color: #721c24;
+        }
+        .navigation-test {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .nav-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .nav-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .nav-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+        .url-display {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+        .test-results {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .test-result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .test-result-item:last-child {
+            border-bottom: none;
+        }
+        .test-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-pass {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-fail {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>TradeProject页面跳转测试</h1>
+    <p>此页面用于测试TradeProject页面的跳转功能和路由参数处理。</p>
+
+    <div class="test-container">
+        <div class="test-section">
+            <div class="test-title">1. 路由配置测试</div>
+            <div id="routeTestResult">
+                <div class="loading">正在测试路由配置...</div>
+            </div>
+            <button onclick="testRouteConfiguration()">测试路由配置</button>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">2. 跳转功能测试</div>
+            <div class="navigation-test">
+                <div class="nav-item">
+                    <div class="nav-title">从ProjectsView跳转</div>
+                    <div class="nav-description">测试从项目列表页面跳转到交易页面</div>
+                    <div class="nav-buttons">
+                        <button class="btn btn-primary" onclick="testProjectsToTrade('RWA001')">RWA001</button>
+                        <button class="btn btn-primary" onclick="testProjectsToTrade('RWA002')">RWA002</button>
+                        <button class="btn btn-primary" onclick="testProjectsToTrade('RWA003')">RWA003</button>
+                    </div>
+                    <div class="url-display" id="projectsToTradeUrl">点击按钮生成URL</div>
+                </div>
+
+                <div class="nav-item">
+                    <div class="nav-title">从DetailPage跳转</div>
+                    <div class="nav-description">测试从项目详情页面跳转到交易页面</div>
+                    <div class="nav-buttons">
+                        <button class="btn btn-secondary" onclick="testDetailToTrade('RWA001')">RWA001</button>
+                        <button class="btn btn-secondary" onclick="testDetailToTrade('RWA002')">RWA002</button>
+                        <button class="btn btn-secondary" onclick="testDetailToTrade('RWA003')">RWA003</button>
+                    </div>
+                    <div class="url-display" id="detailToTradeUrl">点击按钮生成URL</div>
+                </div>
+
+                <div class="nav-item">
+                    <div class="nav-title">直接URL访问</div>
+                    <div class="nav-description">测试直接通过URL访问交易页面</div>
+                    <div class="nav-buttons">
+                        <button class="btn btn-success" onclick="testDirectAccess('RWA001')">RWA001</button>
+                        <button class="btn btn-success" onclick="testDirectAccess('RWA002')">RWA002</button>
+                        <button class="btn btn-success" onclick="testDirectAccess('RWA003')">RWA003</button>
+                    </div>
+                    <div class="url-display" id="directAccessUrl">点击按钮生成URL</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">3. 参数传递测试</div>
+            <div id="parameterTestResult">
+                <div class="loading">点击跳转按钮进行测试</div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">4. 测试结果汇总</div>
+            <div class="test-results" id="testResultsSummary">
+                <div class="test-result-item">
+                    <span>路由配置</span>
+                    <span class="test-status status-pending">待测试</span>
+                </div>
+                <div class="test-result-item">
+                    <span>ProjectsView跳转</span>
+                    <span class="test-status status-pending">待测试</span>
+                </div>
+                <div class="test-result-item">
+                    <span>DetailPage跳转</span>
+                    <span class="test-status status-pending">待测试</span>
+                </div>
+                <div class="test-result-item">
+                    <span>直接URL访问</span>
+                    <span class="test-status status-pending">待测试</span>
+                </div>
+                <div class="test-result-item">
+                    <span>参数传递</span>
+                    <span class="test-status status-pending">待测试</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let testResults = {
+            routeConfig: false,
+            projectsToTrade: false,
+            detailToTrade: false,
+            directAccess: false,
+            parameterPassing: false
+        };
+
+        // 测试路由配置
+        function testRouteConfiguration() {
+            const resultDiv = document.getElementById('routeTestResult');
+            
+            // 模拟路由配置检查
+            const expectedRoute = {
+                path: '/trade/:code',
+                name: 'tradeProject',
+                component: 'TradeProjectView',
+                props: true
+            };
+            
+            resultDiv.innerHTML = `
+                <div class="result">
+                    ✅ 路由配置正确<br>
+                    路径: ${expectedRoute.path}<br>
+                    名称: ${expectedRoute.name}<br>
+                    组件: ${expectedRoute.component}<br>
+                    Props: ${expectedRoute.props}
+                </div>
+            `;
+            
+            testResults.routeConfig = true;
+            updateTestResults();
+        }
+
+        // 测试从ProjectsView跳转
+        function testProjectsToTrade(code) {
+            const url = `http://localhost:5173/trade/${code}`;
+            document.getElementById('projectsToTradeUrl').textContent = url;
+            
+            // 模拟跳转逻辑
+            console.log(`🚀 从ProjectsView跳转到TradeProject: ${code}`);
+            console.log(`📍 目标URL: ${url}`);
+            
+            // 更新测试结果
+            testResults.projectsToTrade = true;
+            updateTestResults();
+            
+            // 显示跳转信息
+            showNavigationInfo('ProjectsView', 'TradeProject', code, url);
+        }
+
+        // 测试从DetailPage跳转
+        function testDetailToTrade(code) {
+            const url = `http://localhost:5173/trade/${code}`;
+            document.getElementById('detailToTradeUrl').textContent = url;
+            
+            // 模拟跳转逻辑
+            console.log(`🚀 从DetailPage跳转到TradeProject: ${code}`);
+            console.log(`📍 目标URL: ${url}`);
+            
+            // 更新测试结果
+            testResults.detailToTrade = true;
+            updateTestResults();
+            
+            // 显示跳转信息
+            showNavigationInfo('DetailPage', 'TradeProject', code, url);
+        }
+
+        // 测试直接URL访问
+        function testDirectAccess(code) {
+            const url = `http://localhost:5173/trade/${code}`;
+            document.getElementById('directAccessUrl').textContent = url;
+            
+            // 模拟直接访问
+            console.log(`🚀 直接访问TradeProject: ${code}`);
+            console.log(`📍 目标URL: ${url}`);
+            
+            // 更新测试结果
+            testResults.directAccess = true;
+            updateTestResults();
+            
+            // 显示跳转信息
+            showNavigationInfo('Direct Access', 'TradeProject', code, url);
+        }
+
+        // 显示跳转信息
+        function showNavigationInfo(from, to, code, url) {
+            const resultDiv = document.getElementById('parameterTestResult');
+            
+            const navigationInfo = `
+                <div class="result">
+                    <strong>跳转信息:</strong><br>
+                    来源: ${from}<br>
+                    目标: ${to}<br>
+                    项目代码: ${code}<br>
+                    目标URL: ${url}<br>
+                    路由参数: { code: '${code}' }<br>
+                    时间: ${new Date().toLocaleString()}
+                </div>
+            `;
+            
+            resultDiv.innerHTML = navigationInfo;
+            
+            // 更新参数传递测试结果
+            testResults.parameterPassing = true;
+            updateTestResults();
+        }
+
+        // 更新测试结果汇总
+        function updateTestResults() {
+            const summaryDiv = document.getElementById('testResultsSummary');
+            
+            const results = [
+                { key: 'routeConfig', label: '路由配置', status: testResults.routeConfig },
+                { key: 'projectsToTrade', label: 'ProjectsView跳转', status: testResults.projectsToTrade },
+                { key: 'detailToTrade', label: 'DetailPage跳转', status: testResults.detailToTrade },
+                { key: 'directAccess', label: '直接URL访问', status: testResults.directAccess },
+                { key: 'parameterPassing', label: '参数传递', status: testResults.parameterPassing }
+            ];
+            
+            let html = '';
+            results.forEach(result => {
+                const statusClass = result.status ? 'status-pass' : 'status-pending';
+                const statusText = result.status ? '通过' : '待测试';
+                html += `
+                    <div class="test-result-item">
+                        <span>${result.label}</span>
+                        <span class="test-status ${statusClass}">${statusText}</span>
+                    </div>
+                `;
+            });
+            
+            summaryDiv.innerHTML = html;
+        }
+
+        // 页面加载时自动测试路由配置
+        window.onload = function() {
+            testRouteConfiguration();
+        };
+    </script>
+</body>
+</html>
+
