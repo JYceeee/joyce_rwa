@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects页面产品列表显示测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .result {
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #28a745;
+        }
+        .error {
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #dc3545;
+            color: #721c24;
+        }
+        .product-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .product-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        .product-code {
+            background: #007bff;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .product-subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        .product-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #666;
+            font-size: 14px;
+        }
+        .detail-value {
+            color: #333;
+            font-size: 14px;
+        }
+        .status {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .status.active { background: #d4edda; color: #155724; }
+        .status.completed { background: #cce5ff; color: #004085; }
+        .status.pending { background: #fff3cd; color: #856404; }
+        .investment-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+        .investment-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .investment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        .investment-item {
+            text-align: center;
+        }
+        .investment-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        .investment-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #28a745;
+            transition: width 0.3s ease;
+        }
+        .progress-text {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        .summary {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Projects页面产品列表显示测试</h1>
+    <p>此页面用于测试ProjectsView页面的产品列表显示功能，验证数据库字段映射和界面展示。</p>
+
+    <div class="test-container">
+        <div class="test-section">
+            <div class="test-title">1. 数据获取和字段映射测试</div>
+            <div id="dataTestResult">
+                <div class="loading">正在测试数据获取...</div>
+            </div>
+            <button onclick="testDataMapping()">测试数据映射</button>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">2. 产品列表显示测试</div>
+            <div id="productListDisplay">
+                <div class="loading">先进行数据映射测试</div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">3. 字段映射验证</div>
+            <div id="fieldMappingResult">
+                <div class="loading">等待数据映射测试完成</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let mappedProducts = [];
+
+        // 测试数据映射
+        async function testDataMapping() {
+            const resultDiv = document.getElementById('dataTestResult');
+            resultDiv.innerHTML = '<div class="loading">正在获取和映射数据...</div>';
+            
+            try {
+                // 获取原始数据
+                const response = await fetch('http://localhost:3000/api/product_details');
+                const data = await response.json();
+                
+                if (data.status === 0) {
+                    const rawProducts = data.data || [];
+                    
+                    // 模拟ProjectsView中的字段映射
+                    mappedProducts = rawProducts.map(product => ({
+                        ...product,
+                        totalOffering: product.total_token,
+                        subscribed: product.current_subscribed_token,
+                        targetYield: product.target_yield,
+                        ltv: product.LTV,
+                        annualInterestRate: product.annual_interest_rate,
+                        loanAmount: product.loan_amount,
+                        valuation: product.valuation,
+                        image: getProductImage(product.code)
+                    }));
+                    
+                    resultDiv.innerHTML = `
+                        <div class="result">
+                            ✅ 数据映射成功<br>
+                            原始数据: ${rawProducts.length} 个产品<br>
+                            映射后数据: ${mappedProducts.length} 个产品<br>
+                            映射时间: ${new Date().toLocaleString()}
+                        </div>
+                    `;
+                    
+                    // 显示产品列表
+                    displayProductList();
+                    
+                    // 验证字段映射
+                    verifyFieldMapping();
+                    
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            ❌ 获取数据失败<br>
+                            状态码: ${data.status}<br>
+                            错误消息: ${data.message}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ 网络错误<br>
+                        错误: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // 显示产品列表
+        function displayProductList() {
+            const displayDiv = document.getElementById('productListDisplay');
+            
+            if (mappedProducts.length === 0) {
+                displayDiv.innerHTML = '<div class="loading">没有产品数据</div>';
+                return;
+            }
+            
+            let html = `
+                <div class="summary">
+                    <strong>产品列表摘要</strong><br>
+                    共 ${mappedProducts.length} 个产品，包含住宅和商业项目
+                </div>
+            `;
+            
+            mappedProducts.forEach((product, index) => {
+                const progressPercentage = getProgressPercentage(product);
+                
+                html += `
+                    <div class="product-card">
+                        <div class="product-header">
+                            <div class="product-title">
+                                <span class="product-code">${product.code}</span>
+                                ${product.name}
+                            </div>
+                            <div class="status ${product.status}">${product.status}</div>
+                        </div>
+                        
+                        <div class="product-subtitle">${product.subtitle}</div>
+                        
+                        <div class="product-details">
+                            <div class="detail-item">
+                                <span class="detail-label">类型:</span>
+                                <span class="detail-value">${product.type}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">地区:</span>
+                                <span class="detail-value">${product.region}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">风险等级:</span>
+                                <span class="detail-value">${product.risk}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">目标收益率:</span>
+                                <span class="detail-value">${product.targetYield}%</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">LTV:</span>
+                                <span class="detail-value">${product.ltv}%</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">年利率:</span>
+                                <span class="detail-value">${product.annualInterestRate}%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="investment-section">
+                            <div class="investment-title">投资详情</div>
+                            <div class="investment-grid">
+                                <div class="investment-item">
+                                    <div class="investment-label">总发行量</div>
+                                    <div class="investment-value">A$${formatCurrency(product.totalOffering)}</div>
+                                </div>
+                                <div class="investment-item">
+                                    <div class="investment-label">已认购</div>
+                                    <div class="investment-value">A$${formatCurrency(product.subscribed)}</div>
+                                </div>
+                                <div class="investment-item">
+                                    <div class="investment-label">贷款金额</div>
+                                    <div class="investment-value">A$${formatCurrency(product.loanAmount)}</div>
+                                </div>
+                                <div class="investment-item">
+                                    <div class="investment-label">抵押价值</div>
+                                    <div class="investment-value">A$${formatCurrency(product.valuation)}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progressPercentage}%"></div>
+                            </div>
+                            <div class="progress-text">认购进度: ${progressPercentage}%</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            displayDiv.innerHTML = html;
+        }
+
+        // 验证字段映射
+        function verifyFieldMapping() {
+            const resultDiv = document.getElementById('fieldMappingResult');
+            
+            if (mappedProducts.length === 0) {
+                resultDiv.innerHTML = '<div class="loading">没有数据可验证</div>';
+                return;
+            }
+            
+            const sampleProduct = mappedProducts[0];
+            const mappingChecks = [
+                { field: 'totalOffering', expected: 'total_token', actual: sampleProduct.totalOffering },
+                { field: 'subscribed', expected: 'current_subscribed_token', actual: sampleProduct.subscribed },
+                { field: 'targetYield', expected: 'target_yield', actual: sampleProduct.targetYield },
+                { field: 'ltv', expected: 'LTV', actual: sampleProduct.ltv },
+                { field: 'annualInterestRate', expected: 'annual_interest_rate', actual: sampleProduct.annualInterestRate },
+                { field: 'loanAmount', expected: 'loan_amount', actual: sampleProduct.loanAmount },
+                { field: 'valuation', expected: 'valuation', actual: sampleProduct.valuation }
+            ];
+            
+            let html = '<div class="result"><strong>字段映射验证结果:</strong><br>';
+            
+            mappingChecks.forEach(check => {
+                const isValid = check.actual !== undefined && check.actual !== null;
+                const status = isValid ? '✅' : '❌';
+                html += `${status} ${check.field}: ${check.actual} (来源: ${check.expected})<br>`;
+            });
+            
+            html += '</div>';
+            resultDiv.innerHTML = html;
+        }
+
+        // 工具函数
+        function getProductImage(code) {
+            const imageMap = {
+                'RWA001': '/pics/TYMU.png',
+                'RWA002': '/pics/SQNB.png',
+                'RWA003': '/pics/LZYT.png',
+                'YYD': '/pics/YYD.png',
+                'COMP': '/pics/TYMU.png'
+            }
+            return imageMap[code] || '/pics/TYMU.png'
+        }
+
+        function formatCurrency(value) {
+            if (!value) return '0'
+            const num = parseFloat(value)
+            if (isNaN(num)) return value
+            return num.toLocaleString()
+        }
+
+        function getProgressPercentage(product) {
+            if (!product.totalOffering || !product.subscribed) return 0
+            
+            const total = parseFloat(product.totalOffering.toString().replace(/[A$,]/g, ''))
+            const subscribed = parseFloat(product.subscribed.toString().replace(/[A$,]/g, ''))
+            
+            if (total === 0) return 0
+            
+            const percentage = (subscribed / total) * 100
+            return Math.min(Math.round(percentage), 100)
+        }
+
+        // 页面加载时自动测试
+        window.onload = function() {
+            testDataMapping();
+        };
+    </script>
+</body>
+</html>

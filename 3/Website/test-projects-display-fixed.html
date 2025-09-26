@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects页面修复测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .result {
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #28a745;
+        }
+        .error {
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #dc3545;
+            color: #721c24;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        .project-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .project-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+        .project-code {
+            background: #007bff;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .project-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #666;
+        }
+        .detail-value {
+            color: #333;
+        }
+        .status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.active { background: #d4edda; color: #155724; }
+        .status.upcoming { background: #cce5ff; color: #004085; }
+        .status.research { background: #fff3cd; color: #856404; }
+        .status.planning { background: #e2e3e5; color: #383d41; }
+        .status.completed { background: #d1ecf1; color: #0c5460; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .field-mapping {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .field-mapping h4 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .field-mapping pre {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Projects页面产品信息展示修复测试</h1>
+    <p>此页面用于测试修复后的ProjectsView页面产品信息展示功能。</p>
+
+    <div class="test-container">
+        <div class="test-section">
+            <div class="test-title">1. 字段映射修复说明</div>
+            <div class="field-mapping">
+                <h4>修复的问题：</h4>
+                <ul>
+                    <li>✅ 数据库字段到前端字段的完整映射</li>
+                    <li>✅ 货币值格式化处理</li>
+                    <li>✅ 利率和收益率显示优化</li>
+                    <li>✅ LTV和贷款期限格式化</li>
+                    <li>✅ 进度计算错误处理</li>
+                    <li>✅ 图片路径映射</li>
+                </ul>
+                
+                <h4>字段映射关系：</h4>
+                <pre>数据库字段 → 前端字段
+total_token → totalOffering
+current_subscribed_token → subscribed
+target_yield → targetYield
+LTV → ltv
+annual_interest_rate → annualInterestRate
+loan_amount → loanAmount
+valuation → valuation</pre>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">2. 后端API连接测试</div>
+            <div id="apiTestResult">
+                <div class="loading">正在测试API连接...</div>
+            </div>
+            <button onclick="testAPI()">测试API连接</button>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">3. 产品数据获取和格式化测试</div>
+            <div id="productDataResult">
+                <div class="loading">点击"获取产品数据"开始测试</div>
+            </div>
+            <button onclick="getProductData()">获取产品数据</button>
+            <button onclick="testFieldMapping()">测试字段映射</button>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">4. 格式化函数测试</div>
+            <div id="formatTestResult">
+                <div class="loading">点击"测试格式化函数"</div>
+            </div>
+            <button onclick="testFormatFunctions()">测试格式化函数</button>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">5. 产品列表显示测试</div>
+            <div id="productListDisplay">
+                <div class="loading">先获取产品数据</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let productData = [];
+
+        // 模拟前端格式化函数
+        function formatCurrencyValue(value) {
+            if (!value || value === 'TBA') return 'TBA';
+            
+            if (typeof value === 'string' && (value.includes('A$') || value.includes('AUD'))) {
+                return value;
+            }
+            
+            const numStr = value.toString().replace(/[A$,]/g, '');
+            const num = parseFloat(numStr);
+            
+            if (isNaN(num)) return value;
+            
+            return `A$${num.toLocaleString()}`;
+        }
+
+        function formatInterestRate(annualRate, targetYield) {
+            if (annualRate && annualRate !== 'TBA') {
+                return annualRate;
+            }
+            
+            if (targetYield && targetYield !== 'TBA') {
+                const yieldNum = parseFloat(targetYield);
+                if (!isNaN(yieldNum)) {
+                    return `${yieldNum.toFixed(1)}% p.a.`;
+                }
+            }
+            
+            return 'TBA';
+        }
+
+        function formatLTV(ltv) {
+            if (!ltv || ltv === 'TBA') return 'TBA';
+            
+            if (typeof ltv === 'string' && ltv.includes('%')) {
+                return ltv;
+            }
+            
+            const num = parseFloat(ltv);
+            if (isNaN(num)) return ltv;
+            
+            return `${num}%`;
+        }
+
+        function formatYield(yieldValue) {
+            if (!yieldValue || yieldValue === 'TBA') return 'TBA';
+            
+            const num = parseFloat(yieldValue);
+            if (isNaN(num)) return yieldValue;
+            
+            return `${num.toFixed(1)}%`;
+        }
+
+        function getProgressPercentage(product) {
+            if (!product.totalOffering || !product.subscribed) return 0;
+            
+            try {
+                const totalStr = product.totalOffering.toString().replace(/[A$,]/g, '');
+                const subscribedStr = product.subscribed.toString().replace(/[A$,]/g, '');
+                
+                const total = parseFloat(totalStr);
+                const subscribed = parseFloat(subscribedStr);
+                
+                if (isNaN(total) || isNaN(subscribed) || total === 0) return 0;
+                
+                const percentage = (subscribed / total) * 100;
+                return Math.min(Math.round(percentage), 100);
+            } catch (error) {
+                console.warn('计算进度百分比失败:', error, product);
+                return 0;
+            }
+        }
+
+        // 测试API连接
+        async function testAPI() {
+            const resultDiv = document.getElementById('apiTestResult');
+            resultDiv.innerHTML = '<div class="loading">正在测试API连接...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/product_details');
+                const data = await response.json();
+                
+                if (data.status === 0) {
+                    resultDiv.innerHTML = `
+                        <div class="result">
+                            ✅ API连接成功<br>
+                            状态码: ${data.status}<br>
+                            消息: ${data.message}<br>
+                            数据条数: ${data.data ? data.data.length : 0}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            ❌ API返回错误<br>
+                            状态码: ${data.status}<br>
+                            错误消息: ${data.message}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ 网络连接失败<br>
+                        错误: ${error.message}<br>
+                        请确保后端服务器正在运行 (node index.js)
+                    </div>
+                `;
+            }
+        }
+
+        // 获取产品数据
+        async function getProductData() {
+            const resultDiv = document.getElementById('productDataResult');
+            resultDiv.innerHTML = '<div class="loading">正在获取产品数据...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/product_details');
+                const data = await response.json();
+                
+                if (data.status === 0) {
+                    productData = data.data;
+                    resultDiv.innerHTML = `
+                        <div class="result">
+                            ✅ 产品数据获取成功<br>
+                            共获取到 ${productData.length} 个产品<br>
+                            数据更新时间: ${new Date().toLocaleString()}
+                        </div>
+                    `;
+                    
+                    // 更新产品列表显示
+                    displayProductList();
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            ❌ 获取产品数据失败<br>
+                            状态码: ${data.status}<br>
+                            错误消息: ${data.message}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ 网络错误<br>
+                        错误: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // 测试字段映射
+        function testFieldMapping() {
+            if (productData.length === 0) {
+                document.getElementById('productDataResult').innerHTML = `
+                    <div class="error">
+                        ❌ 请先获取产品数据
+                    </div>
+                `;
+                return;
+            }
+
+            const testProduct = productData[0];
+            const mappedProduct = {
+                ...testProduct,
+                // 确保基本字段存在
+                code: testProduct.code || '',
+                name: testProduct.name || '',
+                subtitle: testProduct.subtitle || '',
+                type: testProduct.type || 'residential',
+                region: testProduct.region || '',
+                risk: testProduct.risk || 'medium',
+                status: testProduct.status || 'active',
+                summary: testProduct.summary || '',
+                
+                // 投资信息字段映射
+                totalOffering: testProduct.totalOffering || testProduct.total_token || '0',
+                subscribed: testProduct.subscribed || testProduct.current_subscribed_token || '0',
+                
+                // 关键事实字段映射
+                loanAmount: testProduct.loanAmount || testProduct.loan_amount || 'TBA',
+                annualInterestRate: testProduct.annualInterestRate || testProduct.annual_interest_rate || 'TBA',
+                loanTerm: testProduct.loanTerm || testProduct.loan_term || 'TBA',
+                ltv: testProduct.ltv || testProduct.LTV || 'TBA',
+                
+                // 目标收益率
+                targetYield: testProduct.targetYield || testProduct.target_yield || 0,
+                
+                // 抵押物信息
+                valuation: testProduct.valuation || 'TBA'
+            };
+
+            document.getElementById('productDataResult').innerHTML = `
+                <div class="result">
+                    ✅ 字段映射测试成功<br>
+                    原始数据字段数: ${Object.keys(testProduct).length}<br>
+                    映射后字段数: ${Object.keys(mappedProduct).length}<br>
+                    映射示例: total_token (${testProduct.total_token}) → totalOffering (${mappedProduct.totalOffering})
+                </div>
+            `;
+        }
+
+        // 测试格式化函数
+        function testFormatFunctions() {
+            const testCases = [
+                { value: '1000000', expected: 'A$1,000,000', func: 'formatCurrencyValue' },
+                { value: 'AUD 1,500,000', expected: 'AUD 1,500,000', func: 'formatCurrencyValue' },
+                { value: 'TBA', expected: 'TBA', func: 'formatCurrencyValue' },
+                { value: '9.9%', expected: '9.9%', func: 'formatInterestRate' },
+                { value: null, targetYield: 9.9, expected: '9.9% p.a.', func: 'formatInterestRate' },
+                { value: '67', expected: '67%', func: 'formatLTV' },
+                { value: '67%', expected: '67%', func: 'formatLTV' },
+                { value: 9.9, expected: '9.9%', func: 'formatYield' }
+            ];
+
+            let results = '<div class="result">✅ 格式化函数测试结果：<br><br>';
+            let allPassed = true;
+
+            testCases.forEach((testCase, index) => {
+                let result;
+                if (testCase.func === 'formatInterestRate') {
+                    result = formatInterestRate(testCase.value, testCase.targetYield);
+                } else {
+                    result = window[testCase.func](testCase.value);
+                }
+
+                const passed = result === testCase.expected;
+                if (!passed) allPassed = false;
+
+                results += `${index + 1}. ${testCase.func}(${JSON.stringify(testCase.value)}) = "${result}" ${passed ? '✅' : '❌'}<br>`;
+            });
+
+            results += `</div>`;
+
+            if (!allPassed) {
+                results += '<div class="error">❌ 部分测试失败</div>';
+            }
+
+            document.getElementById('formatTestResult').innerHTML = results;
+        }
+
+        // 显示产品列表
+        function displayProductList() {
+            const displayDiv = document.getElementById('productListDisplay');
+            
+            if (productData.length === 0) {
+                displayDiv.innerHTML = '<div class="loading">没有产品数据</div>';
+                return;
+            }
+            
+            let html = `<h4>产品列表 (${productData.length} 个产品)</h4>`;
+            
+            productData.forEach((product, index) => {
+                // 应用字段映射
+                const mappedProduct = {
+                    ...product,
+                    totalOffering: product.totalOffering || product.total_token || '0',
+                    subscribed: product.subscribed || product.current_subscribed_token || '0',
+                    targetYield: product.targetYield || product.target_yield || 0,
+                    ltv: product.ltv || product.LTV || 'TBA',
+                    annualInterestRate: product.annualInterestRate || product.annual_interest_rate || 'TBA',
+                    loanAmount: product.loanAmount || product.loan_amount || 'TBA',
+                    valuation: product.valuation || 'TBA'
+                };
+
+                const progress = getProgressPercentage(mappedProduct);
+                
+                html += `
+                    <div class="project-card">
+                        <div class="project-header">
+                            <div class="project-title">${mappedProduct.name}</div>
+                            <div class="project-code">${mappedProduct.code}</div>
+                        </div>
+                        <div class="project-details">
+                            <div class="detail-item">
+                                <span class="detail-label">类型:</span>
+                                <span class="detail-value">${mappedProduct.type}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">地区:</span>
+                                <span class="detail-value">${mappedProduct.region}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">风险等级:</span>
+                                <span class="detail-value">${mappedProduct.risk}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">目标收益率:</span>
+                                <span class="detail-value">${formatYield(mappedProduct.targetYield)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">抵押物价值:</span>
+                                <span class="detail-value">${formatCurrencyValue(mappedProduct.valuation)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">贷款金额:</span>
+                                <span class="detail-value">${formatCurrencyValue(mappedProduct.loanAmount)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">总认购额度:</span>
+                                <span class="detail-value">${formatCurrencyValue(mappedProduct.totalOffering)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">已认购额度:</span>
+                                <span class="detail-value">${formatCurrencyValue(mappedProduct.subscribed)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">年利率:</span>
+                                <span class="detail-value">${formatInterestRate(mappedProduct.annualInterestRate, mappedProduct.targetYield)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">LTV:</span>
+                                <span class="detail-value">${formatLTV(mappedProduct.ltv)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">认购进度:</span>
+                                <span class="detail-value">${progress}%</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">状态:</span>
+                                <span class="detail-value">
+                                    <span class="status ${mappedProduct.status}">${mappedProduct.status}</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            displayDiv.innerHTML = html;
+        }
+
+        // 页面加载时自动测试API
+        window.onload = function() {
+            testAPI();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API连接测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .warning { color: orange; }
+        .info { color: blue; }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+        }
+        button:hover { background: #0056b3; }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            background: #f8f9fa;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 API连接测试工具</h1>
+        <p>测试TradeProject页面与后端数据库的API连接</p>
+        
+        <div class="test-section">
+            <h3>1. 基础连接测试</h3>
+            <button onclick="testBasicConnection()">测试API连接</button>
+            <div id="connectionResult" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>2. 保存交易测试</h3>
+            <button onclick="testSaveTransaction()">测试保存交易</button>
+            <div id="saveResult" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>3. 加载交易记录测试</h3>
+            <button onclick="testLoadTransactions()">测试加载交易记录</button>
+            <div id="loadResult" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>4. 完整流程测试</h3>
+            <button onclick="testFullWorkflow()">测试完整流程</button>
+            <div id="workflowResult" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/user/transactionhistory';
+        
+        // 测试数据
+        const testData = {
+            projectCode: 'TYMU',
+            tradeType: 'buy',
+            amount: 10,
+            price: 1.00,
+            total: 10.00,
+            userAddress: '0x1234567890123456789012345678901234567890',
+            transactionHash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+            blockNumber: 12345,
+            timestamp: new Date().toISOString()
+        };
+        
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : 
+                            type === 'success' ? 'success' : 
+                            type === 'warning' ? 'warning' : 'info';
+            
+            element.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+        }
+        
+        async function testBasicConnection() {
+            const resultElement = document.getElementById('connectionResult');
+            resultElement.innerHTML = '';
+            
+            try {
+                log('connectionResult', '正在测试API连接...', 'info');
+                
+                const response = await fetch(API_BASE + '?limit=1');
+                
+                if (response.ok) {
+                    log('connectionResult', '✅ API连接成功', 'success');
+                    const data = await response.json();
+                    log('connectionResult', `响应状态: ${data.status}`, 'info');
+                } else {
+                    log('connectionResult', `❌ API连接失败: ${response.status} ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                log('connectionResult', `❌ 连接错误: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testSaveTransaction() {
+            const resultElement = document.getElementById('saveResult');
+            resultElement.innerHTML = '';
+            
+            try {
+                log('saveResult', '正在测试保存交易...', 'info');
+                log('saveResult', `发送数据: ${JSON.stringify(testData, null, 2)}`, 'info');
+                
+                const response = await fetch(API_BASE, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP请求失败: ${response.status} ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                log('saveResult', `后端响应: ${JSON.stringify(result, null, 2)}`, 'info');
+                
+                if (result.status === 0) {
+                    log('saveResult', '✅ 交易保存成功', 'success');
+                    if (result.data && result.data.id) {
+                        log('saveResult', `交易ID: ${result.data.id}`, 'info');
+                    }
+                } else {
+                    log('saveResult', `❌ 交易保存失败: ${result.message}`, 'error');
+                }
+                
+            } catch (error) {
+                log('saveResult', `❌ 保存错误: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testLoadTransactions() {
+            const resultElement = document.getElementById('loadResult');
+            resultElement.innerHTML = '';
+            
+            try {
+                log('loadResult', '正在测试加载交易记录...', 'info');
+                
+                const url = API_BASE + `?projectCode=${testData.projectCode}&limit=10`;
+                log('loadResult', `请求URL: ${url}`, 'info');
+                
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP请求失败: ${response.status} ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                log('loadResult', `后端响应: ${JSON.stringify(result, null, 2)}`, 'info');
+                
+                if (result.status === 0) {
+                    const count = result.data ? result.data.length : 0;
+                    log('loadResult', `✅ 成功加载 ${count} 条交易记录`, 'success');
+                    
+                    if (count > 0 && result.data[0]) {
+                        log('loadResult', `最新记录: ${JSON.stringify(result.data[0], null, 2)}`, 'info');
+                    }
+                } else {
+                    log('loadResult', `❌ 加载失败: ${result.message}`, 'error');
+                }
+                
+            } catch (error) {
+                log('loadResult', `❌ 加载错误: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testFullWorkflow() {
+            const resultElement = document.getElementById('workflowResult');
+            resultElement.innerHTML = '';
+            
+            try {
+                log('workflowResult', '开始完整工作流程测试...', 'info');
+                
+                // 步骤1: 模拟智能合约交易
+                log('workflowResult', '步骤1: 模拟智能合约交易', 'info');
+                const mockContractResult = {
+                    success: true,
+                    transactionHash: testData.transactionHash,
+                    blockNumber: testData.blockNumber,
+                    tokenPrice: testData.price,
+                    totalCost: testData.total
+                };
+                log('workflowResult', '✅ 智能合约交易模拟成功', 'success');
+                
+                // 步骤2: 保存到数据库
+                log('workflowResult', '步骤2: 保存交易到数据库', 'info');
+                const saveResponse = await fetch(API_BASE, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                if (!saveResponse.ok) {
+                    throw new Error(`数据库保存失败: ${saveResponse.status}`);
+                }
+                
+                const saveResult = await saveResponse.json();
+                
+                if (saveResult.status === 0) {
+                    log('workflowResult', `✅ 数据库保存成功，ID: ${saveResult.data?.id || 'N/A'}`, 'success');
+                } else {
+                    log('workflowResult', `❌ 数据库保存失败: ${saveResult.message}`, 'error');
+                    return;
+                }
+                
+                // 步骤3: 验证数据
+                log('workflowResult', '步骤3: 验证保存的数据', 'info');
+                const verifyResponse = await fetch(API_BASE + `?projectCode=${testData.projectCode}&limit=1`);
+                const verifyResult = await verifyResponse.json();
+                
+                if (verifyResult.status === 0 && verifyResult.data && verifyResult.data.length > 0) {
+                    const savedTransaction = verifyResult.data[0];
+                    log('workflowResult', '✅ 数据验证成功', 'success');
+                    log('workflowResult', `保存的交易记录: ${JSON.stringify(savedTransaction, null, 2)}`, 'info');
+                    
+                    // 检查字段映射
+                    const fieldChecks = [
+                        { frontend: 'projectCode', backend: 'token_symbol', expected: testData.projectCode },
+                        { frontend: 'tradeType', backend: 'transaction_type', expected: testData.tradeType.toUpperCase() },
+                        { frontend: 'amount', backend: 'amount', expected: testData.amount },
+                        { frontend: 'price', backend: 'price', expected: testData.price },
+                        { frontend: 'total', backend: 'totalCost', expected: testData.total },
+                        { frontend: 'userAddress', backend: 'wallet_address', expected: testData.userAddress }
+                    ];
+                    
+                    let allFieldsCorrect = true;
+                    for (const check of fieldChecks) {
+                        if (savedTransaction[check.backend] != check.expected) {
+                            log('workflowResult', `⚠️ 字段映射问题: ${check.frontend} -> ${check.backend}`, 'warning');
+                            log('workflowResult', `期望: ${check.expected}, 实际: ${savedTransaction[check.backend]}`, 'warning');
+                            allFieldsCorrect = false;
+                        }
+                    }
+                    
+                    if (allFieldsCorrect) {
+                        log('workflowResult', '✅ 字段映射验证通过', 'success');
+                    }
+                    
+                } else {
+                    log('workflowResult', '❌ 数据验证失败: 无法查询到刚保存的交易记录', 'error');
+                }
+                
+                log('workflowResult', '🎉 完整工作流程测试完成', 'success');
+                
+            } catch (error) {
+                log('workflowResult', `❌ 完整工作流程测试失败: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
