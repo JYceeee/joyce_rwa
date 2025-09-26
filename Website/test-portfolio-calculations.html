@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PortfolioView 计算逻辑测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .test-data {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .result {
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #28a745;
+        }
+        .error {
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #dc3545;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .calculation-step {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f1f3f4;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>PortfolioView 计算逻辑测试</h1>
+    <p>此页面用于测试PortfolioView中Asset Summary的计算逻辑，确保所有数字都基于WalletView中的Transaction Activity数据计算。</p>
+
+    <div class="test-container">
+        <div class="test-section">
+            <div class="test-title">1. 模拟交易数据</div>
+            <div class="test-data" id="transactionData">
+                <div>正在生成模拟交易数据...</div>
+            </div>
+            <button onclick="generateTestData()">生成测试数据</button>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">2. 模拟项目价格数据</div>
+            <div class="test-data" id="projectData">
+                <div>正在生成模拟项目数据...</div>
+            </div>
+            <button onclick="generateProjectData()">生成项目数据</button>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">3. 持仓计算</div>
+            <div class="test-data" id="holdingsCalculation">
+                <div>点击"计算持仓"按钮开始计算</div>
+            </div>
+            <button onclick="calculateHoldings()">计算持仓</button>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">4. 投资指标计算</div>
+            <div class="test-data" id="investmentMetrics">
+                <div>点击"计算投资指标"按钮开始计算</div>
+            </div>
+            <button onclick="calculateInvestmentMetrics()">计算投资指标</button>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">5. Asset Summary 结果</div>
+            <div class="result" id="assetSummary">
+                <div>等待计算完成...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟数据
+        let mockTransactions = [];
+        let mockProjects = [];
+
+        // 生成模拟交易数据
+        function generateTestData() {
+            mockTransactions = [
+                {
+                    id: 1,
+                    type: 'buy',
+                    project_code: 'RWA001',
+                    projectCode: 'RWA001',
+                    amount: 100,
+                    price: 1.00,
+                    timestamp: Date.now() - 3600000, // 1小时前
+                    user_address: '0x1234567890123456789012345678901234567890'
+                },
+                {
+                    id: 2,
+                    type: 'buy',
+                    project_code: 'RWA002',
+                    projectCode: 'RWA002',
+                    amount: 50,
+                    price: 1.02,
+                    timestamp: Date.now() - 7200000, // 2小时前
+                    user_address: '0x1234567890123456789012345678901234567890'
+                },
+                {
+                    id: 3,
+                    type: 'sell',
+                    project_code: 'RWA001',
+                    projectCode: 'RWA001',
+                    amount: 25,
+                    price: 1.05,
+                    timestamp: Date.now() - 10800000, // 3小时前
+                    user_address: '0x1234567890123456789012345678901234567890'
+                },
+                {
+                    id: 4,
+                    type: 'buy',
+                    project_code: 'RWA003',
+                    projectCode: 'RWA003',
+                    amount: 75,
+                    price: 0.98,
+                    timestamp: Date.now() - 14400000, // 4小时前
+                    user_address: '0x1234567890123456789012345678901234567890'
+                }
+            ];
+
+            // 保存到localStorage模拟WalletView的数据
+            localStorage.setItem('walletActivity', JSON.stringify(mockTransactions));
+
+            document.getElementById('transactionData').innerHTML = 
+                '<pre>' + JSON.stringify(mockTransactions, null, 2) + '</pre>';
+        }
+
+        // 生成模拟项目数据
+        function generateProjectData() {
+            mockProjects = [
+                {
+                    code: 'RWA001',
+                    name: 'St Ives NSW Residential Project',
+                    currentPrice: 1.05, // 当前价格比买入时高
+                    targetYield: 9.9
+                },
+                {
+                    code: 'RWA002',
+                    name: 'SQNB Property Loan',
+                    currentPrice: 1.08, // 当前价格比买入时高
+                    targetYield: 7.2
+                },
+                {
+                    code: 'RWA003',
+                    name: 'LZYT Property Loan',
+                    currentPrice: 0.95, // 当前价格比买入时低
+                    targetYield: 6.9
+                }
+            ];
+
+            document.getElementById('projectData').innerHTML = 
+                '<pre>' + JSON.stringify(mockProjects, null, 2) + '</pre>';
+        }
+
+        // 计算持仓（模拟PortfolioView的getAccountHoldings函数）
+        function calculateHoldings() {
+            const accountAddress = '0x1234567890123456789012345678901234567890';
+            
+            // 从localStorage获取交易数据
+            const walletActivity = JSON.parse(localStorage.getItem('walletActivity') || '[]');
+            const transactionActivities = walletActivity.filter(activity => 
+                activity.type === 'buy' || activity.type === 'sell'
+            );
+
+            console.log('📊 账户', accountAddress, '的交易活动:', transactionActivities.length, '条');
+
+            const holdingMap = new Map();
+
+            // 计算每个项目的持仓
+            transactionActivities.forEach(tx => {
+                const key = tx.project_code || tx.projectCode;
+                if (!holdingMap.has(key)) {
+                    holdingMap.set(key, { code: key, amount: 0, totalCost: 0, totalInvestment: 0 });
+                }
+
+                const holding = holdingMap.get(key);
+                // 获取项目当前价格
+                const project = mockProjects.find(p => p.code === key);
+                const currentPrice = project ? project.currentPrice : 1.00;
+
+                if (tx.type === 'buy') {
+                    holding.amount += tx.amount;
+                    holding.totalCost += tx.amount * currentPrice;
+                    holding.totalInvestment += tx.amount * (tx.price || currentPrice);
+                } else {
+                    holding.amount -= tx.amount;
+                    holding.totalCost -= tx.amount * currentPrice;
+                    holding.totalInvestment -= tx.amount * (tx.price || currentPrice);
+                }
+            });
+
+            // 添加当前价格和变化
+            const holdings = Array.from(holdingMap.values())
+                .filter(h => h.amount > 0)
+                .map(holding => {
+                    const project = mockProjects.find(p => p.code === holding.code);
+                    const currentPrice = project ? project.currentPrice : 1.00;
+                    const currentValue = holding.amount * currentPrice;
+                    const change = holding.totalInvestment > 0 ? 
+                        ((currentValue - holding.totalInvestment) / holding.totalInvestment) * 100 : 0;
+
+                    return {
+                        ...holding,
+                        currentPrice,
+                        change
+                    };
+                });
+
+            let calculationSteps = '<div class="calculation-step">';
+            calculationSteps += '<strong>计算步骤：</strong><br>';
+            calculationSteps += '1. 筛选交易活动：' + transactionActivities.length + '条<br>';
+            calculationSteps += '2. 按项目分组计算持仓<br>';
+            calculationSteps += '3. 应用当前价格计算价值<br>';
+            calculationSteps += '</div>';
+
+            calculationSteps += '<div class="result">';
+            calculationSteps += '<strong>计算结果：</strong><br>';
+            calculationSteps += '<pre>' + JSON.stringify(holdings, null, 2) + '</pre>';
+            calculationSteps += '</div>';
+
+            document.getElementById('holdingsCalculation').innerHTML = calculationSteps;
+
+            return holdings;
+        }
+
+        // 计算投资指标（模拟PortfolioView的投资指标计算函数）
+        function calculateInvestmentMetrics() {
+            const holdings = calculateHoldings();
+            
+            // 计算总投资
+            const totalInvestment = holdings.reduce((sum, holding) => sum + (holding.totalInvestment || 0), 0);
+            
+            // 计算当前价值
+            const currentValue = holdings.reduce((sum, holding) => sum + (holding.amount * holding.currentPrice), 0);
+            
+            // 计算总收益
+            const totalGain = currentValue - totalInvestment;
+            
+            // 计算ROI
+            const roi = totalInvestment > 0 ? (totalGain / totalInvestment) * 100 : 0;
+
+            let metricsHTML = '<div class="calculation-step">';
+            metricsHTML += '<strong>投资指标计算：</strong><br>';
+            metricsHTML += '总投资 = ' + holdings.map(h => h.totalInvestment.toFixed(2)).join(' + ') + ' = A$' + totalInvestment.toFixed(2) + '<br>';
+            metricsHTML += '当前价值 = ' + holdings.map(h => (h.amount * h.currentPrice).toFixed(2)).join(' + ') + ' = A$' + currentValue.toFixed(2) + '<br>';
+            metricsHTML += '总收益 = 当前价值 - 总投资 = A$' + totalGain.toFixed(2) + '<br>';
+            metricsHTML += 'ROI = (总收益 / 总投资) × 100% = ' + roi.toFixed(2) + '%<br>';
+            metricsHTML += '</div>';
+
+            metricsHTML += '<div class="result">';
+            metricsHTML += '<strong>投资指标结果：</strong><br>';
+            metricsHTML += '• 总投资: A$' + totalInvestment.toFixed(2) + '<br>';
+            metricsHTML += '• 当前价值: A$' + currentValue.toFixed(2) + '<br>';
+            metricsHTML += '• 总收益: ' + (totalGain >= 0 ? '+' : '') + 'A$' + totalGain.toFixed(2) + '<br>';
+            metricsHTML += '• ROI: ' + (roi >= 0 ? '+' : '') + roi.toFixed(2) + '%<br>';
+            metricsHTML += '• 资产数量: ' + holdings.length + '<br>';
+            metricsHTML += '</div>';
+
+            document.getElementById('investmentMetrics').innerHTML = metricsHTML;
+
+            // 更新Asset Summary
+            updateAssetSummary(holdings, totalInvestment, currentValue, totalGain, roi);
+        }
+
+        // 更新Asset Summary显示
+        function updateAssetSummary(holdings, totalInvestment, currentValue, totalGain, roi) {
+            const assetSummaryHTML = `
+                <div class="test-title">Asset Summary 最终结果</div>
+                <div class="result">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; text-align: center;">
+                        <div>
+                            <div style="font-size: 24px; font-weight: bold; color: #333;">${holdings.length}</div>
+                            <div style="font-size: 12px; color: #666;">Assets</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 24px; font-weight: bold; color: ${roi >= 0 ? '#28a745' : '#dc3545'};">${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%</div>
+                            <div style="font-size: 12px; color: #666;">Total Return</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 24px; font-weight: bold; color: #333;">A$${currentValue.toFixed(0)}</div>
+                            <div style="font-size: 12px; color: #666;">Total Value</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="test-data">
+                    <strong>详细数据：</strong><br>
+                    • 总投资: A$${totalInvestment.toFixed(2)}<br>
+                    • 当前价值: A$${currentValue.toFixed(2)}<br>
+                    • 总收益: ${totalGain >= 0 ? '+' : ''}A$${totalGain.toFixed(2)}<br>
+                    • ROI: ${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%<br>
+                    • 资产数量: ${holdings.length}
+                </div>
+            `;
+
+            document.getElementById('assetSummary').innerHTML = assetSummaryHTML;
+        }
+
+        // 页面加载时自动生成测试数据
+        window.onload = function() {
+            generateTestData();
+            generateProjectData();
+        };
+    </script>
+</body>
+</html>

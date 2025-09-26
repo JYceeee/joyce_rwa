@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History Chart 测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .test-data {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .result {
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #28a745;
+        }
+        .chart-container {
+            background: #141426;
+            padding: 20px;
+            border-radius: 16px;
+            margin: 20px 0;
+        }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .chart-title {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .chart-controls {
+            display: flex;
+            gap: 10px;
+        }
+        .chart-summary {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: #1f2937;
+            border-radius: 12px;
+            border: 1px solid #374151;
+        }
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .summary-label {
+            font-size: 12px;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .summary-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+        .summary-value.buy-color { color: #10b981; }
+        .summary-value.sell-color { color: #ef4444; }
+        .summary-value.positive { color: #10b981; }
+        .summary-value.negative { color: #ef4444; }
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            height: 200px;
+            padding: 0 16px;
+            border-bottom: 1px solid #374151;
+            border-left: 1px solid #374151;
+        }
+        .bar-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+        }
+        .bar-container {
+            position: relative;
+            width: 100%;
+            height: 160px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        .bar-buy {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50%;
+            background: #10b981;
+            border-radius: 4px 4px 0 0;
+            min-height: 2px;
+        }
+        .bar-sell {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 50%;
+            background: #ef4444;
+            border-radius: 4px 4px 0 0;
+            min-height: 2px;
+        }
+        .bar-label {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #9ca3af;
+            text-align: center;
+        }
+        .bar-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: #ffffff;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+        .bar-item:hover .bar-tooltip {
+            opacity: 1;
+        }
+        .tooltip-buy { color: #10b981; margin-bottom: 2px; }
+        .tooltip-sell { color: #ef4444; margin-bottom: 2px; }
+        .tooltip-total { color: #ffffff; font-weight: 600; border-top: 1px solid #374151; padding-top: 4px; margin-top: 4px; }
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 16px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #ffffff;
+        }
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+        .buy-color { background: #10b981; }
+        .sell-color { background: #ef4444; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Transaction History Chart 测试</h1>
+    <p>此页面用于测试PortfolioView中Transaction History图表基于Wallet Activity Log累计值的计算和显示功能。</p>
+
+    <div class="test-container">
+        <div class="test-section">
+            <div class="test-title">1. 模拟Wallet Activity Log数据</div>
+            <div class="test-data" id="walletActivityData">
+                <div>正在生成模拟数据...</div>
+            </div>
+            <button onclick="generateWalletActivityData()">生成Wallet Activity数据</button>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">2. 生成Transaction History图表数据</div>
+            <div class="test-data" id="chartData">
+                <div>点击"生成图表数据"按钮开始计算</div>
+            </div>
+            <button onclick="generateChartData()">生成图表数据</button>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">3. Transaction History图表显示</div>
+            <div id="chartDisplay">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h4 class="chart-title">Transaction History</h4>
+                        <div class="chart-controls">
+                            <select id="timeframeSelect">
+                                <option value="7d">Last 7 Days</option>
+                                <option value="30d" selected>Last 30 Days</option>
+                                <option value="90d">Last 3 Months</option>
+                                <option value="1y">Last Year</option>
+                            </select>
+                            <button onclick="refreshChart()">🔄</button>
+                        </div>
+                    </div>
+                    
+                    <div id="chartSummary" style="display: none;">
+                        <div class="chart-summary">
+                            <div class="summary-item">
+                                <span class="summary-label">Total Buy Value:</span>
+                                <span class="summary-value buy-color" id="totalBuyValue">A$0.00</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Total Sell Value:</span>
+                                <span class="summary-value sell-color" id="totalSellValue">A$0.00</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Net Value:</span>
+                                <span class="summary-value" id="netValue">A$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="chartContent">
+                        <div style="text-align: center; padding: 40px; color: #9ca3af;">
+                            点击"生成图表数据"按钮开始
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟数据
+        let mockWalletActivity = [];
+        let chartData = [];
+
+        // 生成模拟Wallet Activity数据
+        function generateWalletActivityData() {
+            const now = Date.now();
+            mockWalletActivity = [
+                {
+                    id: 1,
+                    type: 'buy',
+                    project_code: 'RWA001',
+                    projectCode: 'RWA001',
+                    project_name: 'St Ives NSW Residential Project',
+                    amount: 100,
+                    price: 1.00,
+                    timestamp: now - 3600000, // 1小时前
+                    user_address: '0x1234567890123456789012345678901234567890'
+                },
+                {
+                    id: 2,
+                    type: 'buy',
+                    project_code: 'RWA002',
+                    projectCode: 'RWA002',
+                    project_name: 'SQNB Property Loan',
+                    amount: 50,
+                    price: 1.02,
+                    timestamp: now - 7200000, // 2小时前
+                    user_address: '0x1234567890123456789012345678901234567890'
+                },
+                {
+                    id: 3,
+                    type: 'sell',
+                    project_code: 'RWA001',
+                    projectCode: 'RWA001',
+                    project_name: 'St Ives NSW Residential Project',
+                    amount: 25,
+                    price: 1.05,
+                    timestamp: now - 10800000, // 3小时前
+                    user_address: '0x1234567890123456789012345678901234567890'
+                },
+                {
+                    id: 4,
+                    type: 'buy',
+                    project_code: 'RWA003',
+                    projectCode: 'RWA003',
+                    project_name: 'LZYT Property Loan',
+                    amount: 75,
+                    price: 0.98,
+                    timestamp: now - 14400000, // 4小时前
+                    user_address: '0x1234567890123456789012345678901234567890'
+                },
+                {
+                    id: 5,
+                    type: 'buy',
+                    project_code: 'RWA001',
+                    projectCode: 'RWA001',
+                    project_name: 'St Ives NSW Residential Project',
+                    amount: 200,
+                    price: 1.03,
+                    timestamp: now - 86400000, // 1天前
+                    user_address: '0x1234567890123456789012345678901234567890'
+                },
+                {
+                    id: 6,
+                    type: 'sell',
+                    project_code: 'RWA002',
+                    projectCode: 'RWA002',
+                    project_name: 'SQNB Property Loan',
+                    amount: 30,
+                    price: 1.08,
+                    timestamp: now - 172800000, // 2天前
+                    user_address: '0x1234567890123456789012345678901234567890'
+                }
+            ];
+
+            // 保存到localStorage模拟WalletView的数据
+            localStorage.setItem('walletActivity', JSON.stringify(mockWalletActivity));
+
+            document.getElementById('walletActivityData').innerHTML = 
+                '<pre>' + JSON.stringify(mockWalletActivity, null, 2) + '</pre>';
+        }
+
+        // 生成图表数据
+        function generateChartData() {
+            const timeframe = document.getElementById('timeframeSelect').value;
+            const days = getDaysFromTimeframe(timeframe);
+            const endDate = new Date();
+            const startDate = new Date(endDate.getTime() - (days * 24 * 60 * 60 * 1000));
+            
+            // 从localStorage获取交易数据
+            const walletActivity = JSON.parse(localStorage.getItem('walletActivity') || '[]');
+            const transactionActivities = walletActivity.filter(activity => 
+                activity.type === 'buy' || activity.type === 'sell'
+            );
+            
+            console.log('📊 生成交易图表数据，共', transactionActivities.length, '条交易记录');
+            
+            // 按日期分组交易数据
+            const groupedData = new Map();
+            
+            // 初始化所有日期
+            for (let i = 0; i < days; i++) {
+                const date = new Date(startDate.getTime() + (i * 24 * 60 * 60 * 1000));
+                const dateKey = date.toISOString().split('T')[0];
+                groupedData.set(dateKey, { 
+                    date: formatDateLabel(date), 
+                    buy: 0, 
+                    sell: 0,
+                    buyAmount: 0,  // 买入数量累计
+                    sellAmount: 0, // 卖出数量累计
+                    buyValue: 0,   // 买入价值累计
+                    sellValue: 0   // 卖出价值累计
+                });
+            }
+            
+            // 统计交易数据
+            transactionActivities.forEach(tx => {
+                const txDate = new Date(tx.timestamp);
+                const dateKey = txDate.toISOString().split('T')[0];
+                
+                if (groupedData.has(dateKey)) {
+                    const dayData = groupedData.get(dateKey);
+                    const amount = parseFloat(tx.amount) || 0;
+                    const price = parseFloat(tx.price) || 1.00;
+                    const value = amount * price;
+                    
+                    if (tx.type === 'buy') {
+                        dayData.buy++;
+                        dayData.buyAmount += amount;
+                        dayData.buyValue += value;
+                    } else if (tx.type === 'sell') {
+                        dayData.sell++;
+                        dayData.sellAmount += amount;
+                        dayData.sellValue += value;
+                    }
+                }
+            });
+            
+            // 转换为数组并排序
+            chartData = Array.from(groupedData.values()).sort((a, b) => {
+                return new Date(a.date) - new Date(b.date);
+            });
+            
+            console.log('📊 交易图表数据生成完成，共', chartData.length, '个数据点');
+            
+            // 显示图表数据
+            document.getElementById('chartData').innerHTML = 
+                '<pre>' + JSON.stringify(chartData, null, 2) + '</pre>';
+            
+            // 渲染图表
+            renderChart();
+        }
+
+        // 渲染图表
+        function renderChart() {
+            if (chartData.length === 0) {
+                document.getElementById('chartContent').innerHTML = 
+                    '<div style="text-align: center; padding: 40px; color: #9ca3af;">No transaction data available</div>';
+                return;
+            }
+
+            // 计算最大值
+            const maxValue = Math.max(...chartData.map(item => item.buyValue + item.sellValue));
+            
+            // 计算累计统计
+            const totalBuyValue = chartData.reduce((sum, item) => sum + item.buyValue, 0);
+            const totalSellValue = chartData.reduce((sum, item) => sum + item.sellValue, 0);
+            const netValue = totalBuyValue - totalSellValue;
+            
+            // 更新摘要
+            document.getElementById('totalBuyValue').textContent = 'A$' + totalBuyValue.toFixed(2);
+            document.getElementById('totalSellValue').textContent = 'A$' + totalSellValue.toFixed(2);
+            document.getElementById('netValue').textContent = (netValue >= 0 ? '+' : '') + 'A$' + netValue.toFixed(2);
+            document.getElementById('netValue').className = 'summary-value ' + (netValue >= 0 ? 'positive' : 'negative');
+            document.getElementById('chartSummary').style.display = 'block';
+            
+            // 生成柱状图
+            let chartHTML = '<div class="bar-chart">';
+            chartData.forEach((item, index) => {
+                const buyHeight = maxValue > 0 ? (item.buyValue / maxValue) * 100 : 0;
+                const sellHeight = maxValue > 0 ? (item.sellValue / maxValue) * 100 : 0;
+                
+                chartHTML += `
+                    <div class="bar-item">
+                        <div class="bar-container">
+                            <div class="bar-buy" style="height: ${Math.max(buyHeight, item.buyValue > 0 ? 5 : 0)}%"></div>
+                            <div class="bar-sell" style="height: ${Math.max(sellHeight, item.sellValue > 0 ? 5 : 0)}%"></div>
+                        </div>
+                        <div class="bar-label">${item.date}</div>
+                        <div class="bar-tooltip">
+                            <div class="tooltip-buy">Buy: ${item.buy} (A$${item.buyValue.toFixed(2)})</div>
+                            <div class="tooltip-sell">Sell: ${item.sell} (A$${item.sellValue.toFixed(2)})</div>
+                            <div class="tooltip-total">Total: ${item.buy + item.sell} (A$${(item.buyValue + item.sellValue).toFixed(2)})</div>
+                        </div>
+                    </div>
+                `;
+            });
+            chartHTML += '</div>';
+            
+            chartHTML += `
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <div class="legend-color buy-color"></div>
+                        <span>Buy Value (A$)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color sell-color"></div>
+                        <span>Sell Value (A$)</span>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('chartContent').innerHTML = chartHTML;
+        }
+
+        // 刷新图表
+        function refreshChart() {
+            generateChartData();
+        }
+
+        // 工具函数
+        function getDaysFromTimeframe(timeframe) {
+            switch (timeframe) {
+                case '7d': return 7;
+                case '30d': return 30;
+                case '90d': return 90;
+                case '1y': return 365;
+                default: return 30;
+            }
+        }
+
+        function formatDateLabel(date) {
+            const now = new Date();
+            const diffTime = now - date;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) return 'Today';
+            if (diffDays === 1) return 'Yesterday';
+            if (diffDays < 7) return `${diffDays}d ago`;
+            if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        // 页面加载时自动生成数据
+        window.onload = function() {
+            generateWalletActivityData();
+        };
+    </script>
+</body>
+</html>

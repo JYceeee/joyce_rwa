@@ -6,9 +6,8 @@ const getAllProductDetails = async (req, res) => {
     const sql = `
       SELECT 
         id, code, name, subtitle, type, region, risk, target_yield, status, summary,
-        total_offering, subscribed, total_subscription_tokens, subscribed_tokens,
-        current_subscription, total_subscription,
-        loan_amount, annual_interest_rate, loan_term, ltv, drawdown_date, early_repayment, repayment_arrangement,
+        total_token, current_subscribed_token,
+        loan_amount, annual_interest_rate, loan_term, LTV, drawdown_date, early_repayment, repayment_arrangement,
         issuer, pw_shareholders, lender, borrower, guarantor,
         disbursement_method, interest, early_repayment_details, maturity_date,
         property_address, valuation, security_rank, lvr,
@@ -35,18 +34,14 @@ const getAllProductDetails = async (req, res) => {
       summary: product.summary,
       
       // 投资信息
-      totalOffering: product.total_offering,
-      subscribed: product.subscribed,
-      totalSubscriptionTokens: product.total_subscription_tokens,
-      subscribedTokens: product.subscribed_tokens,
-      currentSubscription: product.current_subscription,
-      totalSubscription: product.total_subscription,
+      totalOffering: product.total_token,
+      subscribed: product.current_subscribed_token,
       
       // 关键事实
       loanAmount: product.loan_amount,
       annualInterestRate: product.annual_interest_rate,
       loanTerm: product.loan_term,
-      ltv: product.ltv,
+      ltv: product.LTV,
       drawdownDate: product.drawdown_date,
       earlyRepayment: product.early_repayment,
       repaymentArrangement: product.repayment_arrangement,
@@ -130,18 +125,14 @@ const getProductByCode = async (req, res) => {
       summary: product.summary,
       
       // 投资信息
-      totalOffering: product.total_offering,
-      subscribed: product.subscribed,
-      totalSubscriptionTokens: product.total_subscription_tokens,
-      subscribedTokens: product.subscribed_tokens,
-      currentSubscription: product.current_subscription,
-      totalSubscription: product.total_subscription,
+      totalOffering: product.total_token,
+      subscribed: product.current_subscribed_token,
       
       // 关键事实
       loanAmount: product.loan_amount,
       annualInterestRate: product.annual_interest_rate,
       loanTerm: product.loan_term,
-      ltv: product.ltv,
+      ltv: product.LTV,
       drawdownDate: product.drawdown_date,
       earlyRepayment: product.early_repayment,
       repaymentArrangement: product.repayment_arrangement,
@@ -195,7 +186,7 @@ const getProductByCode = async (req, res) => {
 const updateProductSubscription = async (req, res) => {
   try {
     const { code } = req.params;
-    const { subscribed, subscribed_tokens, current_subscription } = req.body;
+    const { subscribed, current_subscribed_token } = req.body;
     
     if (!code) {
       return res.cc('缺少产品代码参数', 1);
@@ -203,11 +194,11 @@ const updateProductSubscription = async (req, res) => {
     
     const sql = `
       UPDATE product_details 
-      SET subscribed = ?, subscribed_tokens = ?, current_subscription = ?, updated_at = CURRENT_TIMESTAMP
+      SET current_subscribed_token = ?, updated_at = CURRENT_TIMESTAMP
       WHERE code = ?
     `;
     
-    const [result] = await mysql.promise().execute(sql, [subscribed, subscribed_tokens, current_subscription, code]);
+    const [result] = await mysql.promise().execute(sql, [current_subscribed_token, code]);
     
     if (result.affectedRows > 0) {
       res.cc('更新产品订阅信息成功', 0);

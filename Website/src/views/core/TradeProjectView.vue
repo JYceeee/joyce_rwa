@@ -297,7 +297,7 @@
 </template>
 
 <script>
-import { products, productUtils } from '@/data/ProductDetailsInfo.js'
+import { productAPI } from '@/service/api'
 import { contractService } from '@/service/contractService.js'
 import { getKycStatus, isKycVerified, getKycLevel, setKycLevel, KYC_STATUS, KYC_LEVELS } from '@/service/kycService.js'
 import { useAuth } from '@/composables/useAuth.js'
@@ -341,6 +341,10 @@ export default {
       userTokenBalance: '',
       tradeHistory: [],
       testAmount: '',
+      // 项目数据
+      projectData: null,
+      projectLoading: true,
+      projectError: null,
       // 错误消息映射
       errorMessages: {
         'insufficient_balance': 'You have insufficient funds',
@@ -358,21 +362,29 @@ export default {
   },
   computed: {
     projectCode() {
-      return this.code || this.$route.params.code || 'TYMU'
+      return this.code || this.$route.params.code || 'RWA001'
+    },
+    project() {
+      // 使用从数据库加载的项目数据
+      if (this.projectData) {
+        console.log('📊 TradeProjectView: 使用数据库项目数据:', this.projectData)
+        return this.projectData
+      }
+      return null
     },
     projectData() {
-      // 从ProductDetailsInfo获取项目数据
-      const product = productUtils.getProductByCode(this.projectCode)
+      // 从ProductDetailsInfo获取项目数据（保留作为备用）
+      const product = this.project
       
       if (product) {
-        console.log('📊 TradeProjectView: 从ProductDetailsInfo获取项目数据:', product)
+        console.log('📊 TradeProjectView: 从数据库获取项目数据:', product)
         
         // 构建符合模板需求的数据结构，完整映射ProductDetailsInfo.js中的所有字段
         return {
           // 基本信息
           code: product.code,
           name: product.name,
-          image: product.image,
+          image: product.image || this.getProductImage(product.code),
           subtitle: product.subtitle,
           type: product.type,
           region: product.region,
@@ -486,6 +498,40 @@ export default {
     }
   },
   methods: {
+    async loadProjectData() {
+      try {
+        this.projectLoading = true
+        this.projectError = null
+        console.log('🔄 TradeProjectView: 从数据库加载项目数据...', this.projectCode)
+        
+        const response = await productAPI.getProductByCode(this.projectCode)
+        
+        if (response.status === 0) {
+          this.projectData = response.data
+          console.log('✅ TradeProjectView: 项目数据加载成功:', this.projectData)
+        } else {
+          this.projectError = response.message || '获取项目数据失败'
+          console.error('❌ TradeProjectView: API返回错误:', response)
+        }
+      } catch (error) {
+        this.projectError = '网络错误，无法获取项目数据'
+        console.error('❌ TradeProjectView: 加载项目数据失败:', error)
+      } finally {
+        this.projectLoading = false
+      }
+    },
+    
+    getProductImage(code) {
+      const imageMap = {
+        'RWA001': '/pics/TYMU.png',
+        'RWA002': '/pics/SQNB.png',
+        'RWA003': '/pics/LZYT.png',
+        'YYD': '/pics/YYD.png',
+        'COMP': '/pics/TYMU.png'
+      }
+      return imageMap[code] || '/pics/TYMU.png'
+    },
+    
     calculateTokenPrice(product) {
       // 基于目标收益率计算代币价格
       const basePrice = 1.00
@@ -1588,6 +1634,9 @@ export default {
     
   },
   async mounted() {
+    // 加载项目数据
+    await this.loadProjectData()
+    
     // 初始化useWallet
     try {
       const { connected, fullAddress } = useWallet()

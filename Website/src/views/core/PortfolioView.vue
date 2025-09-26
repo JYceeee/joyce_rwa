@@ -139,29 +139,7 @@
           </div>
         </div>
           
-          <!-- 最近交易记录 -->
-          <!-- <div class="pf-holdings">
-            <h4>Recent Trades</h4>
-            <div v-if="getRecentTransactions(selectedAccount).length === 0" class="no-trades">No recent trades</div>
-            <div v-else>
-              <div v-for="trade in getRecentTransactions(selectedAccount)" :key="trade.id" class="pf-trade-item">
-                <div class="pf-trade-header">
-                  <span class="pf-trade-type" :class="trade.type">{{ trade.type.toUpperCase() }}</span>
-                  <span class="pf-trade-time">{{ formatTime(trade.timestamp) }}</span>
-                </div>
-                <div class="pf-trade-info">
-                  <div class="pf-trade-project-section">
-                    <span class="pf-label">Project:</span>
-                    <span class="pf-value">{{ trade.project_code }} - {{ trade.project_name }}</span>
-                  </div>
-                  <div class="pf-trade-amount-section">
-                    <span class="pf-label">Token Amount:</span>
-                    <span class="pf-value">{{ trade.amount }} tokens</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div> -->
+ 
         </div>
       </aside>
 
@@ -227,6 +205,24 @@
                 </div>
               </div>
               
+              <!-- 累计统计摘要 -->
+              <div v-if="transactionChartData.length > 0" class="pf-chart-summary">
+                <div class="pf-summary-item">
+                  <span class="pf-summary-label">Total Buy Value:</span>
+                  <span class="pf-summary-value pf-buy-color">A${{ getTotalBuyValue().toFixed(2) }}</span>
+                </div>
+                <div class="pf-summary-item">
+                  <span class="pf-summary-label">Total Sell Value:</span>
+                  <span class="pf-summary-value pf-sell-color">A${{ getTotalSellValue().toFixed(2) }}</span>
+                </div>
+                <div class="pf-summary-item">
+                  <span class="pf-summary-label">Net Value:</span>
+                  <span class="pf-summary-value" :class="getNetValue() >= 0 ? 'pf-positive' : 'pf-negative'">
+                    {{ getNetValue() >= 0 ? '+' : '' }}A${{ getNetValue().toFixed(2) }}
+                  </span>
+                </div>
+              </div>
+              
               <div class="pf-bar-chart-container">
                 <div v-if="loadingTransactions" class="pf-chart-loading">
                   <div class="pf-spinner"></div>
@@ -247,25 +243,25 @@
                       class="pf-bar-item"
                     >
                       <div class="pf-bar-container">
-                        <div class="pf-bar-buy" :style="{ height: getBarHeight(item.buy, maxTransactions) + '%' }"></div>
-                        <div class="pf-bar-sell" :style="{ height: getBarHeight(item.sell, maxTransactions) + '%' }"></div>
+                        <div class="pf-bar-buy" :style="{ height: getBarHeight(item.buyValue, maxTransactions) + '%' }"></div>
+                        <div class="pf-bar-sell" :style="{ height: getBarHeight(item.sellValue, maxTransactions) + '%' }"></div>
                       </div>
                       <div class="pf-bar-label">{{ item.date }}</div>
                       <div class="pf-bar-tooltip">
-                        <div class="pf-tooltip-buy">Buy: {{ item.buy }}</div>
-                        <div class="pf-tooltip-sell">Sell: {{ item.sell }}</div>
-                        <div class="pf-tooltip-total">Total: {{ item.buy + item.sell }}</div>
+                        <div class="pf-tooltip-buy">Buy: {{ item.buy }} (A${{ item.buyValue.toFixed(2) }})</div>
+                        <div class="pf-tooltip-sell">Sell: {{ item.sell }} (A${{ item.sellValue.toFixed(2) }})</div>
+                        <div class="pf-tooltip-total">Total: {{ item.buy + item.sell }} (A${{ (item.buyValue + item.sellValue).toFixed(2) }})</div>
                       </div>
                     </div>
                   </div>
                   <div class="pf-chart-legend">
                     <div class="pf-legend-item">
                       <div class="pf-legend-color pf-buy-color"></div>
-                      <span>Buy Transactions</span>
+                      <span>Buy Value (A$)</span>
                     </div>
                     <div class="pf-legend-item">
                       <div class="pf-legend-color pf-sell-color"></div>
-                      <span>Sell Transactions</span>
+                      <span>Sell Value (A$)</span>
                     </div>
                   </div>
                 </div>
@@ -320,9 +316,15 @@
         <div v-if="activeTab==='Transactions'" class="pf-transactions">
           <div class="pf-transactions-header">
             <h3>Recent Transactions</h3>
-            <button class="pf-filter-btn" @click="showFilters = !showFilters">
-              Filter
-            </button>
+            <div class="pf-transactions-actions">
+              <button class="pf-filter-btn" @click="showFilters = !showFilters">
+                Filter
+              </button>
+              <button class="pf-refresh-btn" @click="refreshTransactions" :disabled="loadingTransactions">
+                <span v-if="loadingTransactions">🔄</span>
+                <span v-else>Refresh</span>
+              </button>
+            </div>
           </div>
           
           <div v-if="showFilters" class="pf-filters">
@@ -340,19 +342,29 @@
           </div>
 
           <div class="pf-transactions-list">
-            <div v-for="transaction in filteredTransactions" :key="transaction.id" class="pf-transaction-item">
-              <div class="pf-transaction-icon" :class="transaction.type">
-                {{ transaction.type === 'buy' ? '📈' : '📉' }}
-              </div>
-              <div class="pf-transaction-details">
-                <div class="pf-transaction-title">
-                  {{ transaction.type.toUpperCase() }} {{ transaction.amount }} {{ transaction.projectCode }}
+            <div v-if="filteredTransactions.length === 0" class="pf-no-transactions">
+              <div class="pf-empty-icon">📊</div>
+              <p>No transaction data available</p>
+              <p class="pf-empty-hint">Complete some trades in the Trade page to see your transaction history</p>
+            </div>
+            <div v-else>
+              <div v-for="transaction in filteredTransactions" :key="transaction.id" class="pf-transaction-item">
+                <div class="pf-transaction-icon" :class="transaction.type">
+                  {{ transaction.type === 'buy' ? '📈' : '📉' }}
                 </div>
-                <div class="pf-transaction-time">{{ formatTime(transaction.timestamp) }}</div>
-              </div>
-              <div class="pf-transaction-value">
-                <div class="pf-transaction-price">A${{ transaction.price.toFixed(2) }}</div>
-                <div class="pf-transaction-total">A${{ (transaction.amount * transaction.price).toFixed(2) }}</div>
+                <div class="pf-transaction-details">
+                  <div class="pf-transaction-title">
+                    {{ transaction.type.toUpperCase() }} {{ transaction.amount }} {{ transaction.projectCode }}
+                  </div>
+                  <div class="pf-transaction-subtitle">
+                    {{ transaction.projectName }}
+                  </div>
+                  <div class="pf-transaction-time">{{ formatTime(transaction.timestamp) }}</div>
+                </div>
+                <div class="pf-transaction-value">
+                  <div class="pf-transaction-price">A${{ transaction.price.toFixed(2) }}</div>
+                  <div class="pf-transaction-total">A${{ (transaction.amount * transaction.price).toFixed(2) }}</div>
+                </div>
               </div>
             </div>
           </div>
@@ -400,6 +412,8 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useWallet } from '/src/composables/useWallet'
 import { useRouter } from 'vue-router'
+import { productAPI } from '@/service/api'
+import { useDatabaseSync } from '@/service/databaseSyncService'
 
 const router = useRouter()
 const { fullAddress, shortAddress, connected, nativeBalanceDisplay, nativeSymbol } = useWallet()
@@ -443,8 +457,35 @@ const filterProject = ref('')
 const accGroupOpen = ref(true)
 const selectedAccount = ref('')
 
+// 数据库同步相关
+let unsubscribeProducts = null
+
 // 账户数据 - 从localStorage加载绑定的钱包账户
 const accounts = ref([])
+
+// 从数据库加载项目数据
+async function loadProjects() {
+  try {
+    projectsLoading.value = true
+    projectsError.value = null
+    console.log('🔄 PortfolioView: 从数据库加载项目数据...')
+    
+    const response = await productAPI.getAllProducts()
+    
+    if (response.status === 0) {
+      projects.value = response.data || []
+      console.log('✅ PortfolioView: 项目数据加载成功，共', projects.value.length, '个项目')
+    } else {
+      projectsError.value = response.message || '获取项目数据失败'
+      console.error('❌ PortfolioView: API返回错误:', response)
+    }
+  } catch (error) {
+    projectsError.value = '网络错误，无法获取项目数据'
+    console.error('❌ PortfolioView: 加载项目数据失败:', error)
+  } finally {
+    projectsLoading.value = false
+  }
+}
 
 // 从localStorage加载绑定的钱包账户，与WalletView保持一致
 function loadBoundAccounts() {
@@ -586,102 +627,40 @@ function initializeTransactionData() {
 const accountTransactions = ref({})
 
 
-// 项目数据
-const projects = ref([
-  {
-    code: 'TYMU',
-    name: 'TYMU Property Loan',
-    image: '/pics/TYMU.png',
-    subtitle: 'Prime Residential Mortgage Backed Loan',
-    type: 'residential',
-    region: 'Suburban',
-    risk: 'low',
-    targetYield: 6.5,
-    currentPrice: 1.00,
-    change: 2.5
-  },
-  {
-    code: 'SQNB',
-    name: 'SQNB Property Loan',
-    image: '/pics/SQNB.png',
-    subtitle: 'Commercial Mortgage Loan',
-    type: 'commercial',
-    region: 'CBD',
-    risk: 'medium',
-    targetYield: 7.2,
-    currentPrice: 1.02,
-    change: -1.2
-  },
-  {
-    code: 'LZYT',
-    name: 'LZYT Property Loan',
-    image: '/pics/LZYT.png',
-    subtitle: 'Suburban Residential Loan',
-    type: 'residential',
-    region: 'Suburban',
-    risk: 'medium',
-    targetYield: 6.9,
-    currentPrice: 0.98,
-    change: 0.8
-  },
-  {
-    code: 'YYD',
-    name: 'YYD Property Loan',
-    image: '/pics/YYD.png',
-    subtitle: 'CBD Apartment Mortgage',
-    type: 'residential',
-    region: 'CBD',
-    risk: 'low',
-    targetYield: 6.1,
-    currentPrice: 1.05,
-    change: 3.1
-  }
-])
+// 项目数据 - 从数据库获取
+const projects = ref([])
+const projectsLoading = ref(true)
+const projectsError = ref(null)
 
 // 计算属性
 const filteredTransactions = computed(() => {
-  let filtered = []
+  // 从WalletView获取交易活动数据
+  const walletActivity = getWalletActivityData()
   
-  if (selectedAccount.value) {
-    filtered = accountTransactions.value[selectedAccount.value] || []
-  } else {
-    // 如果没有选中账户，返回默认的演示交易数据
-    filtered = [
-      {
-        id: 1,
-        type: 'buy',
-        projectCode: 'TYMU',
-        amount: 100,
-        price: 1.00,
-        timestamp: Date.now() - 3600000,
-      },
-      {
-        id: 2,
-        type: 'buy',
-        projectCode: 'SQNB',
-        amount: 50,
-        price: 1.02,
-        timestamp: Date.now() - 7200000,
-      },
-      {
-        id: 3,
-        type: 'sell',
-        projectCode: 'LZYT',
-        amount: 25,
-        price: 0.98,
-        timestamp: Date.now() - 10800000,
-      },
-      {
-        id: 4,
-        type: 'buy',
-        projectCode: 'YYD',
-        amount: 75,
-        price: 1.05,
-        timestamp: Date.now() - 14400000,
-      }
-    ]
+  // 筛选出transaction activity（buy/sell类型）
+  let filtered = walletActivity.filter(activity => 
+    activity.type === 'buy' || activity.type === 'sell'
+  )
+  
+  // 如果没有交易数据，返回空数组
+  if (filtered.length === 0) {
+    console.log('📊 PortfolioView: 没有找到交易活动数据')
+    return []
   }
   
+  // 转换数据格式以匹配模板需求
+  filtered = filtered.map(activity => ({
+    id: activity.id || Date.now() + Math.random(),
+    type: activity.type,
+    projectCode: activity.project_code || activity.projectCode,
+    projectName: activity.project_name || 'Unknown Project',
+    amount: activity.amount || 0,
+    price: activity.price || 1.00,
+    timestamp: activity.timestamp || Date.now(),
+    userAddress: activity.user_address || selectedAccount.value
+  }))
+  
+  // 应用筛选器
   if (filterType.value) {
     filtered = filtered.filter(t => t.type === filterType.value)
   }
@@ -690,6 +669,7 @@ const filteredTransactions = computed(() => {
     filtered = filtered.filter(t => t.projectCode === filterProject.value)
   }
   
+  // 按时间倒序排列
   return filtered.sort((a, b) => b.timestamp - a.timestamp)
 })
 
@@ -763,9 +743,9 @@ const getAccountHoldings = (accountAddress) => {
     }
     
     const holding = holdingMap.get(key)
-    // 获取项目当前价格
+    // 获取项目当前价格 - 从数据库获取的项目数据
     const project = projects.value.find(p => p.code === key)
-    const currentPrice = project ? project.currentPrice : 1.00
+    const currentPrice = project ? (project.currentPrice || 1.00) : 1.00
     
     if (tx.type === 'buy') {
       holding.amount += tx.amount
@@ -783,7 +763,7 @@ const getAccountHoldings = (accountAddress) => {
     .filter(h => h.amount > 0)
     .map(holding => {
       const project = projects.value.find(p => p.code === holding.code)
-      const currentPrice = project ? project.currentPrice : 1.00
+      const currentPrice = project ? (project.currentPrice || 1.00) : 1.00
       const currentValue = holding.amount * currentPrice
       const change = holding.totalInvestment > 0 ? ((currentValue - holding.totalInvestment) / holding.totalInvestment) * 100 : 0
       
@@ -954,7 +934,8 @@ const allTransactions = computed(() => {
 
 const maxTransactions = computed(() => {
   if (transactionChartData.value.length === 0) return 1
-  return Math.max(...transactionChartData.value.map(item => item.buy + item.sell))
+  // 基于累计价值计算最大值
+  return Math.max(...transactionChartData.value.map(item => item.buyValue + item.sellValue))
 })
 
 const tradingInsights = computed(() => {
@@ -1070,13 +1051,40 @@ const getAccountBalance = (accountAddress) => {
   return account.balance.toFixed(4)
 }
 
-const refreshPortfolio = () => {
-  // 模拟价格更新
-  projects.value.forEach(project => {
-    const change = (Math.random() - 0.5) * 0.1 // ±5% change
-    project.currentPrice *= (1 + change)
-    project.change = change * 100
-  })
+const refreshPortfolio = async () => {
+  // 从数据库重新加载项目数据
+  await loadProjects()
+  
+  // 模拟价格更新（如果需要的话）
+  // projects.value.forEach(project => {
+  //   const change = (Math.random() - 0.5) * 0.1 // ±5% change
+  //   project.currentPrice *= (1 + change)
+  //   project.change = change * 100
+  // })
+}
+
+// 刷新交易数据
+const refreshTransactions = async () => {
+  loadingTransactions.value = true
+  try {
+    console.log('🔄 PortfolioView: 刷新交易数据...')
+    
+    // 从WalletView重新获取交易数据
+    const walletActivity = getWalletActivityData()
+    const transactionActivities = walletActivity.filter(activity => 
+      activity.type === 'buy' || activity.type === 'sell'
+    )
+    
+    console.log('📊 PortfolioView: 获取到', transactionActivities.length, '条交易记录')
+    
+    // 触发响应式更新
+    // Vue的响应式系统会自动更新filteredTransactions计算属性
+    
+  } catch (error) {
+    console.error('❌ PortfolioView: 刷新交易数据失败:', error)
+  } finally {
+    loadingTransactions.value = false
+  }
 }
 
 // 交易图表相关方法
@@ -1092,6 +1100,14 @@ const refreshTransactionData = async () => {
 }
 
 const generateTransactionChartData = async () => {
+  // 从WalletView获取交易活动数据
+  const walletActivity = getWalletActivityData()
+  const transactionActivities = walletActivity.filter(activity => 
+    activity.type === 'buy' || activity.type === 'sell'
+  )
+  
+  console.log('📊 PortfolioView: 生成交易图表数据，共', transactionActivities.length, '条交易记录')
+  
   // 获取时间范围
   const days = getDaysFromTimeframe(chartTimeframe.value)
   const endDate = new Date()
@@ -1104,20 +1120,36 @@ const generateTransactionChartData = async () => {
   for (let i = 0; i < days; i++) {
     const date = new Date(startDate.getTime() + (i * 24 * 60 * 60 * 1000))
     const dateKey = date.toISOString().split('T')[0]
-    groupedData.set(dateKey, { date: formatDateLabel(date), buy: 0, sell: 0 })
+    groupedData.set(dateKey, { 
+      date: formatDateLabel(date), 
+      buy: 0, 
+      sell: 0,
+      buyAmount: 0,  // 买入数量累计
+      sellAmount: 0, // 卖出数量累计
+      buyValue: 0,   // 买入价值累计
+      sellValue: 0   // 卖出价值累计
+    })
   }
   
   // 统计交易数据
-  allTransactions.value.forEach(tx => {
+  transactionActivities.forEach(tx => {
     const txDate = new Date(tx.timestamp)
     const dateKey = txDate.toISOString().split('T')[0]
     
     if (groupedData.has(dateKey)) {
       const dayData = groupedData.get(dateKey)
+      const amount = parseFloat(tx.amount) || 0
+      const price = parseFloat(tx.price) || 1.00
+      const value = amount * price
+      
       if (tx.type === 'buy') {
         dayData.buy++
+        dayData.buyAmount += amount
+        dayData.buyValue += value
       } else if (tx.type === 'sell') {
         dayData.sell++
+        dayData.sellAmount += amount
+        dayData.sellValue += value
       }
     }
   })
@@ -1126,6 +1158,8 @@ const generateTransactionChartData = async () => {
   transactionChartData.value = Array.from(groupedData.values()).sort((a, b) => {
     return new Date(a.date) - new Date(b.date)
   })
+  
+  console.log('📊 PortfolioView: 交易图表数据生成完成，共', transactionChartData.value.length, '个数据点')
 }
 
 const getDaysFromTimeframe = (timeframe) => {
@@ -1153,6 +1187,21 @@ const formatDateLabel = (date) => {
 const getBarHeight = (value, max) => {
   if (max === 0) return 0
   return Math.max((value / max) * 100, value > 0 ? 5 : 0) // 最小高度5%用于显示
+}
+
+// 计算总买入价值
+const getTotalBuyValue = () => {
+  return transactionChartData.value.reduce((sum, item) => sum + item.buyValue, 0)
+}
+
+// 计算总卖出价值
+const getTotalSellValue = () => {
+  return transactionChartData.value.reduce((sum, item) => sum + item.sellValue, 0)
+}
+
+// 计算净价值
+const getNetValue = () => {
+  return getTotalBuyValue() - getTotalSellValue()
 }
 
 const formatTime = (timestamp) => {
@@ -1240,7 +1289,13 @@ const goToDetail = (code) => {
 // 生命周期
 let priceUpdateInterval
 
-onMounted(() => {
+onMounted(async () => {
+  // 先加载项目数据
+  await loadProjects()
+  
+  // 设置数据库同步
+  setupDatabaseSync()
+  
   // 加载绑定的钱包账户
   loadBoundAccounts()
   
@@ -1274,6 +1329,30 @@ onMounted(() => {
   }
 })
 
+// 设置数据库同步
+const setupDatabaseSync = () => {
+  const { subscribeProducts, getLastRefreshTime } = useDatabaseSync()
+  
+  // 订阅产品数据更新
+  unsubscribeProducts = subscribeProducts((products) => {
+    console.log('📡 PortfolioView: 收到产品数据更新，共', products.length, '个项目')
+    projects.value = products
+  })
+  
+  // 设置最后刷新时间
+  const lastRefresh = getLastRefreshTime()
+  if (lastRefresh) {
+    console.log('🕐 PortfolioView: 最后刷新时间:', lastRefresh)
+  }
+}
+
+// 清理数据库同步
+const cleanupDatabaseSync = () => {
+  if (unsubscribeProducts) {
+    unsubscribeProducts()
+  }
+}
+
 // 处理WalletView的wallet activity更新
 const handleWalletActivityUpdate = (event) => {
   console.log('🔄 PortfolioView: 检测到WalletView交易活动更新:', event.detail)
@@ -1298,6 +1377,9 @@ onUnmounted(() => {
   if (priceUpdateInterval) {
     clearInterval(priceUpdateInterval)
   }
+  
+  // 清理数据库同步
+  cleanupDatabaseSync()
   
   // 移除事件监听器
   window.removeEventListener('walletActivityUpdated', handleWalletActivityUpdate)
@@ -1668,8 +1750,12 @@ window.addEventListener('storage', (e) => {
 /* 交易历史样式 */
 .pf-transactions-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
 .pf-transactions-header h3{margin:0;font-size:18px;font-weight:700;color:#ffffff;}
+.pf-transactions-actions{display:flex;gap:8px;align-items:center;}
 .pf-filter-btn{padding:6px 12px;border:1px solid #374151;border-radius:8px;background:#1f2937;color:#ffffff;cursor:pointer;font-size:14px;}
 .pf-filter-btn:hover{background:#374151;}
+.pf-refresh-btn{padding:6px 12px;border:1px solid #374151;border-radius:8px;background:#1f2937;color:#ffffff;cursor:pointer;font-size:14px;transition:all 0.2s ease;}
+.pf-refresh-btn:hover:not(:disabled){background:#374151;}
+.pf-refresh-btn:disabled{opacity:0.6;cursor:not-allowed;}
 
 .pf-filters{display:flex;gap:12px;margin-bottom:16px;padding:12px;background:#1f2937;border-radius:10px;}
 .pf-filter-select{padding:6px 10px;border:1px solid #374151;border-radius:6px;background:#141426;color:#ffffff;font-size:14px;}
@@ -1680,10 +1766,17 @@ window.addEventListener('storage', (e) => {
 .pf-transaction-icon.sell{background:#fee2e2;color:#dc2626;}
 .pf-transaction-details{flex:1;}
 .pf-transaction-title{font-weight:600;color:#ffffff;margin-bottom:2px;}
+.pf-transaction-subtitle{font-size:12px;color:#9ca3af;margin-bottom:4px;}
 .pf-transaction-time{font-size:12px;color:#9ca3af;}
 .pf-transaction-value{text-align:right;}
 .pf-transaction-price{font-weight:600;color:#ffffff;}
 .pf-transaction-total{font-size:12px;color:#9ca3af;margin-top:2px;}
+
+/* 空状态样式 */
+.pf-no-transactions{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;}
+.pf-empty-icon{font-size:48px;margin-bottom:16px;opacity:0.5;}
+.pf-no-transactions p{margin:8px 0;color:#9ca3af;}
+.pf-empty-hint{font-size:14px;color:#6b7280;}
 
 /* 资产总结图表样式 */
 .pf-asset-summary{margin-bottom:24px;padding:20px;border-radius:16px;background:#141426;border:1px solid var(--border);max-width: 820px;}
@@ -1703,6 +1796,53 @@ window.addEventListener('storage', (e) => {
   border-radius: 16px;
   background: #141426;
   border: 1px solid var(--border);
+}
+
+/* 图表摘要样式 */
+.pf-chart-summary{
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #1f2937;
+  border-radius: 12px;
+  border: 1px solid #374151;
+}
+
+.pf-summary-item{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.pf-summary-label{
+  font-size: 12px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pf-summary-value{
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.pf-summary-value.pf-buy-color{
+  color: #10b981;
+}
+
+.pf-summary-value.pf-sell-color{
+  color: #ef4444;
+}
+
+.pf-summary-value.pf-positive{
+  color: #10b981;
+}
+
+.pf-summary-value.pf-negative{
+  color: #ef4444;
 }
 
 .pf-chart-controls{

@@ -1,12 +1,14 @@
 // api.ts - API服务接口
-import { products } from '../data/ProductDetailsInfo.js'
 
-// 模拟API响应结构
+// API响应结构
 interface ApiResponse<T = any> {
   status: number
   message?: string
   data?: T
 }
+
+// 后端API基础URL
+const API_BASE_URL = 'http://localhost:3000/api'
 
 // 产品API接口
 export const productAPI = {
@@ -16,16 +18,23 @@ export const productAPI = {
    */
   async getAllProducts(): Promise<ApiResponse> {
     try {
-      console.log('📊 API: 获取所有产品数据')
+      console.log('📊 API: 从数据库获取所有产品数据')
       
-      // 模拟API延迟
-      await new Promise(resolve => setTimeout(resolve, 100))
+      const response = await fetch(`${API_BASE_URL}/product_details`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
       
-      return {
-        status: 0,
-        message: 'Success',
-        data: products
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
+      
+      const result = await response.json()
+      console.log('📊 API: 数据库返回数据:', result)
+      
+      return result
     } catch (error) {
       console.error('❌ API: 获取产品数据失败:', error)
       return {
@@ -43,26 +52,23 @@ export const productAPI = {
    */
   async getProductByCode(code: string): Promise<ApiResponse> {
     try {
-      console.log('📊 API: 根据代码获取产品:', code)
+      console.log('📊 API: 从数据库根据代码获取产品:', code)
       
-      // 模拟API延迟
-      await new Promise(resolve => setTimeout(resolve, 50))
+      const response = await fetch(`${API_BASE_URL}/product_details/${code}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
       
-      const product = products.find(p => p.code === code)
-      
-      if (product) {
-        return {
-          status: 0,
-          message: 'Success',
-          data: product
-        }
-      } else {
-        return {
-          status: 1,
-          message: 'Product not found',
-          data: null
-        }
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
+      
+      const result = await response.json()
+      console.log('📊 API: 数据库返回产品详情:', result)
+      
+      return result
     } catch (error) {
       console.error('❌ API: 获取产品详情失败:', error)
       return {
@@ -82,8 +88,14 @@ export const productAPI = {
     try {
       console.log('📊 API: 搜索产品:', query)
       
-      // 模拟API延迟
-      await new Promise(resolve => setTimeout(resolve, 100))
+      // 先获取所有产品，然后在前端进行搜索过滤
+      const allProductsResponse = await this.getAllProducts()
+      
+      if (allProductsResponse.status !== 0) {
+        return allProductsResponse
+      }
+      
+      const products = allProductsResponse.data || []
       
       if (!query || query.trim() === '') {
         return {
@@ -127,8 +139,14 @@ export const productAPI = {
     try {
       console.log('📊 API: 根据类型获取产品:', type)
       
-      // 模拟API延迟
-      await new Promise(resolve => setTimeout(resolve, 50))
+      // 先获取所有产品，然后在前端进行类型过滤
+      const allProductsResponse = await this.getAllProducts()
+      
+      if (allProductsResponse.status !== 0) {
+        return allProductsResponse
+      }
+      
+      const products = allProductsResponse.data || []
       
       if (!type || type === 'all') {
         return {
@@ -164,8 +182,14 @@ export const productAPI = {
     try {
       console.log('📊 API: 根据风险等级获取产品:', risk)
       
-      // 模拟API延迟
-      await new Promise(resolve => setTimeout(resolve, 50))
+      // 先获取所有产品，然后在前端进行风险等级过滤
+      const allProductsResponse = await this.getAllProducts()
+      
+      if (allProductsResponse.status !== 0) {
+        return allProductsResponse
+      }
+      
+      const products = allProductsResponse.data || []
       
       if (!risk || risk === 'all') {
         return {
@@ -188,6 +212,47 @@ export const productAPI = {
         status: 1,
         message: error instanceof Error ? error.message : 'Unknown error',
         data: []
+      }
+    }
+  },
+
+  /**
+   * 更新产品订阅信息
+   * @param {string} code - 产品代码
+   * @param {object} subscriptionData - 订阅数据
+   * @returns {Promise<ApiResponse>} 更新结果
+   */
+  async updateProductSubscription(code: string, subscriptionData: any): Promise<ApiResponse> {
+    try {
+      console.log('📊 API: 更新产品订阅信息:', code, subscriptionData)
+      
+      // 转换字段名以匹配后端API
+      const apiData = {
+        current_subscribed_token: subscriptionData.subscribed || subscriptionData.current_subscribed_token
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/product_details/${code}/subscription`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(apiData)
+      })
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const result = await response.json()
+      console.log('📊 API: 数据库更新订阅信息结果:', result)
+      
+      return result
+    } catch (error) {
+      console.error('❌ API: 更新产品订阅信息失败:', error)
+      return {
+        status: 1,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        data: null
       }
     }
   }

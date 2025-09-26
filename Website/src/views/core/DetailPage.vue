@@ -1,6 +1,16 @@
 <template>
   <section class="container">
-    <h1 class="headline">{{ model?.name || 'Project Detail' }}</h1>
+    <div class="page-header">
+      <h1 class="headline">{{ model?.name || 'Project Detail' }}</h1>
+      <div class="header-actions" v-if="model">
+        <span v-if="lastRefreshTime" class="last-update">
+          最后更新: {{ formatTime(lastRefreshTime) }}
+        </span>
+        <button @click="refreshProjectData" :disabled="loading" class="refresh-btn">
+          {{ loading ? '刷新中...' : '刷新数据' }}
+        </button>
+      </div>
+    </div>
     
     <!-- 加载状态 -->
     <div v-if="loading" class="loading-state">
@@ -29,36 +39,68 @@
         </div>
         <div class="facts-grid">
           <div class="fact-item">
-            <div class="fact-label">Loan Amount</div>
-            <div class="fact-value">{{ p.loanAmount }}</div>
+            <div class="fact-label">Project Code</div>
+            <div class="fact-value">{{ p.code }}</div>
           </div>
           <div class="fact-item">
-            <div class="fact-label">Total Token</div>
-            <div class="fact-value">{{ getTotalToken() }}</div>
+            <div class="fact-label">Project Name</div>
+            <div class="fact-value">{{ p.name }}</div>
+          </div>
+          <div class="fact-item">
+            <div class="fact-label">Project Type</div>
+            <div class="fact-value">{{ p.type }}</div>
+          </div>
+          <div class="fact-item">
+            <div class="fact-label">Region</div>
+            <div class="fact-value">{{ p.region }}</div>
+          </div>
+          <div class="fact-item">
+            <div class="fact-label">Risk Level</div>
+            <div class="fact-value">{{ p.risk }}</div>
+          </div>
+          <div class="fact-item">
+            <div class="fact-label">Status</div>
+            <div class="fact-value">{{ p.status }}</div>
+          </div>
+          <div class="fact-item">
+            <div class="fact-label">Target Yield</div>
+            <div class="fact-value">{{ p.targetYield }}%</div>
+          </div>
+          <div class="fact-item">
+            <div class="fact-label">Total Offering</div>
+            <div class="fact-value">A${{ formatNumber(p.totalOffering) }}</div>
+          </div>
+          <div class="fact-item">
+            <div class="fact-label">Subscribed</div>
+            <div class="fact-value">A${{ formatNumber(p.subscribed) }}</div>
+          </div>
+          <div class="fact-item">
+            <div class="fact-label">Loan Amount</div>
+            <div class="fact-value">A${{ formatNumber(p.loanAmount) }}</div>
           </div>
           <div class="fact-item">
             <div class="fact-label">Annual Interest Rate</div>
-            <div class="fact-value">{{ p.loanInterest }}</div>
+            <div class="fact-value">{{ p.annualInterestRate }}%</div>
           </div>
           <div class="fact-item">
             <div class="fact-label">Loan Term</div>
-            <div class="fact-value">{{ p.loanTerm }}</div>
+            <div class="fact-value">{{ p.loanTerm }} months</div>
           </div>
           <div class="fact-item">
             <div class="fact-label">LTV (Loan-to-Value)</div>
-            <div class="fact-value">{{ p.collateralRatio }}</div>
+            <div class="fact-value">{{ p.ltv }}%</div>
           </div>
           <div class="fact-item">
-            <div class="fact-label">Disbursement Date</div>
-            <div class="fact-value">{{ p.loanWithdrawalDate }}</div>
+            <div class="fact-label">Drawdown Date</div>
+            <div class="fact-value">{{ formatDate(p.drawdownDate) }}</div>
           </div>
           <div class="fact-item">
-            <div class="fact-label">Prepayment Option</div>
-            <div class="fact-value">{{ getPrepaymentInfo() }}</div>
+            <div class="fact-label">Early Repayment</div>
+            <div class="fact-value">{{ p.earlyRepayment }}</div>
           </div>
           <div class="fact-item">
-            <div class="fact-label">Repayment Schedule</div>
-            <div class="fact-value">{{ p.interestPaymentMethod }}</div>
+            <div class="fact-label">Repayment Arrangement</div>
+            <div class="fact-value">{{ p.repaymentArrangement }}</div>
           </div>
         </div>
       </section>
@@ -73,7 +115,7 @@
           </div>
           <div class="party-item">
             <div class="party-label">PW Shareholders</div>
-            <div class="party-value">{{ p.pwShareholders }}</div>
+            <div class="party-value">{{ p.pw_shareholders }}</div>
           </div>
           <div class="party-item">
             <div class="party-label">Lender</div>
@@ -96,7 +138,7 @@
         <div class="disbursement-grid">
           <div class="disbursement-item">
             <div class="disbursement-label">Disbursement Method</div>
-            <div class="disbursement-value">{{ p.disbursementMethod }}</div>
+            <div class="disbursement-value">{{ p.disbursement_method }}</div>
           </div>
           <div class="disbursement-item">
             <div class="disbursement-label">Interest Rate</div>
@@ -104,11 +146,11 @@
           </div>
           <div class="disbursement-item">
             <div class="disbursement-label">Prepayment Information</div>
-            <div class="disbursement-value">{{ p.earlyRepaymentDetails }}</div>
+            <div class="disbursement-value">{{ p.early_repayment_details }}</div>
           </div>
           <div class="disbursement-item">
             <div class="disbursement-label">Maturity Date</div>
-            <div class="disbursement-value">{{ p.maturityDate }}</div>
+            <div class="disbursement-value">{{ formatDate(p.maturity_date) }}</div>
           </div>
         </div>
       </section>
@@ -119,22 +161,22 @@
         <div class="collateral-grid">
           <div class="collateral-item">
             <div class="collateral-label">Property Address</div>
-            <div class="collateral-value">{{ p.propertyAddress }}</div>
+            <div class="collateral-value">{{ p.property_address }}</div>
           </div>
           <div class="collateral-item">
             <div class="collateral-label">Valuation</div>
-            <div class="collateral-value">{{ p.valuation }}</div>
+            <div class="collateral-value">A${{ formatNumber(p.valuation) }}</div>
           </div>
           <div class="collateral-item">
             <div class="collateral-label">Security Ranking</div>
-            <div class="collateral-value">{{ p.securityRank }}</div>
+            <div class="collateral-value">{{ p.security_rank }}</div>
           </div>
           <div class="collateral-item">
             <div class="collateral-label">LVR (Loan-to-Value Ratio)</div>
-            <div class="collateral-value">{{ p.lvr }}</div>
+            <div class="collateral-value">{{ p.lvr }}%</div>
           </div>
           <div class="collateral-item full-width">
-            <div class="collateral-label">Description</div>
+            <div class="collateral-label">Project Summary</div>
             <div class="collateral-value">{{ p.summary }}</div>
           </div>
         </div>
@@ -146,15 +188,15 @@
         <div class="default-grid">
           <div class="default-item">
             <div class="default-label">Default Interest Rate</div>
-            <div class="default-value">{{ p.defaultInterestRate }}</div>
+            <div class="default-value">{{ p.default_interest_rate }}</div>
           </div>
           <div class="default-item full-width">
             <div class="default-label">Default Trigger Conditions</div>
-            <div class="default-value">{{ p.defaultTriggers }}</div>
+            <div class="default-value">{{ p.default_triggers }}</div>
           </div>
           <div class="default-item full-width">
             <div class="default-label">Disposal Process</div>
-            <div class="default-value">{{ p.defaultProcess }}</div>
+            <div class="default-value">{{ p.default_process }}</div>
           </div>
         </div>
       </section>
@@ -165,22 +207,22 @@
         <div class="documents-grid">
           <div class="document-item">
             <div class="document-label">Issuer Token</div>
-            <div class="document-value">{{ p.issuerToken }}</div>
+            <div class="document-value">{{ p.issuer_token }}</div>
             <button class="doc-btn">View</button>
           </div>
           <div class="document-item">
             <div class="document-label">Loan Token</div>
-            <div class="document-value">{{ p.loanToken }}</div>
+            <div class="document-value">{{ p.loan_token }}</div>
             <button class="doc-btn">View</button>
           </div>
           <div class="document-item">
             <div class="document-label">Valuation Report</div>
-            <div class="document-value">{{ p.valuationReport }}</div>
+            <div class="document-value">{{ p.valuation_report }}</div>
             <button class="doc-btn">Download</button>
           </div>
           <div class="document-item">
             <div class="document-label">Mortgage Deed</div>
-            <div class="document-value">{{ p.mortgageDeed }}</div>
+            <div class="document-value">{{ p.mortgage_deed }}</div>
             <button class="doc-btn">Download</button>
           </div>
         </div>
@@ -190,6 +232,8 @@
 </template>
 
 <script>
+import { productAPI } from '@/service/api'
+
 export default { 
   name: 'DetailPage',
   props: { product: { type: Object, default: null } },
@@ -197,7 +241,9 @@ export default {
     return {
       model: null,
       loading: false,
-      error: null
+      error: null,
+      refreshInterval: null,
+      lastRefreshTime: null
     }
   },
   computed: {
@@ -208,34 +254,124 @@ export default {
   },
   async mounted() {
     await this.loadProjectData()
+    this.startAutoRefresh()
+  },
+  beforeUnmount() {
+    this.stopAutoRefresh()
   },
   methods: {
     async loadProjectData() {
-      // 优先使用props传入的product
-      if (this.product) {
-        this.model = this.product
-        return
-      }
-
-      // 尝试从sessionStorage获取
       try {
-        const cache = sessionStorage.getItem('lastProduct')
-        if (cache) {
-          this.model = JSON.parse(cache)
+        this.loading = true
+        this.error = null
+        
+        // 优先使用props传入的product
+        if (this.product) {
+          this.model = this.product
+          this.lastRefreshTime = new Date()
           return
         }
-      } catch(e) {
-        console.warn('解析缓存数据失败:', e)
-      }
 
-      // 从URL参数获取项目ID并调用API
-      const projectId = this.$route.params.id || this.$route.query.id
-      if (projectId) {
-        await this.fetchProjectFromAPI(projectId)
+        // 尝试从sessionStorage获取
+        try {
+          const cache = sessionStorage.getItem('lastProduct')
+          if (cache) {
+            this.model = JSON.parse(cache)
+            this.lastRefreshTime = new Date()
+            return
+          }
+        } catch(e) {
+          console.warn('解析缓存数据失败:', e)
+        }
+
+        // 从URL参数获取项目ID并调用API
+        const projectId = this.$route.params.id || this.$route.query.id
+        if (projectId) {
+          await this.fetchProjectFromAPI(projectId)
+        }
+      } catch (error) {
+        this.error = '加载项目数据失败'
+        console.error('❌ DetailPage: 加载项目数据失败:', error)
+      } finally {
+        this.loading = false
       }
     },
 
     async fetchProjectFromAPI(projectId) {
+      try {
+        console.log('🔄 DetailPage: 从数据库获取项目数据...', projectId)
+        
+        const response = await productAPI.getProductByCode(projectId)
+        
+        if (response.status === 0) {
+          // 映射数据库字段到前端期望的字段名
+          const rawData = response.data
+          this.model = {
+            ...rawData,
+            totalOffering: rawData.total_token,
+            subscribed: rawData.current_subscribed_token,
+            targetYield: rawData.target_yield,
+            ltv: rawData.LTV,
+            annualInterestRate: rawData.annual_interest_rate,
+            loanAmount: rawData.loan_amount,
+            valuation: rawData.valuation,
+            image: rawData.image || this.getProductImage(rawData.code)
+          }
+          this.lastRefreshTime = new Date()
+          console.log('✅ DetailPage: 项目数据加载成功:', this.model)
+        } else {
+          this.error = response.message || '获取项目数据失败'
+          console.error('❌ DetailPage: API返回错误:', response)
+        }
+      } catch (error) {
+        this.error = '网络错误，无法获取项目数据'
+        console.error('❌ DetailPage: 获取项目数据失败:', error)
+      }
+    },
+    
+    // 刷新数据
+    async refreshProjectData() {
+      console.log('🔄 DetailPage: 手动刷新项目数据...')
+      await this.loadProjectData()
+    },
+    
+    // 开始自动刷新
+    startAutoRefresh() {
+      // 每30秒自动刷新一次数据
+      this.refreshInterval = setInterval(() => {
+        console.log('🔄 DetailPage: 自动刷新项目数据...')
+        this.loadProjectData()
+      }, 30000) // 30秒
+    },
+    
+    // 停止自动刷新
+    stopAutoRefresh() {
+      if (this.refreshInterval) {
+        clearInterval(this.refreshInterval)
+        this.refreshInterval = null
+        console.log('⏹️ DetailPage: 停止自动刷新')
+      }
+    },
+    
+    // 格式化时间显示
+    formatTime(date) {
+      if (!date) return ''
+      const now = new Date()
+      const diff = now - date
+      const minutes = Math.floor(diff / 60000)
+      
+      if (minutes < 1) return '刚刚'
+      if (minutes < 60) return `${minutes}分钟前`
+      
+      const hours = Math.floor(minutes / 60)
+      if (hours < 24) return `${hours}小时前`
+      
+      const days = Math.floor(hours / 24)
+      return `${days}天前`
+    },
+    
+    // 旧方法保留（如果需要）
+    async fetchProjectFromAPI_old(projectId) {
       this.loading = true
       this.error = null
       
@@ -290,6 +426,41 @@ export default {
       return '-'
     },
 
+    // 获取产品图片
+    getProductImage(code) {
+      const imageMap = {
+        'RWA001': '/pics/TYMU.png',
+        'RWA002': '/pics/SQNB.png',
+        'RWA003': '/pics/LZYT.png',
+        'YYD': '/pics/YYD.png',
+        'COMP': '/pics/TYMU.png'
+      }
+      return imageMap[code] || '/pics/TYMU.png'
+    },
+
+    // 格式化数字
+    formatNumber(value) {
+      if (!value) return '0'
+      const num = parseFloat(value)
+      if (isNaN(num)) return value
+      return num.toLocaleString()
+    },
+
+    // 格式化日期
+    formatDate(dateString) {
+      if (!dateString) return '-'
+      try {
+        const date = new Date(dateString)
+        return date.toLocaleDateString('en-AU', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })
+      } catch (error) {
+        return dateString
+      }
+    },
+
     // 处理投资按钮点击
     handleInvest() {
       if (!this.model) {
@@ -337,6 +508,48 @@ export default {
 </script>
 
 <style scoped>
+/* 页面头部 */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.last-update {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.refresh-btn {
+  background: #374151;
+  border: 1px solid #4b5563;
+  color: #ffffff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.refresh-btn:hover:not(:disabled) {
+  background: #4b5563;
+  border-color: #6b7280;
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* 主容器 */
 .detail-container {
   max-width: 1200px;

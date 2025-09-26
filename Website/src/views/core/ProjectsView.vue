@@ -46,14 +46,24 @@
       <button class="btn" @click="resetFilters">Reset</button>
     </div>
     
-    <!-- 筛选结果统计 -->
-    <div class="filter-stats" style="margin: 8px 0; color: var(--muted); font-size: 14px;">
-      Showing {{ filteredProducts.length }} of {{ products.length }} projects
-      <span v-if="hasActiveFilters" style="margin-left: 12px;">
-        <button @click="resetFilters" style="background: none; border: none; color: #3b82f6; text-decoration: underline; cursor: pointer;">
-          Clear filters
+    <!-- 筛选结果统计和刷新控制 -->
+    <div class="filter-stats" style="margin: 8px 0; color: var(--muted); font-size: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+      <div>
+        Showing {{ filteredProducts.length }} of {{ products.length }} projects
+        <span v-if="hasActiveFilters" style="margin-left: 12px;">
+          <button @click="resetFilters" style="background: none; border: none; color: #3b82f6; text-decoration: underline; cursor: pointer;">
+            Clear filters
+          </button>
+        </span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span v-if="lastRefreshTime" style="font-size: 12px; color: #6b7280;">
+          最后更新: {{ formatTime(lastRefreshTime) }}
+        </span>
+        <button @click="refreshProducts" :disabled="loading" class="refresh-btn" style="background: #374151; border: 1px solid #4b5563; color: #ffffff; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease;" :style="{ opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer' }">
+          {{ loading ? '刷新中...' : '刷新数据' }}
         </button>
-      </span>
+      </div>
     </div>
 
     <!-- 加载状态 -->
@@ -95,6 +105,22 @@
                  </div>
                </div>
                <p class="doc-subtitle">{{ p.subtitle }}</p>
+               
+               <!-- 项目基本信息 -->
+               <div class="project-basic-info">
+                 <div class="info-item">
+                   <span class="info-label">Type:</span>
+                   <span class="info-value">{{ p.type }}</span>
+                 </div>
+                 <div class="info-item">
+                   <span class="info-label">Region:</span>
+                   <span class="info-value">{{ p.region }}</span>
+                 </div>
+                 <div class="info-item">
+                   <span class="info-label">Risk:</span>
+                   <span class="info-value risk-{{ p.risk }}">{{ p.risk }}</span>
+                 </div>
+               </div>
              </section>
 
              <hr class="sep" />
@@ -120,19 +146,35 @@
            <div class="investment-grid">
              <div class="investment-item">
                <div class="investment-label">Collateral Value</div>
-               <div class="investment-value">{{ p.valuation || 'TBA' }}</div>
+               <div class="investment-value">A${{ formatNumber(p.valuation) || 'TBA' }}</div>
+             </div>
+             <div class="investment-item">
+               <div class="investment-label">Loan Amount</div>
+               <div class="investment-value">A${{ formatNumber(p.loanAmount) || 'TBA' }}</div>
+             </div>
+             <div class="investment-item">
+               <div class="investment-label">Total Offering</div>
+               <div class="investment-value">A${{ formatNumber(p.totalOffering) || 'TBA' }}</div>
+             </div>
+             <div class="investment-item">
+               <div class="investment-label">Subscribed</div>
+               <div class="investment-value">A${{ formatNumber(p.subscribed) || 'TBA' }}</div>
              </div>
              <div class="investment-item">
                <div class="investment-label">Loan Coupon</div>
                <div class="investment-value">{{ p.annualInterestRate || (p.targetYield ? p.targetYield.toFixed(1) + '% p.a.' : 'TBA') }}</div>
              </div>
              <div class="investment-item">
-               <div class="investment-label">Total Offering</div>
-               <div class="investment-value">{{ formatCurrency(p.totalOffering) || 'TBA' }}</div>
+               <div class="investment-label">LTV</div>
+               <div class="investment-value">{{ p.ltv || 'TBA' }}%</div>
              </div>
              <div class="investment-item">
-               <div class="investment-label">Subscribed</div>
-               <div class="investment-value">{{ formatCurrency(p.subscribed) || 'TBA' }}</div>
+               <div class="investment-label">Loan Term</div>
+               <div class="investment-value">{{ p.loanTerm || 'TBA' }} months</div>
+             </div>
+             <div class="investment-item">
+               <div class="investment-label">Target Yield</div>
+               <div class="investment-value">{{ p.targetYield || 'TBA' }}%</div>
              </div>
            </div>
            
@@ -184,6 +226,7 @@
 
 <script>
 import { productAPI } from '@/service/api'
+import { useDatabaseSync } from '@/service/databaseSyncService'
 
 export default { 
   name: 'ProjectsView',
@@ -192,30 +235,130 @@ export default {
       filters: { q: '', type: '', region: '', risk: '', status: '', minYield: 0 },
       products: [],
       loading: true,
-      error: null
+      error: null,
+      refreshInterval: null,
+      lastRefreshTime: null
     }
   },
   async mounted() {
     await this.loadProducts()
+    this.setupDatabaseSync()
+  },
+  beforeUnmount() {
+    this.cleanupDatabaseSync()
   },
   methods: {
     async loadProducts() {
       try {
         this.loading = true
         this.error = null
+        console.log('🔄 从数据库加载产品数据...')
+        
         const response = await productAPI.getAllProducts()
         
         if (response.status === 0) {
-          this.products = response.data || []
+          // 映射数据库字段到前端期望的字段名
+          this.products = (response.data || []).map(product => ({
+            ...product,
+            totalOffering: product.total_token,
+            subscribed: product.current_subscribed_token,
+            targetYield: product.target_yield,
+            ltv: product.LTV,
+            annualInterestRate: product.annual_interest_rate,
+            loanAmount: product.loan_amount,
+            valuation: product.valuation,
+            image: product.image || this.getProductImage(product.code)
+          }))
+          this.lastRefreshTime = new Date()
+          console.log('✅ 产品数据加载成功，共', this.products.length, '个项目')
         } else {
           this.error = response.message || '获取产品数据失败'
-          console.error('API返回错误:', response)
+          console.error('❌ API返回错误:', response)
         }
       } catch (error) {
         this.error = '网络错误，无法获取产品数据'
-        console.error('加载产品数据失败:', error)
+        console.error('❌ 加载产品数据失败:', error)
       } finally {
         this.loading = false
+      }
+    },
+    
+    // 刷新数据
+    async refreshProducts() {
+      console.log('🔄 手动刷新产品数据...')
+      await this.loadProducts()
+    },
+    
+    // 设置数据库同步
+    setupDatabaseSync() {
+      const { subscribeProducts, subscribeNewProjects, getLastRefreshTime } = useDatabaseSync()
+      
+      // 订阅产品列表更新
+      this.unsubscribeProducts = subscribeProducts((products) => {
+        console.log('📡 ProjectsView: 收到产品数据更新，共', products.length, '个项目')
+        // 映射数据库字段到前端期望的字段名
+        this.products = products.map(product => ({
+          ...product,
+          totalOffering: product.total_token,
+          subscribed: product.current_subscribed_token,
+          targetYield: product.target_yield,
+          ltv: product.LTV,
+          annualInterestRate: product.annual_interest_rate,
+          loanAmount: product.loan_amount,
+          valuation: product.valuation,
+          image: product.image || this.getProductImage(product.code)
+        }))
+        this.lastRefreshTime = new Date()
+      })
+      
+      // 订阅新项目通知
+      this.unsubscribeNewProjects = subscribeNewProjects((newProjects) => {
+        console.log('🆕 ProjectsView: 发现', newProjects.length, '个新项目')
+        // 可以在这里添加新项目通知逻辑
+        this.showNewProjectsNotification(newProjects)
+      })
+      
+      // 设置最后刷新时间
+      const lastRefresh = getLastRefreshTime()
+      if (lastRefresh) {
+        this.lastRefreshTime = lastRefresh
+      }
+    },
+    
+    // 清理数据库同步
+    cleanupDatabaseSync() {
+      if (this.unsubscribeProducts) {
+        this.unsubscribeProducts()
+      }
+      if (this.unsubscribeNewProjects) {
+        this.unsubscribeNewProjects()
+      }
+    },
+    
+    // 显示新项目通知
+    showNewProjectsNotification(newProjects) {
+      if (newProjects.length > 0) {
+        const projectNames = newProjects.map(p => p.name).join(', ')
+        console.log('🆕 发现新项目:', projectNames)
+        // 可以在这里添加用户通知
+      }
+    },
+    
+    // 开始自动刷新（保留作为备用）
+    startAutoRefresh() {
+      // 每30秒自动刷新一次数据
+      this.refreshInterval = setInterval(() => {
+        console.log('🔄 自动刷新产品数据...')
+        this.loadProducts()
+      }, 30000) // 30秒
+    },
+    
+    // 停止自动刷新（保留作为备用）
+    stopAutoRefresh() {
+      if (this.refreshInterval) {
+        clearInterval(this.refreshInterval)
+        this.refreshInterval = null
+        console.log('⏹️ 停止自动刷新')
       }
     },
     formatCurrency(value) {
@@ -270,6 +413,43 @@ export default {
       const product = this.products.find(x => x.code === code)
       alert(`已注册对 ${product.name} 的投资兴趣！`)
       console.log('Register interest for:', code)
+    },
+    
+    // 格式化时间显示
+    formatTime(date) {
+      if (!date) return ''
+      const now = new Date()
+      const diff = now - date
+      const minutes = Math.floor(diff / 60000)
+      
+      if (minutes < 1) return '刚刚'
+      if (minutes < 60) return `${minutes}分钟前`
+      
+      const hours = Math.floor(minutes / 60)
+      if (hours < 24) return `${hours}小时前`
+      
+      const days = Math.floor(hours / 24)
+      return `${days}天前`
+    },
+    
+    // 获取产品图片
+    getProductImage(code) {
+      const imageMap = {
+        'RWA001': '/pics/TYMU.png',
+        'RWA002': '/pics/SQNB.png',
+        'RWA003': '/pics/LZYT.png',
+        'YYD': '/pics/YYD.png',
+        'COMP': '/pics/TYMU.png'
+      }
+      return imageMap[code] || '/pics/TYMU.png'
+    },
+
+    // 格式化数字
+    formatNumber(value) {
+      if (!value) return '0'
+      const num = parseFloat(value)
+      if (isNaN(num)) return value
+      return num.toLocaleString()
     }
   },
   computed: {
@@ -363,6 +543,11 @@ export default {
 }
 .filters .btn:hover { background: #4b5563; }
 
+.refresh-btn:hover:not(:disabled) { 
+  background: #4b5563 !important; 
+  border-color: #6b7280 !important; 
+}
+
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -429,6 +614,46 @@ export default {
   padding: 18px;
   color: var(--ink);
   box-shadow: 0 6px 18px rgba(0,0,0,.25);
+}
+
+/* 项目基本信息样式 */
+.project-basic-info{
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.info-item{
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.info-label{
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-value{
+  font-size: 14px;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.info-value.risk-low{
+  color: #059669;
+}
+
+.info-value.risk-medium{
+  color: #d97706;
+}
+
+.info-value.risk-high{
+  color: #dc2626;
 }
 
 .main-content {

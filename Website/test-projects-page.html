@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects页面测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .test-data {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .result {
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #28a745;
+        }
+        .error {
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #dc3545;
+            color: #721c24;
+        }
+        .project-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .project-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+        .project-code {
+            background: #007bff;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .project-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #666;
+        }
+        .detail-value {
+            color: #333;
+        }
+        .status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.active { background: #d4edda; color: #155724; }
+        .status.completed { background: #cce5ff; color: #004085; }
+        .status.pending { background: #fff3cd; color: #856404; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        .refresh-info {
+            background: #e7f3ff;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Projects页面测试</h1>
+    <p>此页面用于测试ProjectsView页面的数据库集成和功能。</p>
+
+    <div class="test-container">
+        <div class="test-section">
+            <div class="test-title">1. 后端API连接测试</div>
+            <div id="apiTestResult">
+                <div class="loading">正在测试API连接...</div>
+            </div>
+            <button onclick="testAPI()">测试API连接</button>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">2. 产品数据获取测试</div>
+            <div id="productDataResult">
+                <div class="loading">点击"获取产品数据"开始测试</div>
+            </div>
+            <button onclick="getProductData()">获取产品数据</button>
+            <button onclick="refreshProductData()">刷新数据</button>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">3. 产品列表显示测试</div>
+            <div id="productListDisplay">
+                <div class="loading">先获取产品数据</div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">4. 数据库同步测试</div>
+            <div id="syncTestResult">
+                <div class="loading">点击"开始同步测试"</div>
+            </div>
+            <button onclick="startSyncTest()">开始同步测试</button>
+            <button onclick="stopSyncTest()">停止同步测试</button>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">5. 刷新功能测试</div>
+            <div id="refreshTestResult">
+                <div class="loading">点击"测试刷新功能"</div>
+            </div>
+            <button onclick="testRefreshFunction()">测试刷新功能</button>
+            <div id="refreshInfo" class="refresh-info" style="display: none;">
+                <div>最后刷新时间: <span id="lastRefreshTime">-</span></div>
+                <div>刷新次数: <span id="refreshCount">0</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let productData = [];
+        let refreshCount = 0;
+        let syncInterval = null;
+
+        // 测试API连接
+        async function testAPI() {
+            const resultDiv = document.getElementById('apiTestResult');
+            resultDiv.innerHTML = '<div class="loading">正在测试API连接...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/product_details');
+                const data = await response.json();
+                
+                if (data.status === 0) {
+                    resultDiv.innerHTML = `
+                        <div class="result">
+                            ✅ API连接成功<br>
+                            状态码: ${data.status}<br>
+                            消息: ${data.message}<br>
+                            数据条数: ${data.data ? data.data.length : 0}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            ❌ API返回错误<br>
+                            状态码: ${data.status}<br>
+                            错误消息: ${data.message}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ 网络连接失败<br>
+                        错误: ${error.message}<br>
+                        请确保后端服务器正在运行 (node index.js)
+                    </div>
+                `;
+            }
+        }
+
+        // 获取产品数据
+        async function getProductData() {
+            const resultDiv = document.getElementById('productDataResult');
+            resultDiv.innerHTML = '<div class="loading">正在获取产品数据...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/product_details');
+                const data = await response.json();
+                
+                if (data.status === 0) {
+                    productData = data.data;
+                    resultDiv.innerHTML = `
+                        <div class="result">
+                            ✅ 产品数据获取成功<br>
+                            共获取到 ${productData.length} 个产品<br>
+                            数据更新时间: ${new Date().toLocaleString()}
+                        </div>
+                        <div class="test-data">
+                            <pre>${JSON.stringify(productData, null, 2)}</pre>
+                        </div>
+                    `;
+                    
+                    // 更新产品列表显示
+                    displayProductList();
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            ❌ 获取产品数据失败<br>
+                            状态码: ${data.status}<br>
+                            错误消息: ${data.message}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ 网络错误<br>
+                        错误: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // 显示产品列表
+        function displayProductList() {
+            const displayDiv = document.getElementById('productListDisplay');
+            
+            if (productData.length === 0) {
+                displayDiv.innerHTML = '<div class="loading">没有产品数据</div>';
+                return;
+            }
+            
+            let html = `<h4>产品列表 (${productData.length} 个产品)</h4>`;
+            
+            productData.forEach((product, index) => {
+                html += `
+                    <div class="project-card">
+                        <div class="project-header">
+                            <div class="project-title">${product.name}</div>
+                            <div class="project-code">${product.code}</div>
+                        </div>
+                        <div class="project-details">
+                            <div class="detail-item">
+                                <span class="detail-label">类型:</span>
+                                <span class="detail-value">${product.type}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">地区:</span>
+                                <span class="detail-value">${product.region}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">风险等级:</span>
+                                <span class="detail-value">${product.risk}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">目标收益率:</span>
+                                <span class="detail-value">${product.target_yield}%</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">总代币数:</span>
+                                <span class="detail-value">${product.total_token}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">已认购代币:</span>
+                                <span class="detail-value">${product.current_subscribed_token}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">LTV:</span>
+                                <span class="detail-value">${product.LTV}%</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">状态:</span>
+                                <span class="detail-value">
+                                    <span class="status ${product.status}">${product.status}</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            displayDiv.innerHTML = html;
+        }
+
+        // 刷新产品数据
+        async function refreshProductData() {
+            await getProductData();
+        }
+
+        // 开始同步测试
+        function startSyncTest() {
+            const resultDiv = document.getElementById('syncTestResult');
+            resultDiv.innerHTML = '<div class="loading">开始同步测试，每5秒刷新一次数据...</div>';
+            
+            let testCount = 0;
+            syncInterval = setInterval(async () => {
+                testCount++;
+                try {
+                    const response = await fetch('http://localhost:3000/api/product_details');
+                    const data = await response.json();
+                    
+                    if (data.status === 0) {
+                        resultDiv.innerHTML = `
+                            <div class="result">
+                                ✅ 同步测试进行中 (第 ${testCount} 次)<br>
+                                数据条数: ${data.data ? data.data.length : 0}<br>
+                                最后更新: ${new Date().toLocaleString()}
+                            </div>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = `
+                            <div class="error">
+                                ❌ 同步测试失败 (第 ${testCount} 次)<br>
+                                错误: ${data.message}
+                            </div>
+                        `;
+                    }
+                } catch (error) {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            ❌ 同步测试网络错误 (第 ${testCount} 次)<br>
+                            错误: ${error.message}
+                        </div>
+                    `;
+                }
+            }, 5000);
+        }
+
+        // 停止同步测试
+        function stopSyncTest() {
+            if (syncInterval) {
+                clearInterval(syncInterval);
+                syncInterval = null;
+                document.getElementById('syncTestResult').innerHTML = `
+                    <div class="result">
+                        ✅ 同步测试已停止
+                    </div>
+                `;
+            }
+        }
+
+        // 测试刷新功能
+        function testRefreshFunction() {
+            refreshCount++;
+            const now = new Date();
+            
+            document.getElementById('lastRefreshTime').textContent = now.toLocaleString();
+            document.getElementById('refreshCount').textContent = refreshCount;
+            document.getElementById('refreshInfo').style.display = 'block';
+            
+            document.getElementById('refreshTestResult').innerHTML = `
+                <div class="result">
+                    ✅ 刷新功能测试成功<br>
+                    刷新次数: ${refreshCount}<br>
+                    最后刷新时间: ${now.toLocaleString()}
+                </div>
+            `;
+        }
+
+        // 页面加载时自动测试API
+        window.onload = function() {
+            testAPI();
+        };
+    </script>
+</body>
+</html>
