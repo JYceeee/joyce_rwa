@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>向上抛物线连接线测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #ffffff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .demo-title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #8a2be2 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .demo-subtitle {
+            text-align: center;
+            font-size: 18px;
+            color: #8ca0c3;
+            margin-bottom: 40px;
+        }
+
+        .section {
+            margin-bottom: 60px;
+        }
+
+        .blockchain-visual {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(135deg, rgba(20, 20, 40, 0.8) 0%, rgba(30, 30, 60, 0.6) 100%);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .blockchain-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .blockchain-nodes {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            padding: 20px;
+        }
+
+        .node {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #8a2be2 0%, #6b21a8 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(138, 43, 226, 0.4);
+            animation: nodePulse 2s ease-in-out infinite;
+        }
+
+        .node-pulse {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(138, 43, 226, 0.3);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .node-icon {
+            font-size: 24px;
+            z-index: 2;
+        }
+
+        .connection-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .lines-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .connection-line {
+            stroke-dasharray: 20 10;
+            animation: dashMove 2s linear infinite;
+            filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.6));
+            stroke-linecap: round;
+        }
+
+        .blockchain-title {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+
+        .features {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .feature-card {
+            background: rgba(20, 20, 40, 0.8);
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .feature-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .feature-desc {
+            font-size: 14px;
+            color: #8ca0c3;
+            line-height: 1.5;
+        }
+
+        @keyframes nodePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        @keyframes dashMove {
+            0% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: 30; }
+        }
+
+        @keyframes titleGlow {
+            0% { text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(138, 43, 226, 0.3); }
+            100% { text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 20px rgba(138, 43, 226, 0.6); }
+        }
+
+        .line-1 { animation-delay: 0s; }
+        .line-2 { animation-delay: 0.2s; }
+        .line-3 { animation-delay: 0.4s; }
+        .line-4 { animation-delay: 0.6s; }
+        .line-5 { animation-delay: 0.8s; }
+        .line-6 { animation-delay: 1s; }
+        .line-7 { animation-delay: 1.2s; }
+        .line-8 { animation-delay: 1.4s; }
+        .line-9 { animation-delay: 1.6s; }
+        .line-10 { animation-delay: 1.8s; }
+        .line-11 { animation-delay: 2s; }
+        .line-12 { animation-delay: 2.2s; }
+        .line-13 { animation-delay: 2.4s; }
+        .line-14 { animation-delay: 2.6s; }
+        .line-15 { animation-delay: 2.8s; }
+        .line-16 { animation-delay: 3s; }
+        .line-17 { animation-delay: 3.2s; }
+        .line-18 { animation-delay: 3.4s; }
+        .line-19 { animation-delay: 3.6s; }
+        .line-20 { animation-delay: 3.8s; }
+        .line-21 { animation-delay: 4s; }
+        .line-22 { animation-delay: 4.2s; }
+        .line-23 { animation-delay: 4.4s; }
+        .line-24 { animation-delay: 4.6s; }
+        .line-25 { animation-delay: 4.8s; }
+        .line-26 { animation-delay: 5s; }
+        .line-27 { animation-delay: 5.2s; }
+        .line-28 { animation-delay: 5.4s; }
+        .line-29 { animation-delay: 5.6s; }
+        .line-30 { animation-delay: 5.8s; }
+        .line-31 { animation-delay: 6s; }
+        .line-32 { animation-delay: 6.2s; }
+        .line-33 { animation-delay: 6.4s; }
+        .line-34 { animation-delay: 6.6s; }
+        .line-35 { animation-delay: 6.8s; }
+        .line-36 { animation-delay: 7s; }
+        .line-37 { animation-delay: 7.2s; }
+        .line-38 { animation-delay: 7.4s; }
+        .line-39 { animation-delay: 7.6s; }
+        .line-40 { animation-delay: 7.8s; }
+
+        .node-1 { animation-delay: 0s; }
+        .node-2 { animation-delay: 0.3s; }
+        .node-3 { animation-delay: 0.6s; }
+        .node-4 { animation-delay: 0.9s; }
+        .node-5 { animation-delay: 1.2s; }
+        .node-6 { animation-delay: 1.5s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="demo-title">向上抛物线连接线测试</h1>
+        <p class="demo-subtitle">所有抛物线都向正上方抛，最高点距离最低点200px</p>
+
+        <div class="section">
+            <div class="blockchain-visual">
+                <div class="blockchain-container">
+                    <!-- 区块链节点 -->
+                    <div class="blockchain-nodes">
+                        <div class="node node-1">
+                            <div class="node-pulse"></div>
+                            <div class="node-icon">🏠</div>
+                        </div>
+                        <div class="node node-2">
+                            <div class="node-pulse"></div>
+                            <div class="node-icon">💰</div>
+                        </div>
+                        <div class="node node-3">
+                            <div class="node-pulse"></div>
+                            <div class="node-icon">⚡</div>
+                        </div>
+                        <div class="node node-4">
+                            <div class="node-pulse"></div>
+                            <div class="node-icon">📊</div>
+                        </div>
+                        <div class="node node-5">
+                            <div class="node-pulse"></div>
+                            <div class="node-icon">🌍</div>
+                        </div>
+                        <div class="node node-6">
+                            <div class="node-pulse"></div>
+                            <div class="node-icon">🔗</div>
+                        </div>
+                    </div>
+
+                    <!-- 连接线 -->
+                    <div class="connection-lines">
+                        <svg class="lines-svg" viewBox="0 0 400 200">
+                            <defs>
+                                <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:rgba(138, 43, 226, 0.8);stop-opacity:1" />
+                                    <stop offset="50%" style="stop-color:rgba(59, 130, 246, 0.6);stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:rgba(138, 43, 226, 0.8);stop-opacity:1" />
+                                </linearGradient>
+                                <linearGradient id="lineGradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:rgba(34, 197, 94, 0.8);stop-opacity:1" />
+                                    <stop offset="50%" style="stop-color:rgba(59, 130, 246, 0.6);stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:rgba(34, 197, 94, 0.8);stop-opacity:1" />
+                                </linearGradient>
+                                <linearGradient id="lineGradient3" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:rgba(245, 158, 11, 0.8);stop-opacity:1" />
+                                    <stop offset="50%" style="stop-color:rgba(59, 130, 246, 0.6);stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:rgba(245, 158, 11, 0.8);stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            
+                            <!-- 主要连接线 - 连接节点1到节点3 -->
+                            <path d="M80 70 Q120 -130 160 90" 
+                                  stroke="url(#lineGradient)" 
+                                  stroke-width="2" 
+                                  fill="none" 
+                                  class="connection-line line-1"/>
+                            <!-- 连接节点2到节点4 -->
+                            <path d="M120 100 Q160 -100 200 75" 
+                                  stroke="url(#lineGradient)" 
+                                  stroke-width="2" 
+                                  fill="none" 
+                                  class="connection-line line-2"/>
+                            <!-- 连接节点3到节点5 -->
+                            <path d="M160 90 Q200 -110 240 110" 
+                                  stroke="url(#lineGradient)" 
+                                  stroke-width="2" 
+                                  fill="none" 
+                                  class="connection-line line-3"/>
+                            <!-- 连接节点4到节点6 -->
+                            <path d="M200 75 Q240 -125 280 100" 
+                                  stroke="url(#lineGradient)" 
+                                  stroke-width="2" 
+                                  fill="none" 
+                                  class="connection-line line-4"/>
+                            <!-- 连接节点5到节点6 -->
+                            <path d="M240 110 Q260 -90 280 100" 
+                                  stroke="url(#lineGradient)" 
+                                  stroke-width="2" 
+                                  fill="none" 
+                                  class="connection-line line-5"/>
+                            <!-- 连接节点1到节点2 -->
+                            <path d="M80 70 Q100 -100 120 100" 
+                                  stroke="url(#lineGradient)" 
+                                  stroke-width="2" 
+                                  fill="none" 
+                                  class="connection-line line-6"/>
+                            
+                            <!-- 额外的抛物线连接线 -->
+                            <path d="M80 70 Q140 -130 200 75" 
+                                  stroke="url(#lineGradient2)" 
+                                  stroke-width="1.5" 
+                                  fill="none" 
+                                  class="connection-line line-7"/>
+                            <path d="M120 100 Q180 -100 240 110" 
+                                  stroke="url(#lineGradient2)" 
+                                  stroke-width="1.5" 
+                                  fill="none" 
+                                  class="connection-line line-8"/>
+                            <path d="M160 90 Q220 -110 280 100" 
+                                  stroke="url(#lineGradient2)" 
+                                  stroke-width="1.5" 
+                                  fill="none" 
+                                  class="connection-line line-9"/>
+                            <path d="M80 70 Q160 -105 240 110" 
+                                  stroke="url(#lineGradient3)" 
+                                  stroke-width="1" 
+                                  fill="none" 
+                                  class="connection-line line-10"/>
+                            <path d="M120 100 Q200 -100 280 100" 
+                                  stroke="url(#lineGradient3)" 
+                                  stroke-width="1" 
+                                  fill="none" 
+                                  class="connection-line line-11"/>
+                            <path d="M160 90 Q200 -100 240 110" 
+                                  stroke="url(#lineGradient2)" 
+                                  stroke-width="1.5" 
+                                  fill="none" 
+                                  class="connection-line line-12"/>
+                            <path d="M200 75 Q240 -125 280 100" 
+                                  stroke="url(#lineGradient2)" 
+                                  stroke-width="1.5" 
+                                  fill="none" 
+                                  class="connection-line line-13"/>
+                            <path d="M80 70 Q180 -130 280 100" 
+                                  stroke="url(#lineGradient3)" 
+                                  stroke-width="0.8" 
+                                  fill="none" 
+                                  class="connection-line line-14"/>
+                            <path d="M120 100 Q140 -100 160 90" 
+                                  stroke="url(#lineGradient2)" 
+                                  stroke-width="1.2" 
+                                  fill="none" 
+                                  class="connection-line line-15"/>
+                            <path d="M200 75 Q220 -100 240 110" 
+                                  stroke="url(#lineGradient2)" 
+                                  stroke-width="1.2" 
+                                  fill="none" 
+                                  class="connection-line line-16"/>
+                            <path d="M80 70 Q140 -130 200 75" 
+                                  stroke="url(#lineGradient)" 
+                                  stroke-width="1.8" 
+                                  fill="none" 
+                                  class="connection-line line-17"/>
+                            <path d="M120 100 Q200 -100 280 100" 
+                                  stroke="url(#lineGradient)" 
+                                  stroke-width="1.8" 
+                                  fill="none" 
+                                  class="connection-line line-18"/>
+                            <path d="M160 90 Q180 -100 200 75" 
+                                  stroke="url(#lineGradient3)" 
+                                  stroke-width="1" 
+                                  fill="none" 
+                                  class="connection-line line-19"/>
+                            <path d="M240 110 Q260 -90 280 100" 
+                                  stroke="url(#lineGradient)" 
+                                  stroke-width="1.5" 
+                                  fill="none" 
+                                  class="connection-line line-20"/>
+                            
+                            <!-- 新增更多抛物线连接线 -->
+                            <path d="M100 70 Q110 -100 120 100" 
+                                  stroke="url(#lineGradient2)" 
+                                  stroke-width="1.3" 
+                                  fill="none" 
+                                  class="connection-line line-21"/>
+                            <path d="M120 100 Q160 -100 200 75" 
+                                  stroke="url(#lineGradient3)" 
+                                  stroke-width="1.1" 
+                                  fill="none" 
+                                  class="connection-line line-22"/>
+                            <path d="M160 90 Q220 -110 280 100" 
+                                  stroke="url(#lineGradient2)" 
+                                  stroke-width="1.4" 
+                                  fill="none" 
+                                  class="connection-line line-23"/>
+                            <path d="M80 70 Q120 -130 160 90" 
+                                  stroke="url(#lineGradient3)" 
+                                  stroke-width="1.0" 
+                                  fill="none" 
+                                  class="connection-line line-24"/>
+                            <path d="M200 75 Q220 -100 240 110" 
+                                  stroke="url(#lineGradient)" 
+                                  stroke-width="1.6" 
+                                  fill="none" 
+                                  class="connection-line line-25"/>
+                            <path d="M120 100 Q180 -100 240 110" 
+                                  stroke="url(#lineGradient2)" 
+                                  stroke-width="1.2" 
+                                  fill="none" 
+                                  class="connection-line line-26"/>
+                            <path d="M80 70 Q180 -130 280 100" 
+                                  stroke="url(#lineGradient3)" 
+                                  stroke-width="0.9" 
+                                  fill="none" 
+                                  class="connection-line line-27"/>
+                            <path d="M160 90 Q200 -100 240 110" 
+                                  stroke="url(#lineGradient)" 
+                                  stroke-width="1.7" 
+                                  fill="none" 
+                                  class="connection-line line-28"/>
+                            <path d="M120 100 Q160 -100 200 75" 
+                                  stroke="url(#lineGradient2)" 
+                                  stroke-width="1.1" 
+                                  fill="none" 
+                                  class="connection-line line-29"/>
+                            <path d="M200 75 Q240 -125 280 100" 
+                                  stroke="url(#lineGradient3)" 
+                                  stroke-width="1.3" 
+                                  fill="none" 
+                                  class="connection-line line-30"/>
+                            <path d="M80 70 Q160 -105 240 110" 
+                                  stroke="url(#lineGradient)" 
+                                  stroke-width="1.4" 
+                                  fill="none" 
+                                  class="connection-line line-31"/>
+                            <path d="M160 90 Q180 -100 200 75" 
+                                  stroke="url(#lineGradient2)" 
+                                  stroke-width="1.5" 
+                                  fill="none" 
+                                  class="connection-line line-32"/>
+                            <path d="M120 100 Q200 -100 280 100" 
+                                  stroke="url(#lineGradient3)" 
+                                  stroke-width="1.0" 
+                                  fill="none" 
+                                  class="connection-line line-33"/>
+                            <path d="M240 110 Q260 -90 280 100" 
+                                  stroke="url(#lineGradient)" 
+                                  stroke-width="1.8" 
+                                  fill="none" 
+                                  class="connection-line line-34"/>
+                            <path d="M80 70 Q140 -130 200 75" 
+                                  stroke="url(#lineGradient2)" 
+                                  stroke-width="1.2" 
+                                  fill="none" 
+                                  class="connection-line line-35"/>
+                            <path d="M160 90 Q220 -110 280 100" 
+                                  stroke="url(#lineGradient3)" 
+                                  stroke-width="0.8" 
+                                  fill="none" 
+                                  class="connection-line line-36"/>
+                            <path d="M120 100 Q180 -100 240 110" 
+                                  stroke="url(#lineGradient)" 
+                                  stroke-width="1.6" 
+                                  fill="none" 
+                                  class="connection-line line-37"/>
+                            <path d="M200 75 Q220 -100 240 110" 
+                                  stroke="url(#lineGradient2)" 
+                                  stroke-width="1.3" 
+                                  fill="none" 
+                                  class="connection-line line-38"/>
+                            <path d="M80 70 Q180 -130 280 100" 
+                                  stroke="url(#lineGradient3)" 
+                                  stroke-width="0.7" 
+                                  fill="none" 
+                                  class="connection-line line-39"/>
+                            <path d="M160 90 Q180 -100 200 75" 
+                                  stroke="url(#lineGradient)" 
+                                  stroke-width="1.9" 
+                                  fill="none" 
+                                  class="connection-line line-40"/>
+                        </svg>
+                    </div>
+
+                    <div class="blockchain-title">SMART CONTRACTS</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">⬆️</div>
+                <div class="feature-title">向上抛物线</div>
+                <div class="feature-desc">所有抛物线都向正上方抛，形成优美的弧线效果</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📏</div>
+                <div class="feature-title">200px高度</div>
+                <div class="feature-desc">最高点距离最低点精确控制为200px，确保视觉一致性</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <div class="feature-title">多彩渐变</div>
+                <div class="feature-desc">使用三种不同的渐变色彩，增强视觉层次感</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <div class="feature-title">动态流动</div>
+                <div class="feature-desc">40条连接线都有独立的动画延迟，创造流动效果</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('⬆️ 向上抛物线连接线测试已加载');
+        console.log('✨ 新特性:');
+        console.log('- 所有抛物线都向正上方抛');
+        console.log('- 最高点距离最低点200px');
+        console.log('- 40条连接线，每条都有独特的动画延迟');
+        console.log('- 三种渐变色彩：紫色、绿色、橙色');
+        console.log('- 动态流动效果，创造网络连接感');
+    </script>
+</body>
+</html>

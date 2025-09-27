@@ -1,7 +1,5 @@
 <template>
   <div class="container pf-page">
-  
-    <!-- 有绑定钱包时显示Portfolio页面 -->
     <div class="pf-main-content">
       <div class="pf-body">
         <!-- 侧栏：Accounts -->
@@ -111,7 +109,7 @@
                 </div>
               </div>
               
-              <!-- 图例 - 现在在饼图右侧 -->
+              <!-- 图例 -->
               <div class="pf-chart-legend">
                 <div v-for="(holding, index) in holdings" :key="holding.code" class="pf-legend-item">
                   <div class="pf-legend-color" :style="{ backgroundColor: getPieColor(index) }"></div>
@@ -124,8 +122,6 @@
               </div>
             </div>
           </div>
-            
-  
           </div>
         </aside>
 
@@ -164,12 +160,12 @@
                     <span class="pf-stat-number">{{ holdings.length }}</span>
                     <span class="pf-stat-label">Assets</span>
                   </div>
-                  <div class="pf-summary-stat">
+                  <!-- <div class="pf-summary-stat">
                     <span class="pf-stat-number" :class="{ positive: totalGain >= 0, negative: totalGain < 0 }">
                       {{ totalGain >= 0 ? '+' : '' }}{{ roi.toFixed(1) }}%
                     </span>
                     <span class="pf-stat-label">Total Return</span>
-                  </div>
+                  </div> -->
                   <div class="pf-summary-stat">
                     <span class="pf-stat-number">A${{ currentValue.toFixed(2) }}</span>
                     <span class="pf-stat-label">Total Value</span>
@@ -204,6 +200,7 @@
                   </div>
                   <div v-else class="pf-bar-chart">
                     <div 
+                      ref="chartBarsContainer"
                       class="pf-chart-bars"
                       :style="{ '--bar-count': transactionChartData.length }"
                     >
@@ -212,6 +209,10 @@
                         :key="index"
                         class="pf-bar-item"
                       >
+                        <div class="pf-bar-value-label">
+                          <span class="pf-bar-amount">A${{ (item.buyValue + item.sellValue).toFixed(2) }}</span>
+                          <span class="pf-bar-percentage">{{ getTransactionPercentage(item, maxTransactions) }}%</span>
+                        </div>
                         <div class="pf-bar-container">
                           <div class="pf-bar-buy" :style="{ height: getBarHeight(item.buyValue, maxTransactions) + '%' }"></div>
                           <div class="pf-bar-sell" :style="{ height: getBarHeight(item.sellValue, maxTransactions) + '%' }"></div>
@@ -374,12 +375,12 @@
           </div>
         </main>
       </div>
-    </div> <!-- 结束 pf-main-content -->
+    </div> 
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useWallet } from '/src/composables/useWallet'
 import { useRouter } from 'vue-router'
 import { productAPI } from '@/service/api'
@@ -403,6 +404,9 @@ const actions = [
 ]
 const tabs = ['Analysis', 'Transactions', 'Projects']
 const activeTab = ref('Analysis')
+
+// 图表容器引用
+const chartBarsContainer = ref(null)
 
 // 时间范围选择器
 const timeframes = [
@@ -1208,6 +1212,9 @@ const generateTransactionChartData = async () => {
   })
   
   console.log('📊 PortfolioView: 交易图表数据生成完成，共', transactionChartData.value.length, '个数据点')
+  
+  // 滚动到最右侧显示最新数据
+  scrollChartToRight()
 }
 
 const getDaysFromTimeframe = (timeframe) => {
@@ -1240,6 +1247,24 @@ const getBarHeight = (value, max) => {
   const maxHeight = 80
   const minHeight = value > 0 ? 8 : 0 // 提高最小高度
   return Math.max((value / max) * maxHeight, minHeight)
+}
+
+// 计算交易百分比
+const getTransactionPercentage = (item, maxTransactions) => {
+  if (maxTransactions === 0) return 0
+  const totalValue = item.buyValue + item.sellValue
+  const percentage = (totalValue / maxTransactions) * 100
+  return percentage.toFixed(1)
+}
+
+// 滚动图表到最右侧
+const scrollChartToRight = () => {
+  nextTick(() => {
+    const container = chartBarsContainer.value
+    if (container) {
+      container.scrollLeft = container.scrollWidth - container.clientWidth
+    }
+  })
 }
 
 // 计算总买入价值
@@ -1730,7 +1755,7 @@ window.addEventListener('storage', (e) => {
 .pf-add{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:14px;background:var(--panel);border:1px solid var(--border);box-shadow:var(--shadow);font-weight:600;cursor:pointer;color:#ffffff;}
 .pf-add-ico{font-size:18px;line-height:1}
 .pf-body{display:grid;grid-template-columns:280px 1fr;gap:16px;padding:0 20px 24px;margin-top: 30px;;}
-.pf-sidebar{background:#141426;border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px;width:280px;}
+.pf-sidebar{background:#141426;border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px;}
 .pf-side-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .pf-side-head h2{font-size:20px;font-weight:800;color:#ffffff;}
 .pf-side-tools{display:flex;gap:10px;color:#9ca3af}
@@ -1986,8 +2011,8 @@ window.addEventListener('storage', (e) => {
   display: flex;
   align-items: flex-end;
   gap: 8px;
-  height: 280px; /* 增加高度为标签留出更多空间 */
-  padding: 0 16px 40px 16px; /* 底部增加padding为标签留空间 */
+  height: 320px; /* 增加高度为数据标签留出更多空间 */
+  padding: 30px 16px 40px 16px; /* 顶部增加padding为数据标签留空间 */
   border-bottom: 1px solid #374151;
   border-left: 1px solid #374151;
   min-width: 100%;
@@ -2036,7 +2061,7 @@ window.addEventListener('storage', (e) => {
 .pf-bar-container{
   position: relative;
   width: 100%;
-  height: 240px; /* 调整高度与图表高度匹配 */
+  height: 280px; /* 调整高度与图表高度匹配 */
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -2072,8 +2097,41 @@ window.addEventListener('storage', (e) => {
   background: #dc2626;
 }
 
+/* 数据值标签样式 - 显示在柱状图上方 */
+.pf-bar-value-label {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 600;
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  z-index: 10;
+  pointer-events: none;
+  min-width: 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.pf-bar-amount {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.pf-bar-percentage {
+  color: #9ca3af;
+  font-weight: 500;
+  font-size: 9px;
+}
+
 .pf-bar-label{
-  margin-top: 12px; /* 增加上边距 */
+  margin-top: 20px; /* 增加上边距 */
   font-size: 11px; /* 稍微减小字体以适应更多数据 */
   color: #9ca3af;
   text-align: center;
@@ -2124,18 +2182,30 @@ window.addEventListener('storage', (e) => {
 }
 
 .pf-chart-legend{
-  display: flex;
-  justify-content: center;
-  gap: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
   margin-top: 16px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .pf-legend-item{
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
+  font-size: 13px;
   color: #ffffff;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+}
+
+.pf-legend-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .pf-legend-color{
@@ -2184,6 +2254,22 @@ window.addEventListener('storage', (e) => {
     min-width: 6px;
   }
   
+  .pf-bar-value-label {
+    font-size: 8px;
+    top: -16px;
+    padding: 1px 4px;
+    min-width: 50px;
+    gap: 4px;
+  }
+  
+  .pf-bar-amount {
+    font-size: 8px;
+  }
+  
+  .pf-bar-percentage {
+    font-size: 7px;
+  }
+  
   .pf-bar-label {
     font-size: 9px; /* 移动设备上更小的字体 */
     margin-top: 8px; /* 减少上边距 */
@@ -2222,6 +2308,22 @@ window.addEventListener('storage', (e) => {
     min-width: 4px;
   }
   
+  .pf-bar-value-label {
+    font-size: 7px;
+    top: -14px;
+    padding: 1px 3px;
+    min-width: 40px;
+    gap: 3px;
+  }
+  
+  .pf-bar-amount {
+    font-size: 7px;
+  }
+  
+  .pf-bar-percentage {
+    font-size: 6px;
+  }
+  
   .pf-bar-label {
     font-size: 8px; /* 小屏幕设备上更小的字体 */
     margin-top: 6px; /* 进一步减少上边距 */
@@ -2238,30 +2340,17 @@ window.addEventListener('storage', (e) => {
 .pf-sidebar-pie-section .pf-chart-header{margin-bottom:16px;}
 .pf-sidebar-pie-section .pf-chart-header h4{margin:0;font-size:16px;font-weight:700;color:#ffffff;}
 .pf-sidebar-pie-section .pf-chart-subtitle{margin:4px 0 0 0;font-size:12px;color:#9ca3af;font-weight:400;}
-.pf-sidebar-pie-section .pf-pie-chart-container{display:flex;flex-direction:row;align-items:center;gap:20px;}
+.pf-sidebar-pie-section .pf-pie-chart-container{display:flex;flex-direction:column;align-items:center;gap:16px;}
 .pf-sidebar-pie-section .pf-pie-chart{position:relative;width:160px;height:160px;}
 .pf-sidebar-pie-section .pf-pie-svg{width:100%;height:100%;}
-.pf-sidebar-pie-section .pf-chart-legend{flex:1;min-width:0;}
+.pf-sidebar-pie-section .pf-chart-legend{width:100%;}
 .pf-sidebar-pie-section .pf-legend-item{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
 .pf-sidebar-pie-section .pf-legend-item:last-child{margin-bottom:0;}
 .pf-sidebar-pie-section .pf-legend-color{width:12px;height:12px;border-radius:2px;}
-.pf-sidebar-pie-section .pf-legend-info{flex:1;}
-.pf-sidebar-pie-section .pf-legend-code{font-weight:600;color:#ffffff;font-size:12px;margin-bottom:2px;}
-.pf-sidebar-pie-section .pf-legend-value{font-size:11px;color:#ffffff;margin-bottom:1px;}
-.pf-sidebar-pie-section .pf-legend-percentage{font-size:10px;color:#9ca3af;}
-
-/* 响应式设计 - 小屏幕时图例回到下方 */
-@media (max-width: 768px) {
-  .pf-sidebar-pie-section .pf-pie-chart-container {
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-  }
-  
-  .pf-sidebar-pie-section .pf-chart-legend {
-    width: 100%;
-  }
-}
+.pf-sidebar-pie-section .pf-legend-info{flex:1;min-width:0;}
+.pf-sidebar-pie-section .pf-legend-code{font-weight:600;color:#ffffff;font-size:12px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pf-sidebar-pie-section .pf-legend-value{font-size:11px;color:#ffffff;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pf-sidebar-pie-section .pf-legend-percentage{font-size:10px;color:#9ca3af;white-space:nowrap;}
 
 .pf-chart-container{display:flex;align-items:center;gap:32px;}
 .pf-pie-chart{position:relative;width:200px;height:200px;}
@@ -2272,17 +2361,73 @@ window.addEventListener('storage', (e) => {
 
 .pf-chart-legend{flex:1;}
 .pf-legend-item{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
-.pf-legend-color{width:16px;height:16px;border-radius:4px;}
-.pf-legend-info{flex:1;}
-.pf-legend-code{font-weight:600;color:#ffffff;margin-bottom:2px;}
-.pf-legend-value{font-size:14px;color:#ffffff;margin-bottom:2px;}
-.pf-legend-percentage{font-size:12px;color:#9ca3af;}
+.pf-legend-color{width:16px;height:16px;border-radius:4px;flex-shrink:0;}
+.pf-legend-info{flex:1;min-width:0;}
+.pf-legend-code{font-weight:600;color:#ffffff;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pf-legend-value{font-size:14px;color:#ffffff;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pf-legend-percentage{font-size:12px;color:#9ca3af;white-space:nowrap;}
 
 
 /* 分析页面样式 */
 .pf-analysis-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:16px;}
 .pf-analysis-card{padding:16px;border-radius:12px;background:#141426;border:1px solid var(--border);}
 .pf-analysis-card h4{margin:0 0 12px 0;font-size:16px;font-weight:700;color:#ffffff;}
+
+/* Asset Distribution 图例响应式样式 */
+@media (max-width: 768px) {
+  .pf-chart-legend {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 8px;
+  }
+  
+  .pf-legend-item {
+    padding: 6px;
+    gap: 6px;
+  }
+  
+  .pf-legend-color {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .pf-legend-code {
+    font-size: 11px;
+  }
+  
+  .pf-legend-value {
+    font-size: 10px;
+  }
+  
+  .pf-legend-percentage {
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pf-chart-legend {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  
+  .pf-legend-item {
+    padding: 4px;
+    gap: 4px;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
+  
+  .pf-legend-color {
+    width: 8px;
+    height: 8px;
+    align-self: flex-start;
+    margin-bottom: 2px;
+  }
+  
+  .pf-legend-info {
+    width: 100%;
+  }
+}
 
 .pf-chart-placeholder{height:200px;display:flex;align-items:end;justify-content:center;gap:20px;padding:20px 0;}
 .pf-chart-bars{display:flex;align-items:end;gap:16px;height:100%;}

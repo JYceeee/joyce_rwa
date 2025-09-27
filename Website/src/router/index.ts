@@ -24,6 +24,7 @@ import AboutUsView from '../views/info/aboutus/AboutUsView.vue'
 import ContactView from '../views/info/aboutus/ContactView.vue'
 import TermView from '../views/info/aboutus/Term.vue'
 import PrivacyPolicyView from '../views/info/aboutus/PrivacyPolicy.vue'
+import FAQView from '../views/info/FAQView.vue'
 import OptionsView from '../views/settings/OptionsView.vue'
 import SettingsView from '../views/settings/SettingsView.vue'
 // Test pages
@@ -58,6 +59,7 @@ const router = createRouter({
     { path: '/pricing', name: 'pricing', component: PricingView },
     { path: '/about', name: 'about', component: AboutUsView },
     { path: '/contact', name: 'contact', component: ContactView },
+    { path: '/faq', name: 'faq', component: FAQView },
     // Placeholder routes for other footer links
     { path: '/releases', name: 'releases', component: OverviewView },
     { path: '/careers', name: 'careers', component: OverviewView },

@@ -79,7 +79,7 @@
         </div>
         <div class="modal-footer">
           <button class="btn secondary" @click="closeSuccessModal">关闭</button>
-          <button class="btn primary" @click="viewOnEtherscan">在Etherscan查看</button>
+          <button class="btn primary" @click="viewPortfolio">查看Portfolio</button>
         </div>
       </div>
     </div>
@@ -1105,24 +1105,13 @@ export default {
       }
     },
     
-    // 在Etherscan查看交易
-    viewOnEtherscan() {
-      const chainId = this.getCurrentChainId()
-      let baseUrl = 'https://etherscan.io'
+    // 查看Portfolio
+    viewPortfolio() {
+      // 关闭成功弹窗
+      this.closeSuccessModal()
       
-      // 根据网络选择正确的区块浏览器
-      if (chainId === 11155111) {
-        baseUrl = 'https://sepolia.etherscan.io'
-      } else if (chainId === 5) {
-        baseUrl = 'https://goerli.etherscan.io'
-      } else if (chainId === 137) {
-        baseUrl = 'https://polygonscan.com'
-      } else if (chainId === 80001) {
-        baseUrl = 'https://mumbai.polygonscan.com'
-      }
-      
-      const url = `${baseUrl}/tx/${this.successData.transactionHash}`
-      window.open(url, '_blank')
+      // 跳转到Portfolio页面
+      this.$router.push('/portfolio')
     },
     
     // 获取当前链ID
@@ -2723,40 +2712,60 @@ export default {
   }
 }
 
-/* 弹窗基础样式 - 与new listing card保持一致 */
+/* 弹窗基础样式 - 符合homepage深色主题风格 */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.45);
+  background: rgba(10, 10, 26, 0.8);
+  backdrop-filter: blur(8px);
   display: grid;
   place-items: center;
-  z-index: 50;
+  z-index: 1000;
 }
 
 .modal-content {
-  width: min(720px, 92vw);
-  background: #fff;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.2);
+  width: min(500px, 90vw);
+  background: rgba(20, 20, 40, 0.98);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(138, 43, 226, 0.2);
+  border-radius: 18px;
+  padding: 32px 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   max-height: 90vh;
   overflow-y: auto;
+  position: relative;
+}
+
+.modal-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(138, 43, 226, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(75, 0, 130, 0.1) 0%, transparent 50%);
+  border-radius: 18px;
+  pointer-events: none;
+  z-index: -1;
 }
 
 .modal-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 0 0 16px 0;
-  border-bottom: 1px solid #e5e7eb;
-  margin-bottom: 20px;
+  gap: 16px;
+  padding: 0 0 24px 0;
+  border-bottom: 1px solid rgba(138, 43, 226, 0.2);
+  margin-bottom: 24px;
 }
 
 .modal-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1f2937;
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
   margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .modal-body {
@@ -2765,11 +2774,75 @@ export default {
 
 .modal-footer {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   justify-content: flex-end;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(138, 43, 226, 0.2);
+}
+
+/* 交易成功弹窗样式 - 符合homepage深色主题风格 */
+.success-modal {
+  text-align: center;
+  padding: 0;
+}
+
+.success-icon {
+  font-size: 64px;
+  color: #16a34a;
+  margin-bottom: 24px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  filter: drop-shadow(0 0 8px rgba(22, 163, 74, 0.3));
+}
+
+.success-details {
+  background: rgba(138, 43, 226, 0.05);
+  border: 1px solid rgba(138, 43, 226, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 24px 0;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(138, 43, 226, 0.1);
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  color: #8ca0c3;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.detail-value {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.hash-value {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  color: #8a2be2;
+  text-decoration: underline;
+  background: rgba(138, 43, 226, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(138, 43, 226, 0.2);
+}
+
+.hash-value:hover {
+  color: #a855f7;
+  background: rgba(138, 43, 226, 0.2);
 }
 
 /* 余额不足弹窗样式 */
@@ -2796,26 +2869,29 @@ export default {
   font-weight: 600;
 }
 
-/* 加载中弹窗样式 - 与new listing card success样式保持一致 */
+/* 加载中弹窗样式 - 符合homepage深色主题风格 */
 .loading-modal {
   text-align: center;
-  padding: 40px 24px;
+  padding: 0;
 }
 
 .loading-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  margin: 0 auto 16px;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 24px;
+  background: rgba(138, 43, 226, 0.1);
+  border-radius: 50%;
+  border: 2px solid rgba(138, 43, 226, 0.3);
 }
 
 .loading-icon .spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid #e2e8f0;
-  border-top: 2px solid #3b82f6;
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(138, 43, 226, 0.2);
+  border-top: 3px solid #8a2be2;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -2825,20 +2901,61 @@ export default {
 }
 
 .loading-message p {
-  margin: 8px 0;
-  color: #64748b;
-  font-size: 14px;
+  margin: 12px 0;
+  color: #e0e0e0;
+  font-size: 16px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .loading-status {
   font-weight: 600;
-  color: #3b82f6;
+  color: #8a2be2;
   font-style: italic;
-  font-size: 14px;
+  font-size: 16px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* 弹窗按钮样式 - 符合homepage风格 */
+.modal-footer .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.modal-footer .btn.primary {
+  background: var(--brand);
+  color: #fff;
+  border-color: transparent;
+}
+
+.modal-footer .btn.primary:hover {
+  background: var(--brand-700);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.modal-footer .btn.secondary {
+  background: rgba(20, 20, 40, 0.8);
+  color: #e0e0e0;
+  border-color: rgba(138, 43, 226, 0.3);
+}
+
+.modal-footer .btn.secondary:hover {
+  border-color: rgba(138, 43, 226, 0.6);
+  background: rgba(138, 43, 226, 0.1);
+  transform: translateY(-1px);
 }
 </style>

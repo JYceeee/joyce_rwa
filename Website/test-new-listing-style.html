@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Listing Section 新样式测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 100%);
+            color: #ffffff;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .test-section {
+            background: rgba(20, 20, 40, 0.95);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(138, 43, 226, 0.2);
+        }
+
+        .test-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .test-subtitle {
+            font-size: 16px;
+            color: #8ca0c3;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        /* New Listing Section Styles */
+        .new-listings-section {
+            background: #0A0A19;
+            padding: 60px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+        }
+
+        .new-listings-section .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .listing-card {
+            width: 500px;
+            background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(138, 43, 226, 0.2);
+            border: 1px solid rgba(138, 43, 226, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .listing-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #8a2be2, #4b0082, #8a2be2);
+            border-radius: 20px 20px 0 0;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(138, 43, 226, 0.2);
+        }
+
+        .card-title {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .status-badge {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.active {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .status-badge.inactive {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            color: #d1d5db;
+        }
+
+        .status-badge.upcoming {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .card-content {
+            color: #e5e7eb;
+        }
+
+        .project-info {
+            margin-bottom: 24px;
+        }
+
+        .project-name {
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+            line-height: 1.3;
+        }
+
+        .project-description {
+            color: #9ca3af;
+            font-size: 14px;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .project-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .detail-label {
+            color: #9ca3af;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .detail-value.highlight {
+            color: #10b981;
+            font-size: 18px;
+        }
+
+        .detail-value.status {
+            color: #f59e0b;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn-primary, .btn-secondary {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #8a2be2, #4b0082);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(138, 43, 226, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(138, 43, 226, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #8a2be2;
+            border: 2px solid rgba(138, 43, 226, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(138, 43, 226, 0.1);
+            border-color: rgba(138, 43, 226, 0.5);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .new-listings-section {
+                padding: 40px 0;
+            }
+            
+            .new-listings-section .container {
+                padding: 0 16px;
+            }
+            
+            .listing-card {
+                width: 100%;
+                max-width: 400px;
+                padding: 24px;
+            }
+            
+            .card-title {
+                font-size: 20px;
+            }
+            
+            .project-name {
+                font-size: 18px;
+            }
+            
+            .project-details {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .card-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .listing-card {
+                padding: 20px;
+            }
+            
+            .card-title {
+                font-size: 18px;
+            }
+            
+            .project-name {
+                font-size: 16px;
+            }
+            
+            .detail-value {
+                font-size: 14px;
+            }
+            
+            .detail-value.highlight {
+                font-size: 16px;
+            }
+        }
+
+        .test-info {
+            background: rgba(138, 43, 226, 0.1);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .test-info h3 {
+            color: #8a2be2;
+            margin-bottom: 8px;
+        }
+
+        .test-info p {
+            color: #e0e0e0;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="test-section">
+            <h1 class="test-title">New Listing Section 新样式测试</h1>
+            <p class="test-subtitle">测试新的卡片设计和布局</p>
+            
+            <div class="test-info">
+                <h3>✨ 新样式特性</h3>
+                <p>• 深色背景渐变设计，营造专业感</p>
+                <p>• 卡片顶部彩色条纹，增强视觉层次</p>
+                <p>• 2x2网格布局的项目详情</p>
+                <p>• 渐变按钮和悬停效果</p>
+                <p>• 完全响应式设计</p>
+            </div>
+        </div>
+
+        <div class="new-listings-section">
+            <div class="container">
+                <div class="listing-card">
+                    <!-- 卡片头部 -->
+                    <div class="card-header">
+                        <h3 class="card-title">New Listing</h3>
+                        <div class="status-badge upcoming">Upcoming</div>
+                    </div>
+
+                    <!-- 卡片内容 -->
+                    <div class="card-content">
+                        <div class="project-info">
+                            <h4 class="project-name">RWA002 • SQNB Property Loan</h4>
+                            <p class="project-description">Premium real estate investment opportunity</p>
+                        </div>
+
+                        <!-- 项目详情 -->
+                        <div class="project-details">
+                            <div class="detail-item">
+                                <span class="detail-label">LOAN SIZE</span>
+                                <span class="detail-value">AUD 1,800,000</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">EST. YIELD (IRR)</span>
+                                <span class="detail-value highlight">7.2%</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">TERM</span>
+                                <span class="detail-value">24 months</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">STATUS</span>
+                                <span class="detail-value status">Upcoming</span>
+                            </div>
+                        </div>
+
+                        <!-- 卡片操作按钮 -->
+                        <div class="card-actions">
+                            <button class="btn-primary">VIEW DETAILS</button>
+                            <button class="btn-secondary">ADD TO WATCHLIST</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📱 响应式测试说明</h3>
+            <p style="color: #8ca0c3; line-height: 1.6;">
+                • 桌面端：500px宽度的卡片，2x2网格布局<br>
+                • 平板端：卡片宽度自适应，详情变为单列<br>
+                • 手机端：按钮垂直排列，字体大小调整<br>
+                • 所有尺寸下都保持优雅的视觉效果
+            </p>
+        </div>
+    </div>
+</body>
+</html>

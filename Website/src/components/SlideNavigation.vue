@@ -7,6 +7,9 @@
   >
     <div class="sidebar-header">
       <h3 class="sidebar-title">Navigation Menu</h3>
+      <button class="sidebar-close-btn" @click="closeSidebar">
+        <span class="sidebar-close-btn-icon">❌</span>
+      </button>
     </div>
     
     <nav class="sidebar-nav">
@@ -38,6 +41,10 @@
         <span class="sidebar-item-icon">📞</span>
         <span>Contacts</span>
       </a>
+      <a href="#" @click.prevent="navigate('/faq')" class="sidebar-item">
+        <span class="sidebar-item-icon">❓</span>
+        <span>FAQ</span>
+      </a>
     </nav>
     
     <div class="sidebar-footer">
@@ -65,7 +72,9 @@ export default {
   data() {
     return {
       autoCloseTimer: null,
-      autoCloseDelay: 1000 // 1秒后自动关闭
+      autoCloseDelay: 200, // 1秒后自动关闭
+      scrollY: 0,
+      isScrolling: false
     }
   },
   methods: {
@@ -92,12 +101,61 @@ export default {
     closeSidebar() {
       // 发出关闭事件给父组件
       this.$emit('close');
+    },
+    
+    // 监听页面滚动
+    handleScroll() {
+      this.scrollY = window.scrollY;
+      this.isScrolling = true;
+      
+      // 使用requestAnimationFrame优化性能
+      if (!this.scrollFrame) {
+        this.scrollFrame = requestAnimationFrame(() => {
+          this.isScrolling = false;
+          this.scrollFrame = null;
+        });
+      }
+    },
+    
+    // 确保侧边栏始终固定在视窗顶部
+    ensureSidebarFixed() {
+      const sidebar = this.$el;
+      if (sidebar) {
+        // 强制设置固定定位，防止其他样式影响
+        sidebar.style.position = 'fixed';
+        sidebar.style.top = '0';
+        sidebar.style.left = '0';
+        sidebar.style.zIndex = '1000';
+      }
     }
+  },
+  mounted() {
+    // 确保侧边栏固定定位
+    this.ensureSidebarFixed();
+    
+    // 添加滚动监听
+    window.addEventListener('scroll', this.handleScroll, { passive: true });
+    
+    // 监听窗口大小变化，确保侧边栏始终正确显示
+    window.addEventListener('resize', this.ensureSidebarFixed);
+  },
+  updated() {
+    // 组件更新后再次确保固定定位
+    this.ensureSidebarFixed();
   },
   beforeUnmount() {
     // 清理定时器
     if (this.autoCloseTimer) {
       clearTimeout(this.autoCloseTimer);
+    }
+    
+    // 清理滚动监听
+    window.removeEventListener('scroll', this.handleScroll);
+    window.removeEventListener('resize', this.ensureSidebarFixed);
+    
+    // 清理requestAnimationFrame
+    if (this.scrollFrame) {
+      cancelAnimationFrame(this.scrollFrame);
     }
   }
 }
@@ -113,13 +171,17 @@ export default {
   height: 100vh;
   background: var(--bg, #1a1a2e);
   border-right: 1px solid var(--border, #2a2a4a);
-  z-index: 999;
+  z-index: 1000;
   transform: translateX(-100%);
   transition: transform 0.3s ease-out;
   display: flex;
   flex-direction: column;
   margin: 0;
   padding: 0;
+  /* 确保侧边栏始终固定在视窗顶部 */
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .sidebar.open {
@@ -145,6 +207,28 @@ export default {
   flex: 1;
   padding: 16px 0;
   overflow-y: auto;
+  /* 优化滚动性能 */
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(138, 43, 226, 0.3) transparent;
+}
+
+/* 自定义滚动条样式 */
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(138, 43, 226, 0.3);
+  border-radius: 2px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(138, 43, 226, 0.5);
 }
 
 .sidebar-item {
@@ -200,10 +284,43 @@ export default {
   border-color: var(--brand, #ffa500);
 }
 
+/* 确保侧边栏在所有情况下都保持固定 */
+.sidebar {
+  /* 强制固定定位，覆盖任何可能的样式冲突 */
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 1000 !important;
+}
+
 /* 响应式设计 - 移动端侧边栏适配 */
 @media (max-width: 768px) {
   .sidebar {
     width: 180px;  /* 保持与桌面端相同的宽度 */
+  }
+}
+
+/* 确保侧边栏在页面滚动时保持稳定 */
+@media (prefers-reduced-motion: no-preference) {
+  .sidebar {
+    /* 使用硬件加速优化性能 */
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+  }
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  .sidebar {
+    border-right: 2px solid var(--border, #2a2a4a);
+  }
+  
+  .sidebar-item:hover {
+    background: rgba(255, 255, 255, 0.1);
   }
 }
 </style>

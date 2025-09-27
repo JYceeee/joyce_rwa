@@ -13,6 +13,14 @@
         <option value="residential">Residential</option>
         <option value="commercial">Commercial</option>
       </select>
+      <select v-model="filters.status" class="input" style="max-width:160px;height:38px">
+        <option value="">All Status</option>
+        <option value="active">Active</option>
+        <option value="upcoming">Upcoming</option>
+        <option value="research">Research</option>
+        <option value="planning">Planning</option>
+        <option value="completed">Completed</option>
+      </select>
       <select v-model="filters.region" class="input" style="max-width:160px;height:38px">
         <option value="">All Regions</option>
         <option value="St Ives NSW">St Ives NSW</option>
@@ -25,14 +33,6 @@
         <option value="low">Low</option>
         <option value="medium">Medium</option>
         <option value="high">High</option>
-      </select>
-      <select v-model="filters.status" class="input" style="max-width:160px;height:38px">
-        <option value="">All Status</option>
-        <option value="active">Active</option>
-        <option value="upcoming">Upcoming</option>
-        <option value="research">Research</option>
-        <option value="planning">Planning</option>
-        <option value="completed">Completed</option>
       </select>
       <select v-model.number="filters.minYield" class="input" style="max-width:180px;height:38px">
         <option :value="0">Min Yield: Any</option>
@@ -478,6 +478,9 @@ export default {
         const matchYield = !this.filters.minYield || (p.targetYield || 0) >= this.filters.minYield
         
         return matchQ && matchType && matchRegion && matchRisk && matchStatus && matchYield
+      }).sort((a, b) => {
+        // 按project code升序排列
+        return a.code.localeCompare(b.code)
       })
     },
     
@@ -640,7 +643,7 @@ export default {
 
 .info-value{
   font-size: 14px;
-  color: #1f2937;
+  color: #828386;
   font-weight: 600;
 }
 

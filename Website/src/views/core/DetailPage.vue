@@ -40,67 +40,67 @@
         <div class="facts-grid">
           <div class="fact-item">
             <div class="fact-label">Project Code</div>
-            <div class="fact-value">{{ p.code }}</div>
+            <div class="fact-value">{{ model.code }}</div>
           </div>
           <div class="fact-item">
             <div class="fact-label">Project Name</div>
-            <div class="fact-value">{{ p.name }}</div>
+            <div class="fact-value">{{ model.name }}</div>
           </div>
           <div class="fact-item">
             <div class="fact-label">Project Type</div>
-            <div class="fact-value">{{ p.type }}</div>
+            <div class="fact-value">{{ model.type }}</div>
           </div>
           <div class="fact-item">
             <div class="fact-label">Region</div>
-            <div class="fact-value">{{ p.region }}</div>
+            <div class="fact-value">{{ model.region }}</div>
           </div>
           <div class="fact-item">
             <div class="fact-label">Risk Level</div>
-            <div class="fact-value">{{ p.risk }}</div>
+            <div class="fact-value">{{ model.risk }}</div>
           </div>
           <div class="fact-item">
             <div class="fact-label">Status</div>
-            <div class="fact-value">{{ p.status }}</div>
+            <div class="fact-value">{{ model.status }}</div>
           </div>
           <div class="fact-item">
             <div class="fact-label">Target Yield</div>
-            <div class="fact-value">{{ p.targetYield }}%</div>
+            <div class="fact-value">{{ model.targetYield }}%</div>
           </div>
           <div class="fact-item">
             <div class="fact-label">Total Offering</div>
-            <div class="fact-value">A${{ formatNumber(p.totalOffering) }}</div>
+            <div class="fact-value">A${{ formatNumber(model.totalOffering) }}</div>
           </div>
           <div class="fact-item">
             <div class="fact-label">Subscribed</div>
-            <div class="fact-value">A${{ formatNumber(p.subscribed) }}</div>
+            <div class="fact-value">A${{ formatNumber(model.subscribed) }}</div>
           </div>
           <div class="fact-item">
             <div class="fact-label">Loan Amount</div>
-            <div class="fact-value">A${{ formatNumber(p.loanAmount) }}</div>
+            <div class="fact-value">A${{ formatNumber(model.loanAmount) }}</div>
           </div>
           <div class="fact-item">
             <div class="fact-label">Annual Interest Rate</div>
-            <div class="fact-value">{{ p.annualInterestRate }}%</div>
+            <div class="fact-value">{{ model.annualInterestRate }}%</div>
           </div>
           <div class="fact-item">
             <div class="fact-label">Loan Term</div>
-            <div class="fact-value">{{ p.loanTerm }} months</div>
+            <div class="fact-value">{{ model.loanTerm }}</div>
           </div>
           <div class="fact-item">
             <div class="fact-label">LTV (Loan-to-Value)</div>
-            <div class="fact-value">{{ p.ltv }}%</div>
+            <div class="fact-value">{{ model.ltv }}%</div>
           </div>
           <div class="fact-item">
             <div class="fact-label">Drawdown Date</div>
-            <div class="fact-value">{{ formatDate(p.drawdownDate) }}</div>
+            <div class="fact-value">{{ formatDate(model.drawdownDate) }}</div>
           </div>
           <div class="fact-item">
             <div class="fact-label">Early Repayment</div>
-            <div class="fact-value">{{ p.earlyRepayment }}</div>
+            <div class="fact-value">{{ model.earlyRepayment }}</div>
           </div>
           <div class="fact-item">
             <div class="fact-label">Repayment Arrangement</div>
-            <div class="fact-value">{{ p.repaymentArrangement }}</div>
+            <div class="fact-value">{{ model.repaymentArrangement }}</div>
           </div>
         </div>
       </section>
@@ -111,23 +111,23 @@
         <div class="parties-grid">
           <div class="party-item">
             <div class="party-label">Issuer</div>
-            <div class="party-value">{{ p.issuer }}</div>
+            <div class="party-value">{{ model.issuer }}</div>
           </div>
           <div class="party-item">
             <div class="party-label">PW Shareholders</div>
-            <div class="party-value">{{ p.pw_shareholders }}</div>
+            <div class="party-value">{{ model.pw_shareholders }}</div>
           </div>
           <div class="party-item">
             <div class="party-label">Lender</div>
-            <div class="party-value">{{ p.lender }}</div>
+            <div class="party-value">{{ model.lender }}</div>
           </div>
           <div class="party-item">
             <div class="party-label">Borrower</div>
-            <div class="party-value">{{ p.borrower }}</div>
+            <div class="party-value">{{ model.borrower }}</div>
           </div>
           <div class="party-item">
             <div class="party-label">Guarantor</div>
-            <div class="party-value">{{ p.guarantor }}</div>
+            <div class="party-value">{{ model.guarantor }}</div>
           </div>
         </div>
       </section>
@@ -138,19 +138,19 @@
         <div class="disbursement-grid">
           <div class="disbursement-item">
             <div class="disbursement-label">Disbursement Method</div>
-            <div class="disbursement-value">{{ p.disbursement_method }}</div>
+            <div class="disbursement-value">{{ model.disbursement_method }}</div>
           </div>
           <div class="disbursement-item">
             <div class="disbursement-label">Interest Rate</div>
-            <div class="disbursement-value">{{ p.interest }}</div>
+            <div class="disbursement-value">{{ model.interest }}</div>
           </div>
           <div class="disbursement-item">
             <div class="disbursement-label">Prepayment Information</div>
-            <div class="disbursement-value">{{ p.early_repayment_details }}</div>
+            <div class="disbursement-value">{{ model.early_repayment_details }}</div>
           </div>
           <div class="disbursement-item">
             <div class="disbursement-label">Maturity Date</div>
-            <div class="disbursement-value">{{ formatDate(p.maturity_date) }}</div>
+            <div class="disbursement-value">{{ formatDate(model.maturity_date) }}</div>
           </div>
         </div>
       </section>
@@ -161,19 +161,19 @@
         <div class="collateral-grid">
           <div class="collateral-item">
             <div class="collateral-label">Property Address</div>
-            <div class="collateral-value">{{ p.property_address }}</div>
+            <div class="collateral-value">{{ model.property_address }}</div>
           </div>
           <div class="collateral-item">
             <div class="collateral-label">Valuation</div>
-            <div class="collateral-value">A${{ formatNumber(p.valuation) }}</div>
+            <div class="collateral-value">A${{ formatNumber(model.valuation) }}</div>
           </div>
           <div class="collateral-item">
             <div class="collateral-label">Security Ranking</div>
-            <div class="collateral-value">{{ p.security_rank }}</div>
+            <div class="collateral-value">{{ model.security_rank }}</div>
           </div>
           <div class="collateral-item full-width">
             <div class="collateral-label">Project Summary</div>
-            <div class="collateral-value">{{ p.summary }}</div>
+            <div class="collateral-value">{{ model.summary }}</div>
           </div>
         </div>
       </section>
@@ -184,15 +184,15 @@
         <div class="default-grid">
           <div class="default-item">
             <div class="default-label">Default Interest Rate</div>
-            <div class="default-value">{{ p.default_interest_rate }}</div>
+            <div class="default-value">{{ model.default_interest_rate }}</div>
           </div>
           <div class="default-item full-width">
             <div class="default-label">Default Trigger Conditions</div>
-            <div class="default-value">{{ p.default_triggers }}</div>
+            <div class="default-value">{{ model.default_triggers }}</div>
           </div>
           <div class="default-item full-width">
             <div class="default-label">Disposal Process</div>
-            <div class="default-value">{{ p.default_process }}</div>
+            <div class="default-value">{{ model.default_process }}</div>
           </div>
         </div>
       </section>
@@ -203,22 +203,22 @@
         <div class="documents-grid">
           <div class="document-item">
             <div class="document-label">Issuer Token</div>
-            <div class="document-value">{{ p.issuer_token }}</div>
+            <div class="document-value">{{ model.issuer_token }}</div>
             <button class="doc-btn">View</button>
           </div>
           <div class="document-item">
             <div class="document-label">Loan Token</div>
-            <div class="document-value">{{ p.loan_token }}</div>
+            <div class="document-value">{{ model.loan_token }}</div>
             <button class="doc-btn">View</button>
           </div>
           <div class="document-item">
             <div class="document-label">Valuation Report</div>
-            <div class="document-value">{{ p.valuation_report }}</div>
+            <div class="document-value">{{ model.valuation_report }}</div>
             <button class="doc-btn">Download</button>
           </div>
           <div class="document-item">
             <div class="document-label">Mortgage Deed</div>
-            <div class="document-value">{{ p.mortgage_deed }}</div>
+            <div class="document-value">{{ model.mortgage_deed }}</div>
             <button class="doc-btn">Download</button>
           </div>
         </div>
@@ -240,12 +240,6 @@ export default {
       error: null,
       refreshInterval: null,
       lastRefreshTime: null
-    }
-  },
-  computed: {
-    // 定义p变量指向model，方便模板使用
-    p() {
-      return this.model || {}
     }
   },
   async mounted() {

@@ -18,29 +18,17 @@
           <a href="#" @click.prevent="go('/home')" class="menu-item">Home</a>
           <a href="#" @click.prevent="go('/projects')" class="menu-item">Projects</a>
           <a href="#" @click.prevent="go('/portfolio')" class="menu-item">Portfolio</a>
-          <!-- <div class="dropdown-container">
-            <a href="#" @click.prevent="toggleMoreDropdown" class="more-link">
-              More ▾
-            </a>
+          <a href="#" class="menu-item">More ▾</a>
             <div v-if="moreDropdownOpen" class="dropdown-menu">
-              <a href="#" @click.prevent="go('/about')" class="dropdown-item">
-                <span class="dropdown-icon">🏢</span>
-                <span>About Us</span>
-              </a>
-              <a href="#" @click.prevent="go('/vision')" class="dropdown-item">
-                <span class="dropdown-icon">🎯</span>
-                <span>Vision</span>
-              </a>
-              <a href="#" @click.prevent="go('/contact')" class="dropdown-item">
-                <span class="dropdown-icon">📞</span>
-                <span>Contact Us</span>
-              </a>
-              <a href="#" @click.prevent="go('/help')" class="dropdown-item">
-                <span class="dropdown-icon">❓</span>
-                <span>Help Center</span>
-              </a>
+              <a href="#" @click.prevent="go('/overview')" class="dropdown-item">Overview</a>
+              <a href="#" @click.prevent="go('/about')" class="dropdown-item">About Us</a>
+              <a href="#" @click.prevent="go('/features')" class="dropdown-item">Features</a>
+              <a href="#" @click.prevent="go('/solutions')" class="dropdown-item">Solutions</a>
+              <a href="#" @click.prevent="go('/tutorials')" class="dropdown-item">Tutorials</a>
+              <a href="#" @click.prevent="go('/pricing')" class="dropdown-item">Pricing</a>
+              <a href="#" @click.prevent="go('/faq')" class="dropdown-item">FAQ</a>
+              <a href="#" @click.prevent="go('/contact')" class="dropdown-item">Contact Us</a>
             </div>
-          </div>   -->
         </nav>
         
         <!-- 移动端汉堡菜单按钮 -->
