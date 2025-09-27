@@ -1,409 +1,379 @@
 <template>
   <div class="container pf-page">
-   
-
+  
     <!-- 有绑定钱包时显示Portfolio页面 -->
     <div class="pf-main-content">
-      <!-- 顶部操作按钮行 -->
-      <!-- <div class="pf-topbar"> -->
-        <!-- <div class="pf-actions">
-          <button v-for="a in actions" :key="a.text" class="pf-pill" @click="handleAction(a.text)">
-            <span class="pf-pill-ico">{{ a.icon }}</span>
-            <span>{{ a.text }}</span>
-          </button>
-        </div> -->
-        <!-- <button class="pf-add" @click="refreshPortfolio">
-          <span class="pf-add-ico">🔄</span>
-          Refresh -->
-        <!-- </button> -->
-      <!-- </div> -->
-
-    <div class="pf-body">
-      <!-- 侧栏：Accounts -->
-      <aside class="pf-sidebar">
-        <div class="pf-side-head">
-          <h2>Bound Wallets</h2>
-          <div class="pf-side-tools">
-            <span class="gear" @click="showSettings = !showSettings">⚙️</span>
-            <span class="plus" @click="addAccount" title="Add wallets in Wallet page">＋</span>
+      <div class="pf-body">
+        <!-- 侧栏：Accounts -->
+        <aside class="pf-sidebar">
+          <div class="pf-side-head">
+            <h2>Bound Wallets</h2>
+            <div class="pf-side-tools">
+              <span class="gear" @click="showSettings = !showSettings">⚙️</span>
+              <span class="plus" @click="addAccount" title="Add wallets in Wallet page">＋</span>
+            </div>
           </div>
-        </div>
 
-        <!-- 账户组 -->
-        <div class="pf-acc-group">
-          <button class="pf-acc-title" @click="accGroupOpen = !accGroupOpen">
-            <span>Decentralized</span>
-            <span class="caret" :class="{open: accGroupOpen}">▾</span>
-          </button>
+          <!-- 账户组 -->
+          <div class="pf-acc-group">
+            <button class="pf-acc-title" @click="accGroupOpen = !accGroupOpen">
+              <span>Decentralized</span>
+              <span class="caret" :class="{open: accGroupOpen}">▾</span>
+            </button>
 
-          <div v-show="accGroupOpen" class="pf-acc-list">
-            <div 
-              v-for="account in accounts" 
-              :key="account.address" 
-              class="pf-acc-item"
-              :class="{ active: selectedAccount === account.address }"
-              @click="selectAccount(account.address)"
-            >
-              <div class="pf-avatar"></div>
-              <div class="pf-acc-info">
-                <div class="pf-acc-name">{{ account.name || 'Account' }}</div>
-                <div class="pf-addr" :title="account.address">
-                  {{ formatAddress(account.address) }}
-                </div>
-                <div class="pf-acc-balance">
-                  {{ getAccountBalance(account.address) }} {{ nativeSymbol }}
+            <div v-show="accGroupOpen" class="pf-acc-list">
+              <div 
+                v-for="account in accounts" 
+                :key="account.address" 
+                class="pf-acc-item"
+                :class="{ active: selectedAccount === account.address }"
+                @click="selectAccount(account.address)"
+              >
+                <div class="pf-avatar"></div>
+                <div class="pf-acc-info">
+                  <div class="pf-acc-name">{{ account.name || 'Account' }}</div>
+                  <div class="pf-addr" :title="account.address">
+                    {{ formatAddress(account.address) }}
+                  </div>
+                  <div class="pf-acc-balance">
+                    {{ getAccountBalance(account.address) }} {{ nativeSymbol }}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        
-        <!-- 当前选中账户的投资概览 -->
-        <div v-if="selectedAccount" class="pf-account-overview">
-          <h3>Account Overview</h3>
           
-          <!-- 投资统计卡片 -->
-          <div class="pf-stats">
-            <div class="pf-stat-card">
-              <div class="pf-stat-label">Total Investment</div>
-              <div class="pf-stat-value">A${{ getAccountTotalInvestment(selectedAccount).toFixed(2) }}</div>
-            </div>
-            <div class="pf-stat-card">
-              <div class="pf-stat-label">Current Value</div>
-              <div class="pf-stat-value" :class="{ positive: getAccountTotalGain(selectedAccount) >= 0, negative: getAccountTotalGain(selectedAccount) < 0 }">
-                A${{ getAccountCurrentValue(selectedAccount).toFixed(2) }}
+          <!-- 当前选中账户的投资概览 -->
+          <div v-if="selectedAccount" class="pf-account-overview">
+            <h3>Account Overview</h3>
+            
+            <!-- 投资统计卡片 -->
+            <div class="pf-stats">
+              <div class="pf-stat-card">
+                <div class="pf-stat-label">Total Investment</div>
+                <div class="pf-stat-value">A${{ getAccountTotalInvestment(selectedAccount).toFixed(2) }}</div>
+              </div>
+              <div class="pf-stat-card">
+                <div class="pf-stat-label">Current Value</div>
+                <div class="pf-stat-value" :class="{ positive: getAccountTotalGain(selectedAccount) >= 0, negative: getAccountTotalGain(selectedAccount) < 0 }">
+                  A${{ getAccountCurrentValue(selectedAccount).toFixed(2) }}
+                </div>
+              </div>
+              <div class="pf-stat-card">
+                <div class="pf-stat-label">Total Gain/Loss</div>
+                <div class="pf-stat-value" :class="{ positive: getAccountTotalGain(selectedAccount) >= 0, negative: getAccountTotalGain(selectedAccount) < 0 }">
+                  {{ getAccountTotalGain(selectedAccount) >= 0 ? '+' : '' }}A${{ getAccountTotalGain(selectedAccount).toFixed(2) }}
+                </div>
+              </div>
+              <div class="pf-stat-card">
+                <div class="pf-stat-label">ROI</div>
+                <div class="pf-stat-value" :class="{ positive: getAccountROI(selectedAccount) >= 0, negative: getAccountROI(selectedAccount) < 0 }">
+                  {{ getAccountROI(selectedAccount) >= 0 ? '+' : '' }}{{ getAccountROI(selectedAccount).toFixed(2) }}%
+                </div>
               </div>
             </div>
-            <div class="pf-stat-card">
-              <div class="pf-stat-label">Total Gain/Loss</div>
-              <div class="pf-stat-value" :class="{ positive: getAccountTotalGain(selectedAccount) >= 0, negative: getAccountTotalGain(selectedAccount) < 0 }">
-                {{ getAccountTotalGain(selectedAccount) >= 0 ? '+' : '' }}A${{ getAccountTotalGain(selectedAccount).toFixed(2) }}
-              </div>
-            </div>
-            <div class="pf-stat-card">
-              <div class="pf-stat-label">ROI</div>
-              <div class="pf-stat-value" :class="{ positive: getAccountROI(selectedAccount) >= 0, negative: getAccountROI(selectedAccount) < 0 }">
-                {{ getAccountROI(selectedAccount) >= 0 ? '+' : '' }}{{ getAccountROI(selectedAccount).toFixed(2) }}%
-              </div>
-            </div>
-          </div>
 
-        <!-- 资产分布饼图 -->
-        <div class="pf-sidebar-pie-section">
-          <div class="pf-chart-header">
-            <h4>Asset Distribution</h4>
-          </div>
-          
-          <div class="pf-pie-chart-container">
-            <div class="pf-pie-chart">
-              <svg viewBox="0 0 200 200" class="pf-pie-svg">
-                <circle
-                  cx="100"
-                  cy="100"
-                  r="80"
-                  fill="none"
-                  stroke="#e5e7eb"
-                  stroke-width="20"
-                />
-                <circle
-                  v-for="(holding, index) in holdings"
-                  :key="holding.code"
-                  cx="100"
-                  cy="100"
-                  r="80"
-                  fill="none"
-                  :stroke="getPieColor(index)"
-                  stroke-width="20"
-                  :stroke-dasharray="getPieDashArray(holding)"
-                  :stroke-dashoffset="getPieDashOffset(index)"
-                  transform="rotate(-90 100 100)"
-                />
-              </svg>
-              <div class="pf-pie-center">
-                <div class="pf-pie-total">A${{ currentValue.toFixed(0) }}</div>
-                <div class="pf-pie-label">Total Value</div>
-              </div>
+          <!-- 资产分布饼图 -->
+          <div class="pf-sidebar-pie-section">
+            <div class="pf-chart-header">
+              <h4>All Assets Distribution</h4>
+              <p class="pf-chart-subtitle">All purchased assets across all wallets</p>
             </div>
             
-            <!-- 图例 -->
-            <div class="pf-chart-legend">
-              <div v-for="(holding, index) in holdings" :key="holding.code" class="pf-legend-item">
-                <div class="pf-legend-color" :style="{ backgroundColor: getPieColor(index) }"></div>
-                <div class="pf-legend-info">
-                  <div class="pf-legend-code">{{ holding.code }}</div>
-                  <div class="pf-legend-value">A${{ (holding.amount * holding.currentPrice).toFixed(0) }}</div>
-                  <div class="pf-legend-percentage">{{ getAssetPercentage(holding).toFixed(1) }}%</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-          
- 
-        </div>
-      </aside>
-
-      <!-- 主区域 -->
-      <main class="pf-main">
-        <!-- 投资概览 -->
-        <div class="pf-hero">
-          <div class="pf-balance">
-             A${{ nativeBalanceDisplay }}
-          </div>
-          <!-- <div class="pf-change" :class="{ positive: totalGain >= 0, negative: totalGain < 0 }">
-            {{ totalGain >= 0 ? '+' : '' }}A${{ totalGain.toFixed(2) }} ({{ roi >= 0 ? '+' : '' }}{{ roi.toFixed(2) }}%)
-          </div> -->
-        </div>
-
-        <!-- Tabs -->
-        <nav class="pf-tabs">
-          <button
-            v-for="t in tabs"
-            :key="t"
-            class="pf-tab"
-            :class="{active: activeTab===t}"
-            @click="activeTab=t"
-          >{{ t }}</button>
-        </nav>
-
-        <!-- 项目分析 -->
-        <div v-if="activeTab==='Analysis'" class="pf-analysis">
-          <!-- 资产总结图表 -->
-          <div class="pf-asset-summary">
-            <div class="pf-summary-header">
-              <h3>Asset Summary</h3>
-              <div class="pf-summary-stats">
-                <div class="pf-summary-stat">
-                  <span class="pf-stat-number">{{ holdings.length }}</span>
-                  <span class="pf-stat-label">Assets</span>
-                </div>
-                <div class="pf-summary-stat">
-                  <span class="pf-stat-number" :class="{ positive: totalGain >= 0, negative: totalGain < 0 }">
-                    {{ totalGain >= 0 ? '+' : '' }}{{ roi.toFixed(1) }}%
-                  </span>
-                  <span class="pf-stat-label">Total Return</span>
-                </div>
-                <div class="pf-summary-stat">
-                  <span class="pf-stat-number">A${{ currentValue.toFixed(0) }}</span>
-                  <span class="pf-stat-label">Total Value</span>
-                </div>
-              </div>
-            </div>
-            
-            <!-- 交易记录柱状图 -->
-            <div class="pf-transaction-chart">
-              <div class="pf-chart-header">
-                <h4>Transaction History</h4>
-                <div class="pf-chart-controls">
-                  <select v-model="chartTimeframe" class="pf-select">
-                    <option value="7d">Last 7 Days</option>
-                    <option value="30d">Last 30 Days</option>
-                    <option value="90d">Last 3 Months</option>
-                    <option value="1y">Last Year</option>
-                  </select>
-                  <button @click="refreshTransactionData" class="pf-refresh-btn">🔄</button>
+            <div class="pf-pie-chart-container">
+              <div class="pf-pie-chart">
+                <svg viewBox="0 0 200 200" class="pf-pie-svg">
+                  <circle
+                    cx="100"
+                    cy="100"
+                    r="80"
+                    fill="none"
+                    stroke="#e5e7eb"
+                    stroke-width="20"
+                  />
+                  <circle
+                    v-for="(holding, index) in holdings"
+                    :key="holding.code"
+                    cx="100"
+                    cy="100"
+                    r="80"
+                    fill="none"
+                    :stroke="getPieColor(index)"
+                    stroke-width="20"
+                    :stroke-dasharray="getPieDashArray(holding)"
+                    :stroke-dashoffset="getPieDashOffset(index)"
+                    transform="rotate(-90 100 100)"
+                  />
+                </svg>
+                <div class="pf-pie-center">
+                  <div class="pf-pie-total">A${{ currentValue.toFixed(2) }}</div>
+                  <div class="pf-pie-label">Total Value</div>
                 </div>
               </div>
               
-              <!-- 累计统计摘要 -->
-              <div v-if="transactionChartData.length > 0" class="pf-chart-summary">
-                <div class="pf-summary-item">
-                  <span class="pf-summary-label">Total Buy Value:</span>
-                  <span class="pf-summary-value pf-buy-color">A${{ getTotalBuyValue().toFixed(2) }}</span>
+              <!-- 图例 - 现在在饼图右侧 -->
+              <div class="pf-chart-legend">
+                <div v-for="(holding, index) in holdings" :key="holding.code" class="pf-legend-item">
+                  <div class="pf-legend-color" :style="{ backgroundColor: getPieColor(index) }"></div>
+                  <div class="pf-legend-info">
+                    <div class="pf-legend-code">{{ holding.code }}</div>
+                    <div class="pf-legend-value">A${{ (holding.amount * holding.currentPrice).toFixed(2) }}</div>
+                    <div class="pf-legend-percentage">{{ getAssetPercentage(holding).toFixed(1) }}%</div>
+                  </div>
                 </div>
-                <div class="pf-summary-item">
-                  <span class="pf-summary-label">Total Sell Value:</span>
-                  <span class="pf-summary-value pf-sell-color">A${{ getTotalSellValue().toFixed(2) }}</span>
-                </div>
-                <div class="pf-summary-item">
-                  <span class="pf-summary-label">Net Value:</span>
-                  <span class="pf-summary-value" :class="getNetValue() >= 0 ? 'pf-positive' : 'pf-negative'">
-                    {{ getNetValue() >= 0 ? '+' : '' }}A${{ getNetValue().toFixed(2) }}
-                  </span>
+              </div>
+            </div>
+          </div>
+            
+  
+          </div>
+        </aside>
+
+        <!-- 主区域 -->
+        <main class="pf-main">
+          <!-- 投资概览 -->
+          <div class="pf-hero">
+            <div class="pf-balance">
+              A$ 
+              {{ nativeBalanceDisplay }}
+            </div>
+            <div class="pf-change" :class="{ positive: totalGain >= 0, negative: totalGain < 0 }">
+              {{ totalGain >= 0 ? '+' : '' }}A${{ totalGain.toFixed(2) }} ({{ roi >= 0 ? '+' : '' }}{{ roi.toFixed(2) }}%)
+            </div>
+          </div>
+
+          <!-- Tabs -->
+          <nav class="pf-tabs">
+            <button
+              v-for="t in tabs"
+              :key="t"
+              class="pf-tab"
+              :class="{active: activeTab===t}"
+              @click="activeTab=t"
+            >{{ t }}</button>
+          </nav>
+
+          <!-- 项目分析 -->
+          <div v-if="activeTab==='Analysis'" class="pf-analysis">
+            <!-- 资产总结图表 -->
+            <div class="pf-asset-summary">
+              <div class="pf-summary-header">
+                <h3>Asset Summary</h3>
+                <div class="pf-summary-stats">
+                  <div class="pf-summary-stat">
+                    <span class="pf-stat-number">{{ holdings.length }}</span>
+                    <span class="pf-stat-label">Assets</span>
+                  </div>
+                  <div class="pf-summary-stat">
+                    <span class="pf-stat-number" :class="{ positive: totalGain >= 0, negative: totalGain < 0 }">
+                      {{ totalGain >= 0 ? '+' : '' }}{{ roi.toFixed(1) }}%
+                    </span>
+                    <span class="pf-stat-label">Total Return</span>
+                  </div>
+                  <div class="pf-summary-stat">
+                    <span class="pf-stat-number">A${{ currentValue.toFixed(2) }}</span>
+                    <span class="pf-stat-label">Total Value</span>
+                  </div>
                 </div>
               </div>
               
-              <div class="pf-bar-chart-container">
-                <div v-if="loadingTransactions" class="pf-chart-loading">
-                  <div class="pf-spinner"></div>
-                  <span>Loading transaction data...</span>
+              <!-- 交易记录柱状图 -->
+              <div class="pf-transaction-chart">
+                <div class="pf-chart-header">
+                  <h4>Transaction History</h4>
+                  <div class="pf-chart-controls">
+                   <select v-model="chartTimeframe" class="pf-select">
+                     <option value="3d">Last 3 Days</option>
+                     <option value="7d">Last 7 Days</option>
+                     <option value="30d">Last 30 Days</option>
+                     <option value="90d">Last 3 Months</option>
+                     <option value="1y">Last Year</option>
+                   </select>
+                    <button @click="refreshTransactionData" class="pf-refresh-btn">🔄</button>
+                  </div>
                 </div>
-                <div v-else-if="transactionChartData.length === 0" class="pf-chart-empty">
-                  <div class="pf-empty-icon">📊</div>
-                  <p>No transaction data available</p>
-                </div>
-                <div v-else class="pf-bar-chart">
-                  <div 
-                    class="pf-chart-bars"
-                    :style="{ '--bar-count': transactionChartData.length }"
-                  >
+                
+                <div class="pf-bar-chart-container">
+                  <div v-if="loadingTransactions" class="pf-chart-loading">
+                    <div class="pf-spinner"></div>
+                    <span>Loading transaction data...</span>
+                  </div>
+                  <div v-else-if="transactionChartData.length === 0" class="pf-chart-empty">
+                    <div class="pf-empty-icon"></div>
+                    <p>No transaction data available</p>
+                  </div>
+                  <div v-else class="pf-bar-chart">
                     <div 
-                      v-for="(item, index) in transactionChartData" 
-                      :key="index"
-                      class="pf-bar-item"
+                      class="pf-chart-bars"
+                      :style="{ '--bar-count': transactionChartData.length }"
                     >
-                      <div class="pf-bar-container">
-                        <div class="pf-bar-buy" :style="{ height: getBarHeight(item.buyValue, maxTransactions) + '%' }"></div>
-                        <div class="pf-bar-sell" :style="{ height: getBarHeight(item.sellValue, maxTransactions) + '%' }"></div>
+                      <div 
+                        v-for="(item, index) in transactionChartData" 
+                        :key="index"
+                        class="pf-bar-item"
+                      >
+                        <div class="pf-bar-container">
+                          <div class="pf-bar-buy" :style="{ height: getBarHeight(item.buyValue, maxTransactions) + '%' }"></div>
+                          <div class="pf-bar-sell" :style="{ height: getBarHeight(item.sellValue, maxTransactions) + '%' }"></div>
+                        </div>
+                        <div class="pf-bar-label">{{ item.date }}</div>
+                        <div class="pf-bar-tooltip">
+                          <div class="pf-tooltip-buy">Buy: {{ item.buy }} (A${{ item.buyValue.toFixed(2) }})</div>
+                          <div class="pf-tooltip-sell">Sell: {{ item.sell }} (A${{ item.sellValue.toFixed(2) }})</div>
+                          <div class="pf-tooltip-total">Total: {{ item.buy + item.sell }} (A${{ (item.buyValue + item.sellValue).toFixed(2) }})</div>
+                        </div>
                       </div>
-                      <div class="pf-bar-label">{{ item.date }}</div>
-                      <div class="pf-bar-tooltip">
-                        <div class="pf-tooltip-buy">Buy: {{ item.buy }} (A${{ item.buyValue.toFixed(2) }})</div>
-                        <div class="pf-tooltip-sell">Sell: {{ item.sell }} (A${{ item.sellValue.toFixed(2) }})</div>
-                        <div class="pf-tooltip-total">Total: {{ item.buy + item.sell }} (A${{ (item.buyValue + item.sellValue).toFixed(2) }})</div>
+                    </div>
+                    <div class="pf-chart-legend">
+                      <div class="pf-legend-item">
+                        <div class="pf-legend-color pf-buy-color"></div>
+                        <span>Buy Value (A$)</span>
+                      </div>
+                      <div class="pf-legend-item">
+                        <div class="pf-legend-color pf-sell-color"></div>
+                        <span>Sell Value (A$)</span>
                       </div>
                     </div>
                   </div>
-                  <div class="pf-chart-legend">
-                    <div class="pf-legend-item">
-                      <div class="pf-legend-color pf-buy-color"></div>
-                      <span>Buy Value (A$)</span>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="pf-analysis-grid">
+              <!-- 收益分布图 -->
+              <div class="pf-analysis-card">
+                <h4>Return Distribution</h4>
+                <div class="pf-chart-placeholder">
+                  <div class="pf-chart-bars">
+                    <div v-for="holding in holdings" :key="holding.code" class="pf-chart-bar">
+                      <div class="pf-chart-bar-fill" :style="{ height: getPriceBarHeight(holding.change) + '%' }"></div>
+                      <div class="pf-chart-bar-label">{{ holding.code }}</div>
                     </div>
-                    <div class="pf-legend-item">
-                      <div class="pf-legend-color pf-sell-color"></div>
-                      <span>Sell Value (A$)</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 风险评估 -->
+              <div class="pf-analysis-card">
+                <h4>Risk Assessment</h4>
+                <div class="pf-risk-metrics">
+                  <div class="pf-risk-item">
+                    <span class="pf-risk-label">Portfolio Risk</span>
+                    <span class="pf-risk-value">{{ portfolioRisk }}</span>
+                  </div>
+                  <div class="pf-risk-item">
+                    <span class="pf-risk-label">Diversification</span>
+                    <span class="pf-risk-value">{{ diversification.toFixed(2) }}%</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 交易建议 -->
+              <!-- <div class="pf-analysis-card">
+                <h4>Trading Insights</h4>
+                <div class="pf-insights">
+                  <div v-for="insight in tradingInsights" :key="insight.id" class="pf-insight-item">
+                    <div class="pf-insight-icon">{{ insight.icon }}</div>
+                    <div class="pf-insight-text">{{ insight.text }}</div>
+                  </div>
+                </div>
+              </div> -->
+            </div>
+          </div>
+
+          <!-- 交易历史 -->
+          <div v-if="activeTab==='Transactions'" class="pf-transactions">
+            <div class="pf-transactions-header">
+              <h3>Recent Transactions</h3>
+              <div class="pf-transactions-actions">
+                <button class="pf-filter-btn" @click="showFilters = !showFilters">
+                  Filter
+                </button>
+                <button class="pf-refresh-btn" @click="refreshTransactions" :disabled="loadingTransactions">
+                  <span v-if="loadingTransactions">🔄</span>
+                  <span v-else>Refresh</span>
+                </button>
+              </div>
+            </div>
+            
+            <div v-if="showFilters" class="pf-filters">
+              <select v-model="filterType" class="pf-filter-select">
+                <option value="">All Types</option>
+                <option value="buy">Buy</option>
+                <option value="sell">Sell</option>
+              </select>
+              <select v-model="filterProject" class="pf-filter-select">
+                <option value="">All Projects</option>
+                <option v-for="project in projects" :key="project.code" :value="project.code">
+                  {{ project.code }}
+                </option>
+              </select>
+            </div>
+
+            <div class="pf-transactions-list">
+              <div v-if="filteredTransactions.length === 0" class="pf-no-transactions">
+                <div class="pf-empty-icon"></div>
+                <p>No transaction data available</p>
+                <p class="pf-empty-hint">Complete some trades in the Trade page to see your transaction history</p>
+              </div>
+              <div v-else>
+                <div v-for="transaction in filteredTransactions" :key="transaction.id" class="pf-transaction-item">
+                  <div class="pf-transaction-icon" :class="transaction.type">
+                    {{ transaction.type === 'buy' ? '📈' : '📉' }}
+                  </div>
+                  <div class="pf-transaction-details">
+                    <div class="pf-transaction-title">
+                      {{ transaction.type.toUpperCase() }} {{ transaction.amount }} {{ transaction.projectCode }}
                     </div>
+                    <div class="pf-transaction-subtitle">
+                      {{ transaction.projectName }}
+                    </div>
+                    <div class="pf-transaction-time">{{ formatTime(transaction.timestamp) }}</div>
+                  </div>
+                  <div class="pf-transaction-value">
+                    <div class="pf-transaction-price">A${{ transaction.price.toFixed(2) }}</div>
+                    <div class="pf-transaction-total">A${{ (transaction.amount * transaction.price).toFixed(2) }}</div>
                   </div>
                 </div>
               </div>
             </div>
-
           </div>
 
-          <div class="pf-analysis-grid">
-            <!-- 收益分布图 -->
-            <div class="pf-analysis-card">
-              <h4>Return Distribution</h4>
-              <div class="pf-chart-placeholder">
-                <div class="pf-chart-bars">
-                  <div v-for="holding in holdings" :key="holding.code" class="pf-chart-bar">
-                    <div class="pf-chart-bar-fill" :style="{ height: getPriceBarHeight(holding.change) + '%' }"></div>
-                    <div class="pf-chart-bar-label">{{ holding.code }}</div>
+          <!-- 项目详情 -->
+          <div v-if="activeTab==='Projects'" class="pf-projects">
+            <div class="pf-projects-grid">
+              <div v-for="project in accountProjects" :key="project.code" class="pf-project-card">
+                <div class="pf-project-header">
+                  <img :src="project.image" :alt="project.code" class="pf-project-image" />
+                  <div class="pf-project-info">
+                    <h4>{{ project.code }}</h4>
+                    <p>{{ project.subtitle }}</p>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <!-- 风险评估 -->
-            <div class="pf-analysis-card">
-              <h4>Risk Assessment</h4>
-              <div class="pf-risk-metrics">
-                <div class="pf-risk-item">
-                  <span class="pf-risk-label">Portfolio Risk</span>
-                  <span class="pf-risk-value">{{ portfolioRisk }}</span>
-                </div>
-                <div class="pf-risk-item">
-                  <span class="pf-risk-label">Diversification</span>
-                  <span class="pf-risk-value">{{ diversification }}%</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- 交易建议 -->
-            <!-- <div class="pf-analysis-card">
-              <h4>Trading Insights</h4>
-              <div class="pf-insights">
-                <div v-for="insight in tradingInsights" :key="insight.id" class="pf-insight-item">
-                  <div class="pf-insight-icon">{{ insight.icon }}</div>
-                  <div class="pf-insight-text">{{ insight.text }}</div>
-                </div>
-              </div>
-            </div> -->
-          </div>
-        </div>
-
-        <!-- 交易历史 -->
-        <div v-if="activeTab==='Transactions'" class="pf-transactions">
-          <div class="pf-transactions-header">
-            <h3>Recent Transactions</h3>
-            <div class="pf-transactions-actions">
-              <button class="pf-filter-btn" @click="showFilters = !showFilters">
-                Filter
-              </button>
-              <button class="pf-refresh-btn" @click="refreshTransactions" :disabled="loadingTransactions">
-                <span v-if="loadingTransactions">🔄</span>
-                <span v-else>Refresh</span>
-              </button>
-            </div>
-          </div>
-          
-          <div v-if="showFilters" class="pf-filters">
-            <select v-model="filterType" class="pf-filter-select">
-              <option value="">All Types</option>
-              <option value="buy">Buy</option>
-              <option value="sell">Sell</option>
-            </select>
-            <select v-model="filterProject" class="pf-filter-select">
-              <option value="">All Projects</option>
-              <option v-for="project in projects" :key="project.code" :value="project.code">
-                {{ project.code }}
-              </option>
-            </select>
-          </div>
-
-          <div class="pf-transactions-list">
-            <div v-if="filteredTransactions.length === 0" class="pf-no-transactions">
-              <div class="pf-empty-icon">📊</div>
-              <p>No transaction data available</p>
-              <p class="pf-empty-hint">Complete some trades in the Trade page to see your transaction history</p>
-            </div>
-            <div v-else>
-              <div v-for="transaction in filteredTransactions" :key="transaction.id" class="pf-transaction-item">
-                <div class="pf-transaction-icon" :class="transaction.type">
-                  {{ transaction.type === 'buy' ? '📈' : '📉' }}
-                </div>
-                <div class="pf-transaction-details">
-                  <div class="pf-transaction-title">
-                    {{ transaction.type.toUpperCase() }} {{ transaction.amount }} {{ transaction.projectCode }}
+                <div class="pf-project-metrics">
+                  <div class="pf-project-metric">
+                    <span class="pf-metric-label">Current Price</span>
+                    <span class="pf-metric-value">A${{ project.currentPrice }}</span>
                   </div>
-                  <div class="pf-transaction-subtitle">
-                    {{ transaction.projectName }}
+                  <div class="pf-project-metric">
+                    <span class="pf-metric-label">Target Yield</span>
+                    <span class="pf-metric-value">{{ project.targetYield }}%</span>
                   </div>
-                  <div class="pf-transaction-time">{{ formatTime(transaction.timestamp) }}</div>
+                  <div class="pf-project-metric">
+                    <span class="pf-metric-label">Risk Level</span>
+                    <span class="pf-metric-value" :class="'risk-' + project.risk">{{ project.risk }}</span>
+                  </div>
                 </div>
-                <div class="pf-transaction-value">
-                  <div class="pf-transaction-price">A${{ transaction.price.toFixed(2) }}</div>
-                  <div class="pf-transaction-total">A${{ (transaction.amount * transaction.price).toFixed(2) }}</div>
+                <div class="pf-project-actions">
+                  <button class="pf-project-btn" @click="goToTrade(project.code)">Trade</button>
+                  <button class="pf-project-btn pf-project-btn-secondary" @click="goToDetail(project.code)">Details</button>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-
-        <!-- 项目详情 -->
-        <div v-if="activeTab==='Projects'" class="pf-projects">
-          <div class="pf-projects-grid">
-            <div v-for="project in accountProjects" :key="project.code" class="pf-project-card">
-              <div class="pf-project-header">
-                <img :src="project.image" :alt="project.code" class="pf-project-image" />
-                <div class="pf-project-info">
-                  <h4>{{ project.code }}</h4>
-                  <p>{{ project.subtitle }}</p>
-                </div>
-              </div>
-              <div class="pf-project-metrics">
-                <div class="pf-project-metric">
-                  <span class="pf-metric-label">Current Price</span>
-                  <span class="pf-metric-value">A${{ project.currentPrice }}</span>
-                </div>
-                <div class="pf-project-metric">
-                  <span class="pf-metric-label">Target Yield</span>
-                  <span class="pf-metric-value">{{ project.targetYield }}%</span>
-                </div>
-                <div class="pf-project-metric">
-                  <span class="pf-metric-label">Risk Level</span>
-                  <span class="pf-metric-value" :class="'risk-' + project.risk">{{ project.risk }}</span>
-                </div>
-              </div>
-              <div class="pf-project-actions">
-                <button class="pf-project-btn" @click="goToTrade(project.code)">Trade</button>
-                <button class="pf-project-btn pf-project-btn-secondary" @click="goToDetail(project.code)">Details</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
     </div> <!-- 结束 pf-main-content -->
   </div>
 </template>
@@ -445,7 +415,7 @@ const timeframes = [
 const selectedTimeframe = ref('1d')
 
 // 交易图表相关数据
-const chartTimeframe = ref('30d')
+const chartTimeframe = ref('3d')
 const loadingTransactions = ref(false)
 const transactionChartData = ref([])
 
@@ -809,12 +779,66 @@ const getAccountROI = (accountAddress) => {
   return roi
 }
 
+// 获取所有在网站购买的所有资产的分布
+const getAllAssetsDistribution = () => {
+  // 从WalletView获取所有交易活动数据
+  const walletActivity = getWalletActivityData()
+  
+  // 筛选出所有transaction activity（buy/sell类型）
+  const transactionActivities = walletActivity.filter(activity => 
+    activity.type === 'buy' || activity.type === 'sell'
+  )
+  
+  console.log('📊 PortfolioView: 获取所有资产分布，共', transactionActivities.length, '条交易记录')
+  
+  const assetMap = new Map()
+  
+  // 计算每个项目的总持仓（所有账户合并）
+  transactionActivities.forEach(tx => {
+    const key = tx.project_code || tx.projectCode
+    if (!assetMap.has(key)) {
+      assetMap.set(key, { 
+        code: key, 
+        amount: 0, 
+        totalCost: 0, 
+        totalInvestment: 0,
+        projectName: tx.project_name || 'Unknown Project'
+      })
+    }
+    
+    const asset = assetMap.get(key)
+    // 获取项目当前价格 - 从数据库获取的项目数据
+    const project = projects.value.find(p => p.code === key)
+    const currentPrice = project ? (project.currentPrice || 1.00) : 1.00
+    asset.currentPrice = currentPrice
+    
+    if (tx.type === 'buy') {
+      asset.amount += parseFloat(tx.amount) || 0
+      asset.totalCost += (parseFloat(tx.amount) || 0) * (parseFloat(tx.price) || 1.00)
+      asset.totalInvestment += (parseFloat(tx.amount) || 0) * (parseFloat(tx.price) || 1.00)
+    } else if (tx.type === 'sell') {
+      asset.amount -= parseFloat(tx.amount) || 0
+      asset.totalCost -= (parseFloat(tx.amount) || 0) * (parseFloat(tx.price) || 1.00)
+      // 卖出时，totalInvestment保持不变（已实现投资）
+    }
+  })
+  
+  // 过滤掉数量为0或负数的资产
+  const validAssets = Array.from(assetMap.values()).filter(asset => asset.amount > 0)
+  
+  console.log('📊 PortfolioView: 所有资产分布:', validAssets)
+  return validAssets
+}
+
 // 为了兼容性，保留原有的计算属性（基于当前选中账户或默认数据）
 const holdings = computed(() => {
-  if (selectedAccount.value) {
-    return getAccountHoldings(selectedAccount.value)
+  // 优先显示所有资产的分布
+  const allAssets = getAllAssetsDistribution()
+  if (allAssets.length > 0) {
+    return allAssets
   }
-  // 如果没有选中账户，返回默认的演示数据
+  
+  // 如果没有交易数据，返回默认的演示数据
   return [
     { code: 'TYMU', amount: 100, totalCost: 100, currentPrice: 1.00, change: 2.5 },
     { code: 'SQNB', amount: 50, totalCost: 51, currentPrice: 1.02, change: -1.2 },
@@ -822,29 +846,52 @@ const holdings = computed(() => {
     { code: 'YYD', amount: 75, totalCost: 78.75, currentPrice: 1.05, change: 3.1 }
   ]
 })
+// 计算所有资产的总投资
 const totalInvestment = computed(() => {
+  const allAssets = getAllAssetsDistribution()
+  if (allAssets.length > 0) {
+    const total = allAssets.reduce((sum, asset) => sum + (asset.totalInvestment || 0), 0)
+    console.log('💰 PortfolioView: 所有资产总投资:', total)
+    return total
+  }
+  
   if (selectedAccount.value) {
     return getAccountTotalInvestment(selectedAccount.value)
   }
   return 254.25 // 默认总投资
 })
+
+// 计算所有资产的当前价值
 const currentValue = computed(() => {
+  const allAssets = getAllAssetsDistribution()
+  if (allAssets.length > 0) {
+    const total = allAssets.reduce((sum, asset) => sum + (asset.amount * asset.currentPrice), 0)
+    console.log('📈 PortfolioView: 所有资产当前价值:', total)
+    return total
+  }
+  
   if (selectedAccount.value) {
     return getAccountCurrentValue(selectedAccount.value)
   }
   return 267.75 // 默认当前价值
 })
+
+// 计算所有资产的总收益
 const totalGain = computed(() => {
-  if (selectedAccount.value) {
-    return getAccountTotalGain(selectedAccount.value)
-  }
-  return 13.5 // 默认总收益
+  const currentVal = currentValue.value
+  const investment = totalInvestment.value
+  const gain = currentVal - investment
+  console.log('📊 PortfolioView: 所有资产总收益:', gain, '(当前价值:', currentVal, '- 总投资:', investment, ')')
+  return gain
 })
+
+// 计算所有资产的ROI
 const roi = computed(() => {
-  if (selectedAccount.value) {
-    return getAccountROI(selectedAccount.value)
-  }
-  return 5.31 // 默认ROI
+  const investment = totalInvestment.value
+  const gain = totalGain.value
+  const roiValue = investment > 0 ? (gain / investment) * 100 : 0
+  console.log('📈 PortfolioView: 所有资产ROI:', roiValue.toFixed(2) + '%', '(总收益:', gain, '/ 总投资:', investment, ')')
+  return roiValue
 })
 
 // 获取当前账户下购买的项目
@@ -1122,6 +1169,7 @@ const generateTransactionChartData = async () => {
     const dateKey = date.toISOString().split('T')[0]
     groupedData.set(dateKey, { 
       date: formatDateLabel(date), 
+      dateKey: dateKey, // 保存原始日期键用于排序
       buy: 0, 
       sell: 0,
       buyAmount: 0,  // 买入数量累计
@@ -1156,7 +1204,7 @@ const generateTransactionChartData = async () => {
   
   // 转换为数组并排序
   transactionChartData.value = Array.from(groupedData.values()).sort((a, b) => {
-    return new Date(a.date) - new Date(b.date)
+    return new Date(a.dateKey) - new Date(b.dateKey)
   })
   
   console.log('📊 PortfolioView: 交易图表数据生成完成，共', transactionChartData.value.length, '个数据点')
@@ -1164,11 +1212,12 @@ const generateTransactionChartData = async () => {
 
 const getDaysFromTimeframe = (timeframe) => {
   switch (timeframe) {
+    case '3d': return 3
     case '7d': return 7
     case '30d': return 30
     case '90d': return 90
     case '1y': return 365
-    default: return 30
+    default: return 3
   }
 }
 
@@ -1186,7 +1235,11 @@ const formatDateLabel = (date) => {
 
 const getBarHeight = (value, max) => {
   if (max === 0) return 0
-  return Math.max((value / max) * 100, value > 0 ? 5 : 0) // 最小高度5%用于显示
+  // 调整计算方式，为标签留出更多空间
+  // 使用80%的最大高度，为标签预留20%空间
+  const maxHeight = 80
+  const minHeight = value > 0 ? 8 : 0 // 提高最小高度
+  return Math.max((value / max) * maxHeight, minHeight)
 }
 
 // 计算总买入价值
@@ -1299,12 +1352,13 @@ onMounted(async () => {
   // 加载绑定的钱包账户
   loadBoundAccounts()
   
+  // 初始化交易图表数据
+  await generateTransactionChartData()
+  
   // 初始化选中账户
   if (accounts.value.length > 0) {
     selectedAccount.value = accounts.value[0].address
   }
-  
-  // 初始化交易图表数据
   refreshTransactionData()
   
   // 每30秒更新一次价格
@@ -1312,6 +1366,12 @@ onMounted(async () => {
   
   // 监听WalletView的wallet activity变化
   window.addEventListener('walletActivityUpdated', handleWalletActivityUpdate)
+  
+  // 监听时间范围变化
+  watch(chartTimeframe, async () => {
+    console.log('📊 PortfolioView: 时间范围变化，重新生成图表数据:', chartTimeframe.value)
+    await generateTransactionChartData()
+  })
   
   // 测试数据关联 - 检查是否能正确读取WalletView的transaction activity
   const walletActivity = getWalletActivityData()
@@ -1670,7 +1730,7 @@ window.addEventListener('storage', (e) => {
 .pf-add{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:14px;background:var(--panel);border:1px solid var(--border);box-shadow:var(--shadow);font-weight:600;cursor:pointer;color:#ffffff;}
 .pf-add-ico{font-size:18px;line-height:1}
 .pf-body{display:grid;grid-template-columns:280px 1fr;gap:16px;padding:0 20px 24px;margin-top: 30px;;}
-.pf-sidebar{background:#141426;border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px;}
+.pf-sidebar{background:#141426;border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px;width:280px;}
 .pf-side-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .pf-side-head h2{font-size:20px;font-weight:800;color:#ffffff;}
 .pf-side-tools{display:flex;gap:10px;color:#9ca3af}
@@ -1926,8 +1986,8 @@ window.addEventListener('storage', (e) => {
   display: flex;
   align-items: flex-end;
   gap: 8px;
-  height: 200px;
-  padding: 0 16px;
+  height: 280px; /* 增加高度为标签留出更多空间 */
+  padding: 0 16px 40px 16px; /* 底部增加padding为标签留空间 */
   border-bottom: 1px solid #374151;
   border-left: 1px solid #374151;
   min-width: 100%;
@@ -1948,6 +2008,11 @@ window.addEventListener('storage', (e) => {
 }
 
 /* 根据数据点数量调整柱状图宽度 */
+.pf-chart-bars[style*="--bar-count: 3"] .pf-bar-item {
+  width: calc(100% / 3);
+  min-width: 60px;
+}
+
 .pf-chart-bars[style*="--bar-count: 7"] .pf-bar-item {
   width: calc(100% / 7);
   min-width: 40px;
@@ -1971,7 +2036,7 @@ window.addEventListener('storage', (e) => {
 .pf-bar-container{
   position: relative;
   width: 100%;
-  height: 160px;
+  height: 240px; /* 调整高度与图表高度匹配 */
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -2008,10 +2073,14 @@ window.addEventListener('storage', (e) => {
 }
 
 .pf-bar-label{
-  margin-top: 8px;
-  font-size: 12px;
+  margin-top: 12px; /* 增加上边距 */
+  font-size: 11px; /* 稍微减小字体以适应更多数据 */
   color: #9ca3af;
   text-align: center;
+  white-space: nowrap; /* 防止标签换行 */
+  overflow: hidden; /* 隐藏溢出文本 */
+  text-overflow: ellipsis; /* 用省略号表示溢出 */
+  max-width: 100%; /* 确保标签不超出容器 */
 }
 
 .pf-bar-tooltip{
@@ -2095,6 +2164,10 @@ window.addEventListener('storage', (e) => {
     max-width: 60px;
   }
   
+  .pf-chart-bars[style*="--bar-count: 3"] .pf-bar-item {
+    min-width: 48px;
+  }
+  
   .pf-chart-bars[style*="--bar-count: 7"] .pf-bar-item {
     min-width: 32px;
   }
@@ -2112,7 +2185,8 @@ window.addEventListener('storage', (e) => {
   }
   
   .pf-bar-label {
-    font-size: 10px;
+    font-size: 9px; /* 移动设备上更小的字体 */
+    margin-top: 8px; /* 减少上边距 */
   }
 }
 
@@ -2126,6 +2200,10 @@ window.addEventListener('storage', (e) => {
   .pf-bar-item {
     min-width: 20px;
     max-width: 40px;
+  }
+  
+  .pf-chart-bars[style*="--bar-count: 3"] .pf-bar-item {
+    min-width: 40px;
   }
   
   .pf-chart-bars[style*="--bar-count: 7"] .pf-bar-item {
@@ -2143,6 +2221,11 @@ window.addEventListener('storage', (e) => {
   .pf-chart-bars[style*="--bar-count: 365"] .pf-bar-item {
     min-width: 4px;
   }
+  
+  .pf-bar-label {
+    font-size: 8px; /* 小屏幕设备上更小的字体 */
+    margin-top: 6px; /* 进一步减少上边距 */
+  }
 }
 
 /* 图表行布局 */
@@ -2154,10 +2237,11 @@ window.addEventListener('storage', (e) => {
 .pf-sidebar-pie-section{margin-bottom:24px;padding:16px;border-radius:12px;background:#141426;border:1px solid #292e36;}
 .pf-sidebar-pie-section .pf-chart-header{margin-bottom:16px;}
 .pf-sidebar-pie-section .pf-chart-header h4{margin:0;font-size:16px;font-weight:700;color:#ffffff;}
-.pf-sidebar-pie-section .pf-pie-chart-container{display:flex;flex-direction:column;align-items:center;gap:16px;}
+.pf-sidebar-pie-section .pf-chart-subtitle{margin:4px 0 0 0;font-size:12px;color:#9ca3af;font-weight:400;}
+.pf-sidebar-pie-section .pf-pie-chart-container{display:flex;flex-direction:row;align-items:center;gap:20px;}
 .pf-sidebar-pie-section .pf-pie-chart{position:relative;width:160px;height:160px;}
 .pf-sidebar-pie-section .pf-pie-svg{width:100%;height:100%;}
-.pf-sidebar-pie-section .pf-chart-legend{width:100%;}
+.pf-sidebar-pie-section .pf-chart-legend{flex:1;min-width:0;}
 .pf-sidebar-pie-section .pf-legend-item{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
 .pf-sidebar-pie-section .pf-legend-item:last-child{margin-bottom:0;}
 .pf-sidebar-pie-section .pf-legend-color{width:12px;height:12px;border-radius:2px;}
@@ -2165,6 +2249,19 @@ window.addEventListener('storage', (e) => {
 .pf-sidebar-pie-section .pf-legend-code{font-weight:600;color:#ffffff;font-size:12px;margin-bottom:2px;}
 .pf-sidebar-pie-section .pf-legend-value{font-size:11px;color:#ffffff;margin-bottom:1px;}
 .pf-sidebar-pie-section .pf-legend-percentage{font-size:10px;color:#9ca3af;}
+
+/* 响应式设计 - 小屏幕时图例回到下方 */
+@media (max-width: 768px) {
+  .pf-sidebar-pie-section .pf-pie-chart-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .pf-sidebar-pie-section .pf-chart-legend {
+    width: 100%;
+  }
+}
 
 .pf-chart-container{display:flex;align-items:center;gap:32px;}
 .pf-pie-chart{position:relative;width:200px;height:200px;}

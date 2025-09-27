@@ -2723,6 +2723,55 @@ export default {
   }
 }
 
+/* 弹窗基础样式 - 与new listing card保持一致 */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: grid;
+  place-items: center;
+  z-index: 50;
+}
+
+.modal-content {
+  width: min(720px, 92vw);
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.2);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 0 16px 0;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 20px;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.modal-body {
+  padding: 0;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
 /* 余额不足弹窗样式 */
 .error-modal {
   border-left: 4px solid #ef4444;
@@ -2747,9 +2796,10 @@ export default {
   font-weight: 600;
 }
 
-/* 加载中弹窗样式 */
+/* 加载中弹窗样式 - 与new listing card success样式保持一致 */
 .loading-modal {
-  border-left: 4px solid #3b82f6;
+  text-align: center;
+  padding: 40px 24px;
 }
 
 .loading-icon {
@@ -2758,6 +2808,7 @@ export default {
   justify-content: center;
   width: 32px;
   height: 32px;
+  margin: 0 auto 16px;
 }
 
 .loading-icon .spinner {
@@ -2776,12 +2827,14 @@ export default {
 .loading-message p {
   margin: 8px 0;
   color: #64748b;
+  font-size: 14px;
 }
 
 .loading-status {
   font-weight: 600;
   color: #3b82f6;
   font-style: italic;
+  font-size: 14px;
 }
 
 @keyframes spin {

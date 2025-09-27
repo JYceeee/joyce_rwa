@@ -81,7 +81,7 @@ const router = createRouter({
     // { path: '/test/contract', name: 'contractTest', component: ContractTestView },
     // { path: '/test/config', name: 'contractConfig', component: () => import('@/views/test/ContractConfigView.vue') },
     // { path: '/test/trade-database', name: 'tradeDatabaseTest', component: () => import('@/views/test/TradeDatabaseTestView.vue') },
-    { path: '/test/contract-address', name: 'contractAddressTest', component: () => import('@/views/test/ContractAddressTestView.vue') },
+    { path: '/test/contract-address', name: 'contractAddressTest', component: () => import('@/views/test/ContractAddressTestView.vue') }
   ],
 })
 
