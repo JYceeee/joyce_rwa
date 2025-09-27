@@ -42,18 +42,18 @@
     <div v-if="showSuccessModal" class="modal-overlay" @click="closeSuccessModal">
       <div class="modal-content success-modal" @click.stop>
         <div class="modal-header">
-          <div class="success-icon">✅</div>
+          <!-- <div class="success-icon">✅</div> -->
           <h2 class="modal-title">Transaction Successful!</h2>
         </div>
         <div class="modal-body">
           <div class="success-details">
             <div class="detail-item">
               <span class="detail-label">Trade Type:</span>
-              <span class="detail-value">{{ successData.tradeType === 'buy' ? '买入' : '卖出' }}</span>
+              <span class="detail-value">{{ successData.tradeType === 'buy' ? 'Buy' : 'Sell' }}</span>
             </div>
             <div class="detail-item">
               <span class="detail-label">Trade Amount:</span>
-              <span class="detail-value">{{ successData.amount }} 代币</span>
+              <span class="detail-value">{{ successData.amount }} Tokens</span>
             </div>
             <div class="detail-item">
               <span class="detail-label">Trade Price:</span>
@@ -78,8 +78,8 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn secondary" @click="closeSuccessModal">关闭</button>
-          <button class="btn primary" @click="viewPortfolio">查看Portfolio</button>
+          <button class="btn secondary" @click="closeSuccessModal">Close</button>
+          <button class="btn primary" @click="viewPortfolio">View Portfolio</button>
         </div>
       </div>
     </div>
@@ -167,9 +167,6 @@
             <span class="amount-unit">tokens</span>
           </div>
           <div class="amount-info">
-            <!-- <span class="info-text">
-              Current Price: {{ projectData.metrics.currentElaraPrice }} per token
-            </span> -->
           </div>
         </div>
 
@@ -178,23 +175,23 @@
           <!-- <h3 class="section-title">Trade Type</h3> -->
           <div class="trade-type-buttons">
             <button 
+              v-if="showBuyButton"
               class="trade-type-btn" 
               :class="{ active: tradeType === 'buy' }"
               @click="selectTradeType('buy')"
               :disabled="loading"
             >
-              <!-- <span class="btn-icon">📈</span> -->
               <span class="btn-text">Buy</span>
             </button>
 
             <button 
+              v-if="showSellButton"
               class="trade-type-btn" 
               :class="{ active: tradeType === 'sell' }"
               @click="selectTradeType('sell')"
               :disabled="loading"
             >
-              <!-- <span class="btn-icon">📉</span> -->
-              <span class="btn-text">Sell</span>
+              <span class="btn-text">Sell Interest</span>
             </button>
           </div>
         </div>
@@ -321,6 +318,7 @@ export default {
       loading: false,
       error: null,
       errorType: null, // 错误类型
+      isInterestTrade: false, // 是否为利息交易
       showSuccessModal: false,
       showInsufficientBalanceModal: false,
       showLoadingModal: false,
@@ -372,6 +370,15 @@ export default {
         final: code
       })
       return code || 'RWA001'
+    },
+    
+    // 控制按钮显示
+    showBuyButton() {
+      return this.tradeType === 'buy' || !this.isInterestTrade
+    },
+    
+    showSellButton() {
+      return this.tradeType === 'sell' && this.isInterestTrade
     },
     project() {
       // 使用从数据库加载的项目数据
@@ -622,6 +629,29 @@ export default {
 
     cancelTrade() {
       this.$router.back()
+    },
+
+    // 初始化交易类型
+    initializeTradeType() {
+      const query = this.$route.query
+      console.log('🔍 TradeProjectView: 检查路由参数:', query)
+      
+      if (query.type === 'sell' && query.interest === 'true') {
+        // 出售利息
+        this.tradeType = 'sell'
+        this.isInterestTrade = true
+        console.log('✅ 设置为出售利息模式')
+      } else if (query.type === 'buy') {
+        // 购买
+        this.tradeType = 'buy'
+        this.isInterestTrade = false
+        console.log('✅ 设置为购买模式')
+      } else {
+        // 默认购买模式
+        this.tradeType = 'buy'
+        this.isInterestTrade = false
+        console.log('✅ 设置为默认购买模式')
+      }
     },
 
     // 选择交易类型并执行完整流程
@@ -1651,6 +1681,9 @@ export default {
     }
   },
   async mounted() {
+    // 检查路由参数，设置交易类型
+    this.initializeTradeType()
+    
     // 加载项目数据
     await this.loadProjectData()
     
@@ -2729,9 +2762,10 @@ export default {
   backdrop-filter: blur(10px);
   border: 1px solid rgba(138, 43, 226, 0.2);
   border-radius: 18px;
-  padding: 32px 24px;
+  padding: 40px 32px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  max-height: 90vh;
+  max-height: 700px;
+  max-width: 500px;
   overflow-y: auto;
   position: relative;
 }
@@ -2755,9 +2789,9 @@ export default {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 0 0 24px 0;
+  padding: 0 0 28px 0;
   border-bottom: 1px solid rgba(138, 43, 226, 0.2);
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .modal-title {
@@ -2776,8 +2810,8 @@ export default {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
-  margin-top: 24px;
-  padding-top: 24px;
+  margin-top: 28px;
+  padding-top: 28px;
   border-top: 1px solid rgba(138, 43, 226, 0.2);
 }
 
@@ -2799,15 +2833,15 @@ export default {
   background: rgba(138, 43, 226, 0.05);
   border: 1px solid rgba(138, 43, 226, 0.2);
   border-radius: 12px;
-  padding: 20px;
-  margin: 24px 0;
+  padding: 24px;
+  margin: 28px 0;
 }
 
 .detail-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 0;
+  padding: 12px 0;
   border-bottom: 1px solid rgba(138, 43, 226, 0.1);
 }
 

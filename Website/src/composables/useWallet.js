@@ -92,8 +92,23 @@ function detachEventListeners() {
   }
 }
 async function handleAccountsChanged(accs) {
-  if (!accs || accs.length === 0) disconnect()
-  else { address.value = accs[0]; await refreshAll() }
+  console.log('🔄 Accounts changed:', accs)
+  if (!accs || accs.length === 0) {
+    disconnect()
+  } else {
+    const oldAddress = address.value
+    address.value = accs[0]
+    
+    // 如果地址发生变化，触发地址变化事件
+    if (oldAddress && oldAddress !== accs[0]) {
+      console.log('🔄 Wallet address changed from', oldAddress, 'to', accs[0])
+      window.dispatchEvent(new CustomEvent('walletAddressChanged', { 
+        detail: { oldAddress, newAddress: accs[0] } 
+      }))
+    }
+    
+    await refreshAll()
+  }
 }
 async function handleChainChanged() { await refreshAll() }
 
@@ -142,6 +157,11 @@ async function connect() {
     attachEventListeners()
     
     console.log('✅ Wallet connected successfully:', accounts[0])
+    
+    // 触发自定义事件通知其他组件
+    window.dispatchEvent(new CustomEvent('walletConnected', { 
+      detail: { address: accounts[0], chainId: chainId.value } 
+    }))
   } catch (e) { 
     console.error('❌ Wallet connection failed:', e)
     
@@ -160,6 +180,9 @@ async function connect() {
   }
 }
 function disconnect() {
+  const wasConnected = connected.value
+  const oldAddress = address.value
+  
   connected.value = false
   address.value = ''
   chainId.value = null
@@ -169,6 +192,14 @@ function disconnect() {
   audPrice.value = null
   tokens.splice(0)
   detachEventListeners()
+  
+  // 如果之前是连接状态，触发断开连接事件
+  if (wasConnected) {
+    console.log('🔌 Wallet disconnected, triggering event...')
+    window.dispatchEvent(new CustomEvent('walletDisconnected', { 
+      detail: { address: oldAddress } 
+    }))
+  }
 }
 async function refreshAll() {
   if (!connected.value) return
