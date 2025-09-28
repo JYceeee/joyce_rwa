@@ -6,18 +6,17 @@
         <p class="sub">
           Access verified Real World Assets (RWA) — mortgage-backed loans, tokenized for secure and transparent investing.
         </p>
-        <!-- <form class="email-row" @submit.prevent="notify('Thanks! We will be in touch.')">
-          <input class="input" id="email" name="email" type="email" placeholder="Enter your email" required />
-          <button class="btn primary" type="submit">Get started</button>
-        </form> -->
         <p class="foot">By continuing, you agree to our Terms and acknowledge our 
           <a href="/src/components/privacypolicy.vue" >Privacy Policy.</a></p>
       </div>
-      <div class="hero-image">
-        <img src="\public\icons\BlockchainHome.png" alt="Hero Image" class="hero-image" />
-          </div>
-      <!-- 区块链智能合约交易动态图样 -->
-      <!-- <BlockchainLiveVisual /> -->
+      <!-- <div class="hero-image"> -->
+        <!-- <div class="blockchain-live-visual"> -->
+        <!-- 区块链智能合约交易动态图样 -->
+         <video autoplay loop muted playsinline class="bg-video">
+           <source src="/videos/Blockchainvideo.mp4" type="video/mp4">
+         </video>
+        <!-- <img src="\public\icons\BlockchainHome.png" alt="Hero Image" class="hero-image" /> -->
+      <!-- </div> -->
     </div>
   </section>
 
@@ -132,12 +131,10 @@
 <script>
 import { productAPI } from '@/service/api.ts'
 import { useDatabaseSync } from '@/service/databaseSyncService.js'
-import BlockchainLiveVisual from '@/views/FunctionalModule/blockchainlivemodule/BlockchainLiveVisual.vue'
 
 export default {
   name: 'HomeView',
   components: {
-    BlockchainLiveVisual
   },
   emits: ['notify'],
   data() {
@@ -337,27 +334,21 @@ export default {
   margin-right: -50vw;
 }
 /* Hero section 深色背景样式 */
-.hero {
+.hero.container {
+  max-width: none; /* 覆盖全局container的max-width限制 */
   margin: 0;
   padding: 0;
-  background: linear-gradient(135deg, 
-    #1a1a2e 0%, 
-    #16213e 25%, 
-    #2d1b69 50%, 
-    #1a1a2e 75%, 
-    #0f0f23 100%);
   position: relative;
   overflow: hidden;
-  min-height: 100vh;
+  min-height: calc(100vh - 80px); /* 减去header高度 */
   width: 100vw;
-  max-width: 100vw;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   left: 50%;
   right: 50%;
   margin-left: -50vw;
   margin-right: -50vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .hero::before {
@@ -411,9 +402,9 @@ export default {
   transition: transform 0.3s ease;
 }
 
-.hero-image:hover {
+/* .hero-image:hover {
   transform: scale(1.02);
-}
+} */
 
 .hero-image img {
   width: 100%;
@@ -483,6 +474,21 @@ export default {
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
 
+.blockchain-live-visual {
+  width: 100%;
+  height: 100%;
+}
+
+.bg-video {
+  position: absolute;
+  top: -70%;
+  left: 0;
+  width: 100%;
+  height: 225%;
+  object-fit: cover;
+  z-index: -1;
+  border-radius: 0; /* 移除圆角，完全覆盖 */
+} 
 
 
 /* 重新设计的New Listing卡片样式 */
