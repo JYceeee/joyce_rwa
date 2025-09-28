@@ -14,9 +14,9 @@
           </div>
           <div class="solution-content">
             <ul class="solution-features">
-              <li>低门槛投资,最低100澳元起投</li>
-              <li>多样化投资组合，分散风险</li>
-              <li>简单易用的交易界面</li>
+              <li>Low-threshold investment, starting from as little as $100 AUD</li>
+              <li>Diverse investment portfolios, diversify risks</li>
+              <li>Simple and easy-to-use trading interface</li>
               <li>Real-time Investment Tracking</li>
               <li>24/7 Customer Support</li>
             </ul>
@@ -34,11 +34,11 @@
           </div>
           <div class="solution-content">
             <ul class="solution-features">
-              <li>大额投资优惠费率</li>
-              <li>专属投资顾问服务</li>
-              <li>定制化投资策略</li>
-              <li>API接口集成</li>
-              <li>白标解决方案</li>
+              <li>Large investment discount rate</li>
+              <li>Exclusive investment advisor service</li>
+              <li>Customized investment strategy</li>
+              <li>API interface integration</li>
+              <li>White label solution</li>
             </ul>
             <div class="solution-cta">
               <router-link to="/contact" class="btn primary">Contact Sales</router-link>

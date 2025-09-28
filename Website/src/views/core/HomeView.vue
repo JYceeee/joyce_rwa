@@ -96,7 +96,7 @@
       </div>
       <!-- 查看所有项目按钮 -->
       <div v-if="!loading && !error && upcomingProjects.length > 0" class="view-all-section">
-        <button class="view-all-projects btn-outline" @click="viewAllProjects">
+        <button class="view-all-projects btn-outline" @click.prevent="go('/projects')">
           VIEW ALL PROJECTS
         </button>
       </div>

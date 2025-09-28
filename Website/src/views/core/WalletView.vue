@@ -479,6 +479,48 @@
           </div>
         </div>
         
+        <!-- 交易活动分页控件 - 移动到Transaction Activity section底部 -->
+        <div v-if="transactionTotalPages > 1" class="mm-transaction-pagination">
+          <div class="mm-pagination-info">
+            <span class="mm-pagination-text">
+              Transaction Page {{ transactionPage }} of {{ transactionTotalPages }}
+            </span>
+            <span class="mm-pagination-count">
+              ({{ leftColumnActivities.length }} records)
+            </span>
+          </div>
+          
+          <div class="mm-pagination-controls">
+            <button 
+              class="mm-pagination-btn" 
+              @click="prevTransactionPage"
+              :disabled="transactionPage <= 1"
+            >
+              ← 
+            </button>
+            
+            <div class="mm-pagination-pages">
+              <button 
+                v-for="page in transactionTotalPages" 
+                :key="page"
+                class="mm-pagination-page"
+                :class="{ active: page === transactionPage }"
+                @click="goToTransactionPage(page)"
+              >
+                {{ page }}
+              </button>
+            </div>
+            
+            <button 
+              class="mm-pagination-btn" 
+              @click="nextTransactionPage"
+              :disabled="transactionPage >= transactionTotalPages"
+            >
+               →
+            </button>
+          </div>
+        </div>
+        
       <!-- 右侧：状态检查活动 (wallet_status_check/wallet_focus_check) - 始终在右侧 -->
       <div class="mm-activity-right">
         <div class="mm-activity-section-header">
@@ -579,48 +621,6 @@
               class="mm-pagination-btn" 
               @click="nextStatusPage"
               :disabled="statusCheckPage >= statusCheckTotalPages"
-            >
-               →
-            </button>
-          </div>
-        </div>
-        
-        <!-- 交易活动分页控件 - 移动到Status Check section底部 -->
-        <div v-if="transactionTotalPages > 1" class="mm-transaction-pagination">
-          <div class="mm-pagination-info">
-            <span class="mm-pagination-text">
-              Transaction Page {{ transactionPage }} of {{ transactionTotalPages }}
-            </span>
-            <span class="mm-pagination-count">
-              ({{ leftColumnActivities.length }} records)
-            </span>
-          </div>
-          
-          <div class="mm-pagination-controls">
-            <button 
-              class="mm-pagination-btn" 
-              @click="prevTransactionPage"
-              :disabled="transactionPage <= 1"
-            >
-              ← 
-            </button>
-            
-            <div class="mm-pagination-pages">
-              <button 
-                v-for="page in transactionTotalPages" 
-                :key="page"
-                class="mm-pagination-page"
-                :class="{ active: page === transactionPage }"
-                @click="goToTransactionPage(page)"
-              >
-                {{ page }}
-              </button>
-            </div>
-            
-            <button 
-              class="mm-pagination-btn" 
-              @click="nextTransactionPage"
-              :disabled="transactionPage >= transactionTotalPages"
             >
                →
             </button>
@@ -1998,14 +1998,13 @@ color:#FFFFFF;
   border-radius: 8px;
 }
 
-/* 交易活动分页样式 - 现在在Status Check section底部 */
+/* 交易活动分页样式 - 现在在Transaction Activity section底部 */
 .mm-transaction-pagination {
   margin-top: 16px;
   padding: 16px;
   background: #141426;
   border: 1px solid #374151;
   border-radius: 8px;
-  max-width: 400px;
 }
 
 .mm-pagination-info {

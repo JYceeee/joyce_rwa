@@ -7,6 +7,7 @@ import ProjectsView from '../views/core/ProjectsView.vue'
 import DetailPage from '../views/core/DetailPage.vue'
 import ProfileView from '../views/core/ProfileView.vue'
 import TradeProjectView from '../views/core/TradeProjectView.vue'
+import ContractView from '../views/core/contract.vue'
 import BridgeView from '../views/FunctionalModule/otherinteractbutton/BridgeView.vue'
 import SendView from '../views/FunctionalModule/otherinteractbutton/SendView.vue'
 import SwapView from '../views/FunctionalModule/otherinteractbutton/SwapView.vue'
@@ -40,6 +41,7 @@ const router = createRouter({
     { path: '/wallet', name: 'wallet', component: WalletView },
     { path: '/portfolio', name: 'portfolio', component: PortfolioView },
     { path: '/projects', name: 'projects', component: ProjectsView },
+    { path: '/projects/:code', name: 'projectDetail', component: ProjectsView, props: true },
     { path: '/detail/:id?', name: 'detail', component: DetailPage, props: true },
     { path: '/swap', name: 'swap', component: SwapView },
     { path: '/bridge', name: 'bridge', component: BridgeView },
@@ -49,6 +51,7 @@ const router = createRouter({
     { path: '/login', name: 'login', component: LoginView },
     { path: '/signup', name: 'signup', component: SignupView },
     { path: '/trade/:code', name: 'tradeProject', component: TradeProjectView, props: true },
+    { path: '/contract', name: 'contract', component: ContractView },
     // { path: '/email-verify', name: 'emailVerify', component: EmailVerifyView },
     { path: '/kycService', component: kycService },
     // Footer pages
@@ -83,7 +86,7 @@ const router = createRouter({
     // { path: '/test/contract', name: 'contractTest', component: ContractTestView },
     // { path: '/test/config', name: 'contractConfig', component: () => import('@/views/test/ContractConfigView.vue') },
     // { path: '/test/trade-database', name: 'tradeDatabaseTest', component: () => import('@/views/test/TradeDatabaseTestView.vue') },
-    { path: '/test/contract-address', name: 'contractAddressTest', component: () => import('@/views/test/ContractAddressTestView.vue') }
+    // { path: '/test/contract-address', name: 'contractAddressTest', component: () => import('@/views/test/ContractAddressTestView.vue') }
   ],
 })
 

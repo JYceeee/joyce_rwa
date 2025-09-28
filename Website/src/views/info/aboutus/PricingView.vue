@@ -1,128 +1,129 @@
 <template>
   <div class="container">
     <div class="page-header">
-      <h1>定价方案</h1>
-      <p class="page-subtitle">透明的费用结构，让您清楚了解每笔交易的成本</p>
+      <h1>Pricing Solutions</h1>
+      <p class="page-subtitle">Transparent fee structure, so you can clearly understand the cost of each transaction</p>
     </div>
 
     <div class="pricing-content">
       <div class="pricing-cards">
         <div class="pricing-card">
           <div class="pricing-header">
-            <h3>个人投资者</h3>
+            <h3>Individual Investors</h3>
             <div class="price">
               <span class="currency">$</span>
               <span class="amount">1.5</span>
               <span class="period">%</span>
             </div>
-            <p class="price-description">每笔交易手续费</p>
+            <p class="price-description">Each transaction fee</p>
           </div>
           <div class="pricing-features">
             <ul>
-              <li>✅ 无最低投资限制</li>
-              <li>✅ 基础交易功能</li>
-              <li>✅ 投资组合跟踪</li>
-              <li>✅ 邮件支持</li>
-              <li>❌ 专属客服</li>
-              <li>❌ API访问</li>
+              <li>✅ No minimum investment limit</li>
+              <li>✅ Basic trading functions</li>
+              <li>✅ Investment portfolio tracking</li>
+              <li>✅ Email support</li>
+              <li>❌ Exclusive customer support</li>
+              <li>❌ API access</li>
             </ul>
           </div>
           <div class="pricing-cta">
-            <router-link to="/signup" class="btn primary">开始投资</router-link>
+            <router-link to="/signup" class="btn primary">Start Investing</router-link>
           </div>
         </div>
 
         <div class="pricing-card featured">
-          <div class="featured-badge">最受欢迎</div>
+          <div class="featured-badge">Most Popular</div>
           <div class="pricing-header">
-            <h3>机构投资者</h3>
+            <h3>Institutional Investors</h3>
             <div class="price">
               <span class="currency">$</span>
               <span class="amount">1.0</span>
               <span class="period">%</span>
             </div>
-            <p class="price-description">每笔交易手续费</p>
+            <p class="price-description">Each transaction fee</p>
           </div>
           <div class="pricing-features">
             <ul>
-              <li>✅ 最低投资 $10,000</li>
-              <li>✅ 高级交易功能</li>
-              <li>✅ 专属投资顾问</li>
-              <li>✅ 优先客服支持</li>
-              <li>✅ API访问</li>
-              <li>✅ 定制化报告</li>
+              <li>✅ Minimum investment $10,000</li>
+              <li>✅ Advanced trading functions</li>
+              <li>✅ Exclusive investment advisor</li>
+              <li>✅ Priority customer support</li>
+              <li>✅ API access</li>
+              <li>✅ Customized report</li>
             </ul>
           </div>
           <div class="pricing-cta">
-            <router-link to="/contact" class="btn primary">联系销售</router-link>
+            <router-link to="/contact" class="btn primary">Contact Sales</router-link>
           </div>
         </div>
 
         <div class="pricing-card">
           <div class="pricing-header">
-            <h3>企业客户</h3>
+            <h3>Enterprise Customers</h3>
             <div class="price">
               <span class="currency">$</span>
               <span class="amount">0.5</span>
               <span class="period">%</span>
             </div>
-            <p class="price-description">每笔交易手续费</p>
+            <p class="price-description">Each transaction fee</p>
           </div>
           <div class="pricing-features">
             <ul>
-              <li>✅ 最低投资 $100,000</li>
-              <li>✅ 完整API集成</li>
-              <li>✅ 白标解决方案</li>
-              <li>✅ 24/7专属支持</li>
-              <li>✅ 定制化开发</li>
-              <li>✅ 合规性支持</li>
+              <li>✅ Minimum investment $100,000</li>
+              <li>✅ Complete API integration</li>
+              <li>✅ White label solution</li>
+              <li>✅ 24/7 exclusive support</li>
+              <li>✅ Customized development</li>
+              <li>✅ Compliance support</li>
             </ul>
           </div>
           <div class="pricing-cta">
-            <router-link to="/contact" class="btn primary">定制方案</router-link>
+            <router-link to="/contact" class="btn primary">Customized solution</router-link>
           </div>
         </div>
       </div>
 
       <div class="fee-breakdown">
-        <h2>费用明细</h2>
+        <h2>Fee Details</h2>
         <div class="fee-table">
           <div class="fee-row">
             <div class="fee-item">
-              <h4>交易手续费</h4>
-              <p>基于交易金额的百分比费用，在交易时自动扣除</p>
+              <h4>Transaction fee</h4>
+              <p>Percentage fee based on transaction amount, deducted automatically during transaction</p>
             </div>
             <div class="fee-amount">0.5% - 1.5%</div>
           </div>
           <div class="fee-row">
             <div class="fee-item">
-              <h4>网络费用</h4>
-              <p>区块链网络交易费用，由网络拥堵程度决定</p>
+              <h4>Network fee</h4>
+              <p>Blockchain network transaction fee, determined by network congestion</p>
             </div>
             <div class="fee-amount">$2 - $20</div>
           </div>
           <div class="fee-row">
             <div class="fee-item">
-              <h4>提现费用</h4>
-              <p>将资金提取到银行账户的手续费</p>
+              <h4>Withdrawal fee</h4>
+              <p>Fee for withdrawing funds to bank account</p>
             </div>
             <div class="fee-amount">$5</div>
           </div>
           <div class="fee-row">
             <div class="fee-item">
-              <h4>管理费</h4>
-              <p>年度资产管理费用，从投资收益中扣除</p>
+              <h4>Management fee</h4>
+              <p>Annual asset management fee, deducted from investment收益中扣除</p>
             </div>
             <div class="fee-amount">0.2%</div>
           </div>
         </div>
       </div>
 
-      <div class="faq-section">
-        <h2>常见问题</h2>
+      <!-- <div class="faq-section">
+        <h2>Frequently Asked Questions</h2>
         <div class="faq-list">
           <div class="faq-item">
-            <h4>是否有隐藏费用？</h4>
+            <h4>Are there hidden fees?</h4>
+            <p>We promise a transparent fee structure, all fees will be clearly displayed before transactions, and there will be no hidden fees.</p>
             <p>我们承诺透明的费用结构，所有费用都会在交易前明确显示，不会有任何隐藏费用。</p>
           </div>
           <div class="faq-item">
@@ -134,7 +135,7 @@
             <p>交易手续费在交易执行时自动扣除，管理费按年度从投资收益中扣除。</p>
           </div>
         </div>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>

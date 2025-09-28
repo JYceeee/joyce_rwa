@@ -6,7 +6,9 @@
     @mouseleave="handleMouseLeave"
   >
     <div class="sidebar-header">
-      <h3 class="sidebar-title">Navigation Menu</h3>
+      <div class="sidebar-logo">
+        <img src="/icons/RWA.png" alt="RWA Logo" class="sidebar-logo-img" />
+      </div>
       <button class="sidebar-close-btn" @click="closeSidebar">
         <span class="sidebar-close-btn-icon">❌</span>
       </button>
@@ -164,10 +166,9 @@ export default {
 <style scoped>
 /* 侧边栏样式 */
 .sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 220px;
+  /* position: fixed; */
+  /* left: 0; */
+  width: 160px;
   height: 100vh;
   background: var(--bg, #1a1a2e);
   border-right: 1px solid var(--border, #2a2a4a);
@@ -196,10 +197,38 @@ export default {
   border-bottom: 1px solid var(--border, #2a2a4a);
 }
 
-.sidebar-title {
-  margin: 0;
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.sidebar-logo-img {
+  height: 32px;
+  width: auto;
+  max-width: 80px;
+  object-fit: contain;
+}
+
+.sidebar-close-btn {
+  background: transparent;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.sidebar-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-close-btn-icon {
   font-size: 16px;
-  font-weight: 600;
   color: var(--text, #ffffff);
 }
 
@@ -296,7 +325,7 @@ export default {
 /* 响应式设计 - 移动端侧边栏适配 */
 @media (max-width: 768px) {
   .sidebar {
-    width: 180px;  /* 保持与桌面端相同的宽度 */
+    width: 160px;  /* 保持与桌面端相同的宽度 */
   }
 }
 

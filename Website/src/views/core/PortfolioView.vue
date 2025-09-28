@@ -6,10 +6,10 @@
         <aside class="pf-sidebar">
           <div class="pf-side-head">
             <h2>Bound Wallets</h2>
-            <!-- <div class="pf-side-tools">
+            <div class="pf-side-tools">
               <span class="gear" @click="showSettings = !showSettings">⚙️</span>
               <span class="plus" @click="addAccount" title="Add wallets in Wallet page">＋</span>
-            </div> -->
+            </div>
           </div>
 
           <!-- 账户组 -->
@@ -52,13 +52,7 @@
                 <div class="pf-stat-value">A${{ getAccountTotalInvestment(selectedAccount).toFixed(2) }}</div>
               </div>
               <div class="pf-stat-card">
-                <div class="pf-stat-label">Current Value</div>
-                <div class="pf-stat-value" :class="{ positive: getAccountTotalGain(selectedAccount) >= 0, negative: getAccountTotalGain(selectedAccount) < 0 }">
-                  A${{ getAccountCurrentValue(selectedAccount).toFixed(2) }}
-                </div>
-              </div>
-              <div class="pf-stat-card">
-                <div class="pf-stat-label">Total Gain/Loss</div>
+                <div class="pf-stat-label">Interest Income</div>
                 <div class="pf-stat-value" :class="{ positive: getAccountTotalGain(selectedAccount) >= 0, negative: getAccountTotalGain(selectedAccount) < 0 }">
                   {{ getAccountTotalGain(selectedAccount) >= 0 ? '+' : '' }}A${{ getAccountTotalGain(selectedAccount).toFixed(2) }}
                 </div>
@@ -75,12 +69,13 @@
             <div class="pf-sidebar-pie-section">
               <div class="pf-chart-header">
                 <h4>Current Assets Distribution</h4>
-                <p class="pf-chart-subtitle">All purchased assets across all wallets</p>
               </div>
+              <p class="pf-chart-subtitle">All purchased assets across all wallets</p>
               
               <div class="pf-pie-chart-container">
                 <div class="pf-pie-chart">
                   <svg viewBox="0 0 200 200" class="pf-pie-svg">
+                    <!-- 背景圆环 -->
                     <circle
                       cx="100"
                       cy="100"
@@ -89,6 +84,7 @@
                       stroke="#e5e7eb"
                       stroke-width="20"
                     />
+                    <!-- 数据圆环 -->
                     <circle
                       v-for="(holding, index) in holdings"
                       :key="holding.code"
@@ -102,6 +98,32 @@
                       :stroke-dashoffset="getPieDashOffset(index)"
                       transform="rotate(-90 100 100)"
                     />
+                    <!-- 引导线和百分比标签 -->
+                    <g v-for="(holding, index) in holdings" :key="`label-${holding.code}`">
+                      <!-- 引导线 -->
+                      <line
+                        :x1="getLabelPosition(index).startX"
+                        :y1="getLabelPosition(index).startY"
+                        :x2="getLabelPosition(index).endX"
+                        :y2="getLabelPosition(index).endY"
+                        :stroke="getPieColor(index)"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                      />
+                      <!-- 百分比文本 -->
+                      <text
+                        :x="getLabelPosition(index).textX"
+                        :y="getLabelPosition(index).textY"
+                        :fill="getPieColor(index)"
+                        font-size="20"
+                        font-weight="600"
+                        text-anchor="middle"
+                        dominant-baseline="middle"
+                        class="pf-pie-label-text"
+                      >
+                        {{ getAssetPercentage(holding).toFixed(2) }}%
+                      </text>
+                    </g>
                   </svg>
                   <div class="pf-pie-center">
                     <div class="pf-pie-total">A${{ currentValue.toFixed(2) }}</div>
@@ -112,11 +134,13 @@
                 <!-- 图例 -->
                 <div class="pf-chart-legend">
                   <div v-for="(holding, index) in holdings" :key="holding.code" class="pf-legend-item">
-                    <div class="pf-legend-color" :style="{ backgroundColor: getPieColor(index) }"></div>
-                    <div class="pf-legend-info">
+                    <div class="pf-legend-left">
+                      <div class="pf-legend-color" :style="{ backgroundColor: getPieColor(index) }"></div>
                       <div class="pf-legend-code">{{ holding.code }}</div>
+                    </div>
+                    <div class="pf-legend-right">
                       <div class="pf-legend-value">A${{ (holding.amount * holding.currentPrice).toFixed(2) }}</div>
-                      <div class="pf-legend-percentage">{{ getAssetPercentage(holding).toFixed(2) }}%</div>
+                      <!-- <div class="pf-legend-percentage">{{ getAssetPercentage(holding).toFixed(2) }}%</div> -->
                     </div>
                   </div>
                 </div>
@@ -130,12 +154,14 @@
           <!-- 投资概览 -->
           <div class="pf-hero">
             <div class="pf-balance">
-              A$ <!--插入项目总余额-->
-              {{ nativeBalanceDisplay }}
+              A${{ getAccountTotalInvestment(selectedAccount).toFixed(2) }}
             </div>
-            <div class="pf-change" :class="{ positive: totalGain >= 0, negative: totalGain < 0 }">
+            <div class="pf-change">
+              
+            </div>
+            <!-- <div class="pf-change" :class="{ positive: totalGain >= 0, negative: totalGain < 0 }">
               {{ totalGain >= 0 ? '+' : '' }}A${{ totalGain.toFixed(2) }} ({{ roi >= 0 ? '+' : '' }}{{ roi.toFixed(2) }}%)
-            </div>
+            </div> -->
           </div>
 
           <!-- Tabs -->
@@ -161,10 +187,6 @@
                   </div>
                 </div>
                 <div class="pf-project-metrics">
-                  <!-- <div class="pf-project-metric">
-                    <span class="pf-metric-label">Current Price</span>
-                    <span class="pf-metric-value">A${{ project.currentPrice }}</span>
-                  </div> -->
                   <div class="pf-project-metric">
                     <span class="pf-metric-label">Target Yield</span>
                     <span class="pf-metric-value">{{ project.targetYield }}%</span>
@@ -173,10 +195,17 @@
                     <span class="pf-metric-label">Risk Level</span>
                     <span class="pf-metric-value" :class="'risk-' + project.risk">{{ project.risk }}</span>
                   </div>
-                  <div class="pf-project-metric">
-                    <span class="pf-metric-label">Current Tokens Owned</span>
-                    <span class="pf-metric-value">{{ project.currentTokensOwned }}</span>
-
+                  <div class="pf-project-metric" v-if="getProjectHolding(project.code)">
+                    <span class="pf-metric-label">Holding Amount</span>
+                    <span class="pf-metric-value">{{ getProjectHolding(project.code).currentValue.toFixed(2) }} tokens</span>
+                  </div>
+                  <div class="pf-project-metric" v-if="getProjectHolding(project.code)">
+                    <span class="pf-metric-label">Interest Received</span>
+                    <span class="pf-metric-value">{{ calculateInterestReceived(project.code).toFixed(2) }} tokens</span>
+                  </div>
+                  <div class="pf-project-metric" v-if="getProjectHolding(project.code)">
+                    <span class="pf-metric-label">Interest Accrued</span>
+                    <span class="pf-metric-value">{{ calculateInterestAccrued(project.code).toFixed(2) }} tokens</span>
                   </div>
                 </div>
                 <div class="pf-project-actions">
@@ -230,28 +259,26 @@
                 
                 <!-- 交易摘要统计 -->
                 <div class="pf-chart-summary">
-                  <div class="pf-chart-summary-header">
+                  <!-- <div class="pf-chart-summary-header">
                     <h3>Today's Transactions</h3>
-                  </div>
+                  </div> -->
                   <div class="pf-summary-item">
                     <div class="pf-summary-label">Total</div>
                     <div class="pf-summary-value">
-                      {{ todayTransactionStats.totalTransactions }} 
+                      {{ todayTransactionStats.totalTransactions.toFixed(2) }} 
                       <!-- (A${{ (todayTransactionStats.totalBuy + todayTransactionStats.totalSell).toFixed(2) }}) -->
                     </div>
                   </div>
                   <div class="pf-summary-item">
                     <div class="pf-summary-label">Buy</div>
                     <div class="pf-summary-value">
-                      {{ todayTransactionStats.totalBuy }} tokens
-                      <br>{{ todayTransactionStats.buyPercentage.toFixed(1) }}%</br>
+                      {{ todayTransactionStats.totalBuy .toFixed(2)}}
                     </div>
                   </div>
                   <div class="pf-summary-item">
                     <div class="pf-summary-label">Sell</div>
                     <div class="pf-summary-value">
-                      {{ todayTransactionStats.totalSell }} tokens
-                      <br>{{ todayTransactionStats.sellPercentage.toFixed(1) }}%</br>
+                      {{ todayTransactionStats.totalSell }}
                     </div>
                   </div>
                 </div>
@@ -277,14 +304,14 @@
                         class="pf-bar-item"
                       >
                         <div class="pf-bar-container">
-                          <div class="pf-bar-buy" :style="{ height: getBarHeight(item.buyValue, maxTransactions) + '%' }"></div>
-                          <div class="pf-bar-sell" :style="{ height: getBarHeight(item.sellValue, maxTransactions) + '%' }"></div>
+                          <div class="pf-bar-buy" :style="{ height: getBarHeight(item.cumulativeBuyValue, maxTransactions) + '%' }"></div>
+                          <div class="pf-bar-sell" :style="{ height: getBarHeight(item.cumulativeSellValue, maxTransactions) + '%' }"></div>
                         </div>
                         <div class="pf-bar-label">{{ item.date }}</div>
                         <div class="pf-bar-tooltip">
-                          <div class="pf-tooltip-buy">Buy: {{ item.buy }} (A${{ item.buyValue.toFixed(2) }})</div>
-                          <div class="pf-tooltip-sell">Sell: {{ item.sell }} (A${{ item.sellValue.toFixed(2) }})</div>
-                          <div class="pf-tooltip-total">Total: {{ item.buy + item.sell }} (A${{ (item.buyValue + item.sellValue).toFixed(2) }})</div>
+                          <div class="pf-tooltip-buy">Cumulative Buy: A${{ item.cumulativeBuyValue.toFixed(2) }}</div>
+                          <div class="pf-tooltip-sell">Cumulative Sell: A${{ item.cumulativeSellValue.toFixed(2) }}</div>
+                          <div class="pf-tooltip-net">Net Value: A${{ item.netValue.toFixed(2) }}</div>
                         </div>
                       </div>
                     </div>
@@ -464,10 +491,10 @@
                 <p>No transaction data available</p>
                 <p class="pf-empty-hint">Complete some trades in the Trade page to see your transaction history</p>
               </div>
-              <div v-else>
-                <div v-for="transaction in filteredTransactions" :key="transaction.id" class="pf-transaction-item">
-                  <div class="pf-transaction-icon" :class="transaction.type">
-                    {{ transaction.type === 'buy' ? '📈' : '📉' }}
+                <div v-else>
+                 <div v-for="transaction in filteredTransactions" :key="transaction.id" class="pf-transaction-item" @click="viewContract(transaction)">
+                    <div class="pf-transaction-icon" :class="transaction.type">
+                      {{ transaction.type === 'buy' ? '📈' : '📉' }}
                   </div>
                   <div class="pf-transaction-details">
                     <div class="pf-transaction-title">
@@ -476,17 +503,15 @@
                     <div class="pf-transaction-subtitle">
                       {{ transaction.projectName }}
                     </div>
-                    <div class="pf-transaction-time">{{ formatTime(transaction.timestamp) }}</div>
                   </div>
                   <div class="pf-transaction-value">
-                    <div class="pf-transaction-price">A${{ transaction.price.toFixed(2) }}</div>
-                    <div class="pf-transaction-total">A${{ (transaction.amount * transaction.price).toFixed(2) }}</div>
+                    <div class="pf-transaction-time">{{ formatTime(transaction.timestamp) }}</div>
+                    <div class="pf-transaction-price">A${{ transaction.amount}}</div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-
 
         </main>
       </div>
@@ -517,8 +542,8 @@ const actions = [
   { text: 'Send', icon: '📤' },
   { text: 'Stake', icon: '🔒' },
 ]
-const tabs = ['Analysis', 'Transactions', 'Projects']
-const activeTab = ref('Analysis')
+const tabs = ['Projects', 'Analysis', 'Transactions']
+const activeTab = ref('Projects')
 
 // 图表容器引用
 const chartBarsContainer = ref(null)
@@ -900,6 +925,65 @@ const getAccountTotalGain = (accountAddress) => {
   return totalGain
 }
 
+// 获取指定项目的holding信息
+const getProjectHolding = (projectCode) => {
+  if (!selectedAccount.value) return null
+  
+  const accountHoldings = getAccountHoldings(selectedAccount.value)
+  const holding = accountHoldings.find(h => h.code === projectCode)
+  
+  if (holding) {
+    return {
+      amount: holding.amount,
+      currentPrice: holding.currentPrice,
+      currentValue: holding.amount * holding.currentPrice,
+      totalInvestment: holding.totalInvestment,
+      change: holding.change
+    }
+  }
+  
+  return null
+}
+
+// 计算项目的interest received amount（已收取利息币）
+const calculateInterestReceived = (projectCode) => {
+  const holding = getProjectHolding(projectCode)
+  if (!holding) return 0
+  
+  const project = projects.value.find(p => p.code === projectCode)
+  if (!project) return 0
+  
+  // 基于持有金额和项目收益率计算已收到的利息
+  const annualYield = project.targetYield || 0
+  const monthlyYield = annualYield / 12 / 100
+  
+  // 假设持有时间为6个月（可以根据实际持有时间调整）
+  const holdingMonths = 6
+  const interestReceived = holding.amount * holding.currentPrice * monthlyYield * holdingMonths
+  
+  return interestReceived
+}
+
+// 计算项目的interest accrued amount（待收取利息币）
+const calculateInterestAccrued = (projectCode) => {
+  const holding = getProjectHolding(projectCode)
+  if (!holding) return 0
+  
+  const project = projects.value.find(p => p.code === projectCode)
+  if (!project) return 0
+  
+  // 基于持有金额和项目收益率计算待收取的利息
+  const annualYield = project.targetYield || 0
+  const monthlyYield = annualYield / 12 / 100
+  
+  // 计算从上次收取利息到现在的累计利息
+  // 假设上次收取是3个月前，现在有3个月的待收取利息
+  const accruedMonths = 3
+  const interestAccrued = holding.amount * holding.currentPrice * monthlyYield * accruedMonths
+  
+  return interestAccrued
+}
+
 // 获取指定账户的ROI - 基于transaction activity的ROI计算
 const getAccountROI = (accountAddress) => {
   const totalInvestment = getAccountTotalInvestment(accountAddress)
@@ -1112,7 +1196,7 @@ const allTransactions = computed(() => {
 const maxTransactions = computed(() => {
   if (transactionChartData.value.length === 0) return 1
   // 基于累计价值计算最大值
-  return Math.max(...transactionChartData.value.map(item => item.buyValue + item.sellValue))
+  return Math.max(...transactionChartData.value.map(item => item.cumulativeBuyValue + item.cumulativeSellValue))
 })
 
 // 折线图数据点计算
@@ -1127,8 +1211,8 @@ const buyDataPoints = computed(() => {
   
   return data.map((item, index) => ({
     x: data.length === 1 ? padding + chartWidth / 2 : padding + (index * chartWidth) / (data.length - 1),
-    y: padding + chartHeight - (item.buyValue / maxValue) * chartHeight,
-    value: item.buyValue,
+    y: padding + chartHeight - (item.cumulativeBuyValue / maxValue) * chartHeight,
+    value: item.cumulativeBuyValue,
     date: item.date,
     count: item.buy
   }))
@@ -1145,8 +1229,8 @@ const sellDataPoints = computed(() => {
   
   return data.map((item, index) => ({
     x: data.length === 1 ? padding + chartWidth / 2 : padding + (index * chartWidth) / (data.length - 1),
-    y: padding + chartHeight - (item.sellValue / maxValue) * chartHeight,
-    value: item.sellValue,
+    y: padding + chartHeight - (item.cumulativeSellValue / maxValue) * chartHeight,
+    value: item.cumulativeSellValue,
     date: item.date,
     count: item.sell
   }))
@@ -1178,8 +1262,8 @@ const todayTransactionStats = computed(() => {
   const todayData = transactionChartData.value[transactionChartData.value.length - 1]
   console.log('📊 当天交易统计: 今天数据', todayData)
   
-  const totalBuy = todayData.buy || 0
-  const totalSell = todayData.sell || 0
+  const totalBuy = todayData.cumulativeBuyValue || 0
+  const totalSell = todayData.cumulativeSellValue || 0
   const totalTransactions = totalBuy + totalSell
   
   const stats = {
@@ -1447,7 +1531,7 @@ const refreshTransactionData = async () => {
 }
 
 const generateTransactionChartData = async () => {
-  console.log('📊 PortfolioView: 基于All Assets Distribution生成交易图表数据')
+  console.log('📊 PortfolioView: 基于Current Assets生成交易图表数据')
   
   // 获取当前资产分布数据
   const currentHoldings = holdings.value
@@ -1456,15 +1540,21 @@ const generateTransactionChartData = async () => {
   // 获取时间范围
   const days = getDaysFromTimeframe(chartTimeframe.value)
   const endDate = new Date()
-  // 确保包括今天，从今天往前推days-1天
   const startDate = new Date(endDate.getTime() - ((days - 1) * 24 * 60 * 60 * 1000))
   
   console.log('📅 PortfolioView: 日期范围设置:', {
     days: days,
     startDate: startDate.toISOString().split('T')[0],
-    endDate: endDate.toISOString().split('T')[0],
-    includesToday: endDate.toISOString().split('T')[0] === new Date().toISOString().split('T')[0]
+    endDate: endDate.toISOString().split('T')[0]
   })
+  
+  // 从WalletView获取真实交易活动数据
+  const walletActivity = getWalletActivityData()
+  const transactionActivities = walletActivity.filter(activity => 
+    activity.type === 'buy' || activity.type === 'sell'
+  )
+  
+  console.log('📊 PortfolioView: 获取到真实交易数据', transactionActivities.length, '条记录')
   
   // 按日期分组交易数据
   const groupedData = new Map()
@@ -1475,7 +1565,7 @@ const generateTransactionChartData = async () => {
     const dateKey = date.toISOString().split('T')[0]
     groupedData.set(dateKey, { 
       date: formatDateLabel(date), 
-      dateKey: dateKey, // 保存原始日期键用于排序
+      dateKey: dateKey,
       buy: 0, 
       sell: 0,
       buyAmount: 0,  // 买入数量累计
@@ -1485,57 +1575,13 @@ const generateTransactionChartData = async () => {
     })
   }
   
-  // 基于资产分布数据生成模拟交易历史
-  // 这里我们根据每个资产的当前价值和持有量来生成历史交易数据
-  currentHoldings.forEach((holding, index) => {
-    const assetValue = holding.amount * holding.currentPrice
-    const assetPercentage = getAssetPercentage(holding)
-    
-    // 为每个资产生成过去几天的交易数据
-    for (let i = 0; i < days; i++) {
-      const date = new Date(startDate.getTime() + (i * 24 * 60 * 60 * 1000))
-      const dateKey = date.toISOString().split('T')[0]
-      const dayData = groupedData.get(dateKey)
-      
-      if (dayData) {
-        // 根据资产价值和时间衰减生成交易数据
-        const timeDecay = Math.max(0.1, 1 - (i / days) * 0.8) // 时间衰减因子
-        const randomFactor = 0.5 + Math.random() * 1.0 // 随机因子
-        
-        // 计算当天的交易价值
-        const dailyValue = (assetValue * assetPercentage / 100) * timeDecay * randomFactor
-        
-        // 随机决定是买入还是卖出
-        const isBuy = Math.random() > 0.3 // 70%概率是买入
-        
-        if (isBuy) {
-          dayData.buy++
-          dayData.buyAmount += dailyValue / holding.currentPrice
-          dayData.buyValue += dailyValue
-        } else {
-          const sellValue = dailyValue * 0.6 // 卖出价值稍低
-          dayData.sell++
-          dayData.sellAmount += sellValue / holding.currentPrice
-          dayData.sellValue += sellValue
-        }
-      }
-    }
-  })
-  
-  // 从WalletView获取真实交易活动数据（如果有的话）
-  const walletActivity = getWalletActivityData()
-  const transactionActivities = walletActivity.filter(activity => 
-    activity.type === 'buy' || activity.type === 'sell'
-  )
-  
-  // 如果有真实交易数据，将其合并到生成的数据中
+  // 处理真实交易数据
   if (transactionActivities.length > 0) {
-    console.log('📊 PortfolioView: 合并真实交易数据，共', transactionActivities.length, '条记录')
-    
     transactionActivities.forEach(tx => {
       const txDate = new Date(tx.timestamp)
       const dateKey = txDate.toISOString().split('T')[0]
       
+      // 只处理在时间范围内的交易
       if (groupedData.has(dateKey)) {
         const dayData = groupedData.get(dateKey)
         const amount = parseFloat(tx.amount) || 0
@@ -1555,13 +1601,84 @@ const generateTransactionChartData = async () => {
     })
   }
   
-  // 转换为数组并排序
-  transactionChartData.value = Array.from(groupedData.values()).sort((a, b) => {
+  // 如果没有真实交易数据，基于Current Assets生成模拟数据
+  if (transactionActivities.length === 0 && currentHoldings.length > 0) {
+    console.log('📊 PortfolioView: 无真实交易数据，基于Current Assets生成模拟数据')
+    
+    // 计算总资产价值
+    const totalAssetValue = currentHoldings.reduce((sum, holding) => 
+      sum + (holding.amount * holding.currentPrice), 0
+    )
+    
+    // 为每个资产生成历史交易数据
+    currentHoldings.forEach((holding, index) => {
+      const assetValue = holding.amount * holding.currentPrice
+      const assetPercentage = (assetValue / totalAssetValue) * 100
+      
+      // 为每个资产生成过去几天的交易数据
+      for (let i = 0; i < days; i++) {
+        const date = new Date(startDate.getTime() + (i * 24 * 60 * 60 * 1000))
+        const dateKey = date.toISOString().split('T')[0]
+        const dayData = groupedData.get(dateKey)
+        
+        if (dayData) {
+          // 根据资产价值和时间衰减生成交易数据
+          const timeDecay = Math.max(0.1, 1 - (i / days) * 0.8)
+          const randomFactor = 0.5 + Math.random() * 1.0
+          
+          // 计算当天的交易价值（基于资产百分比）
+          const dailyValue = (assetValue * assetPercentage / 100) * timeDecay * randomFactor * 0.1
+          
+          // 随机决定是买入还是卖出
+          const isBuy = Math.random() > 0.3 // 70%概率是买入
+          
+          if (isBuy) {
+            dayData.buy++
+            dayData.buyAmount += dailyValue / holding.currentPrice
+            dayData.buyValue += dailyValue
+          } else {
+            const sellValue = dailyValue * 0.6
+            dayData.sell++
+            dayData.sellAmount += sellValue / holding.currentPrice
+            dayData.sellValue += sellValue
+          }
+        }
+      }
+    })
+  }
+  
+  // 计算累计值
+  let cumulativeBuyValue = 0
+  let cumulativeSellValue = 0
+  let cumulativeBuyAmount = 0
+  let cumulativeSellAmount = 0
+  
+  // 转换为数组并排序，同时计算累计值
+  const sortedData = Array.from(groupedData.values()).sort((a, b) => {
     return new Date(a.dateKey) - new Date(b.dateKey)
   })
   
+  // 为每个数据点添加累计值
+  transactionChartData.value = sortedData.map(dayData => {
+    cumulativeBuyValue += dayData.buyValue
+    cumulativeSellValue += dayData.sellValue
+    cumulativeBuyAmount += dayData.buyAmount
+    cumulativeSellAmount += dayData.sellAmount
+    
+    return {
+      ...dayData,
+      cumulativeBuyValue,
+      cumulativeSellValue,
+      cumulativeBuyAmount,
+      cumulativeSellAmount,
+      netValue: cumulativeBuyValue - cumulativeSellValue
+    }
+  })
+  
   console.log('📊 PortfolioView: 交易图表数据生成完成，共', transactionChartData.value.length, '个数据点')
-  console.log('📊 PortfolioView: 图表数据详情:', transactionChartData.value)
+  console.log('📊 PortfolioView: 累计买入价值:', cumulativeBuyValue)
+  console.log('📊 PortfolioView: 累计卖出价值:', cumulativeSellValue)
+  console.log('📊 PortfolioView: 净价值:', cumulativeBuyValue - cumulativeSellValue)
   
   // 滚动到最右侧显示最新数据
   scrollChartToRight()
@@ -1753,6 +1870,46 @@ const getPieDashOffset = (index) => {
   return offset
 }
 
+// 计算标签位置和引导线
+const getLabelPosition = (index) => {
+  const holding = holdings.value[index]
+  const percentage = getAssetPercentage(holding)
+  
+  // 计算当前扇形的起始角度和中心角度
+  let startAngle = 0
+  for (let i = 0; i < index; i++) {
+    const prevHolding = holdings.value[i]
+    const prevPercentage = getAssetPercentage(prevHolding)
+    startAngle += (prevPercentage / 100) * 360
+  }
+  
+  const centerAngle = startAngle + (percentage / 100) * 360 / 2
+  const angleInRadians = (centerAngle - 90) * Math.PI / 180 // 转换为弧度，-90度是因为从顶部开始
+  
+  // 饼图中心点
+  const centerX = 100
+  const centerY = 100
+  const radius = 80
+  
+  // 扇形边缘点
+  const edgeX = centerX + Math.cos(angleInRadians) * radius
+  const edgeY = centerY + Math.sin(angleInRadians) * radius
+  
+  // 引导线终点（稍微向外延伸）
+  const labelDistance = 50
+  const endX = centerX + Math.cos(angleInRadians) * (radius + labelDistance)
+  const endY = centerY + Math.sin(angleInRadians) * (radius + labelDistance)
+  
+  return {
+    startX: edgeX,
+    startY: edgeY,
+    endX: endX,
+    endY: endY,
+    textX: endX,
+    textY: endY
+  }
+}
+
 // 折线图相关方法
 const generatePriceHistory = (holding, timeframe) => {
   const points = 6
@@ -1874,6 +2031,15 @@ onMounted(async () => {
     console.log('📊 PortfolioView: 计算的总收益:', getAccountTotalGain(selectedAccount.value))
     console.log('📈 PortfolioView: 计算的ROI:', getAccountROI(selectedAccount.value))
   }
+  
+  // 监听路由变化，当用户点击portfolio导航时自动刷新
+  watch(() => router.currentRoute.value.path, (newPath, oldPath) => {
+    if (newPath === '/portfolio' && newPath !== oldPath) {
+      console.log('🔄 PortfolioView: 检测到portfolio页面访问，自动刷新数据...')
+      refreshPortfolio()
+      refreshTransactions()
+    }
+  }, { immediate: false })
 })
 
 // 设置数据库同步
@@ -2002,6 +2168,22 @@ watch([fullAddress, nativeBalanceDisplay, connected], (newValues, oldValues) => 
 }, { deep: true })
 
 // 监听localStorage中绑定账户的变化
+// 查看合约详情
+const viewContract = (transaction) => {
+  console.log('📄 查看合约详情:', transaction)
+  // 跳转到合约页面，传递交易信息
+  router.push({
+    path: '/contract',
+    query: {
+      projectCode: transaction.projectCode,
+      transactionId: transaction.id,
+      type: transaction.type,
+      amount: transaction.amount,
+      timestamp: transaction.timestamp
+    }
+  })
+}
+
 window.addEventListener('storage', (e) => {
   if (e.key === 'walletBoundAccounts') {
     console.log('🔄 Detected wallet bound accounts change, reloading...')
@@ -2275,7 +2457,7 @@ window.addEventListener('storage', (e) => {
 .pf-add{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:14px;background:var(--panel);border:1px solid var(--border);box-shadow:var(--shadow);font-weight:600;cursor:pointer;color:#ffffff;}
 .pf-add-ico{font-size:18px;line-height:1}
 .pf-body{display:grid;grid-template-columns:280px 1fr;gap:16px;padding:0 20px 24px;margin-top: 30px;;}
-.pf-sidebar{background:#141426;border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px;}
+.pf-sidebar{width:300px;background:#141426;border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px;}
 .pf-side-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .pf-side-head h2{font-size:20px;font-weight:800;color:#ffffff;}
 .pf-side-tools{display:flex;gap:10px;color:#9ca3af}
@@ -2286,7 +2468,7 @@ window.addEventListener('storage', (e) => {
 .pf-acc-item{display:flex;align-items:center;gap:10px;margin-top:8px;padding:8px;border-radius:10px;background:#1f2937}
 .pf-avatar{width:28px;height:28px;border-radius:50%;background:radial-gradient(100% 100% at 25% 25%,#ffd79a 0%,#ff9e6e 40%,#ff7b7b 100%);box-shadow: inset 0 0 0 2px #374151;}
 .pf-addr{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;color:#9ca3af}
-.pf-main{background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px 18px;}
+.pf-main{width:800px;background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px 18px;margin:16px;}
 .pf-hero{padding:8px 4px 12px;border-bottom:1px solid var(--border)}
 .pf-balance{font-size:56px;font-weight:900;letter-spacing:-.02em;display:flex;align-items:center;gap:10px;}
 .pf-eye{border:none;background:transparent;cursor:pointer;font-size:20px}
@@ -2388,7 +2570,12 @@ window.addEventListener('storage', (e) => {
 .pf-summary-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
 .pf-summary-header h3{margin:0;font-size:20px;font-weight:700;color:#ffffff;}
 .pf-summary-stats{display:flex;gap:24px;}
-.pf-summary-stat{text-align:center;}
+.pf-summary-stat{
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 .pf-stat-number{display:block;font-size:18px;font-weight:700;color:#ffffff;margin-bottom:4px;}
 .pf-stat-number.positive{color:#16a34a;}
 .pf-stat-number.negative{color:#dc2626;}
@@ -2414,11 +2601,25 @@ window.addEventListener('storage', (e) => {
   border: 1px solid #374151;
 }
 
+.pf-chart-summary-header{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.pf-chart-summary-header h3{
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  text-align: center;
+}
+
 .pf-summary-item{
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
 }
 
 .pf-summary-label{
@@ -2426,12 +2627,14 @@ window.addEventListener('storage', (e) => {
   color: #9ca3af;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  text-align: center;
 }
 
 .pf-summary-value{
   font-size: 16px;
   font-weight: 700;
   color: #ffffff;
+  text-align: center;
 }
 
 .pf-summary-value.pf-buy-color{
@@ -2454,7 +2657,7 @@ window.addEventListener('storage', (e) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
 .pf-chart-header h4{
@@ -2866,21 +3069,22 @@ window.addEventListener('storage', (e) => {
 .pf-pie-chart-section{flex:0 0 400px;min-width:400px;max-width:500px;}
 
 /* 侧栏饼图样式 */
-.pf-sidebar-pie-section{margin-bottom:24px;padding:16px;border-radius:12px;background:#141426;border:1px solid #292e36;}
+.pf-sidebar-pie-section{margin-bottom:4px;padding:16px;border-radius:12px;background:#141426;border:1px solid #292e36;}
 .pf-sidebar-pie-section .pf-chart-header{margin-bottom:16px;}
 .pf-sidebar-pie-section .pf-chart-header h4{margin:0;font-size:16px;font-weight:700;color:#ffffff;}
 .pf-sidebar-pie-section .pf-chart-subtitle{margin:4px 0 0 0;font-size:12px;color:#9ca3af;font-weight:400;}
-.pf-sidebar-pie-section .pf-pie-chart-container{display:flex;flex-direction:column;align-items:center;gap:16px;}
-.pf-sidebar-pie-section .pf-pie-chart{position:relative;width:160px;height:160px;}
+.pf-sidebar-pie-section .pf-pie-chart-container{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.pf-sidebar-pie-section .pf-pie-chart{margin-top:10px;margin-bottom:10px;width:130px;height:200px;}
 .pf-sidebar-pie-section .pf-pie-svg{width:100%;height:100%;}
 .pf-sidebar-pie-section .pf-chart-legend{width:100%;}
-.pf-sidebar-pie-section .pf-legend-item{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.pf-sidebar-pie-section .pf-legend-item{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;}
 .pf-sidebar-pie-section .pf-legend-item:last-child{margin-bottom:0;}
+.pf-sidebar-pie-section .pf-legend-left{display:flex;align-items:center;gap:6px;flex:1;min-width:0;}
+.pf-sidebar-pie-section .pf-legend-right{display:flex;flex-direction:column;align-items:flex-end;gap:1px;}
 .pf-sidebar-pie-section .pf-legend-color{width:12px;height:12px;border-radius:2px;}
-.pf-sidebar-pie-section .pf-legend-info{flex:1;min-width:0;}
-.pf-sidebar-pie-section .pf-legend-code{font-weight:600;color:#ffffff;font-size:12px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pf-sidebar-pie-section .pf-legend-value{font-size:11px;color:#ffffff;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pf-sidebar-pie-section .pf-legend-percentage{font-size:10px;color:#9ca3af;white-space:nowrap;}
+.pf-sidebar-pie-section .pf-legend-code{font-weight:600;color:#ffffff;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pf-sidebar-pie-section .pf-legend-value{font-size:12px;color:#9ca3af;white-space:nowrap;}
+.pf-sidebar-pie-section .pf-legend-percentage{font-size:24px;color:#9ca3af;white-space:nowrap;}
 
 .pf-chart-container{display:flex;align-items:center;gap:32px;}
 .pf-pie-chart{position:relative;width:200px;height:200px;}
@@ -2889,13 +3093,24 @@ window.addEventListener('storage', (e) => {
 .pf-pie-total{font-size:20px;font-weight:700;color:#ffffff;margin-bottom:4px;}
 .pf-pie-label{font-size:12px;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;}
 
+/* 饼图标签样式 */
+.pf-pie-label-text {
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  fill: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
 .pf-chart-legend{flex:1;}
-.pf-legend-item{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.pf-legend-item{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+.pf-legend-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
+.pf-legend-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
 .pf-legend-color{width:16px;height:16px;border-radius:4px;flex-shrink:0;}
-.pf-legend-info{flex:1;min-width:0;}
-.pf-legend-code{font-weight:600;color:#ffffff;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pf-legend-value{font-size:14px;color:#ffffff;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pf-legend-percentage{font-size:12px;color:#9ca3af;white-space:nowrap;}
+.pf-legend-code{font-weight:600;color:#ffffff;font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pf-legend-value{font-size:20px;color:#9ca3af;white-space:nowrap;}
+.pf-legend-percentage{font-size:20px;color:#9ca3af;white-space:nowrap;}
 
 
 /* 分析页面样式 */
@@ -2942,20 +3157,26 @@ window.addEventListener('storage', (e) => {
   .pf-legend-item {
     padding: 4px;
     gap: 4px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .pf-legend-left {
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .pf-legend-right {
     flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
+    align-items: flex-end;
+    gap: 1px;
   }
   
   .pf-legend-color {
     width: 8px;
     height: 8px;
-    align-self: flex-start;
-    margin-bottom: 2px;
-  }
-  
-  .pf-legend-info {
-    width: 100%;
   }
 }
 
@@ -3084,6 +3305,14 @@ window.addEventListener('storage', (e) => {
 
 .pf-tooltip-sell {
   color: #ef4444;
+}
+
+.pf-tooltip-net {
+  color: #ffffff;
+  font-weight: 600;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 4px;
+  margin-top: 4px;
 }
 
 .pf-risk-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #374151;}

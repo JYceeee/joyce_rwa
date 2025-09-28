@@ -1,12 +1,26 @@
 <template>
   <div class="container">
     <header class="doc-header">
-      <h1 class="headline">Property Loans</h1>
-      <p class="subline">First-lien mortgages · LTV control · Monthly interest</p>
+      <h1 class="headline">
+        <template v-if="isDetailView && currentProduct">
+          {{ currentProduct.name }} - {{ currentProduct.code }}
+        </template>
+        <template v-else>
+          Property Loans
+        </template>
+      </h1>
+      <p class="subline">
+        <template v-if="isDetailView && currentProduct">
+          {{ currentProduct.subtitle }}
+        </template>
+        <template v-else>
+          First-lien mortgages · LTV control · Monthly interest
+        </template>
+      </p>
     </header>
 
     <!-- 筛选栏 -->
-    <div class="filters" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0 6px;">
+    <div v-if="!isDetailView" class="filters" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0 6px;">
       <input v-model="filters.q" class="input" placeholder="Search code/name/subtitle" style="max-width:240px;height:38px" />
       <select v-model="filters.type" class="input" style="max-width:160px;height:38px">
         <option value="">All Types</option>
@@ -47,7 +61,7 @@
     </div>
     
     <!-- 筛选结果统计和刷新控制 -->
-    <div class="filter-stats" style="margin: 8px 0; color: var(--muted); font-size: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+    <div v-if="!isDetailView" class="filter-stats" style="margin: 8px 0; color: var(--muted); font-size: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
       <div>
         Showing {{ filteredProducts.length }} of {{ products.length }} projects
         <span v-if="hasActiveFilters" style="margin-left: 12px;">
@@ -58,7 +72,7 @@
       </div>
       <div style="display: flex; align-items: center; gap: 12px;">
         <span v-if="lastRefreshTime" style="font-size: 12px; color: #6b7280;">
-          最后更新: {{ formatTime(lastRefreshTime) }}
+          Last Updated: {{ formatTime(lastRefreshTime) }}
         </span>
         <button @click="refreshProducts" :disabled="loading" class="refresh-btn" style="background: #374151; border: 1px solid #4b5563; color: #ffffff; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease;" :style="{ opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer' }">
           {{ loading ? '刷新中...' : '刷新数据' }}
@@ -69,19 +83,160 @@
     <!-- 加载状态 -->
     <div v-if="loading" class="loading-container">
       <div class="loading-spinner"></div>
-      <p>正在加载产品数据...</p>
+      <p>Loading product data...</p>
     </div>
 
     <!-- 错误状态 -->
     <div v-else-if="error" class="error-container">
       <div class="error-message">
-        <h3>加载失败</h3>
+        <h3>Load Failed</h3>
         <p>{{ error }}</p>
-        <button @click="loadProducts" class="btn retry-btn">重试</button>
+        <button @click="loadProducts" class="btn retry-btn">Retry</button>
       </div>
     </div>
 
-    <!-- 文档式列表 -->
+    <!-- 单个产品详情视图 -->
+    <section v-else-if="isDetailView && currentProduct" class="doc-list">
+      <article class="doc-card" aria-labelledby="'title-' + currentProduct.code">
+        <!-- 主要内容区域 -->
+        <div class="main-content">
+          <!-- 左侧内容 -->
+          <div class="left-content">
+            <!-- 项目标题信息 -->
+            <section class="title-section">
+              <div class="title-header">
+                <h2 :id="'title-' + currentProduct.code">
+                  <span class="doc-code">{{ currentProduct.code }}</span>
+                  <span class="doc-name">{{ currentProduct.name }}</span>
+                </h2>
+                <div class="status-badge" :class="'status-' + currentProduct.status">
+                  {{ getStatusText(currentProduct.status) }}
+                </div>
+              </div>
+              <p class="doc-subtitle">{{ currentProduct.subtitle }}</p>
+              
+              <!-- 项目基本信息 -->
+              <div class="project-basic-info">
+                <div class="info-item">
+                  <span class="info-label">Type:</span>
+                  <span class="info-value">{{ currentProduct.type }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Region:</span>
+                  <span class="info-value">{{ currentProduct.region }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Risk:</span>
+                  <span class="info-value risk-{{ currentProduct.risk }}">{{ currentProduct.risk }}</span>
+                </div>
+              </div>
+            </section>
+
+            <hr class="sep" />
+
+            <!-- 摘要 -->
+            <section class="summary-section">
+              <h3 class="doc-h3">Summary</h3>
+              <p class="doc-text">
+                {{ currentProduct.summary || 'Mortgage-backed loan project with controlled LTV and monthly coupon schedule. Suitable for investors seeking income with real-asset collateral.' }}
+              </p>
+            </section>
+          </div>
+
+          <!-- 右侧图片 -->
+          <div class="right-content">
+            <img :src="currentProduct.image" class="doc-cover" :alt="currentProduct.code" />
+          </div>
+        </div>
+
+        <!-- 投资信息 -->
+        <section class="doc-section">
+          <h3 class="doc-h3">Investment Details</h3>
+          <div class="investment-grid">
+            <div class="investment-item">
+              <div class="investment-label">Collateral Value</div>
+              <div class="investment-value">{{ currentProduct.metrics.collateralPropertyValue }}</div>
+            </div>
+            <div class="investment-item">
+              <div class="investment-label">Loan Amount</div>
+              <div class="investment-value">{{ currentProduct.loanAmount || 'TBA' }}</div>
+            </div>
+            <div class="investment-item">
+              <div class="investment-label">Total Offering</div>
+              <div class="investment-value">{{ currentProduct.totalOffering || 'TBA' }}</div>
+            </div>
+            <div class="investment-item">
+              <div class="investment-label">Subscribed</div>
+              <div class="investment-value">{{ currentProduct.subscribed || 'TBA' }}</div>
+            </div>
+            <div class="investment-item">
+              <div class="investment-label">Target Yield</div>
+              <div class="investment-value">{{ currentProduct.metrics.targetLoanYield }}</div>
+            </div>
+            <div class="investment-item">
+              <div class="investment-label">LTV</div>
+              <div class="investment-value">{{ currentProduct.ltv || 'TBA' }}%</div>
+            </div>
+            <div class="investment-item">
+              <div class="investment-label">Loan Term</div>
+              <div class="investment-value">{{ currentProduct.loanTerm || 'TBA' }} months</div>
+            </div>
+            <div class="investment-item">
+              <div class="investment-label">Current Price</div>
+              <div class="investment-value">{{ currentProduct.metrics.currentElaraPrice }}</div>
+            </div>
+          </div>
+          
+          <!-- 按钮与进度条在同一行 -->
+          <div class="progress-actions-row">
+            <div class="progress-container">
+              <div class="progress-bar">
+                <div class="progress-fill" :style="{ width: getProgressPercentage(currentProduct) + '%' }"></div>
+                <div class="progress-empty" :style="{ width: (100 - getProgressPercentage(currentProduct)) + '%' }"></div>
+              </div>
+              <span class="progress-text">{{ getProgressPercentage(currentProduct) }}%</span>
+            </div>
+            <div class="doc-actions">
+              <!-- Active状态: Trade and Detail -->
+              <template v-if="currentProduct.status === 'active'">
+                <a href="#" class="btn small orange" @click.prevent="openTrade(currentProduct.code)">Trade</a>
+                <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">Detail</a>
+              </template>
+              
+              <!-- Upcoming状态: Preview and Join Waitlist -->
+              <template v-else-if="currentProduct.status === 'upcoming'">
+                <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">Preview</a>
+                <a href="#" class="btn small" @click.prevent="joinWaitlist(currentProduct.code)">Join Waitlist</a>
+              </template>
+              
+              <!-- Research状态: Learn More and Join Waitlist -->
+              <template v-else-if="currentProduct.status === 'research'">
+                <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">Learn More</a>
+                <a href="#" class="btn small" @click.prevent="joinWaitlist(currentProduct.code)">Join Waitlist</a>
+              </template>
+              
+              <!-- Planning状态: Learn More and Join Waitlist -->
+              <template v-else-if="currentProduct.status === 'planning'">
+                <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">Learn More</a>
+                <a href="#" class="btn small" @click.prevent="joinWaitlist(currentProduct.code)">Join Waitlist</a>
+              </template>
+              
+              <!-- Completed状态: View Details -->
+              <template v-else-if="currentProduct.status === 'completed'">
+                <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">View Details</a>
+              </template>
+              
+              <!-- 默认状态: Learn More -->
+              <template v-else>
+                <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">Learn More</a>
+              </template>
+            </div>
+          </div>
+        </section>
+      </article>
+    </section>
+
+    <!-- 产品列表视图 -->
     <section v-else class="doc-list">
       <article
         v-for="p in filteredProducts"
@@ -146,23 +301,23 @@
            <div class="investment-grid">
              <div class="investment-item">
                <div class="investment-label">Collateral Value</div>
-               <div class="investment-value">A${{ formatNumber(p.valuation) || 'TBA' }}</div>
+               <div class="investment-value">{{ p.metrics.collateralPropertyValue }}</div>
              </div>
              <div class="investment-item">
                <div class="investment-label">Loan Amount</div>
-               <div class="investment-value">A${{ formatNumber(p.loanAmount) || 'TBA' }}</div>
+               <div class="investment-value">{{ p.loanAmount || 'TBA' }}</div>
              </div>
              <div class="investment-item">
                <div class="investment-label">Total Offering</div>
-               <div class="investment-value">A${{ formatNumber(p.totalOffering) || 'TBA' }}</div>
+               <div class="investment-value">{{ p.totalOffering || 'TBA' }}</div>
              </div>
              <div class="investment-item">
                <div class="investment-label">Subscribed</div>
-               <div class="investment-value">A${{ formatNumber(p.subscribed) || 'TBA' }}</div>
+               <div class="investment-value">{{ p.subscribed || 'TBA' }}</div>
              </div>
              <div class="investment-item">
-               <div class="investment-label">Loan Coupon</div>
-               <div class="investment-value">{{ p.annualInterestRate || (p.targetYield ? p.targetYield.toFixed(1) + '% p.a.' : 'TBA') }}</div>
+               <div class="investment-label">Target Yield</div>
+               <div class="investment-value">{{ p.metrics.targetLoanYield }}</div>
              </div>
              <div class="investment-item">
                <div class="investment-label">LTV</div>
@@ -173,8 +328,8 @@
                <div class="investment-value">{{ p.loanTerm || 'TBA' }} months</div>
              </div>
              <div class="investment-item">
-               <div class="investment-label">Target Yield</div>
-               <div class="investment-value">{{ p.targetYield || 'TBA' }}%</div>
+               <div class="investment-label">Current Price</div>
+               <div class="investment-value">{{ p.metrics.currentElaraPrice }}</div>
              </div>
            </div>
            
@@ -230,24 +385,170 @@ import { useDatabaseSync } from '@/service/databaseSyncService'
 
 export default { 
   name: 'ProjectsView',
+  props: {
+    code: {
+      type: String,
+      default: null
+    }
+  },
   data(){
     return {
       filters: { q: '', type: '', region: '', risk: '', status: '', minYield: 0 },
       products: [],
+      currentProduct: null, // 当前选中的产品详情
       loading: true,
       error: null,
       refreshInterval: null,
-      lastRefreshTime: null
+      lastRefreshTime: null,
+      isDetailView: false // 是否为详情视图
     }
   },
   async mounted() {
-    await this.loadProducts()
+    // 检查是否为详情视图
+    this.isDetailView = !!this.code
+    if (this.isDetailView) {
+      await this.loadSingleProduct()
+    } else {
+      await this.loadProducts()
+    }
     this.setupDatabaseSync()
   },
   beforeUnmount() {
     this.cleanupDatabaseSync()
   },
+  watch: {
+    // 监听路由参数变化
+    '$route'(to, from) {
+      if (to.params.code !== from.params.code) {
+        this.code = to.params.code
+        this.isDetailView = !!this.code
+        if (this.isDetailView) {
+          this.loadSingleProduct()
+        } else {
+          this.loadProducts()
+        }
+      }
+    },
+    
+    // 监听props变化
+    code: {
+      handler(newCode) {
+        this.isDetailView = !!newCode
+        if (this.isDetailView) {
+          this.loadSingleProduct()
+        } else {
+          this.loadProducts()
+        }
+      },
+      immediate: true
+    }
+  },
   methods: {
+    // 加载单个产品详情
+    async loadSingleProduct() {
+      try {
+        this.loading = true
+        this.error = null
+        console.log('🔄 ProjectsView: 从数据库加载单个产品数据...', this.code)
+        
+        const response = await productAPI.getProductByCode(this.code)
+        
+        if (response.status === 0) {
+          // 映射数据库字段到前端期望的字段名
+          const rawData = response.data
+          const product = {
+            ...rawData,
+            totalOffering: rawData.total_token,
+            subscribed: rawData.current_subscribed_token,
+            targetYield: rawData.target_yield,
+            ltv: rawData.LTV,
+            annualInterestRate: rawData.annual_interest_rate,
+            loanAmount: rawData.loan_amount,
+            valuation: rawData.valuation,
+            image: rawData.image || this.getProductImage(rawData.code)
+          }
+          
+          // 构建与TradeProjectView一致的数据结构
+          this.currentProduct = {
+            // 基本信息
+            code: product.code,
+            name: product.name,
+            image: product.image,
+            subtitle: product.subtitle,
+            type: product.type,
+            region: product.region,
+            risk: product.risk,
+            targetYield: product.targetYield,
+            status: product.status,
+            summary: product.summary,
+            
+            // 投资信息
+            totalOffering: product.totalOffering,
+            subscribed: product.subscribed,
+            totalSubscriptionTokens: product.totalSubscriptionTokens,
+            subscribedTokens: product.subscribedTokens,
+            
+            // 计算指标
+            metrics: {
+              currentElaraPrice: this.calculateTokenPrice(product),
+              collateralPropertyValue: product.valuation || 'TBA',
+              rentalIncome: this.calculateRentalIncome(product),
+              targetLoanYield: `${product.targetYield}% p.a.`
+            },
+            
+            // Key Facts 关键信息
+            loanAmount: product.loanAmount,
+            annualInterestRate: product.annualInterestRate,
+            loanTerm: product.loanTerm,
+            ltv: product.ltv,
+            drawdownDate: product.drawdownDate,
+            earlyRepayment: product.earlyRepayment,
+            repaymentArrangement: product.repaymentArrangement,
+            
+            // Parties 相关主体
+            issuer: product.issuer,
+            pwShareholders: product.pwShareholders,
+            lender: product.lender,
+            borrower: product.borrower,
+            guarantor: product.guarantor,
+            
+            // Disbursement & Interest 放款和利息
+            disbursementMethod: product.disbursementMethod,
+            interest: product.interest,
+            earlyRepaymentDetails: product.earlyRepaymentDetails,
+            maturityDate: product.maturityDate,
+            
+            // Collateral 抵押品
+            propertyAddress: product.propertyAddress,
+            valuation: product.valuation,
+            securityRank: product.securityRank,
+            
+            // Default & Remedies 违约和补救措施
+            defaultInterestRate: product.defaultInterestRate,
+            defaultTriggers: product.defaultTriggers,
+            defaultProcess: product.defaultProcess,
+            
+            // On-Chain & Documents 链上和文档
+            issuerToken: product.issuerToken,
+            loanToken: product.loanToken,
+            valuationReport: product.valuationReport,
+            mortgageDeed: product.mortgageDeed
+          }
+          
+          this.lastRefreshTime = new Date()
+          console.log('✅ ProjectsView: 单个产品数据加载成功:', this.currentProduct)
+        } else {
+          this.error = response.message || '获取产品数据失败'
+          console.error('❌ ProjectsView: API返回错误:', response)
+        }
+      } catch (error) {
+        this.error = '网络错误，无法获取产品数据'
+        console.error('❌ ProjectsView: 获取单个产品数据失败:', error)
+      } finally {
+        this.loading = false
+      }
+    },
+
     async loadProducts() {
       try {
         this.loading = true
@@ -258,17 +559,29 @@ export default {
         
         if (response.status === 0) {
           // 映射数据库字段到前端期望的字段名
-          this.products = (response.data || []).map(product => ({
-            ...product,
-            totalOffering: product.total_token,
-            subscribed: product.current_subscribed_token,
-            targetYield: product.target_yield,
-            ltv: product.LTV,
-            annualInterestRate: product.annual_interest_rate,
-            loanAmount: product.loan_amount,
-            valuation: product.valuation,
-            image: product.image || this.getProductImage(product.code)
-          }))
+          this.products = (response.data || []).map(product => {
+            const mappedProduct = {
+              ...product,
+              totalOffering: product.total_token,
+              subscribed: product.current_subscribed_token,
+              targetYield: product.target_yield,
+              ltv: product.LTV,
+              annualInterestRate: product.annual_interest_rate,
+              loanAmount: product.loan_amount,
+              valuation: product.valuation,
+              image: product.image || this.getProductImage(product.code)
+            }
+            
+            // 添加计算指标
+            mappedProduct.metrics = {
+              currentElaraPrice: this.calculateTokenPrice(mappedProduct),
+              collateralPropertyValue: mappedProduct.valuation || 'TBA',
+              rentalIncome: this.calculateRentalIncome(mappedProduct),
+              targetLoanYield: `${mappedProduct.targetYield}% p.a.`
+            }
+            
+            return mappedProduct
+          })
           this.lastRefreshTime = new Date()
           console.log('✅ 产品数据加载成功，共', this.products.length, '个项目')
         } else {
@@ -286,7 +599,11 @@ export default {
     // 刷新数据
     async refreshProducts() {
       console.log('🔄 手动刷新产品数据...')
-      await this.loadProducts()
+      if (this.isDetailView) {
+        await this.loadSingleProduct()
+      } else {
+        await this.loadProducts()
+      }
     },
     
     // 设置数据库同步
@@ -443,6 +760,28 @@ export default {
       }
       return imageMap[code] || '/pics/TYMU.png'
     },
+    
+    // 计算代币价格
+    calculateTokenPrice(product) {
+      // 基于目标收益率计算代币价格
+      const basePrice = 1.00
+      const yieldMultiplier = (product.targetYield || 6.0) / 6.0
+      const adjustedPrice = basePrice * yieldMultiplier
+      return `A$${adjustedPrice.toFixed(2)}`
+    },
+    
+    // 计算租金收入
+    calculateRentalIncome(product) {
+      // 基于房产价值和收益率估算租金收入
+      if (!product.valuation) return 'TBA'
+      
+      const valuationStr = product.valuation.replace(/[A$,]/g, '')
+      const valuation = parseFloat(valuationStr)
+      const monthlyYield = (product.targetYield || 6.0) / 12 / 100
+      const estimatedRental = valuation * monthlyYield
+      
+      return `A$${estimatedRental.toLocaleString('en-AU', { maximumFractionDigits: 0 })} / month`
+    },
 
     // 格式化数字
     formatNumber(value) {
@@ -492,8 +831,84 @@ export default {
              this.filters.risk !== '' || 
              this.filters.status !== '' || 
              this.filters.minYield > 0
+    },
+
+    projectData() {
+      // 从ProductDetailsInfo获取项目数据（保留作为备用）
+      const product = this.project
+      
+      if (product) {
+        console.log('TradeProjectView: Retrieve project data from database:', product)
+        
+        // 构建符合模板需求的数据结构，完整映射ProductDetailsInfo.js中的所有字段
+        return {
+          // 基本信息
+          code: product.code,
+          name: product.name,
+          image: product.image || this.getProductImage(product.code),
+          subtitle: product.subtitle,
+          type: product.type,
+          region: product.region,
+          risk: product.risk,
+          targetYield: product.targetYield,
+          status: product.status,
+          summary: product.summary,
+          
+          // 投资信息
+          totalOffering: product.totalOffering,
+          subscribed: product.subscribed,
+          totalSubscriptionTokens: product.totalSubscriptionTokens,
+          subscribedTokens: product.subscribedTokens,
+          
+          // 计算指标
+          metrics: {
+            currentElaraPrice: this.calculateTokenPrice(product),
+            collateralPropertyValue: product.valuation || 'TBA',
+            rentalIncome: this.calculateRentalIncome(product),
+            targetLoanYield: `${product.targetYield}% p.a.`
+          },
+          
+          // Key Facts 关键信息
+          loanAmount: product.loanAmount,
+          annualInterestRate: product.annualInterestRate,
+          loanTerm: product.loanTerm,
+          ltv: product.ltv,
+          drawdownDate: product.drawdownDate,
+          earlyRepayment: product.earlyRepayment,
+          repaymentArrangement: product.repaymentArrangement,
+          
+          // Parties 相关主体
+          issuer: product.issuer,
+          pwShareholders: product.pwShareholders,
+          lender: product.lender,
+          borrower: product.borrower,
+          guarantor: product.guarantor,
+          
+          // Disbursement & Interest 放款和利息
+          disbursementMethod: product.disbursementMethod,
+          interest: product.interest,
+          earlyRepaymentDetails: product.earlyRepaymentDetails,
+          maturityDate: product.maturityDate,
+          
+          // Collateral 抵押品
+          propertyAddress: product.propertyAddress,
+          valuation: product.valuation,
+          securityRank: product.securityRank,
+          
+          // Default & Remedies 违约和补救措施
+          defaultInterestRate: product.defaultInterestRate,
+          defaultTriggers: product.defaultTriggers,
+          defaultProcess: product.defaultProcess,
+          
+          // On-Chain & Documents 链上和文档
+          issuerToken: product.issuerToken,
+          loanToken: product.loanToken,
+          valuationReport: product.valuationReport,
+          mortgageDeed: product.mortgageDeed
+        }
+      }
     }
-  }
+  } 
 }
 </script>
 

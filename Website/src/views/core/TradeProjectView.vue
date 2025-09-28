@@ -23,16 +23,17 @@
     <!-- 加载中弹窗 -->
     <div v-if="showLoadingModal" class="modal-overlay">
       <div class="modal-content loading-modal" @click.stop>
-        <div class="modal-header">
+        <div class="loading-container">
           <div class="loading-icon">
             <div class="spinner"></div>
           </div>
-          <h2 class="modal-title">Processing...</h2>
-        </div>
-        <div class="modal-body">
-          <div class="loading-message">
-            <p>We are processing your transaction request, please wait...</p>
-            <p class="loading-status">{{ loadingStatus }}</p>
+          <div class="loading-content">
+            <h2 class="loading-title">Processing...</h2>
+            <p class="loading-description">We are processing your transaction request, please wait...</p>
+            <div class="loading-status">
+              <div class="status-indicator"></div>
+              <span>{{ loadingStatus }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -41,45 +42,58 @@
     <!-- 交易成功弹窗 -->
     <div v-if="showSuccessModal" class="modal-overlay" @click="closeSuccessModal">
       <div class="modal-content success-modal" @click.stop>
-        <div class="modal-header">
-          <!-- <div class="success-icon">✅</div> -->
-          <h2 class="modal-title">Transaction Successful!</h2>
-        </div>
-        <div class="modal-body">
-          <div class="success-details">
-            <div class="detail-item">
-              <span class="detail-label">Trade Type:</span>
-              <span class="detail-value">{{ successData.tradeType === 'buy' ? 'Buy' : 'Sell' }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Trade Amount:</span>
-              <span class="detail-value">{{ successData.amount }} Tokens</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Trade Price:</span>
-              <span class="detail-value">A${{ successData.price }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Trade Total:</span>
-              <span class="detail-value">A${{ successData.total }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Trade Hash:</span>
-              <span class="detail-value hash-value" @click="copyHash">{{ formatHash(successData.transactionHash) }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Block Number:</span>
-              <span class="detail-value">{{ successData.blockNumber }}</span>
+        <div class="success-container">
+          <div class="success-icon">
+            <div class="checkmark">
+              <div class="checkmark-stem"></div>
+              <div class="checkmark-kick"></div>
             </div>
           </div>
-          <div class="success-message">
-            <p>🎉 Congratulations! Your transaction has been successfully completed and recorded on the blockchain.</p>
-            <p>You can view the transaction record in the "Recent Trades" on the right.</p>
+          <div class="success-content">
+            <h2 class="success-title">Transaction Successful!</h2>
+            <p class="success-description">Your transaction has been completed successfully</p>
+            
+            <div class="success-details">
+              <div class="detail-card">
+                <div class="detail-header">
+                  <span class="detail-icon">📊</span>
+                  <span class="detail-label">Transaction Details</span>
+                </div>
+                <div class="detail-grid">
+                  <div class="detail-item">
+                    <span class="detail-key">Type:</span>
+                    <span class="detail-value">{{ successData.tradeType === 'buy' ? 'Buy' : 'Sell' }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-key">Amount:</span>
+                    <span class="detail-value">{{ successData.amount }} Tokens</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="detail-card">
+                <div class="detail-header">
+                  <span class="detail-icon">🔗</span>
+                  <span class="detail-label">Blockchain Info</span>
+                </div>
+                <div class="detail-grid">
+                  <div class="detail-item">
+                    <span class="detail-key">Hash:</span>
+                    <span class="detail-value hash-value" @click="copyHash">{{ formatHash(successData.transactionHash) }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-key">Block:</span>
+                    <span class="detail-value">{{ successData.blockNumber }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn secondary" @click="closeSuccessModal">Close</button>
-          <button class="btn primary" @click="viewPortfolio">View Portfolio</button>
+          
+          <div class="success-actions">
+            <button class="btn secondary" @click="closeSuccessModal">Close</button>
+            <button class="btn primary" @click="viewPortfolio">View Portfolio</button>
+          </div>
         </div>
       </div>
     </div>
@@ -148,9 +162,6 @@
       <!-- 交易表单 -->
       <div class="trade-form-card">
         <h2 class="form-title">Trade {{ projectCode }}</h2>
-        
-
-
         <!-- 交易数量 -->
         <div class="form-section">
           <h3 class="section-title">Amount</h3>
@@ -169,7 +180,9 @@
           <div class="amount-info">
           </div>
         </div>
-
+        <div>
+          <button>check contract details</button>
+        </div>
         <!-- 交易类型选择 -->
         <div class="form-section">
           <!-- <h3 class="section-title">Trade Type</h3> -->
@@ -347,6 +360,7 @@ export default {
       // 错误消息映射
       errorMessages: {
         'insufficient_balance': 'You have insufficient funds',
+        'insufficient_interest': 'Insufficient interest received amount',
         'input_required': 'Please enter the amount',
         'login_required': 'Please login to your account',
         'wallet_connection_required': 'Please connect your wallet',
@@ -383,7 +397,7 @@ export default {
     project() {
       // 使用从数据库加载的项目数据
       if (this.projectData) {
-        console.log('📊 TradeProjectView: 使用数据库项目数据:', this.projectData)
+        console.log('TradeProjectView: 使用数据库项目数据:', this.projectData)
         return this.projectData
       }
       return null
@@ -462,26 +476,8 @@ export default {
           mortgageDeed: product.mortgageDeed
         }
       }
-      
-      // 如果找不到对应产品，返回默认数据
-      // return {
-      //   code: this.projectCode,
-      //   name: `${this.projectCode} Property Loan`,
-      //   image: '/pics/TYMU.png',
-      //   subtitle: 'Property Investment Opportunity',
-      //   type: 'residential',
-      //   region: 'Unknown',
-      //   risk: 'medium',
-      //   targetYield: 6.0,
-      //   status: 'active',
-      //   metrics: {
-      //     currentElaraPrice: 'A$1.00',
-      //     collateralPropertyValue: 'TBA',
-      //     rentalIncome: 'TBA',
-      //     targetLoanYield: '6.0% p.a.'
-      //   }
-      // }
     },
+
     canSubmit() {
       return this.tradeAmount && this.tradeAmount > 0 && !this.loading
     },
@@ -573,6 +569,7 @@ export default {
       // const price = 1.00 // 固定价格，从项目数据获取
       return (amount * price).toFixed(2)
     },
+    
     formatTime(timestamp) {
       return new Date(timestamp).toLocaleString()
     },
@@ -946,7 +943,29 @@ export default {
       
         console.log(`🚀 开始${this.tradeType}交易...`)
         
-        // 8. 执行交易 - 整合Test Buy/Test Sell的逻辑
+        // 8. 如果是sell interest操作，检查interest received额度
+        if (this.tradeType === 'sell' && this.isInterestTrade) {
+          this.loadingStatus = '正在检查利息额度...'
+          this.addTestResult('info', '💰 Checking Interest Received', '正在检查已收取利息额度...')
+          
+          const interestReceived = this.calculateInterestReceived(this.projectCode)
+          const sellAmount = parseFloat(this.tradeAmount)
+          
+          console.log(`💰 利息额度检查: 已收取=${interestReceived}, 出售=${sellAmount}`)
+          
+          if (sellAmount > interestReceived) {
+            this.showLoadingModal = false
+            this.loading = false
+            this.errorType = 'insufficient_interest'
+            this.error = `出售额度不能超过已收取利息额度。已收取: ${interestReceived.toFixed(2)} tokens，尝试出售: ${sellAmount} tokens`
+            this.addTestResult('error', 'Insufficient Interest', `出售额度超出限制: ${sellAmount} > ${interestReceived.toFixed(2)}`)
+            return
+          }
+          
+          this.addTestResult('success', 'Interest Check Passed', `利息额度验证通过: ${interestReceived.toFixed(2)} >= ${sellAmount}`)
+        }
+        
+        // 9. 执行交易 - 整合Test Buy/Test Sell的逻辑
         let result
         if (this.tradeType === 'buy') {
           this.loadingStatus = '正在与智能合约签订购买协议...'
@@ -1717,6 +1736,48 @@ export default {
   beforeUnmount() {
     // 移除事件监听器
     window.removeEventListener('walletActivityUpdated', this.handleWalletActivityUpdate)
+  },
+  
+  // 计算项目的interest received amount（已收取利息币）
+  calculateInterestReceived(projectCode) {
+    // 获取用户在该项目中的持有信息
+    const userAddress = this.getUserAddress()
+    if (!userAddress) return 0
+    
+    // 从WalletView获取wallet activity数据
+    const walletActivity = this.getWalletActivityData()
+    const transactionActivities = walletActivity.filter(activity => 
+      activity.type === 'buy' || activity.type === 'sell'
+    )
+    
+    // 计算该项目的持有量
+    let holdingAmount = 0
+    transactionActivities.forEach(tx => {
+      if (tx.project_code === projectCode || tx.projectCode === projectCode) {
+        if (tx.type === 'buy') {
+          holdingAmount += parseFloat(tx.amount) || 0
+        } else if (tx.type === 'sell') {
+          holdingAmount -= parseFloat(tx.amount) || 0
+        }
+      }
+    })
+    
+    if (holdingAmount <= 0) return 0
+    
+    // 获取项目信息
+    const project = this.projectData
+    if (!project) return 0
+    
+    // 基于持有金额和项目收益率计算已收到的利息
+    const annualYield = project.targetYield || 0
+    const monthlyYield = annualYield / 12 / 100
+    
+    // 假设持有时间为6个月（可以根据实际持有时间调整）
+    const holdingMonths = 6
+    const currentPrice = 1.0 // 使用默认价格，实际应该从项目数据获取
+    const interestReceived = holdingAmount * currentPrice * monthlyYield * holdingMonths
+    
+    return interestReceived
   }
 }
 </script>
@@ -2547,8 +2608,8 @@ export default {
 }
 
 .spinner {
-  width: 16px;
-  height: 16px;
+  width: 8px;
+  height: 8px;
   border: 2px solid #2a2a4a;
   border-top: 2px solid #4f46e5;
   border-radius: 50%;
@@ -2798,7 +2859,7 @@ export default {
   font-size: 24px;
   font-weight: 700;
   color: #ffffff;
-  margin: 0;
+  margin: 10px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
@@ -2815,51 +2876,165 @@ export default {
   border-top: 1px solid rgba(138, 43, 226, 0.2);
 }
 
-/* 交易成功弹窗样式 - 符合homepage深色主题风格 */
+/* 交易成功弹窗样式 - 重新设计 */
 .success-modal {
-  text-align: center;
   padding: 0;
 }
 
+.success-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 40px 32px;
+}
+
 .success-icon {
-  font-size: 64px;
-  color: #16a34a;
-  margin-bottom: 24px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  filter: drop-shadow(0 0 8px rgba(22, 163, 74, 0.3));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  margin-bottom: 32px;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.1));
+  border-radius: 50%;
+  border: 2px solid rgba(34, 197, 94, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.success-icon::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: conic-gradient(from 0deg, transparent, rgba(34, 197, 94, 0.5), transparent);
+  border-radius: 50%;
+  animation: successGlow 2s ease-in-out infinite;
+  z-index: -1;
+}
+
+.checkmark {
+  position: relative;
+  width: 32px;
+  height: 32px;
+}
+
+.checkmark-stem {
+  position: absolute;
+  width: 3px;
+  height: 16px;
+  background: #22c55e;
+  left: 14px;
+  top: 6px;
+  transform: rotate(45deg);
+  border-radius: 2px;
+}
+
+.checkmark-kick {
+  position: absolute;
+  width: 12px;
+  height: 3px;
+  background: #22c55e;
+  left: 8px;
+  top: 20px;
+  transform: rotate(45deg);
+  border-radius: 2px;
+}
+
+.success-content {
+  max-width: 500px;
+  width: 100%;
+}
+
+.success-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 16px 0;
+  background: linear-gradient(135deg, #ffffff, rgba(34, 197, 94, 0.8));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.success-description {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 32px 0;
+  line-height: 1.5;
+}
+
+@keyframes successGlow {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
 }
 
 .success-details {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.detail-card {
   background: rgba(138, 43, 226, 0.05);
   border: 1px solid rgba(138, 43, 226, 0.2);
-  border-radius: 12px;
-  padding: 24px;
-  margin: 28px 0;
+  border-radius: 16px;
+  padding: 20px;
+  text-align: left;
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(138, 43, 226, 0.1);
+}
+
+.detail-icon {
+  font-size: 18px;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 16px;
+}
+
+.detail-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.success-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  width: 100%;
 }
 
 .detail-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(138, 43, 226, 0.1);
+  padding: 8px 0;
 }
 
-.detail-item:last-child {
-  border-bottom: none;
-}
-
-.detail-label {
-  color: #8ca0c3;
-  font-size: 14px;
+.detail-key {
   font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
 }
 
 .detail-value {
   color: #ffffff;
-  font-size: 14px;
   font-weight: 600;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  font-size: 14px;
 }
 
 .hash-value {
@@ -2903,22 +3078,98 @@ export default {
   font-weight: 600;
 }
 
-/* 加载中弹窗样式 - 符合homepage深色主题风格 */
+/* 加载中弹窗样式 - 重新设计 */
 .loading-modal {
-  text-align: center;
   padding: 0;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 40px 32px;
 }
 
 .loading-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 24px;
-  background: rgba(138, 43, 226, 0.1);
+  width: 80px;
+  height: 80px;
+  margin-bottom: 32px;
+  background: linear-gradient(135deg, rgba(138, 43, 226, 0.1), rgba(75, 0, 130, 0.1));
   border-radius: 50%;
   border: 2px solid rgba(138, 43, 226, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.loading-icon::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: conic-gradient(from 0deg, transparent, rgba(138, 43, 226, 0.5), transparent);
+  border-radius: 50%;
+  animation: rotate 2s linear infinite;
+  z-index: -1;
+}
+
+.loading-content {
+  max-width: 400px;
+}
+
+.loading-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 16px 0;
+  background: linear-gradient(135deg, #ffffff, rgba(138, 43, 226, 0.8));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.loading-description {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.loading-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 24px;
+  background: rgba(138, 43, 226, 0.1);
+  border: 1px solid rgba(138, 43, 226, 0.2);
+  border-radius: 12px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  background: rgba(138, 43, 226, 0.8);
+  border-radius: 50%;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
 }
 
 .loading-icon .spinner {
