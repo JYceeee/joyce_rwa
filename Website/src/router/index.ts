@@ -17,7 +17,6 @@ import LoginView from '../views/auth/LoginView.vue'
 import SignupView from '../views/auth/SignupView.vue'
 // Info pages
 import OverviewView from '../views/info/aboutus/OverviewView.vue'
-import FeaturesView from '../views/info/aboutus/FeaturesView.vue'
 import SolutionsView from '../views/info/aboutus/SolutionsView.vue'
 import TutorialsView from '../views/info/aboutus/TutorialsView.vue'
 import PricingView from '../views/info/aboutus/PricingView.vue'
@@ -26,7 +25,6 @@ import ContactView from '../views/info/aboutus/ContactView.vue'
 import TermView from '../views/info/aboutus/Term.vue'
 import PrivacyPolicyView from '../views/info/aboutus/PrivacyPolicy.vue'
 import FAQView from '../views/info/FAQView.vue'
-import OptionsView from '../views/settings/OptionsView.vue'
 import SettingsView from '../views/settings/SettingsView.vue'
 // Test pages
 import ContractTestView from '../views/test/ContractTestView.vue'
@@ -56,7 +54,7 @@ const router = createRouter({
     { path: '/kycService', component: kycService },
     // Footer pages
     { path: '/overview', name: 'overview', component: OverviewView },
-    { path: '/features', name: 'features', component: FeaturesView },
+    { path: '/features', redirect: '/solutions' },
     { path: '/solutions', name: 'solutions', component: SolutionsView },
     { path: '/tutorials', name: 'tutorials', component: TutorialsView },
     { path: '/pricing', name: 'pricing', component: PricingView },
@@ -79,7 +77,7 @@ const router = createRouter({
     { path: '/cookies', name: 'cookies', component: OverviewView },
     { path: '/licenses', name: 'licenses', component: OverviewView },
     { path: '/settings', name: 'settings', component: SettingsView },
-    { path: '/options', name: 'options', component: OptionsView },
+    { path: '/options', redirect: '/settings' },
     // // Test routes
     // { path: '/test/routes', name: 'routeTest', component: () => import('@/views/test/RouteTestView.vue') },
     // { path: '/test/wallet-debug', name: 'walletConnectionDebug', component: () => import('@/views/test/WalletConnectionDebugView.vue') },

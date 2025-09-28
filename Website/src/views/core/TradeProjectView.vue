@@ -180,13 +180,6 @@
           <div class="amount-info">
           </div>
         </div>
-        <div class="contract-details-section">
-          <button class="contract-details-btn" @click="viewContractDetails">
-            <!-- <span class="btn-icon">📋</span> -->
-            <span class="btn-text">View Contract Details</span>
-            <!-- <span class="btn-arrow">→</span> -->
-          </button>
-        </div>
         <!-- 交易类型选择 -->
         <div class="form-section">
           <!-- <h3 class="section-title">Trade Type</h3> -->
@@ -209,6 +202,18 @@
               :disabled="loading"
             >
               <span class="btn-text">Sell Interest</span>
+            </button>
+          </div>
+          
+
+        </div>
+        <div>
+          <!-- View Contract Details按钮 -->
+          <div class="contract-details-section">
+            <button class="contract-details-btn" @click="viewContractDetails">
+              <!-- <span class="btn-icon">📋</span> -->
+              <span class="btn-text">View Contract Details</span>
+              <!-- <span class="btn-arrow">→</span> -->
             </button>
           </div>
         </div>
@@ -2008,9 +2013,10 @@ export default {
 
 /* 合约详情按钮区域 */
 .contract-details-section {
+  margin-top: 20px;
   margin-bottom: 30px;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .contract-details-btn {
@@ -2018,43 +2024,27 @@ export default {
   align-items: center;
   gap: 12px;
   padding: 16px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
+  background: #1f252f;
+  /* border: 2px solid #ffffff; */
   border-radius: 12px;
   color: #ffffff;
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
   position: relative;
   overflow: hidden;
 }
 
-.contract-details-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
-}
-
-.contract-details-btn:hover::before {
-  left: 100%;
-}
-
 .contract-details-btn:hover {
+  background: #ffffff;
+  color: #000000;
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  font-size: 13px;
 }
 
 .contract-details-btn:active {
   transform: translateY(0);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 .btn-icon {
@@ -2074,9 +2064,6 @@ export default {
   transition: transform 0.3s ease;
 }
 
-.contract-details-btn:hover .btn-arrow {
-  transform: translateX(4px);
-}
 
 .section-title {
   font-size: 16px;
@@ -2096,24 +2083,50 @@ export default {
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  padding: 20px;
-  border: 2px solid #2a2a4a;
+  padding: 16px 24px;
+  border: none;
   border-radius: 12px;
-  background: #1d1d36;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
   color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
+}
+
+.trade-type-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.trade-type-btn:hover::before {
+  left: 100%;
 }
 
 .trade-type-btn:hover:not(:disabled) {
-  border-color: var(--primary);
-  background: #2a2a4a;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.trade-type-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 .trade-type-btn.active {
-  border-color: var(--primary);
-  background: var(--primary);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
 }
 
 .trade-type-btn:disabled {
@@ -2122,9 +2135,9 @@ export default {
 }
 
 .trade-type-btn:disabled:hover {
-  border-color: #2a2a4a;
-  background: #1d1d36;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   transform: none;
+  box-shadow: none;
 }
 
 .btn-icon {

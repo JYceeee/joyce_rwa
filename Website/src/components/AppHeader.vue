@@ -2,14 +2,6 @@
   <header class="header"> 
     <div class="container nav">
       <div class="left">
-        <!-- 侧边栏触发按钮 -->
-        <button 
-          class="sidebar-toggle-btn" 
-          @click="toggleSidebar"
-          aria-label="Toggle sidebar"
-        >
-          <span class="sidebar-icon">☰</span>
-        </button>
         
         <a class="brand" href="#" @click.prevent="go('/')">
           <img src="/icons/RWA-logo.png" alt="Mortgage RWA" class="brand-logo" />
@@ -18,17 +10,41 @@
           <a href="#" @click.prevent="go('/home')" class="menu-item">Home</a>
           <a href="#" @click.prevent="go('/projects')" class="menu-item">Projects</a>
           <a href="#" @click.prevent="go('/portfolio')" class="menu-item">Portfolio</a>
-          <a href="#" class="menu-item">More ▾</a>
+          <div class="dropdown-container">
+            <a href="#" class="menu-item more-link" @click.prevent="toggleMoreDropdown">
+              More ▾
+            </a>
             <div v-if="moreDropdownOpen" class="dropdown-menu">
-              <a href="#" @click.prevent="go('/overview')" class="dropdown-item">Overview</a>
-              <a href="#" @click.prevent="go('/about')" class="dropdown-item">About Us</a>
-              <a href="#" @click.prevent="go('/features')" class="dropdown-item">Features</a>
-              <a href="#" @click.prevent="go('/solutions')" class="dropdown-item">Solutions</a>
-              <a href="#" @click.prevent="go('/tutorials')" class="dropdown-item">Tutorials</a>
-              <a href="#" @click.prevent="go('/pricing')" class="dropdown-item">Pricing</a>
-              <a href="#" @click.prevent="go('/faq')" class="dropdown-item">FAQ</a>
-              <a href="#" @click.prevent="go('/contact')" class="dropdown-item">Contact Us</a>
+              <a href="#" @click.prevent="go('/overview')" class="dropdown-item">
+                <span class="dropdown-icon">📋</span>
+                <span>Overview</span>
+              </a>
+              <a href="#" @click.prevent="go('/about')" class="dropdown-item">
+                <span class="dropdown-icon">🏢</span>
+                <span>About Us</span>
+              </a>
+              <a href="#" @click.prevent="go('/solutions')" class="dropdown-item">
+                <span class="dropdown-icon">🔧</span>
+                <span>Solutions</span>
+              </a>
+              <a href="#" @click.prevent="go('/tutorials')" class="dropdown-item">
+                <span class="dropdown-icon">📚</span>
+                <span>Tutorials</span>
+              </a>
+              <a href="#" @click.prevent="go('/pricing')" class="dropdown-item">
+                <span class="dropdown-icon">💰</span>
+                <span>Pricing</span>
+              </a>
+              <a href="#" @click.prevent="go('/contact')" class="dropdown-item">
+                <span class="dropdown-icon">📞</span>
+                <span>Contact</span>
+              </a>
+              <a href="#" @click.prevent="go('/faq')" class="dropdown-item">
+                <span class="dropdown-icon">❓</span>
+                <span>FAQ</span>
+              </a>
             </div>
+          </div>
         </nav>
         
         <!-- 移动端汉堡菜单按钮 -->
@@ -65,12 +81,16 @@
       <!-- User Auth Buttons -->
         <template v-if="isLoggedIn">
           <button class="btn orange pill" @click.prevent="goToWallet()">
-            <span>🔗</span>
+            <!-- <span>🔗</span> -->
             <span>Wallet</span>
           </button>
           <button class="btn light pill" @click.prevent="goToProfile()">
             <span>👤</span>
             <span>Profile</span>
+          </button>
+          <button class="btn ghost pill settings-btn" @click.prevent="go('/settings')">
+            <span>⚙️</span>
+            <!-- <span>Settings</span> -->
           </button>
         </template>
         <template v-else>
@@ -95,40 +115,46 @@
           <span class="mobile-menu-icon">💼</span>
           <span>Portfolio</span>
         </a>
-        <!-- <div class="mobile-menu-divider"></div>
+        <div class="mobile-menu-divider"></div>
+        <a href="#" @click.prevent="go('/overview')" class="mobile-menu-item">
+          <span class="mobile-menu-icon">📋</span>
+          <span>Overview</span>
+        </a>
         <a href="#" @click.prevent="go('/about')" class="mobile-menu-item">
           <span class="mobile-menu-icon">🏢</span>
           <span>About Us</span>
         </a>
-        <a href="#" @click.prevent="go('/vision')" class="mobile-menu-item">
-          <span class="mobile-menu-icon">🎯</span>
-          <span>Vision</span> 
+        <a href="#" @click.prevent="go('/solutions')" class="mobile-menu-item">
+          <span class="mobile-menu-icon">🔧</span>
+          <span>Solutions</span>
+        </a>
+        <a href="#" @click.prevent="go('/tutorials')" class="mobile-menu-item">
+          <span class="mobile-menu-icon">📚</span>
+          <span>Tutorials</span>
+        </a>
+        <a href="#" @click.prevent="go('/pricing')" class="mobile-menu-item">
+          <span class="mobile-menu-icon">💰</span>
+          <span>Pricing</span>
         </a>
         <a href="#" @click.prevent="go('/contact')" class="mobile-menu-item">
           <span class="mobile-menu-icon">📞</span>
-          <span>Contact Us</span>
+          <span>Contact</span>
         </a>
-        <a href="#" @click.prevent="go('/help')" class="mobile-menu-item">
+        <a href="#" @click.prevent="go('/faq')" class="mobile-menu-item">
           <span class="mobile-menu-icon">❓</span>
-          <span>Help Center</span>
-        </a> -->
+          <span>FAQ</span>
+        </a>
       </div>
     </div>
     
-    <!-- 侧边栏组件 -->
-    <SlideNavigation :isOpen="sidebarOpen" @close="closeSidebar" />
   </header>
 </template>
 
 <script>
 import { isLoggedIn, clearAuth, AUTH_CHANGED_EVENT } from '@/utils/auth';
-import SlideNavigation from './SlideNavigation.vue';
 
 export default {
   name: 'AppHeader',
-  components: {
-    SlideNavigation
-  },
   props: {},
   data(){
     return { 
@@ -136,8 +162,7 @@ export default {
       searchText: '', 
       isLoggedIn: false,
       moreDropdownOpen: false,
-      mobileMenuOpen: false,
-      sidebarOpen: false
+      mobileMenuOpen: false
     }
   },
 
@@ -148,13 +173,11 @@ export default {
       this.closeSearch();
       this.closeMoreDropdown();
       this.closeMobileMenu();
-      // 注意：不自动关闭侧边栏，只有点击☰按钮才关闭
     },
     toggleMoreDropdown(){
       this.moreDropdownOpen = !this.moreDropdownOpen;
       this.closeSearch();
       this.closeMobileMenu();
-      // 注意：不自动关闭侧边栏
     },
     closeMoreDropdown(){
       this.moreDropdownOpen = false;
@@ -163,26 +186,9 @@ export default {
       this.mobileMenuOpen = !this.mobileMenuOpen;
       this.closeSearch();
       this.closeMoreDropdown();
-      // 注意：不自动关闭侧边栏
     },
     closeMobileMenu(){
       this.mobileMenuOpen = false;
-    },
-    toggleSidebar(){
-      this.sidebarOpen = !this.sidebarOpen;
-      this.updateBodyClass();
-      // 注意：只切换侧边栏状态，不关闭其他菜单
-    },
-    closeSidebar(){
-      this.sidebarOpen = false;
-      this.updateBodyClass();
-    },
-    updateBodyClass(){
-      if (this.sidebarOpen) {
-        document.body.classList.add('sidebar-open');
-      } else {
-        document.body.classList.remove('sidebar-open');
-      }
     },
     // refreshAuth() {
     //   const logged = localStorage.getItem('isLoggedIn') === 'true';
@@ -235,8 +241,6 @@ export default {
       if(mobileMenu && this.mobileMenuOpen && !mobileMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)){
         this.closeMobileMenu()
       }
-      
-      // 注意：侧边栏只能通过点击☰按钮关闭，不处理点击外部关闭
     },
     async connectWallet() {
       if (typeof window.ethereum !== "undefined") {
@@ -275,8 +279,6 @@ export default {
   beforeUnmount(){
     document.removeEventListener('click', this.onDocClick);
     window.removeEventListener(AUTH_CHANGED_EVENT, this.checkLogin);
-    // 清理body class
-    document.body.classList.remove('sidebar-open');
   }
 }
 </script>
@@ -354,6 +356,26 @@ export default {
   font-size: 16px;
   width: 20px;
   text-align: center;
+}
+
+/* 菜单项样式 */
+.menu-item {
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 20px;
+  transition: color 0.2s ease;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.menu-item:hover {
+  color: #667eea;
+}
+
+/* Header右侧按钮样式 */
+.header .btn {
+  font-size: 15px;
 }
 
 /* 深色主题适配 - 已直接应用深色样式 */
@@ -465,7 +487,7 @@ export default {
   }
   
   .brand-logo {
-    height: 28px;
+    height: 40px;
   }
   
   .menu {
@@ -541,7 +563,7 @@ export default {
   }
   
   .brand-logo {
-    height: 24px;
+    height: 36px;
   }
   
   .search-input.expanded {
@@ -574,7 +596,7 @@ export default {
   }
   
   .brand-logo {
-    height: 20px;
+    height: 32px;
   }
   
   .search-input.expanded {
@@ -591,29 +613,17 @@ export default {
   }
 }
 
-/* 侧边栏触发按钮样式 */
-.sidebar-toggle-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  margin-right: 12px;
+/* Settings按钮样式 - 移除背景和边框 */
+.settings-btn {
+  font-size:22px;
+  background: transparent !important;
+  border: none !important;
+  padding: 8px !important;
 }
 
-.sidebar-toggle-btn:hover {
-  background: var(--brand-600, rgba(255, 165, 0, 0.1));
-}
-
-.sidebar-icon {
-  font-size: 20px;
-  color: var(--text, #ffffff);
-  line-height: 1;
+.settings-btn:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: none !important;
 }
 
 </style>

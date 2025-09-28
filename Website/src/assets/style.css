@@ -10,7 +10,7 @@
   --ring: #7dc4ff;
   --shadow: 0 8px 32px rgba(10,10,26,0.18);
   --radius:18px;
-  --container:1200px;
+  --container:1400px;
   --orange: #EAAB8D;
 }
 
@@ -111,7 +111,7 @@ a { color: inherit; text-decoration: none }
 .left, .right { display: flex; align-items: center; gap: 16px }
 
 .brand-logo {
-  height: 32px;   /* adjust size to fit your navbar */
+  height: 48px;   /* 放大logo尺寸 */
   width: auto;
   display: block;
 }
