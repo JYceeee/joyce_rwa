@@ -180,8 +180,12 @@
           <div class="amount-info">
           </div>
         </div>
-        <div>
-          <button>check contract details</button>
+        <div class="contract-details-section">
+          <button class="contract-details-btn" @click="viewContractDetails">
+            <!-- <span class="btn-icon">📋</span> -->
+            <span class="btn-text">View Contract Details</span>
+            <!-- <span class="btn-arrow">→</span> -->
+          </button>
         </div>
         <!-- 交易类型选择 -->
         <div class="form-section">
@@ -509,6 +513,20 @@ export default {
     }
   },
   methods: {
+    // 查看合约详情
+    viewContractDetails() {
+      console.log('📄 查看合约详情:', this.projectCode)
+      this.$router.push({
+        path: '/contract',
+        query: {
+          projectCode: this.projectCode,
+          projectName: this.projectData.name,
+          projectImage: this.projectData.image,
+          from: 'trade'
+        }
+      })
+    },
+
     async loadProjectData() {
       try {
         this.projectLoading = true
@@ -1986,6 +2004,78 @@ export default {
   padding: 20px;
   border-radius: 12px;
   border: 1px solid #2a2a4a;
+}
+
+/* 合约详情按钮区域 */
+.contract-details-section {
+  margin-bottom: 30px;
+  display: flex;
+  justify-content: center;
+}
+
+.contract-details-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.contract-details-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.contract-details-btn:hover::before {
+  left: 100%;
+}
+
+.contract-details-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.contract-details-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-icon {
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-text {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.btn-arrow {
+  font-size: 14px;
+  transition: transform 0.3s ease;
+}
+
+.contract-details-btn:hover .btn-arrow {
+  transform: translateX(4px);
 }
 
 .section-title {

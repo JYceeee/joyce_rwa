@@ -201,11 +201,11 @@
                   </div>
                   <div class="pf-project-metric" v-if="getProjectHolding(project.code)">
                     <span class="pf-metric-label">Interest Received</span>
-                    <span class="pf-metric-value">{{ calculateInterestReceived(project.code).toFixed(2) }} tokens</span>
+                    <!-- <span class="pf-metric-value">{{ calculateInterestReceived(project.code).toFixed(2) }} tokens</span> -->
                   </div>
                   <div class="pf-project-metric" v-if="getProjectHolding(project.code)">
                     <span class="pf-metric-label">Interest Accrued</span>
-                    <span class="pf-metric-value">{{ calculateInterestAccrued(project.code).toFixed(2) }} tokens</span>
+                    <!-- <span class="pf-metric-value">{{ calculateInterestAccrued(project.code).toFixed(2) }} tokens</span> -->
                   </div>
                 </div>
                 <div class="pf-project-actions">
