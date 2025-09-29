@@ -1,11 +1,27 @@
 <template>
   <div class="container pf-page">
+    <!-- 移动端顶部导航 -->
+    <div class="pf-mobile-header">
+      <div class="pf-mobile-nav">
+        <button class="pf-mobile-menu-btn" @click="toggleMobileSidebar">
+          <span class="pf-menu-icon">☰</span>
+        </button>
+        <h1 class="pf-mobile-title">Portfolio</h1>
+        <div class="pf-mobile-actions">
+          <button class="pf-mobile-action-btn" @click="showSettings = !showSettings">⚙️</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 移动端侧边栏遮罩 -->
+    <div v-if="mobileSidebarOpen" class="pf-mobile-overlay" @click="closeMobileSidebar"></div>
+
     <div class="pf-main-content">
       <div class="pf-body">
         <!-- 侧栏：Accounts -->
-        <aside class="pf-sidebar">
+        <aside class="pf-sidebar" :class="{ 'pf-sidebar-mobile-open': mobileSidebarOpen }">
           <div class="pf-side-head">
-            <h2>Bound Wallets</h2>
+            <h2>My Wallet</h2>
             <div class="pf-side-tools">
               <span class="gear" @click="showSettings = !showSettings">⚙️</span>
               <span class="plus" @click="addAccount" title="Add wallets in Wallet page">＋</span>
@@ -581,6 +597,9 @@ const filterType = ref('')
 const filterProject = ref('')
 const accGroupOpen = ref(true)
 const selectedAccount = ref('')
+
+// 移动端状态管理
+const mobileSidebarOpen = ref(false)
 
 // 数据库同步相关
 let unsubscribeProducts = null
@@ -1362,6 +1381,15 @@ const selectAccount = (accountAddress) => {
 const addAccount = () => {
   // 在Portfolio中不能添加新账户，只能显示在Wallet中绑定的账户
   alert('请在Wallet页面绑定新的钱包账户。Portfolio只显示已绑定的钱包。')
+}
+
+// 移动端侧边栏控制
+const toggleMobileSidebar = () => {
+  mobileSidebarOpen.value = !mobileSidebarOpen.value
+}
+
+const closeMobileSidebar = () => {
+  mobileSidebarOpen.value = false
 }
 
 // 跳转到Wallet页面
@@ -2457,7 +2485,7 @@ window.addEventListener('storage', (e) => {
 .pf-add{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:14px;background:var(--panel);border:1px solid var(--border);box-shadow:var(--shadow);font-weight:600;cursor:pointer;color:#ffffff;}
 .pf-add-ico{font-size:18px;line-height:1}
 .pf-body{display:grid;grid-template-columns:280px 1fr;gap:16px;padding:0 20px 24px;margin-top: 30px;;}
-.pf-sidebar{width:300px;background:#141426;border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px;}
+.pf-sidebar{margin-left:50px;margin-top:17px;width:250px;background:#141426;border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px;}
 .pf-side-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .pf-side-head h2{font-size:20px;font-weight:800;color:#ffffff;}
 .pf-side-tools{display:flex;gap:10px;color:#9ca3af}
@@ -2468,7 +2496,8 @@ window.addEventListener('storage', (e) => {
 .pf-acc-item{display:flex;align-items:center;gap:10px;margin-top:8px;padding:8px;border-radius:10px;background:#1f2937}
 .pf-avatar{width:28px;height:28px;border-radius:50%;background:radial-gradient(100% 100% at 25% 25%,#ffd79a 0%,#ff9e6e 40%,#ff7b7b 100%);box-shadow: inset 0 0 0 2px #374151;}
 .pf-addr{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;color:#9ca3af}
-.pf-main{width:1100px;background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px 18px;margin:16px;}
+
+.pf-main{width:800px;background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px 18px;margin:16px;}
 .pf-hero{padding:8px 4px 12px;border-bottom:1px solid var(--border)}
 .pf-balance{font-size:56px;font-weight:900;letter-spacing:-.02em;display:flex;align-items:center;gap:10px;}
 .pf-eye{border:none;background:transparent;cursor:pointer;font-size:20px}
@@ -3326,7 +3355,13 @@ window.addEventListener('storage', (e) => {
 
 /* 项目卡片样式 */
 .pf-projects-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:16px;}
-.pf-project-card{padding:16px;border-radius:12px;background:#141426;border:1px solid var(--border);}
+.pf-project-card{
+  width:320px;
+  margin-left:5px;
+  padding:16px;
+  border-radius:12px;
+  background:#141426;
+  border:1px solid var(--border);}
 .pf-project-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
 .pf-project-image{width:40px;height:40px;border-radius:8px;}
 .pf-project-info{flex:1;}
@@ -3343,11 +3378,342 @@ window.addEventListener('storage', (e) => {
 
 .pf-project-actions{display:flex;gap:8px;flex-wrap:wrap;}
 .pf-project-btn{padding:8px 16px;border-radius:8px;border:1px solid #374151;background:#1f2937;color:#ffffff;cursor:pointer;font-size:14px;font-weight:600;transition:all 0.2s ease;}
-.pf-project-btn:hover{background:#374151;}
+.pf-project-btn:hover{background:#d97706;}
 .pf-project-btn-secondary{background:var(--primary);color:#fff;border-color:var(--primary);}
 .pf-project-btn-secondary:hover{background:var(--primary-ink);}
 .pf-project-btn-interest{background:#dc2626;color:#fff;border-color:#dc2626;}
 .pf-project-btn-interest:hover{background:#b91c1c;}
 
 @media (max-width:1024px){.pf-body{grid-template-columns:1fr}.pf-sidebar{order:2}.pf-main{order:1}}
+
+/* 移动端专用样式 */
+.pf-mobile-header {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+}
+
+.pf-mobile-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 100%;
+}
+
+.pf-mobile-menu-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: var(--text);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.pf-mobile-menu-btn:hover {
+  background: var(--panel);
+}
+
+.pf-mobile-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.pf-mobile-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.pf-mobile-action-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: var(--text);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.pf-mobile-action-btn:hover {
+  background: var(--panel);
+}
+
+.pf-mobile-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 50;
+}
+
+.pf-sidebar-mobile-open {
+  transform: translateX(0) !important;
+}
+
+/* 移动端响应式设计 */
+@media (max-width: 768px) {
+  .pf-mobile-header {
+    display: block;
+  }
+  
+  .pf-mobile-overlay {
+    display: block;
+  }
+  
+  .pf-body {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 0;
+    margin-top: 0;
+  }
+  
+  .pf-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 280px;
+    z-index: 60;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    border-radius: 0;
+    margin: 0;
+    overflow-y: auto;
+  }
+  
+  .pf-main {
+    width: 100%;
+    margin: 0;
+    border-radius: 0;
+    min-height: calc(100vh - 60px);
+  }
+  
+  .pf-hero {
+    padding: 16px;
+    text-align: center;
+  }
+  
+  .pf-balance {
+    font-size: 36px;
+    margin-bottom: 8px;
+  }
+  
+  .pf-tabs {
+    gap: 16px;
+    padding: 0 16px;
+    margin-top: 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  .pf-tabs::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+  
+  .pf-tab {
+    padding: 12px 0;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+  
+  .pf-projects-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px;
+  }
+  
+  .pf-project-card {
+    padding: 16px;
+  }
+  
+  .pf-project-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .pf-project-image {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+  }
+  
+  .pf-project-metrics {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin: 16px 0;
+  }
+  
+  .pf-project-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .pf-project-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 14px;
+  }
+  
+  .pf-stats {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .pf-stat-card {
+    padding: 12px;
+  }
+  
+  .pf-stat-value {
+    font-size: 18px;
+  }
+  
+  .pf-pie-chart-container {
+    padding: 16px;
+  }
+  
+  .pf-pie-chart {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+  }
+  
+  .pf-chart-legend {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  
+  .pf-legend-item {
+    padding: 8px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .pf-transaction-chart {
+    padding: 16px;
+  }
+  
+  .pf-chart-bars {
+    gap: 4px;
+    padding: 0 8px;
+  }
+  
+  .pf-bar-item {
+    min-width: 24px;
+    max-width: 60px;
+  }
+  
+  .pf-line-chart-container {
+    height: 150px;
+  }
+  
+  .pf-transaction-list {
+    padding: 16px;
+  }
+  
+  .pf-transaction-item {
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+  
+  .pf-transaction-header {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  
+  .pf-transaction-details {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pf-mobile-header {
+    padding: 8px 12px;
+  }
+  
+  .pf-mobile-title {
+    font-size: 16px;
+  }
+  
+  .pf-balance {
+    font-size: 28px;
+  }
+  
+  .pf-tabs {
+    padding: 0 12px;
+    gap: 12px;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  .pf-tabs::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+  
+  .pf-tab {
+    padding: 10px 0;
+    font-size: 13px;
+  }
+  
+  .pf-projects-grid {
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .pf-project-card {
+    padding: 12px;
+  }
+  
+  .pf-project-metrics {
+    gap: 8px;
+  }
+  
+  .pf-project-metric {
+    padding: 8px;
+  }
+  
+  .pf-pie-chart {
+    width: 160px;
+    height: 160px;
+  }
+  
+  .pf-chart-bars {
+    gap: 2px;
+    padding: 0 4px;
+  }
+  
+  .pf-bar-item {
+    min-width: 20px;
+    max-width: 40px;
+  }
+  
+  .pf-line-chart-container {
+    height: 120px;
+  }
+  
+  .pf-transaction-list {
+    padding: 12px;
+  }
+  
+  .pf-transaction-item {
+    padding: 10px;
+  }
+}
 </style>

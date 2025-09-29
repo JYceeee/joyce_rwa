@@ -125,7 +125,7 @@
             <div class="project-meta">
               <span class="meta-item">Type: {{ projectData.type }}</span>
               <span class="meta-item">Region: {{ projectData.region }}</span>
-              <span class="meta-item">Risk: {{ projectData.risk }}</span>
+              <!-- <span class="meta-item">Risk: {{ projectData.risk }}</span> -->
             </div>
           </div>
         </div>

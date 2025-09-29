@@ -95,9 +95,14 @@
   <section v-if="connected && selectedAccount" class="mm-dashboard-section">
     <!-- 资产标题区 -->
     <div class="mm-hero">
+      <div class="mm-card">
+        <div class="mm-card-label">Current Network</div>
+        <div class="mm-card-title">{{ networkLabel }}</div>
+        <div class="mm-card-sub">Chain ID: {{ chainId }}</div>
+      </div>
       <div class="mm-balance">{{ nativeBalanceDisplay }} {{ nativeSymbol }}</div>
       <div class="mm-subline">
-        <!-- <span>+A$0 (+0.00%)</span> 需要修改为投资累计余额的动态数据 -->
+        <span>A${{ nativeToAudDisplay || 0 }}</span> 
         <a href="#" @click.prevent="$router.push('/portfolio')" class="mm-link">Portfolio ↗</a>
       </div>
     </div>
@@ -113,7 +118,7 @@
       </form>
     </div>
     <!-- 信息条：网络 / 原生余额 -->
-    <div class="mm-info">
+    <!-- <div class="mm-info">
       <div class="mm-card">
         <div class="mm-card-label">Current Network</div>
         <div class="mm-card-title">{{ networkLabel }}</div>
@@ -124,7 +129,7 @@
         <div class="mm-card-title">{{ nativeBalanceDisplay }} {{ nativeSymbol }}</div>
         <div class="mm-card-sub">≈ {{ nativeToAudDisplay || 0 }} AUD</div>
       </div>
-    </div>
+    </div> -->
     <!-- Tabs -->
     <nav class="mm-tabs">
       <button
@@ -132,11 +137,6 @@
         :class="{ 'is-active': activeTab==='tokens' }"
         @click="activeTab='tokens'"
       >Tokens</button>
-      <!-- <button
-        class="mm-tab"
-        :class="{ 'is-active': activeTab==='nfts' }"
-        @click="activeTab='nfts'"
-      >NFTs</button> -->
       <button
         class="mm-tab"
         :class="{ 'is-active': activeTab==='activity' }"
@@ -163,8 +163,8 @@
       <div class="mm-net-right" style="position:relative;">
         <button class="mm-btn mm-outline" @click="toggleSortMenu" style="height:28px;padding:2px 10px;">Sort</button>
         <div v-if="sortOpen" class="mm-sort-menu">
-          <button class="mm-sort-item" :class="{active: sortOrder==='desc'}" @click="setSort('desc')">descending by balance</button>
-          <button class="mm-sort-item" :class="{active: sortOrder==='asc'}" @click="setSort('asc')">ascending by balance</button>
+          <button class="mm-sort-item" :class="{active: sortOrder==='desc'}" @click="setSort('desc')">Descending by balance</button>
+          <button class="mm-sort-item" :class="{active: sortOrder==='asc'}" @click="setSort('asc')">Ascending by balance</button>
         </div>
       </div>
     </div>
@@ -176,9 +176,8 @@
           <div>
             <div class="mm-token-title">
               SepoliaETH 
-              <!-- <span class="mm-dim"></span> -->
             </div>
-            <!-- <div class="mm-rise">+2.48%</div> -->
+            <div class="mm-rise">+2.48%</div>
           </div>
         </div>
         <div class="mm-token-right">
@@ -205,7 +204,7 @@
     </div>
   </section>
 
-  <!-- Activity 页签 - 包含Transaction Activity和Status Check两个section -->
+  <!-- Activity 页签  -->
   <div v-if="activeTab==='activity'" class="mm-activity-section">
     <div class="mm-activity-header">
       <h3>Wallet Activity Log</h3>
@@ -287,7 +286,6 @@
       
       <!-- 左右分栏布局  -->
       <div class="mm-activity-columns">
-                <!-- 左侧：交易活动 (buy/sell) -->
         <div class="mm-activity-left">
             <div class="mm-activity-section-header">
               <h4 class="mm-activity-section-title">Transaction Activity</h4>
@@ -480,52 +478,53 @@
               </a>
             </div>
           </div>
-        </div>
-        
-        <!-- 交易活动分页控件 - 移动到Transaction Activity section底部 -->
-        <div v-if="transactionTotalPages > 1" class="mm-transaction-pagination">
-          <div class="mm-pagination-info">
-            <span class="mm-pagination-text">
-              Transaction Page {{ transactionPage }} of {{ transactionTotalPages }}
-            </span>
-            <span class="mm-pagination-count">
-              ({{ leftColumnActivities.length }} records)
-            </span>
-          </div>
           
-          <div class="mm-pagination-controls">
-            <button 
-              class="mm-pagination-btn" 
-              @click="prevTransactionPage"
-              :disabled="transactionPage <= 1"
-            >
-              ← 
-            </button>
-            
-            <div class="mm-pagination-pages">
-              <button 
-                v-for="page in transactionTotalPages" 
-                :key="page"
-                class="mm-pagination-page"
-                :class="{ active: page === transactionPage }"
-                @click="goToTransactionPage(page)"
-              >
-                {{ page }}
-              </button>
+          <!-- 交易活动分页控件 -->
+          <div v-if="transactionTotalPages > 1" class="mm-transaction-pagination">
+            <div class="mm-pagination-info">
+              <span class="mm-pagination-text">
+                Transaction Page {{ transactionPage }} of {{ transactionTotalPages }}
+              </span>
+              <span class="mm-pagination-count">
+                ({{ leftColumnActivities.length }} records)
+              </span>
             </div>
             
-            <button 
-              class="mm-pagination-btn" 
-              @click="nextTransactionPage"
-              :disabled="transactionPage >= transactionTotalPages"
-            >
-               →
-            </button>
+            <div class="mm-pagination-controls">
+              <button 
+                class="mm-pagination-btn" 
+                @click="prevTransactionPage"
+                :disabled="transactionPage <= 1"
+              >
+                ← 
+              </button>
+              
+              <div class="mm-pagination-pages">
+                <button 
+                  v-for="page in transactionTotalPages" 
+                  :key="page"
+                  class="mm-pagination-page"
+                  :class="{ active: page === transactionPage }"
+                  @click="goToTransactionPage(page)"
+                >
+                  {{ page }}
+                </button>
+              </div>
+              
+              <button 
+                class="mm-pagination-btn" 
+                @click="nextTransactionPage"
+                :disabled="transactionPage >= transactionTotalPages"
+              >
+                 →
+              </button>
+            </div>
           </div>
         </div>
         
+        
       <!-- 右侧：状态检查活动 (wallet_status_check/wallet_focus_check) - 始终在右侧 -->
-      <div class="mm-activity-right">
+      <!-- <div class="mm-activity-right">
         <div class="mm-activity-section-header">
           <h4 class="mm-activity-section-title">Status Check</h4>
           <div class="mm-button-group">
@@ -547,88 +546,38 @@
               <span class="mm-activity-title">{{ getActivityTitle(activity.type) }}</span>
             </div>
             <div class="mm-activity-time">{{ formatTime(activity.timestamp) }}</div>
-          </div>
+          </div> -->
           
           <!-- 状态检查活动 -->
-          <div class="mm-activity-details">
+          <!-- <div class="mm-activity-details"> -->
             <!-- 钱包状态检查 -->
-            <div v-if="activity.type === 'wallet_status_check' || activity.type === 'wallet_focus_check'" class="mm-activity-status">
+            <!-- <div v-if="activity.type === 'wallet_status_check' || activity.type === 'wallet_focus_check'" class="mm-activity-status">
               <span class="mm-activity-label">Status:</span>
               <span class="mm-activity-value">Checked</span>
             </div>
             <div v-if="activity.type === 'wallet_status_check' || activity.type === 'wallet_focus_check'" class="mm-activity-wallet">
               <span class="mm-activity-label">Wallet:</span>
               <span class="mm-activity-value">{{ formatAddress(activity.wallet_address) }}</span>
-            </div>
+            </div> -->
             
             <!-- 网络变化信息 -->
-            <div v-if="activity.type === 'network_change'" class="mm-activity-network">
+            <!-- <div v-if="activity.type === 'network_change'" class="mm-activity-network">
               <span class="mm-activity-label">Network:</span>
               <span class="mm-activity-value">{{ activity.network_name }}</span>
             </div>
             <div v-if="activity.type === 'network_change'" class="mm-activity-network-id">
               <span class="mm-activity-label">Chain ID:</span>
               <span class="mm-activity-value">{{ activity.network_id }}</span>
-            </div>
+            </div> -->
             
             <!-- 通用消息显示 -->
-            <div v-if="activity.message" class="mm-activity-message-text">
+            <!-- <div v-if="activity.message" class="mm-activity-message-text">
               <span class="mm-activity-label">Message:</span>
               <span class="mm-activity-value">{{ activity.message }}</span>
-            </div>
-          </div>
-      </div>
+            </div> -->
+          <!-- </div> -->
+      <!-- </div> -->
         
-        <!-- 状态检查分页控件 -->
-        <div v-if="statusCheckTotalPages > 1" class="mm-status-pagination">
-          <div class="mm-pagination-info">
-            <span class="mm-pagination-text">
-              Page {{ statusCheckPage }} of {{ statusCheckTotalPages }}
-            </span>
-            <span class="mm-pagination-count">
-              ({{ rightColumnActivities.length }} records)
-            </span>
-          </div>
-          
-          <div class="mm-pagination-controls">
-            <button 
-              class="mm-pagination-btn" 
-              @click="prevStatusPage"
-              :disabled="statusCheckPage <= 1"
-            >
-              ← 
-            </button>
-            
-            <div class="mm-pagination-pages">
-              <template v-for="(page, index) in statusCheckPaginationPages" :key="page">
-                <!-- 显示省略号 -->
-                <span 
-                  v-if="index > 0 && page - statusCheckPaginationPages[index - 1] > 1" 
-                  class="mm-pagination-ellipsis"
-                >
-                  ...
-                </span>
-                
-                <!-- 显示页码按钮 -->
-                <button 
-                  class="mm-pagination-page"
-                  :class="{ active: page === statusCheckPage }"
-                  @click="goToStatusPage(page)"
-                >
-                  {{ page }}
-                </button>
-              </template>
-            </div>
-            
-            <button 
-              class="mm-pagination-btn" 
-              @click="nextStatusPage"
-              :disabled="statusCheckPage >= statusCheckTotalPages"
-            >
-               →
-            </button>
-          </div>
-        </div>
         </div>
       </div>
     </div>
@@ -637,10 +586,9 @@
   <!-- 提示/错误 -->
   <p v-if="warning" class="mm-warn">{{ warning }}</p>
   <p v-if="error" class="mm-error">{{ error }}</p>
-</div>
-<transition name="fade">
-  <div v-if="copied" class="mm-toast">Copied</div>
-</transition>
+  <transition name="fade">
+    <div v-if="copied" class="mm-toast">Copied</div>
+  </transition>
 </template>
 
 <script setup>
@@ -693,14 +641,12 @@ const statusCheckPageSize = 3
 const transactionPage = ref(1)
 const transactionPageSize = 5
 
+
 // 网络选择相关
 const selectedNetwork = ref('SepoliaETH')
 const availableNetworks = ref([
   { value: 'SepoliaETH', label: 'SepoliaETH', chainId: 11155111 },
-  { value: 'Ethereum', label: 'Ethereum', chainId: 1 },
-  { value: 'Polygon', label: 'Polygon', chainId: 137 },
-  { value: 'Arbitrum', label: 'Arbitrum', chainId: 42161 },
-  { value: 'Optimism', label: 'Optimism', chainId: 10 }
+  { value: 'Ethereum', label: 'Ethereum', chainId: 1 }
 ])
 
 // 筛选后的活动数据
@@ -835,6 +781,11 @@ const statusCheckPaginationPages = computed(() => {
   return [...new Set(pages)].sort((a, b) => a - b)
 })
 
+// 交易活动总页数
+const transactionTotalPages = computed(() => {
+  return Math.ceil(leftColumnActivities.value.length / transactionPageSize)
+})
+
 // 交易活动分页后的活动
 const paginatedTransactionActivities = computed(() => {
   const startIndex = (transactionPage.value - 1) * transactionPageSize
@@ -842,10 +793,7 @@ const paginatedTransactionActivities = computed(() => {
   return leftColumnActivities.value.slice(startIndex, endIndex)
 })
 
-// 交易活动总页数
-const transactionTotalPages = computed(() => {
-  return Math.ceil(leftColumnActivities.value.length / transactionPageSize)
-})
+
 
 // 监听 fullAddress 变化，自动添加到 accounts 列表（避免重复）
 watch(fullAddress, (newAddr) => {
@@ -1678,7 +1626,7 @@ function switchNetwork(networkValue) {
   const network = availableNetworks.value.find(n => n.value === networkValue)
   if (network) {
     selectedNetwork.value = networkValue
-    console.log(`🌐 切换到网络: ${network.label} (Chain ID: ${network.chainId})`)
+    console.log(`Switching to network: ${network.label} (Chain ID: ${network.chainId})`)
     
     // 这里可以添加实际的网络切换逻辑
     // 例如：调用MetaMask的wallet_switchEthereumChain方法
@@ -1687,9 +1635,9 @@ function switchNetwork(networkValue) {
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: `0x${network.chainId.toString(16)}` }]
       }).then(() => {
-        console.log(`✅ 成功切换到 ${network.label}`)
+        console.log(`Successfully switched to ${network.label}`)
       }).catch((error) => {
-        console.error(`❌ 网络切换失败:`, error)
+        console.error(`Network switch failed:`, error)
         // 如果网络不存在，可以尝试添加网络
         if (error.code === 4902) {
           addNetwork(network)
@@ -1712,40 +1660,41 @@ function addNetwork(network) {
         symbol: 'ETH',
         decimals: 18
       }
-    },
-    'Polygon': {
-      chainId: '0x89',
-      chainName: 'Polygon Mainnet',
-      rpcUrls: ['https://polygon-rpc.com'],
-      blockExplorerUrls: ['https://polygonscan.com'],
-      nativeCurrency: {
-        name: 'MATIC',
-        symbol: 'MATIC',
-        decimals: 18
-      }
-    },
-    'Arbitrum': {
-      chainId: '0xa4b1',
-      chainName: 'Arbitrum One',
-      rpcUrls: ['https://arb1.arbitrum.io/rpc'],
-      blockExplorerUrls: ['https://arbiscan.io'],
-      nativeCurrency: {
-        name: 'ETH',
-        symbol: 'ETH',
-        decimals: 18
-      }
-    },
-    'Optimism': {
-      chainId: '0xa',
-      chainName: 'Optimism',
-      rpcUrls: ['https://mainnet.optimism.io'],
-      blockExplorerUrls: ['https://optimistic.etherscan.io'],
-      nativeCurrency: {
-        name: 'ETH',
-        symbol: 'ETH',
-        decimals: 18
-      }
     }
+    // ,
+    // 'Polygon': {
+    //   chainId: '0x89',
+    //   chainName: 'Polygon Mainnet',
+    //   rpcUrls: ['https://polygon-rpc.com'],
+    //   blockExplorerUrls: ['https://polygonscan.com'],
+    //   nativeCurrency: {
+    //     name: 'MATIC',
+    //     symbol: 'MATIC',
+    //     decimals: 18
+    //   }
+    // },
+    // 'Arbitrum': {
+    //   chainId: '0xa4b1',
+    //   chainName: 'Arbitrum One',
+    //   rpcUrls: ['https://arb1.arbitrum.io/rpc'],
+    //   blockExplorerUrls: ['https://arbiscan.io'],
+    //   nativeCurrency: {
+    //     name: 'ETH',
+    //     symbol: 'ETH',
+    //     decimals: 18
+    //   }
+    // },
+    // 'Optimism': {
+    //   chainId: '0xa',
+    //   chainName: 'Optimism',
+    //   rpcUrls: ['https://mainnet.optimism.io'],
+    //   blockExplorerUrls: ['https://optimistic.etherscan.io'],
+    //   nativeCurrency: {
+    //     name: 'ETH',
+    //     symbol: 'ETH',
+    //     decimals: 18
+      // }
+    // }
   }
   
   const config = networkConfigs[network.value]
@@ -1884,7 +1833,7 @@ color:#FFFFFF;
 /* 英雄区 */
 .mm-hero{margin-top:8px;}
 .mm-balance{font-size:48px;font-weight:800;letter-spacing:-.02em;color:#FFFFFF;}
-.mm-subline{margin-top:6px;display:flex;align-items:center;gap:12px;color:#cbd5e1;font-size:14px;}
+.mm-subline{margin-top:6px;display:flex;align-items:center;gap:12px;color:#cbd5e1;font-size:18px;}
 
 /* 操作按钮：一行 */
 .mm-actions{display:flex;gap:16px;margin-top:12px;}
@@ -1894,7 +1843,7 @@ color:#FFFFFF;
 
 /* 信息条 */
 .mm-info{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px;}
-.mm-card{border:1px solid #2a2a4a;border-radius:16px;padding:16px;background:#1c1c36;}
+.mm-card{border:1px solid #2a2a4a;border-radius:16px;padding:16px;background:#1c1c36;width:200px;}
 .mm-card-label{font-size:12px;color:#64748b;margin-bottom:6px;}
 .mm-card-title{font-weight:600;color:#FFFFFF;}
 .mm-card-sub{font-size:12px;color:#64748b;margin-top:4px;}
@@ -1925,12 +1874,13 @@ color:#FFFFFF;
 .mm-activity-left {
   order: 1;
   min-width: 450px;
+  width: 100%;
 }
 
-.mm-activity-right {
+/* .mm-activity-right {
   order: 2;
   max-width: 400px;
-}
+} */
 
 .mm-activity-left,
 .mm-activity-right {

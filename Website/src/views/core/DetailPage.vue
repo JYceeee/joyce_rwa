@@ -28,79 +28,96 @@
     
     <!-- 项目详情 -->
     <div v-else-if="model" class="detail-container">
-      <!-- Key Facts 关键信息 -->
-      <section class="section key-facts">
+      <!-- 项目基本信息 -->
+      <section class="section project-info">
         <div class="section-header">
-          <h2>Key Facts</h2>
+          <h2>Project Information</h2>
           <button class="invest-btn" @click="handleInvest">
             <span class="btn-icon">💰</span>
             Invest
           </button>
         </div>
-        <div class="facts-grid">
-          <div class="fact-item">
-            <div class="fact-label">Project Code</div>
-            <div class="fact-value">{{ model.code }}</div>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Project Code</div>
+            <div class="info-value">{{ model.code }}</div>
           </div>
-          <div class="fact-item">
-            <div class="fact-label">Project Name</div>
-            <div class="fact-value">{{ model.name }}</div>
+          <div class="info-item">
+            <div class="info-label">Project Name</div>
+            <div class="info-value">{{ model.name }}</div>
           </div>
-          <div class="fact-item">
-            <div class="fact-label">Project Type</div>
-            <div class="fact-value">{{ model.type }}</div>
+          <div class="info-item">
+            <div class="info-label">Type of Collateral Assets</div>
+            <div class="info-value">{{ model.type }}</div>
           </div>
-          <div class="fact-item">
-            <div class="fact-label">Region</div>
-            <div class="fact-value">{{ model.region }}</div>
+          <div class="info-item">
+            <div class="info-label">Value of Collateral Assets</div>
+            <div class="info-value">A${{ formatNumber(model.collateralValue) }}</div>
           </div>
-          <div class="fact-item">
-            <div class="fact-label">Risk Level</div>
-            <div class="fact-value">{{ model.risk }}</div>
+          <div class="info-item">
+            <div class="info-label">Loan Issuer</div>
+            <div class="info-value">{{ model.issuer }}</div>
           </div>
-          <div class="fact-item">
-            <div class="fact-label">Status</div>
-            <div class="fact-value">{{ model.status }}</div>
+          <div class="info-item">
+            <div class="info-label">抵押权</div>
+            <div class="info-value">{{ model.mortgageRank || '第一抵押权人' }}</div>
           </div>
-          <div class="fact-item">
-            <div class="fact-label">Target Yield</div>
-            <div class="fact-value">{{ model.targetYield }}%</div>
+          <div class="info-item">
+            <div class="info-label">资产地址</div>
+            <div class="info-value">{{ model.address || model.region }}</div>
           </div>
-          <div class="fact-item">
-            <div class="fact-label">Total Offering</div>
-            <div class="fact-value">A${{ formatNumber(model.totalOffering) }}</div>
+        </div>
+      </section>
+
+      <!-- 投资信息 -->
+      <section class="section investment-info">
+        <h2>Investment Information</h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Subscribed</div>
+            <div class="info-value">A${{ formatNumber(model.subscribed) }}</div>
           </div>
-          <div class="fact-item">
-            <div class="fact-label">Subscribed</div>
-            <div class="fact-value">A${{ formatNumber(model.subscribed) }}</div>
+          <div class="info-item">
+            <div class="info-label">Total Offering</div>
+            <div class="info-value">A${{ formatNumber(model.totalOffering) }}</div>
           </div>
-          <div class="fact-item">
-            <div class="fact-label">Loan Amount</div>
-            <div class="fact-value">A${{ formatNumber(model.loanAmount) }}</div>
+          <div class="info-item">
+            <div class="info-label">认购进度</div>
+            <div class="info-value">{{ getSubscriptionProgress() }}%</div>
           </div>
-          <div class="fact-item">
-            <div class="fact-label">Annual Interest Rate</div>
-            <div class="fact-value">{{ model.annualInterestRate }}%</div>
+        </div>
+        <!-- 进度条 -->
+        <div class="progress-section">
+          <div class="progress-bar">
+            <div class="progress-fill" :style="{ width: getSubscriptionProgress() + '%' }"></div>
           </div>
-          <div class="fact-item">
-            <div class="fact-label">Loan Term</div>
-            <div class="fact-value">{{ model.loanTerm }}</div>
+          <div class="progress-text">{{ getSubscriptionProgress() }}% Subscribed</div>
+        </div>
+      </section>
+
+      <!-- 贷款信息 -->
+      <section class="section loan-info">
+        <h2>Loan Information</h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Loan Amount</div>
+            <div class="info-value">A${{ formatNumber(model.loanAmount) }}</div>
           </div>
-          <div class="fact-item">
-            <div class="fact-label">LTV (Loan-to-Value)</div>
-            <div class="fact-value">{{ model.ltv }}%</div>
+          <div class="info-item">
+            <div class="info-label">Annual Interest Rate</div>
+            <div class="info-value">{{ model.annualInterestRate }}%</div>
           </div>
-          <div class="fact-item">
-            <div class="fact-label">Drawdown Date</div>
-            <div class="fact-value">{{ formatDate(model.drawdownDate) }}</div>
+          <div class="info-item">
+            <div class="info-label">Loan Term</div>
+            <div class="info-value">{{ model.loanTerm }} months</div>
           </div>
-          <div class="fact-item">
-            <div class="fact-label">Early Repayment</div>
-            <div class="fact-value">{{ model.earlyRepayment }}</div>
+          <div class="info-item">
+            <div class="info-label">LTV (Loan-to-Value)</div>
+            <div class="info-value">{{ model.ltv }}%</div>
           </div>
-          <div class="fact-item">
-            <div class="fact-label">Repayment Arrangement</div>
-            <div class="fact-value">{{ model.repaymentArrangement }}</div>
+          <div class="info-item">
+            <div class="info-label">违约时的利息</div>
+            <div class="info-value">{{ model.defaultInterest || model.annualInterestRate + 2 }}%</div>
           </div>
         </div>
       </section>
@@ -451,6 +468,21 @@ export default {
       }
     },
 
+    // 计算认购进度
+    getSubscriptionProgress() {
+      if (!this.model || !this.model.totalOffering || !this.model.subscribed) {
+        return 0
+      }
+      
+      const total = parseFloat(this.model.totalOffering)
+      const subscribed = parseFloat(this.model.subscribed)
+      
+      if (total === 0) return 0
+      
+      const progress = (subscribed / total) * 100
+      return Math.round(progress * 100) / 100 // 保留两位小数
+    },
+
     // 处理投资按钮点击
     handleInvest() {
       if (!this.model) {
@@ -571,6 +603,78 @@ export default {
   color: var(--text);
   border-bottom: 2px solid var(--brand);
   padding-bottom: 12px;
+}
+
+/* 新的信息网格样式 */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.info-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--brand);
+  transform: translateY(-2px);
+}
+
+.info-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.info-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  word-break: break-word;
+}
+
+/* 进度条样式 */
+.progress-section {
+  margin-top: 24px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #059669);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.progress-text {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #10b981;
 }
 
 /* Key Facts 样式 */
@@ -737,6 +841,15 @@ export default {
     align-items: stretch;
   }
   
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .info-item {
+    padding: 12px;
+  }
+  
   .invest-btn {
     width: 100%;
     justify-content: center;
@@ -773,6 +886,27 @@ export default {
   
   .section h2 {
     font-size: 18px;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .info-item {
+    padding: 10px;
+  }
+  
+  .info-label {
+    font-size: 11px;
+  }
+  
+  .info-value {
+    font-size: 13px;
+  }
+  
+  .progress-section {
+    padding: 16px;
   }
   
   .fact-label, .party-label, .disbursement-label, .collateral-label, .default-label,

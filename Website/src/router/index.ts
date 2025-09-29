@@ -24,9 +24,6 @@ import PrivacyPolicyView from '../views/info/aboutus/PrivacyPolicy.vue'
 import FAQView from '../views/info/FAQView.vue'
 import SettingsView from '../views/settings/SettingsView.vue'
 // Functional modules
-import BridgeView from '../views/FunctionalModule/otherinteractbutton/BridgeView.vue'
-import SendView from '../views/FunctionalModule/otherinteractbutton/SendView.vue'
-import SwapView from '../views/FunctionalModule/otherinteractbutton/SwapView.vue'
 // Other components
 import kycService from '../components/kycService.vue'
 
@@ -40,9 +37,6 @@ const router = createRouter({
     { path: '/projects', name: 'projects', component: ProjectsView },
     { path: '/projects/:code', name: 'projectDetail', component: ProjectsView, props: true },
     { path: '/detail/:id?', name: 'detail', component: DetailPage, props: true },
-    { path: '/swap', name: 'swap', component: SwapView },
-    { path: '/bridge', name: 'bridge', component: BridgeView },
-    { path: '/send', name: 'send', component: SendView },
     { path: '/token/:address', name: 'tokenDetail', component: TokenDetailView, props: true },
     { path: '/profile', name: 'profile', component: ProfileView },
     { path: '/login', name: 'login', component: LoginView },
