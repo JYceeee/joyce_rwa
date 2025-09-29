@@ -631,14 +631,39 @@ export default {
       return statusMap[status] || 'Unknown'
     },
     joinWaitlist(code) {
-      const product = this.products.find(x => x.code === code)
-      alert(`已加入 ${product.name} 的等待列表！`)
-      console.log('Join waitlist for:', code)
+      this.addToWatchlist(code)
     },
     registerInterest(code) {
-      const product = this.products.find(x => x.code === code)
-      alert(`已注册对 ${product.name} 的投资兴趣！`)
-      console.log('Register interest for:', code)
+      this.addToWatchlist(code)
+    },
+    
+    // 添加到 watchlist
+    addToWatchlist(code) {
+      try {
+        // 获取现有的 watchlist
+        let watchlist = []
+        const savedWatchlist = localStorage.getItem('projectWatchlist')
+        if (savedWatchlist) {
+          watchlist = JSON.parse(savedWatchlist)
+        }
+        
+        // 检查是否已经在 watchlist 中
+        if (watchlist.includes(code)) {
+          alert('该项目已在您的关注列表中！')
+          return
+        }
+        
+        // 添加到 watchlist
+        watchlist.push(code)
+        localStorage.setItem('projectWatchlist', JSON.stringify(watchlist))
+        
+        const product = this.products.find(x => x.code === code)
+        alert(`已添加 ${product.name} 到关注列表！`)
+        console.log('Added to watchlist:', code)
+      } catch (error) {
+        console.error('❌ Projects: 添加到 watchlist 失败:', error)
+        alert('添加到关注列表失败，请重试')
+      }
     },
     
     // 格式化时间显示
@@ -850,6 +875,7 @@ export default {
         radial-gradient(circle at 40% 40%, rgba(25, 25, 112, 0.1) 0%, transparent 50%);
   min-height: 100vh;
   padding: 20px;
+  margin-left:50px;
 }
 
 .doc-header{

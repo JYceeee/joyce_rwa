@@ -172,9 +172,9 @@
             <div class="pf-balance">
               A${{ getAccountTotalInvestment(selectedAccount).toFixed(2) }}
             </div>
-            <div class="pf-change">
-              
-            </div>
+            <!-- <div class="pf-change">
+                A${{ currentValue.toFixed(2) }}
+            </div> -->
             <!-- <div class="pf-change" :class="{ positive: totalGain >= 0, negative: totalGain < 0 }">
               {{ totalGain >= 0 ? '+' : '' }}A${{ totalGain.toFixed(2) }} ({{ roi >= 0 ? '+' : '' }}{{ roi.toFixed(2) }}%)
             </div> -->
@@ -228,6 +228,73 @@
                   <button class="pf-project-btn" @click="goToTrade(project.code)">Buy</button>
                   <button class="pf-project-btn pf-project-btn-secondary" @click="goToDetail(project.code)">Details</button>
                   <button class="pf-project-btn pf-project-btn-interest" @click="sellInterest(project.code)">Sell Interest</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- My Watchlist -->
+          <div v-if="activeTab==='My Watchlist'" class="pf-watchlist">
+            <div class="pf-watchlist-header">
+              <h3></h3>
+              <div class="pf-watchlist-stats">
+                <span class="pf-watchlist-count">{{ watchlistProjects.length }} Projects</span>
+              </div>
+            </div>
+            
+            <div v-if="watchlistProjects.length === 0" class="pf-empty-watchlist">
+              <div class="pf-empty-icon"></div>
+              <h4>No projects in your watchlist</h4>
+              <p>Add projects to your watchlist from the Projects page to track them here.</p>
+              <button class="pf-btn pf-btn-primary" @click="goToProjects">
+                Browse Projects
+              </button>
+            </div>
+            
+            <div v-else class="pf-watchlist-grid">
+              <div v-for="project in watchlistProjects" :key="project.code" class="pf-watchlist-card">
+                <div class="pf-watchlist-card-header">
+                  <img :src="project.image || getProjectImage(project.code)" :alt="project.code" class="pf-watchlist-image" />
+                  <div class="pf-watchlist-info">
+                    <h4>{{ project.code }} • {{ project.name }}</h4>
+                    <p>{{ project.subtitle }}</p>
+                  </div>
+                  <div class="pf-watchlist-actions">
+                    <button class="pf-remove-btn" @click="removeFromWatchlist(project.code)" title="Remove from watchlist">
+                      ✕
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="pf-watchlist-metrics">
+                  <div class="pf-watchlist-metric">
+                    <span class="pf-watchlist-label">LOAN SIZE</span>
+                    <span class="pf-watchlist-value">A${{ formatNumber(project.loan_amount || 0) }}</span>
+                  </div>
+                  <div class="pf-watchlist-metric">
+                    <span class="pf-watchlist-label">EST. YIELD</span>
+                    <span class="pf-watchlist-value" style="color: #16a34a;">{{ project.target_yield }}%</span>
+                  </div>
+                  <div class="pf-watchlist-metric">
+                    <span class="pf-watchlist-label">STATUS</span>
+                    <span class="pf-watchlist-value" :style="{ color: getStatusColor(project.status) }">{{ getStatusText(project.status) }}</span>
+                  </div>
+                </div>
+                
+                <div class="pf-watchlist-progress">
+                  <div class="pf-watchlist-progress-bar">
+                    <div class="pf-watchlist-progress-fill" :style="{ width: getWatchlistProgress(project) + '%' }"></div>
+                  </div>
+                  <div class="pf-watchlist-progress-text">{{ getWatchlistProgress(project) }}% Subscribed</div>
+                </div>
+                
+                <div class="pf-watchlist-actions-bottom">
+                  <button class="pf-watchlist-btn pf-watchlist-btn-primary" @click="goToProjectDetail(project.code)">
+                    View Details
+                  </button>
+                  <button v-if="project.status === 'active'" class="pf-watchlist-btn pf-watchlist-btn-secondary" @click="goToTrade(project.code)">
+                    Trade
+                  </button>
                 </div>
               </div>
             </div>
@@ -558,7 +625,7 @@ const actions = [
   { text: 'Send', icon: '📤' },
   { text: 'Stake', icon: '🔒' },
 ]
-const tabs = ['Projects', 'Analysis', 'Transactions']
+const tabs = ['Projects', 'My Watchlist', 'Analysis', 'Transactions']
 const activeTab = ref('Projects')
 
 // 图表容器引用
@@ -607,6 +674,10 @@ let unsubscribeProducts = null
 // 账户数据 - 从localStorage加载绑定的钱包账户
 const accounts = ref([])
 
+// Watchlist 数据
+const watchlist = ref([])
+const watchlistProjects = ref([])
+
 // 从数据库加载项目数据
 async function loadProjects() {
   try {
@@ -629,6 +700,150 @@ async function loadProjects() {
   } finally {
     projectsLoading.value = false
   }
+}
+
+// 加载 watchlist 数据
+function loadWatchlist() {
+  try {
+    const savedWatchlist = localStorage.getItem('projectWatchlist')
+    if (savedWatchlist) {
+      watchlist.value = JSON.parse(savedWatchlist)
+      console.log('📂 Portfolio loaded watchlist:', watchlist.value)
+    } else {
+      watchlist.value = []
+    }
+  } catch (error) {
+    console.error('❌ Portfolio: 加载 watchlist 失败:', error)
+    watchlist.value = []
+  }
+}
+
+// 获取 watchlist 中的项目详情
+async function loadWatchlistProjects() {
+  try {
+    if (watchlist.value.length === 0) {
+      watchlistProjects.value = []
+      return
+    }
+
+    console.log('🔄 Portfolio: 加载 watchlist 项目详情...')
+    const response = await productAPI.getAllProducts()
+    
+    if (response.status === 0) {
+      const allProjects = response.data || []
+      // 过滤出在 watchlist 中的项目
+      watchlistProjects.value = allProjects.filter(project => 
+        watchlist.value.includes(project.code)
+      )
+      console.log('✅ Portfolio: watchlist 项目加载成功，共', watchlistProjects.value.length, '个项目')
+    } else {
+      console.error('❌ Portfolio: 获取 watchlist 项目失败:', response)
+      watchlistProjects.value = []
+    }
+  } catch (error) {
+    console.error('❌ Portfolio: 加载 watchlist 项目失败:', error)
+    watchlistProjects.value = []
+  }
+}
+
+// 从 watchlist 移除项目
+function removeFromWatchlist(projectCode) {
+  try {
+    const index = watchlist.value.indexOf(projectCode)
+    if (index > -1) {
+      watchlist.value.splice(index, 1)
+      localStorage.setItem('projectWatchlist', JSON.stringify(watchlist.value))
+      
+      // 从 watchlistProjects 中移除
+      watchlistProjects.value = watchlistProjects.value.filter(p => p.code !== projectCode)
+      
+      console.log('✅ Portfolio: 已从 watchlist 移除项目:', projectCode)
+    }
+  } catch (error) {
+    console.error('❌ Portfolio: 移除 watchlist 项目失败:', error)
+  }
+}
+
+// 获取项目图片
+function getProjectImage(code) {
+  const imageMap = {
+    'RWA001': '/pics/TYMU.png',
+    'RWA002': '/pics/SQNB.png',
+    'RWA003': '/pics/LZYT.png',
+    'YYD': '/pics/YYD.png',
+    'COMP': '/pics/TYMU.png'
+  }
+  return imageMap[code] || '/pics/TYMU.png'
+}
+
+// 获取状态文本
+function getStatusText(status) {
+  const statusMap = {
+    'active': 'Active',
+    'upcoming': 'Upcoming',
+    'research': 'Research',
+    'planning': 'Planning',
+    'completed': 'Completed'
+  }
+  return statusMap[status] || 'Unknown'
+}
+
+// 获取状态颜色
+function getStatusColor(status) {
+  const colorMap = {
+    'active': '#16a34a',
+    'upcoming': '#d97706',
+    'research': '#3b82f6',
+    'planning': '#8b5cf6',
+    'completed': '#6b7280'
+  }
+  return colorMap[status] || '#6b7280'
+}
+
+// 计算 watchlist 项目进度
+function getWatchlistProgress(project) {
+  if (!project || !project.total_token || !project.current_subscribed_token) {
+    return 0
+  }
+  
+  const total = parseFloat(project.total_token)
+  const subscribed = parseFloat(project.current_subscribed_token)
+  
+  if (total === 0) return 0
+  
+  const progress = (subscribed / total) * 100
+  return Math.round(progress * 100) / 100
+}
+
+// 格式化数字
+function formatNumber(value) {
+  if (!value) return '0'
+  const num = parseFloat(value)
+  if (isNaN(num)) return value
+  return num.toLocaleString()
+}
+
+// 跳转到项目详情
+function goToProjectDetail(projectCode) {
+  router.push({
+    name: 'detail',
+    params: { id: projectCode }
+  })
+}
+
+// 跳转到交易页面
+function goToTrade(projectCode) {
+  router.push({
+    name: 'tradeProject',
+    params: { code: projectCode }
+  })
+}
+
+// 跳转到 Projects 页面
+function goToProjects() {
+  router.push({
+    name: 'projects'
+  })
 }
 
 // 从localStorage加载绑定的钱包账户，与WalletView保持一致
@@ -1964,13 +2179,6 @@ const generatePriceHistory = (holding, timeframe) => {
 }
 
 
-const goToTrade = (code) => {
-  router.push({ 
-    name: 'tradeProject', 
-    params: { code },
-    query: { type: 'buy' }
-  })
-}
 
 const goToDetail = (code) => {
   router.push({ name: 'detail', params: { code } })
@@ -1991,6 +2199,10 @@ let priceUpdateInterval
 onMounted(async () => {
   // 先加载项目数据
   await loadProjects()
+  
+  // 加载 watchlist 数据
+  loadWatchlist()
+  await loadWatchlistProjects()
   
   // 设置数据库同步
   setupDatabaseSync()
@@ -2485,7 +2697,7 @@ window.addEventListener('storage', (e) => {
 .pf-add{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:14px;background:var(--panel);border:1px solid var(--border);box-shadow:var(--shadow);font-weight:600;cursor:pointer;color:#ffffff;}
 .pf-add-ico{font-size:18px;line-height:1}
 .pf-body{display:grid;grid-template-columns:280px 1fr;gap:16px;padding:0 20px 24px;margin-top: 30px;;}
-.pf-sidebar{margin-left:50px;margin-top:17px;width:250px;background:#141426;border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px;}
+.pf-sidebar{margin-left:50px;margin-top:17px;width:300px;background:#141426;border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px;}
 .pf-side-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .pf-side-head h2{font-size:20px;font-weight:800;color:#ffffff;}
 .pf-side-tools{display:flex;gap:10px;color:#9ca3af}
@@ -2497,7 +2709,7 @@ window.addEventListener('storage', (e) => {
 .pf-avatar{width:28px;height:28px;border-radius:50%;background:radial-gradient(100% 100% at 25% 25%,#ffd79a 0%,#ff9e6e 40%,#ff7b7b 100%);box-shadow: inset 0 0 0 2px #374151;}
 .pf-addr{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;color:#9ca3af}
 
-.pf-main{width:800px;background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px 18px;margin:16px;}
+.pf-main{width:800px;background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px 18px;margin-left:66px;margin-top:16px;}
 .pf-hero{padding:8px 4px 12px;border-bottom:1px solid var(--border)}
 .pf-balance{font-size:56px;font-weight:900;letter-spacing:-.02em;display:flex;align-items:center;gap:10px;}
 .pf-eye{border:none;background:transparent;cursor:pointer;font-size:20px}
@@ -3383,6 +3595,307 @@ window.addEventListener('storage', (e) => {
 .pf-project-btn-secondary:hover{background:var(--primary-ink);}
 .pf-project-btn-interest{background:#dc2626;color:#fff;border-color:#dc2626;}
 .pf-project-btn-interest:hover{background:#b91c1c;}
+
+/* Watchlist 样式 */
+.pf-watchlist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.pf-watchlist-header h3 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pf-watchlist-stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.pf-watchlist-count {
+  font-size: 14px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+}
+
+.pf-empty-watchlist {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+}
+
+.pf-empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.pf-empty-watchlist h4 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  color: var(--text);
+}
+
+.pf-empty-watchlist p {
+  margin: 0 0 24px 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.pf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.pf-btn-primary {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.pf-btn-primary:hover {
+  background: var(--primary-ink);
+}
+
+.pf-watchlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.pf-watchlist-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.pf-watchlist-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.pf-watchlist-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.pf-watchlist-image {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.pf-watchlist-info {
+  flex: 1;
+}
+
+.pf-watchlist-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pf-watchlist-info p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.pf-watchlist-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.pf-remove-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.pf-remove-btn:hover {
+  background: #dc2626;
+  color: #fff;
+}
+
+.pf-watchlist-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.pf-watchlist-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.pf-watchlist-label {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.pf-watchlist-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pf-watchlist-progress {
+  margin-bottom: 16px;
+}
+
+.pf-watchlist-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.pf-watchlist-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #059669);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.pf-watchlist-progress-text {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #10b981;
+}
+
+.pf-watchlist-actions-bottom {
+  display: flex;
+  gap: 8px;
+}
+
+.pf-watchlist-btn {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.pf-watchlist-btn-primary {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.pf-watchlist-btn-primary:hover {
+  background: var(--primary-ink);
+}
+
+.pf-watchlist-btn-secondary {
+  background: transparent;
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.pf-watchlist-btn-secondary:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* Watchlist 响应式样式 */
+@media (max-width: 768px) {
+  .pf-watchlist-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .pf-watchlist-card {
+    padding: 16px;
+  }
+  
+  .pf-watchlist-metrics {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .pf-watchlist-actions-bottom {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .pf-watchlist-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .pf-watchlist-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  
+  .pf-watchlist-card {
+    padding: 12px;
+  }
+  
+  .pf-watchlist-card-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+  
+  .pf-watchlist-actions {
+    position: static;
+    margin-top: 8px;
+  }
+}
 
 @media (max-width:1024px){.pf-body{grid-template-columns:1fr}.pf-sidebar{order:2}.pf-main{order:1}}
 

@@ -1,16 +1,68 @@
 <template>
+  <!-- 连接新钱包弹窗 -->
+  <div v-if="showLinkWalletModal" class="modal-mask">
+    <div class="modal-wrapper">
+      <div class="modal-container">
+        <h2 style="margin-bottom:8px;color:#ffffff;">Link New Wallet</h2>
+        <p style="color:#ffffff;">Select a MetaMask account to link to your profile:</p>
+        
+        <!-- 账户选择列表 -->
+        <div v-if="availableAccounts.length > 0" class="account-list">
+          <div 
+            v-for="(account, index) in availableAccounts" 
+            :key="account"
+            class="account-item"
+            :class="{ selected: selectedAccountIndex === index }"
+            @click="selectAccount(index)"
+          >
+            <div class="account-info">
+              <span class="account-address">{{ account }}</span>
+              <span class="account-short">{{ formatAddress(account) }}</span>
+            </div>
+            <div v-if="selectedAccountIndex === index" class="account-check">✓</div>
+          </div>
+        </div>
+        
+        <!-- 加载状态 -->
+        <div v-if="loadingAccounts" class="loading-accounts">
+          <div class="loading-spinner"></div>
+          <span>Loading accounts...</span>
+        </div>
+        
+        <!-- 无账户状态 -->
+        <div v-if="!loadingAccounts && availableAccounts.length === 0" class="no-accounts">
+          <p>No additional accounts found in MetaMask.</p>
+          <p>Please add more accounts in MetaMask and try again.</p>
+        </div>
+        
+        <div style="text-align:right;margin-top:20px;">
+          <button class="mm-btn mm-outline" @click="showLinkWalletModal=false">Cancel</button>
+          <button 
+            v-if="availableAccounts.length > 0" 
+            class="mm-btn mm-primary" 
+            style="margin-left:8px;" 
+            @click="linkSelectedAccount"
+            :disabled="selectedAccountIndex === -1"
+          >
+            Link Selected Account
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 解绑账号弹窗 -->
   <div v-if="showDisconnectModal" class="modal-mask">
     <div class="modal-wrapper">
       <div class="modal-container">
         <h2 style="margin-bottom:8px;color:#ffffff;">Disconnect Wallet</h2>
-        <p style="color:#ffffff;">Select the wallet account you want to disconnect:</p>
+        <p style="color:#ffffff;">Are you sure you want to disconnect this wallet?</p>
         <div>
-          <span style="display:block;font-size:15px;padding:8px 0;color:#ffffff;background:#2a2a4a;border-radius:8px;">{{ selectedAccount }}</span>
+          <span style="display:block;font-size:15px;padding:8px 0;color:#ffffff;background:#2a2a4a;border-radius:8px;">{{ fullAddress }}</span>
         </div>
         <div style="text-align:right;">
           <button class="mm-btn mm-outline" @click="showDisconnectModal=false">Cancel</button>
-          <button class="mm-btn mm-outline" style="margin-left:8px;" @click="disconnectAccount">Confirm</button>
+          <button class="mm-btn mm-outline" style="margin-left:8px;" @click="confirmDisconnect">Confirm</button>
         </div>
       </div>
     </div>
@@ -82,10 +134,18 @@
       
       <!-- User Auth Buttons -->
         <div v-if="isLoggedIn">
-          <div class="wallet-dropdown-container">
+          <!-- 钱包连接状态显示 -->
+          <div v-if="!connected" class="wallet-connect-section">
+            <button class="btn orange pill" @click.prevent="connectWallet">
+              <span>Connect Wallet</span>
+            </button>
+          </div>
+          
+          <!-- 已连接钱包显示 -->
+          <div v-else class="wallet-dropdown-container">
              <div class="wallet-btn-wrapper">
                <button class="btn orange pill wallet-main-btn" @click.prevent="goToWallet()">
-                 <span>Wallet</span>
+                 <span>{{ shortAddress }}</span>
                </button>
                <div class="wallet-divider"></div>
                 <button class="btn orange pill wallet-dropdown-btn" 
@@ -95,19 +155,10 @@
              </div>
             <div v-if="walletDropdownOpen" class="wallet-dropdown-menu">
               <div class="wallet-dropdown-header">Wallet Management</div>
-              <a href="#" @click.prevent="linkNewWallet" class="wallet-dropdown-item">
+              <a href="#" @click.prevent="showLinkWalletModal = true; walletDropdownOpen = false" class="wallet-dropdown-item">
                 <span>Link new wallet</span>
               </a>
-              <a href="#" @click.prevent="addManualWallet" class="wallet-dropdown-item">
-                <!-- <span>➕</span> -->
-                <span>Add wallet manually</span>
-              </a>
-              <a href="#" @click.prevent="setPrimaryWallet" class="wallet-dropdown-item">
-                <!-- <span>⭐</span> -->
-                <span>Set primary wallet</span>
-              </a>
-              <a href="#" @click.prevent="disconnectWallet" class="wallet-dropdown-item">
-                <!-- <span>❌</span> -->
+              <a href="#" @click.prevent="showDisconnectModal = true; walletDropdownOpen = false" class="wallet-dropdown-item">
                 <span>Disconnect wallet</span>
               </a>
             </div>
@@ -176,10 +227,22 @@
 
 <script>
 import { isLoggedIn, clearAuth, AUTH_CHANGED_EVENT } from '@/utils/auth';
+import { useWallet } from '@/composables/useWallet';
 
 export default {
   name: 'AppHeader',
   props: {},
+  setup() {
+    const { connected, fullAddress, shortAddress, connect, disconnect } = useWallet()
+    
+    return {
+      connected,
+      fullAddress,
+      shortAddress,
+      connect,
+      disconnect
+    }
+  },
   data(){
     return { 
       searchOpen: false, 
@@ -187,7 +250,14 @@ export default {
       isLoggedIn: false,
       moreDropdownOpen: false,
       mobileMenuOpen: false,
-      walletDropdownOpen: false
+      walletDropdownOpen: false,
+      showLinkWalletModal: false,
+      showDisconnectModal: false,
+      showDisconnectSuccess: false,
+      disconnectSuccessMsg: '',
+      availableAccounts: [],
+      selectedAccountIndex: -1,
+      loadingAccounts: false
     }
   },
 
@@ -290,26 +360,11 @@ export default {
       }
     },
     async connectWallet() {
-      if (typeof window.ethereum !== "undefined") {
-        try {
-          // 请求用户授权
-          const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-          this.account = accounts[0];
-          console.log("钱包已连接：", this.account);
-          
-          // 将连接的钱包添加到列表中
-          this.addManualWalletAddress(this.account);
-          
-          // 设置为当前钱包
-          localStorage.setItem('walletConnected', 'true');
-          localStorage.setItem('walletAddress', this.account);
-          
-        } catch (error) {
-          console.error("连接失败", error);
-          alert("钱包连接失败：" + error.message);
-        } 
-      } else {
-        alert("请先安装 MetaMask 插件！");
+      try {
+        await this.connect();
+        console.log("Wallet connected successfully");
+      } catch (error) {
+        console.error("Wallet connection failed:", error);
       }
     },
     shortenAddress(addr) {
@@ -383,31 +438,104 @@ export default {
         alert('无效的选择');
       }
     },
+    // 显示连接新钱包弹窗
+    async linkNewWallet() {
+      this.hideWalletDropdown();
+      this.showLinkWalletModal = true;
+      await this.loadAvailableAccounts();
+    },
+    
+    // 加载可用的账户
+    async loadAvailableAccounts() {
+      this.loadingAccounts = true;
+      this.availableAccounts = [];
+      this.selectedAccountIndex = -1;
+      
+      try {
+        if (typeof window.ethereum !== "undefined") {
+          // 获取所有账户
+          const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+          
+          // 过滤掉当前已连接的账户
+          const currentAddress = this.fullAddress;
+          this.availableAccounts = accounts.filter(account => 
+            account.toLowerCase() !== currentAddress.toLowerCase()
+          );
+          
+          console.log("Available accounts:", this.availableAccounts);
+        } else {
+          console.error("MetaMask not detected");
+        }
+      } catch (error) {
+        console.error("Failed to load accounts:", error);
+      } finally {
+        this.loadingAccounts = false;
+      }
+    },
+    
+    // 选择账户
+    selectAccount(index) {
+      this.selectedAccountIndex = index;
+    },
+    
+    // 格式化地址显示
+    formatAddress(address) {
+      if (!address) return '';
+      return `${address.slice(0, 6)}...${address.slice(-4)}`;
+    },
+    
+    // 连接选中的账户
+    async linkSelectedAccount() {
+      if (this.selectedAccountIndex === -1) return;
+      
+      try {
+        const selectedAccount = this.availableAccounts[this.selectedAccountIndex];
+        
+        // 请求切换到选中的账户
+        await window.ethereum.request({
+          method: 'wallet_requestPermissions',
+          params: [{
+            eth_accounts: {}
+          }]
+        });
+        
+        // 触发账户切换
+        await window.ethereum.request({
+          method: 'eth_requestAccounts'
+        });
+        
+        this.showLinkWalletModal = false;
+        console.log("Account switched successfully to:", selectedAccount);
+        
+        // 显示成功消息
+        alert(`Successfully linked account: ${this.formatAddress(selectedAccount)}`);
+        
+      } catch (error) {
+        console.error("Failed to link account:", error);
+        if (error.code === 4001) {
+          alert("User rejected the account switch request.");
+        } else {
+          alert("Failed to link account. Please try again.");
+        }
+      }
+    },
+    
+    // 显示断开连接弹窗
     disconnectWallet() {
       this.hideWalletDropdown();
-      // 获取已连接的钱包列表
-      const linkedWallets = JSON.parse(localStorage.getItem('linkedWallets') || '[]');
-      
-      if (linkedWallets.length === 0) {
-        alert('没有可断开的钱包地址');
-        return;
-      }
-      
-      // 创建选择对话框
-      let options = linkedWallets.map((wallet, index) => 
-        `${index + 1}. ${wallet}`
-      ).join('\n');
-      
-      const choice = prompt(`选择要断开的钱包地址:\n${options}\n\n请输入序号:`);
-      const selectedIndex = parseInt(choice) - 1;
-      
-      if (selectedIndex >= 0 && selectedIndex < linkedWallets.length) {
-        const selectedWallet = linkedWallets[selectedIndex];
-        if (confirm(`确定要断开钱包 ${selectedWallet} 吗？`)) {
-          this.disconnectWalletConnection(selectedWallet);
-        }
-      } else if (choice !== null) {
-        alert('无效的选择');
+      this.showDisconnectModal = true;
+    },
+    
+    // 确认断开连接
+    async confirmDisconnect() {
+      try {
+        this.disconnect();
+        this.showDisconnectModal = false;
+        this.showDisconnectSuccess = true;
+        this.disconnectSuccessMsg = "Wallet has been disconnected successfully.";
+        console.log("Wallet disconnected successfully");
+      } catch (error) {
+        console.error("Wallet disconnection failed:", error);
       }
     },
     disconnectWalletConnection(walletAddress) {
@@ -458,6 +586,13 @@ export default {
 .dropdown-container {
   position: relative;
   display: inline-block;
+}
+
+/* 钱包连接区域样式 */
+.wallet-connect-section {
+  display: inline-block;
+  margin-left: 15px;
+  margin-right: 15px;
 }
 
 /* 钱包下拉菜单样式 */
@@ -1131,6 +1266,172 @@ export default {
     margin-left: 2px;
     margin-right: 2px;
   }
+}
+
+/* 弹窗样式 */
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.modal-container {
+  background: #1a1a2e;
+  border-radius: 12px;
+  padding: 24px;
+  min-width: 400px;
+  max-width: 500px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.mm-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid #374151;
+  background: #1f2937;
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.mm-btn:hover {
+  background: #374151;
+}
+
+.mm-btn.mm-outline {
+  background: transparent;
+  border-color: #6b7280;
+  color: #9ca3af;
+}
+
+.mm-btn.mm-outline:hover {
+  background: #374151;
+  color: #ffffff;
+}
+
+.mm-btn.mm-primary {
+  background: #f97316;
+  border-color: #f97316;
+  color: #ffffff;
+}
+
+.mm-btn.mm-primary:hover {
+  background: #ea580c;
+  border-color: #ea580c;
+}
+
+.mm-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 账户选择列表样式 */
+.account-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin: 16px 0;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  background: #1f2937;
+}
+
+.account-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #374151;
+  transition: background-color 0.2s ease;
+}
+
+.account-item:last-child {
+  border-bottom: none;
+}
+
+.account-item:hover {
+  background: #374151;
+}
+
+.account-item.selected {
+  background: #1e40af;
+}
+
+.account-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.account-address {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 14px;
+  color: #ffffff;
+  word-break: break-all;
+}
+
+.account-short {
+  font-size: 12px;
+  color: #9ca3af;
+  font-weight: 600;
+}
+
+.account-check {
+  color: #10b981;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* 加载状态样式 */
+.loading-accounts {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 20px;
+  color: #9ca3af;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #374151;
+  border-top: 2px solid #f97316;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 无账户状态样式 */
+.no-accounts {
+  text-align: center;
+  padding: 40px 20px;
+  color: #9ca3af;
+}
+
+.no-accounts p {
+  margin: 8px 0;
+  font-size: 14px;
 }
 
 /* Settings按钮样式 - 移除背景和边框 */

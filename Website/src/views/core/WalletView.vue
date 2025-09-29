@@ -53,7 +53,7 @@
               <span class="mm-addr" style="color:#b45309;">please connect your wallet in wallet management</span>
             </template>
           </div>
-          <button v-if="!connected || !selectedAccount" class="mm-btn mm-outline" style="margin-top:6px;" @click="connect">Connect MetaMask</button>
+          <!-- <button v-if="!connected || !selectedAccount" class="mm-btn mm-outline" style="margin-top:6px;" @click="connect">Connect MetaMask</button> -->
         </div>
       </div>
     </header>
