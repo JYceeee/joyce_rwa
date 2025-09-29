@@ -1,25 +1,24 @@
 <template>
+  <!--Homepage-->
   <section class="container hero">
     <div class="grid">
       <div>
-        <h1 class="headline">Invest in RWA Property Loans with Daily Returns</h1>
+        <h1 class="headline">Invest in RWA Property Loans with Monthly Returns</h1>
         <p class="sub">
-          Access verified Real World Assets (RWA) — mortgage-backed loans, tokenized for secure and transparent investing.
+          We are the RWA dealmaker who is good at originating real estate assets as RWA underlying assets that investors like
         </p>
         <p class="foot">By continuing, you agree to our Terms and acknowledge our 
           <a href="/src/components/privacypolicy.vue" >Privacy Policy.</a></p>
       </div>
-      <!-- <div class="hero-image"> -->
-        <!-- <div class="blockchain-live-visual"> -->
         <!-- 区块链智能合约交易动态图样 -->
          <video autoplay loop muted playsinline class="bg-video">
            <source src="/videos/Blockchainvideo.mp4" type="video/mp4">
          </video>
-        <!-- <img src="\public\icons\BlockchainHome.png" alt="Hero Image" class="hero-image" /> -->
-      <!-- </div> -->
+
     </div>
   </section>
 
+  <!--New Listing-->
   <section class="section">
     <div class="cards" aria-label="Highlights">
       <div class="new-listings-section">
@@ -85,7 +84,7 @@
         </div>
         <!-- 空状态 -->
         <div v-if="!loading && !error && upcomingProjects.length === 0" class="empty-state">
-          <div class="empty-icon">📋</div>
+          <!-- <div class="empty-icon">📋</div> -->
           <h4 class="empty-title">No upcoming projects at the moment</h4>
           <p class="empty-description">Check back soon for new opportunities</p>
           <button class="btn-primary" @click="refreshListings">
@@ -102,30 +101,112 @@
     </div>
   </section>
 
+  <div class="container">
+    <div class="page-header">
+      <h1>Contact Us</h1>
+      <p class="page-subtitle">We are happy to help you</p>
+    </div>
 
-  <section class="section wallet">
-    <div class="container wallet-grid">
-      <div class="wallet-visual">
-        <img src="/icons/mobile-app-preview.png" alt="Mortgage RWA Wallet mobile preview" class="wallet-phone" />
-      </div>
-      <div class="wallet-copy">
-        <span class="badge">New</span>
-        <h2 class="wallet-title">Mortgage RWA Wallet</h2>
-        <p class="wallet-sub">Manage your RWA assets in one place:<strong>Receiving Payment</strong>、<strong>Transfering</strong>、<strong>Exchanging</strong>、<strong>Buying</strong>in one safe wallet</p>
-        <ul class="wallet-feats"><li>Non-custodial, self-held private keys</li><li>Daily income details and notifications</li><li>Fiat channels (compliant available regions)</li><li>Multi-chain support (EVM first)</li></ul>
-        <div class="store-row">
-          <a class="store-btn ios" href="#">
-            <svg viewBox="0 0 24 24" width="18" height="18">
-              <path d="M16.365 1.43c.03 1.09-.4 1.9-1.01 2.63-.68.83-1.83 1.47-2.96 1.38-.13-1.04.35-2 .95-2.66.74-.83 1.99-1.46 3.02-1.35zM20.77 17.38c-.53 1.23-.8 1.77-1.5 2.86-1 1.53-2.41 3.43-4.17 3.45-1.56.02-1.97-1.01-4.1-1.01-2.13 0-2.59 1-4.14 1.03-1.77.03-3.13-1.65-4.14-3.17C.7 18.15-.52 14.34.9 11.5c1.01-2.01 2.82-3.29 4.96-3.32 1.54-.03 2.99 1.04 4.1 1.04 1.1 0 2.9-1.28 4.89-1.09.83.04 3.17.34 4.67 2.56-3.99 2.23-3.35 8.09 1.25 9.69z" fill="currentColor"/>
-            </svg><span color="black">App Store</span></a>
-          <a class="store-btn and" href="#">
-            <svg viewBox="0 0 24 24" width="18" height="18">
-              <path d="M3.6 1.8l12.3 9-12.3 9c-.37-.21-.6-.6-.6-1.07V2.87c0-.47.23-.86.6-1.07zm13.78 9L18 9.34 6.36 1.8l10.02 11zm0 0L6.36 22.2 18 14.66l-.62-.82zM19.1 13.88l2.9-1.88-2.9-1.88c-.2-.13-.46-.07-.6.13l-1.2 1.75 1.2 1.75c.14.2.4.26.6.13z" fill="currentColor"/>
-            </svg><span color="black">Google Play</span></a>
+    <div class="contact-content">
+      <div class="contact-grid">
+
+        <!-- Contact Information -->
+        <div class="contact-info">
+          <h2>Contact Information</h2>
+          <div class="contact-methods">
+            <div class="contact-method">
+              <div class="method-icon">📧</div>
+              <div class="method-details">
+                <h4>Email</h4>
+                <p>support@mortgagerwa.com</p>
+                <p>business@mortgagerwa.com</p>
+              </div>
+            </div>
+
+            <div class="contact-method">
+              <div class="method-icon">📞</div>
+              <div class="method-details">
+                <h4>Phone</h4>
+                <p>+61 2 1234 5678</p>
+                <p>Monday to Friday 9:00-18:00</p>
+              </div>
+            </div>
+
+            <div class="contact-method">
+              <div class="method-icon">📍</div>
+              <div class="method-details">
+                <h4>Address</h4>
+                <p>123 George Street</p>
+                <p>Sydney NSW 2000, Australia</p>
+              </div>
+            </div>
+
+            <div class="contact-method">
+              <div class="method-icon">💬</div>
+              <div class="method-details">
+                <h4>Online Customer Service</h4>
+                <p>24/7 Online Support</p>
+                <p>Average Response Time < 5 minutes</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="social-links">
+            <h3>Follow Us</h3>
+            <div class="social-icons">
+              <a href="#" class="social-icon">🐦</a>
+              <a href="#" class="social-icon">💼</a>
+              <a href="#" class="social-icon">📘</a>
+              <a href="#" class="social-icon">🐙</a>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Send Message -->
+        <div class="contact-form">
+          <h2>Send Message</h2>
+          <form @submit.prevent="submitForm" class="form-container">
+            <div class="form-fields">
+              <div class="form-group">
+                <label for="name">Your Name *</label>
+                <input type="text" id="name" v-model="form.name" required>
+              </div>
+
+              <div class="form-group">
+                <label for="email">Your Email *</label>
+                <input type="email" id="email" v-model="form.email" required>
+              </div>
+
+              <div class="form-group">
+                <label for="subject">Subject *</label>
+                <select id="subject" v-model="form.subject" required>
+                  <option value="">Please select a subject</option>
+                  <option value="investor">I am an Investor/I am interested in investing</option>
+                  <option value="asset_holder">I am an Asset Holder/I am interested in holding assets</option>
+                  <option value="general">I need General Consultation</option>
+                  <option value="technical">I need Technical Support</option>
+                  <option value="business">I would like to have a Business Cooperation</option>
+                  <option value="other">Others</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="message">Message Content *</label>
+                <textarea id="message" v-model="form.message" rows="5" required></textarea>
+              </div>
+            </div>
+
+            <div class="form-submit">
+              <button type="submit" class="btn primary" :disabled="isSubmitting">
+                {{ isSubmitting ? 'Sending...' : 'Send Message' }}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+
 </template>
 
 <script>
@@ -141,7 +222,16 @@ export default {
     return {
       products: [],
       loading: false,
-      error: null
+      error: null,
+      // Contact form data
+      form: {
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: ''
+      },
+      isSubmitting: false
     }
   },
   computed: {
@@ -168,21 +258,21 @@ export default {
       this.error = null
       
       try {
-        console.log('🏠 HomeView: 从数据库加载产品数据...')
+        console.log('HomeView: 从数据库加载产品数据...')
         const response = await productAPI.getAllProducts()
         
         if (response.status === 0) {
           this.products = response.data || []
-          console.log('✅ HomeView: 成功加载', this.products.length, '个产品')
-          console.log('📋 HomeView: Upcoming项目:', this.upcomingProjects)
+          console.log('HomeView: 成功加载', this.products.length, '个产品')
+          console.log('HomeView: Upcoming项目:', this.upcomingProjects)
         } else {
           this.error = response.message || '加载产品数据失败'
-          console.error('❌ HomeView: 加载产品数据失败:', this.error)
+          console.error('HomeView: 加载产品数据失败:', this.error)
           this.notify('加载产品数据失败: ' + this.error)
         }
       } catch (error) {
         this.error = error.message || '网络错误'
-        console.error('❌ HomeView: 加载产品数据异常:', error)
+        console.error('HomeView: 加载产品数据异常:', error)
         this.notify('加载产品数据异常: ' + this.error)
       } finally {
         this.loading = false
@@ -243,7 +333,7 @@ export default {
     addToWatchlist(projectCode) {
       // 添加到关注列表
       this.notify(`Added ${projectCode} to watchlist`)
-      console.log('📝 Added to watchlist:', projectCode)
+      console.log('Added to watchlist:', projectCode)
     },
     refreshListings() {
       // 刷新项目列表
@@ -263,8 +353,55 @@ export default {
     
     // 处理钱包活动更新
     handleWalletActivityUpdate(activity) {
-      console.log('🏠 HomeView: 收到钱包活动更新:', activity)
+      console.log('🏠 HomeView: Received wallet activity update:', activity)
       // 这里可以添加处理钱包活动更新的逻辑
+    },
+    
+    // 处理联系表单提交
+    async submitForm() {
+      if (this.isSubmitting) return
+      
+      // 验证必填字段
+      if (!this.form.name || !this.form.email || !this.form.subject || !this.form.message) {
+        alert('Please fill in all required fields')
+        return
+      }
+      
+      // 验证邮箱格式
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(this.form.email)) {
+        alert('Please enter a valid email address')
+        return
+      }
+      
+      this.isSubmitting = true
+      
+      try {
+        // 这里可以添加实际的表单提交逻辑
+        // 例如发送到后端API
+        console.log('Submit contact form:', this.form)
+        
+        // 模拟API调用
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+        // 显示成功消息
+        alert('Message sent successfully! We will reply to you as soon as possible.')
+        
+        // 重置表单
+        this.form = {
+          name: '',
+          email: '',
+          phone: '',
+          subject: '',
+          message: ''
+        }
+        
+      } catch (error) {
+        console.error('Form submission failed:', error)
+        alert('Message sending failed, please try again later.')
+      } finally {
+        this.isSubmitting = false
+      }
     }
   },
   async mounted() {
@@ -275,12 +412,12 @@ export default {
     await this.loadProducts()
     
     // 测试数据关联
-    console.log('🏠 HomeView: 加载的产品数据:', this.products.length, '个项目')
+    console.log('🏠 HomeView: Loaded product data:', this.products.length, 'projects')
     console.log('📋 HomeView: Upcoming项目:', this.upcomingProjects)
     console.log('🆕 HomeView: New Listing项目:', this.newListingProject)
     
     if (this.newListingProject) {
-      console.log('✅ HomeView: New Listing项目详情:', {
+      console.log('✅ HomeView: Project Details of New Listing:', {
         code: this.newListingProject.code,
         name: this.newListingProject.name,
         loanAmount: this.newListingProject.loanAmount,
@@ -289,7 +426,7 @@ export default {
         status: this.newListingProject.status
       })
     } else {
-      console.log('ℹ️ HomeView: 暂无upcoming项目')
+      console.log('ℹ️ HomeView: No upcoming project')
     }
     
     // 监听钱包活动更新事件
@@ -314,12 +451,10 @@ export default {
 .section{
   margin: 0;
   padding: 0;
-  background: linear-gradient(135deg, 
-    #1a1a2e 0%, 
-    #16213e 25%, 
-    #2d1b69 50%, 
-    #1a1a2e 75%, 
-    #0f0f23 100%);
+  background: 
+        radial-gradient(circle at 20% 80%, rgba(51, 204, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(0, 153, 204, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(25, 25, 112, 0.1) 0%, transparent 50%);
   position: relative;
   overflow: hidden;
   min-height: 100vh;
@@ -340,7 +475,8 @@ export default {
   padding: 0;
   position: relative;
   overflow: hidden;
-  min-height: calc(100vh - 80px); /* 减去header高度 */
+  min-height: 100vh; /* 全屏高度 */
+  height: 100vh;
   width: 100vw;
   left: 50%;
   right: 50%;
@@ -360,10 +496,10 @@ export default {
   bottom: 0;
   width: 100vw;
   height: 100vh;
-  background: 
-    radial-gradient(circle at 20% 80%, rgba(138, 43, 226, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(75, 0, 130, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(25, 25, 112, 0.1) 0%, transparent 50%);
+    background: 
+      radial-gradient(circle at 20% 80%, rgba(51, 204, 255, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(0, 153, 204, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(25, 25, 112, 0.1) 0%, transparent 50%);
   pointer-events: none;
   z-index: 0;
 }
@@ -376,7 +512,7 @@ export default {
 .hero .headline {
   color: #ffffff;
   font-family: Georgia, 'Times New Roman', Times, serif;
-  font-size: 48px;
+  font-size: 45px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   margin-left:100px;
   width:700px;
@@ -433,6 +569,15 @@ export default {
   .hero .foot {
     margin-left: 0;
   }
+  
+  .blockchain-live-visual {
+    height: 100vh;
+  }
+  
+  .bg-video {
+    min-width: 100%;
+    min-height: 100%;
+  }
 }
 
 @media (max-width: 480px) {
@@ -453,12 +598,21 @@ export default {
   .hero .sub {
     text-align: center;
   }
+  
+  .blockchain-live-visual {
+    height: 100vh;
+  }
+  
+  .bg-video {
+    min-width: 100%;
+    min-height: 100%;
+  }
 }
 
 .hero .card {
   background: rgba(20, 20, 38, 0.8);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(138, 43, 226, 0.2);
+    border: 1px solid rgba(51, 204, 255, 0.2);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
@@ -475,16 +629,21 @@ export default {
 }
 
 .blockchain-live-visual {
+  position: relative;
   width: 100%;
-  height: 100%;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .bg-video {
   position: absolute;
-  top: -70%;
-  left: 0;
-  width: 100%;
-  height: 225%;
+  top: 50%;
+  left: 50%;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  transform: translate(-50%, -50%);
   object-fit: cover;
   z-index: -1;
   border-radius: 0; /* 移除圆角，完全覆盖 */
@@ -496,6 +655,7 @@ export default {
   margin-top:30px;
   margin-left: 200px;
   font-family: Georgia, 'Times New Roman', Times, serif;
+  font-size: 40px;
   padding: 0;
   position: relative;
   overflow: hidden;
@@ -545,8 +705,8 @@ export default {
   padding: 32px;
   box-shadow: 
     0 20px 40px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(138, 43, 226, 0.2);
-  border: 1px solid rgba(138, 43, 226, 0.1);
+    0 0 0 1px rgba(51, 204, 255, 0.2);
+    border: 1px solid rgba(51, 204, 255, 0.1);
   position: relative;
   overflow: hidden;
 }
@@ -558,7 +718,7 @@ export default {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #8a2be2, #4b0082, #8a2be2);
+  background: linear-gradient(90deg, #33CCFF, #0099CC, #33CCFF);
   border-radius: 20px 20px 0 0;
 }
 
@@ -568,7 +728,7 @@ export default {
   align-items: center;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid rgba(138, 43, 226, 0.2);
+  border-bottom: 1px solid rgba(10, 15, 25, 0.2);
 }
 
 .card-title {
@@ -673,7 +833,7 @@ export default {
   flex: 1;
   padding: 12px 20px;
   border-radius: 12px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   border: none;
   cursor: pointer;
@@ -683,25 +843,26 @@ export default {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #8a2be2, #4b0082);
+  background: rgb(21, 32, 53);
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(138, 43, 226, 0.3);
+  box-shadow: 0 4px 12px rgba(10, 15, 25, 0.3);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(138, 43, 226, 0.4);
+  box-shadow: 0 6px 20px rgba(10, 15, 25, 0.4);
+  background: rgb(15, 20, 30);
 }
 
 .btn-secondary {
   background: transparent;
-  color: #8a2be2;
-  border: 2px solid rgba(138, 43, 226, 0.3);
+  color: #33CCFF;
+  border: 2px solid rgba(51, 204, 255, 0.3);
 }
 
 .btn-secondary:hover {
-  background: rgba(138, 43, 226, 0.1);
-  border-color: rgba(138, 43, 226, 0.5);
+  background: rgba(51, 204, 255, 0.1);
+  border-color: rgba(51, 204, 255, 0.5);
 }
 
 /* 响应式设计 */
@@ -861,10 +1022,10 @@ export default {
   gap: 12px;
 }
 
-.btn-primary {
+.btn-primary {/**view details */
   flex: 1;
   padding: 12px 20px;
-  background: linear-gradient(135deg, #8a2be2 0%, #6b21a8 100%);
+  background: rgb(51, 96, 187);
   color: white;
   border: none;
   border-radius: 12px;
@@ -874,21 +1035,21 @@ export default {
   letter-spacing: 0.5px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(138, 43, 226, 0.3);
+  box-shadow: 0 4px 12px rgba(10, 15, 25, 0.3);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(138, 43, 226, 0.4);
-  background: linear-gradient(135deg, #9d4edd 0%, #7c3aed 100%);
+  box-shadow: 0 6px 20px rgba(10, 15, 25, 0.4);
+  background: rgb(19, 38, 77);
 }
 
-.btn-secondary {
+.btn-secondary { /**add to watchlist */
   flex: 1;
   padding: 12px 20px;
-  background: rgba(20, 20, 40, 0.8);
+  background: rgb(122, 124, 140);
   color: #e0e0e0;
-  border: 1px solid rgba(138, 43, 226, 0.3);
+  border: 1px solid rgba(43, 49, 59, 0.3);
   border-radius: 12px;
   font-size: 14px;
   font-weight: 600;
@@ -900,8 +1061,8 @@ export default {
 
 .btn-secondary:hover {
   transform: translateY(-2px);
-  border-color: rgba(138, 43, 226, 0.6);
-  background: rgba(138, 43, 226, 0.1);
+  border-color: rgba(51, 204, 255, 0.6);
+  background: rgba(51, 204, 255, 0.1);
   color: #ffffff;
 }
 
@@ -964,22 +1125,22 @@ export default {
 }
 
 .projects-list::-webkit-scrollbar-track {
-  background: rgba(138, 43, 226, 0.1);
+  background: rgba(51, 204, 255, 0.1);
   border-radius: 3px;
 }
 
 .projects-list::-webkit-scrollbar-thumb {
-  background: rgba(138, 43, 226, 0.3);
+  background: rgba(10, 15, 25, 0.3);
   border-radius: 3px;
 }
 
 .projects-list::-webkit-scrollbar-thumb:hover {
-  background: rgba(138, 43, 226, 0.5);
+  background: rgba(10, 15, 25, 0.5);
 }
 
 .project-card {
   background: rgba(20, 20, 40, 0.6);
-  border: 1px solid rgba(138, 43, 226, 0.2);
+    border: 1px solid rgba(51, 204, 255, 0.2);
   border-radius: 12px;
   padding: 16px;
   transition: all 0.3s ease;
@@ -987,7 +1148,7 @@ export default {
 
 .project-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(138, 43, 226, 0.4);
+  border-color: rgba(51, 204, 255, 0.4);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
@@ -1081,40 +1242,40 @@ export default {
 }
 
 .project-actions .btn-primary {
-  background: linear-gradient(135deg, #8a2be2 0%, #6b21a8 100%);
+  background: rgb(10, 15, 25);
   color: white;
   border: none;
-  box-shadow: 0 2px 8px rgba(138, 43, 226, 0.3);
+  box-shadow: 0 2px 8px rgba(10, 15, 25, 0.3);
 }
 
 .project-actions .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(138, 43, 226, 0.4);
+  box-shadow: 0 4px 12px rgba(10, 15, 25, 0.4);
 }
 
 .project-actions .btn-secondary {
   background: rgba(20, 20, 40, 0.8);
   color: #e0e0e0;
-  border: 1px solid rgba(138, 43, 226, 0.3);
+  border: 1px solid rgba(10, 15, 25, 0.3);
 }
 
 .project-actions .btn-secondary:hover {
-  border-color: rgba(138, 43, 226, 0.6);
-  background: rgba(138, 43, 226, 0.1);
+  border-color: rgba(51, 204, 255, 0.6);
+  background: rgba(51, 204, 255, 0.1);
   color: #ffffff;
 }
 
 .view-all-projects {
   text-align: center;
   padding-top: 16px;
-  border-top: 1px solid rgba(138, 43, 226, 0.1);
+  border-top: 1px solid rgba(10, 15, 25, 0.1);
 }
 
 .btn-outline {
   padding: 12px 24px;
   background: transparent;
-  color: #8a2be2;
-  border: 2px solid rgba(138, 43, 226, 0.3);
+  color: #184b5d;
+  border: 2px solid rgba(51, 204, 255, 0.3);
   border-radius: 12px;
   font-size: 14px;
   font-weight: 600;
@@ -1122,11 +1283,13 @@ export default {
   letter-spacing: 0.5px;
   cursor: pointer;
   transition: all 0.3s ease;
+  margin-top: -15px;
+  margin-bottom: 30px;
 }
 
 .btn-outline:hover {
-  background: rgba(138, 43, 226, 0.1);
-  border-color: rgba(138, 43, 226, 0.6);
+  background: rgba(51, 204, 255, 0.1);
+  border-color: rgba(51, 204, 255, 0.6);
   color: #ffffff;
   transform: translateY(-2px);
 }
@@ -1144,8 +1307,8 @@ export default {
 .loading-spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid rgba(138, 43, 226, 0.2);
-  border-top: 3px solid #8a2be2;
+  border: 3px solid rgba(10, 15, 25, 0.2);
+  border-top: 3px solid rgb(10, 15, 25);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
@@ -1200,8 +1363,8 @@ export default {
 
 .view-all-projects {
   background: transparent;
-  border: 2px solid rgba(138, 43, 226, 0.3);
-  color: #8a2be2;
+  border: 2px solid rgba(51, 204, 255, 0.3);
+  color: #33CCFF;
   padding: 12px 32px;
   border-radius: 12px;
   font-weight: 600;
@@ -1213,11 +1376,11 @@ export default {
 }
 
 .view-all-projects:hover {
-  background: rgba(138, 43, 226, 0.1);
-  border-color: rgba(138, 43, 226, 0.6);
+  background: rgba(51, 204, 255, 0.1);
+  border-color: rgba(51, 204, 255, 0.6);
   color: #ffffff;
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(138, 43, 226, 0.2);
+  box-shadow: 0 4px 16px rgba(51, 204, 255, 0.2);
 }
 
 .empty-state {
@@ -1440,328 +1603,248 @@ export default {
   }
 }
 
-/* 区块链节点样式 */
-.blockchain-nodes {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+/* Contact Us section */
+.page-header {
+  margin-top: 60px;
+  margin-left: 50px;
+  margin-bottom: 60px;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  text-align: left;
 }
 
-/* 数字图标样式 */
-.digital-icons {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 4;
-  pointer-events: none;
+.page-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.icon {
-  position: absolute;
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.8);
-  text-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
-  animation: iconFloat 4s ease-in-out infinite;
+.page-subtitle {
+  font-size: 1.25rem;
+  color: #94a3b8;
+  margin: 0;
 }
 
-.icon-1 { top: 20%; left: 15%; animation-delay: 0s; }
-.icon-2 { top: 35%; left: 25%; animation-delay: 0.5s; }
-.icon-3 { top: 25%; left: 40%; animation-delay: 1s; }
-.icon-4 { top: 45%; left: 35%; animation-delay: 1.5s; }
-.icon-5 { top: 30%; left: 55%; animation-delay: 2s; }
-.icon-6 { top: 50%; left: 60%; animation-delay: 2.5s; }
-.icon-7 { top: 40%; left: 75%; animation-delay: 3s; }
-.icon-8 { top: 60%; left: 20%; animation-delay: 3.5s; }
-.icon-9 { top: 15%; left: 70%; animation-delay: 4s; }
-.icon-10 { top: 55%; left: 45%; animation-delay: 4.5s; }
-.icon-11 { top: 25%; left: 85%; animation-delay: 5s; }
-.icon-12 { top: 65%; left: 80%; animation-delay: 5.5s; }
+.contact-content {
+  display: flex;
+  flex-direction: column;
+  gap: 80px;
+  height: 850px;
+}
 
-.node {
-  position: absolute;
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: stretch;
+}
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  height: 500px;
+  width:500px;
+  margin-left: 50px;
+  margin-top: -50px;
+}
+
+.contact-info h2,
+.contact-form h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 30px;
+  color: #ffffff;
+  width: 700px;
+}
+
+.contact-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-bottom: 40px;
+  flex: 1;
+}
+
+.contact-method {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: #1d1d36;
+  border: 1px solid #2a2a4a;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.method-icon {
+  font-size: 1.5rem;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
-  background: rgba(59, 130, 246, 0.2);
-  border: 2px solid rgba(59, 130, 246, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: nodePulse 3s ease-in-out infinite;
+  background: #141426;
+  border-radius: 8px;
+  flex-shrink: 0;
 }
 
-.node-pulse {
-  position: absolute;
+.method-details h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #ffffff;
+}
+
+.method-details p {
+  color: #94a3b8;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.social-links h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #ffffff;
+}
+
+.social-icons {
+  display: flex;
+  gap: 12px;
+}
+
+.social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #1d1d36;
+  border: 1px solid #2a2a4a;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.social-icon:hover {
+  background: #2a2a4a;
+  transform: translateY(-2px);
+}
+
+.contact-form {
+  background: #1d1d36;
+  border: 1px solid #2a2a4a;
+  border-radius: 16px;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 24px;
+}
+
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  flex: 1;
+}
+
+.form-submit {
+  margin-top: 5px;
+  padding-top: 24px;
+}
+
+.form-group {
+  margin-bottom: 0;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
   width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: rgba(59, 130, 246, 0.3);
-  animation: pulse 2s ease-in-out infinite;
+  padding: 12px 16px;
+  border: 1px solid #2a2a4a;
+  border-radius: 8px;
+  background: #141426;
+  color: #ffffff;
+  font-size: 1rem;
 }
 
-.node-icon {
-  font-size: 20px;
-  z-index: 2;
-  position: relative;
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
 }
 
-/* 节点位置 */
-.node-1 { top: 34%; left: 15%; animation-delay: 0s; } 
-.node-2 { top: 45%; left: 25%; animation-delay: 0.5s; }
-.node-3 { top: 45%; left: 65%; animation-delay: 1s; }
-.node-4 { top: 40%; left: 45%; animation-delay: 1.5s; }
-.node-5 { top: 60%; left: 55%; animation-delay: 2s; }
-.node-6 { top: 30%; left: 50%; animation-delay: 2.5s; }
-
-/* 连接线样式 */
-.connection-lines {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
+.btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
 }
 
-.lines-svg {
-  width: 100%;
-  height: 100%;
+.btn.primary {
+  background: #f97316;
+  color: white;
+  border: 1px solid #f97316;
 }
 
-.connection-line {
-  stroke-dasharray: 20 10;
-  animation: dashMove 2s linear infinite;
-  filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.6));
-  stroke-linecap: round;
+.btn.primary:hover:not(:disabled) {
+  background: #ea580c;
+  border-color: #ea580c;
 }
 
-.line-1 { animation-delay: 0s; }
-.line-2 { animation-delay: 0.5s; }
-.line-3 { animation-delay: 1s; }
-.line-4 { animation-delay: 1.5s; }
-.line-5 { animation-delay: 2s; }
-.line-6 { animation-delay: 2.5s; }
-.line-7 { animation-delay: 0.3s; }
-.line-8 { animation-delay: 0.8s; }
-.line-9 { animation-delay: 1.3s; }
-.line-10 { animation-delay: 1.8s; }
-.line-11 { animation-delay: 2.3s; }
-.line-12 { animation-delay: 0.1s; }
-.line-13 { animation-delay: 0.6s; }
-.line-14 { animation-delay: 1.1s; }
-.line-15 { animation-delay: 1.6s; }
-.line-16 { animation-delay: 2.1s; }
-.line-17 { animation-delay: 2.6s; }
-.line-18 { animation-delay: 0.4s; }
-.line-19 { animation-delay: 0.9s; }
-.line-20 { animation-delay: 1.4s; }
-.line-21 { animation-delay: 0.2s; }
-.line-22 { animation-delay: 0.7s; }
-.line-23 { animation-delay: 1.2s; }
-.line-24 { animation-delay: 1.7s; }
-.line-25 { animation-delay: 2.2s; }
-.line-26 { animation-delay: 0.05s; }
-.line-27 { animation-delay: 0.55s; }
-.line-28 { animation-delay: 1.05s; }
-.line-29 { animation-delay: 1.55s; }
-.line-30 { animation-delay: 2.05s; }
-.line-31 { animation-delay: 2.55s; }
-.line-32 { animation-delay: 0.15s; }
-.line-33 { animation-delay: 0.65s; }
-.line-34 { animation-delay: 1.15s; }
-.line-35 { animation-delay: 1.65s; }
-.line-36 { animation-delay: 2.15s; }
-.line-37 { animation-delay: 2.65s; }
-.line-38 { animation-delay: 0.25s; }
-.line-39 { animation-delay: 0.75s; }
-.line-40 { animation-delay: 1.25s; }
-
-/* 数据流粒子样式 */
-.data-particles {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
+.btn.primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.particle {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  background: rgba(59, 130, 246, 0.8);
-  border-radius: 50%;
-  animation: particleMove 4s linear infinite;
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
-}
-
-.particle-1 { top: 25%; left: 20%; animation-delay: 0s; }
-.particle-2 { top: 65%; left: 30%; animation-delay: 0.8s; }
-.particle-3 { top: 35%; left: 50%; animation-delay: 1.6s; }
-.particle-4 { top: 75%; left: 60%; animation-delay: 2.4s; }
-.particle-5 { top: 30%; left: 75%; animation-delay: 3.2s; }
-.particle-6 { top: 60%; left: 85%; animation-delay: 4s; }
-.particle-7 { top: 15%; left: 25%; animation-delay: 0.4s; }
-.particle-8 { top: 45%; left: 35%; animation-delay: 1.2s; }
-.particle-9 { top: 55%; left: 45%; animation-delay: 2.0s; }
-.particle-10 { top: 25%; left: 65%; animation-delay: 2.8s; }
-.particle-11 { top: 75%; left: 75%; animation-delay: 3.6s; }
-.particle-12 { top: 40%; left: 85%; animation-delay: 4.4s; }
-
-/* 背景数据流样式 */
-.data-streams {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
-.stream {
-  position: absolute;
-  width: 2px;
-  height: 100%;
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(59, 130, 246, 0.3) 20%,
-    rgba(147, 51, 234, 0.4) 50%,
-    rgba(59, 130, 246, 0.3) 80%,
-    transparent 100%
-  );
-  animation: streamFlow 3s ease-in-out infinite;
-}
-
-.stream-1 { left: 10%; animation-delay: 0s; }
-.stream-2 { left: 25%; animation-delay: 0.6s; }
-.stream-3 { left: 50%; animation-delay: 1.2s; }
-.stream-4 { left: 75%; animation-delay: 1.8s; }
-.stream-5 { left: 90%; animation-delay: 2.4s; }
-.stream-6 { left: 15%; animation-delay: 0.3s; }
-.stream-7 { left: 40%; animation-delay: 0.9s; }
-.stream-8 { left: 85%; animation-delay: 2.1s; }
-
-/* 标题样式 */
-.blockchain-title {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 24px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.9);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-  letter-spacing: 2px;
-  animation: titleGlow 2s ease-in-out infinite alternate;
-}
-
-/* 动画定义 */
-@keyframes nodePulse {
-  0%, 100% { 
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
-  }
-  50% { 
-    transform: scale(1.1);
-    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
-  }
-}
-
-@keyframes pulse {
-  0%, 100% { 
-    transform: scale(1);
-    opacity: 0.7;
-  }
-  50% { 
-    transform: scale(1.5);
-    opacity: 0;
-  }
-}
-
-@keyframes dashMove {
-  0% { stroke-dashoffset: 0; }
-  100% { stroke-dashoffset: 30; }
-}
-
-@keyframes particleMove {
-  0% { 
-    transform: translate(0, 0);
-    opacity: 0;
-  }
-  10% { 
-    opacity: 1;
-  }
-  90% { 
-    opacity: 1;
-  }
-  100% { 
-    transform: translate(100px, -50px);
-    opacity: 0;
-  }
-}
-
-@keyframes streamFlow {
-  0%, 100% { 
-    opacity: 0.3;
-    transform: scaleY(0.5);
-  }
-  50% { 
-    opacity: 0.8;
-    transform: scaleY(1);
-  }
-}
-
-@keyframes titleGlow {
-  0% { 
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-  }
-  100% { 
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.5);
-  }
-}
-
-/* 响应式设计 */
 @media (max-width: 768px) {
-  .blockchain-visual {
-    height: 300px;
+  .page-header {
+    margin-left: 0;
+    text-align: center;
+    padding: 40px 0;
   }
   
-  .node {
-    width: 30px;
-    height: 30px;
+  .page-header h1 {
+    font-size: 28px;
+    position: static;
+    margin-bottom: 20px;
   }
   
-  .node-icon {
-    font-size: 16px;
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
   }
   
-  .blockchain-title {
-    font-size: 18px;
+  .contact-method {
+    flex-direction: column;
+    text-align: center;
   }
 }
 
 @media (max-width: 480px) {
-  .blockchain-visual {
-    height: 250px;
-  }
-  
-  .node {
-    width: 25px;
-    height: 25px;
-  }
-  
-  .node-icon {
-    font-size: 14px;
-  }
-  
-  .blockchain-title {
-    font-size: 16px;
+  .page-header h1 {
+    font-size: 24px;
+    margin-bottom: 16px;
   }
 }
 

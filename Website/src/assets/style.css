@@ -40,6 +40,41 @@ a { color: inherit; text-decoration: none }
   .page-wrap{ padding-left: 16px; padding-right: 16px }
 }
 
+/* 响应式调整header左右边距 */
+@media (max-width: 1024px) {
+  .left { margin-left: 40px; }
+  .right { margin-right: 40px; }
+}
+
+@media (max-width: 768px) {
+  .left { margin-left: 20px; }
+  .right { margin-right: 20px; }
+}
+
+@media (max-width: 480px) {
+  .left { margin-left: 10px; }
+  .right { margin-right: 10px; }
+}
+
+/* 移动端body padding调整 */
+@media (max-width: 768px) {
+  body {
+    padding-top: 60px; /* 匹配移动端header高度 */
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding-top: 56px; /* 匹配小屏幕header高度 */
+  }
+}
+
+@media (max-width: 360px) {
+  body {
+    padding-top: 52px; /* 匹配超小屏幕header高度 */
+  }
+}
+
 /* Header */
 .header {
   position: fixed; 
@@ -48,7 +83,7 @@ a { color: inherit; text-decoration: none }
   right: 0;
   width: 100%;
   /* height:80px; */
-  background: #141426;
+  background: #0A0F19;
   backdrop-filter: saturate(180%) blur(8px);
   border-bottom: 1px solid var(--border);
   z-index: 1000;
@@ -109,6 +144,8 @@ a { color: inherit; text-decoration: none }
 
 /*main*/
 .left, .right { display: flex; align-items: center; gap: 16px }
+.left { margin-left: 80px; }
+.right { margin-right: 80px; }
 
 .brand-logo {
   height: 48px;   /* 放大logo尺寸 */

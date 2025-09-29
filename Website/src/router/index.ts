@@ -8,9 +8,6 @@ import DetailPage from '../views/core/DetailPage.vue'
 import ProfileView from '../views/core/ProfileView.vue'
 import TradeProjectView from '../views/core/TradeProjectView.vue'
 import ContractView from '../views/core/contract.vue'
-import BridgeView from '../views/FunctionalModule/otherinteractbutton/BridgeView.vue'
-import SendView from '../views/FunctionalModule/otherinteractbutton/SendView.vue'
-import SwapView from '../views/FunctionalModule/otherinteractbutton/SwapView.vue'
 import TokenDetailView from '../views/core/TokenDetailView.vue'
 // Auth pages
 import LoginView from '../views/auth/LoginView.vue'
@@ -26,8 +23,10 @@ import TermView from '../views/info/aboutus/Term.vue'
 import PrivacyPolicyView from '../views/info/aboutus/PrivacyPolicy.vue'
 import FAQView from '../views/info/FAQView.vue'
 import SettingsView from '../views/settings/SettingsView.vue'
-// Test pages
-import ContractTestView from '../views/test/ContractTestView.vue'
+// Functional modules
+import BridgeView from '../views/FunctionalModule/otherinteractbutton/BridgeView.vue'
+import SendView from '../views/FunctionalModule/otherinteractbutton/SendView.vue'
+import SwapView from '../views/FunctionalModule/otherinteractbutton/SwapView.vue'
 // Other components
 import kycService from '../components/kycService.vue'
 

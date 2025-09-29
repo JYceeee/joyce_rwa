@@ -151,7 +151,7 @@ const apiConnected = ref(false)
 const lastCheckTime = ref('')
 
 // API配置
-const apiEndpoint = 'http://localhost:3000/user/transactionhistory'
+const apiEndpoint = import.meta.env.VITE_API_TSC_URL
 
 // 计算属性
 const successCount = computed(() => testResults.value.filter(r => r.type === 'success').length)

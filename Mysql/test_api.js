@@ -1,7 +1,7 @@
 // 测试API接口的脚本
 const fetch = require('node-fetch');
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 async function testAPI() {
   console.log('🧪 开始测试RWA项目API接口...\n');

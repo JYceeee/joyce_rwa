@@ -36,28 +36,31 @@
       <div class="mm-account">
         <div class="mm-avatar"></div>
         <div class="mm-account-meta">
-          <div class="mm-account-title">Account</div>
+          <div class="mm-account-title" style="display:flex;align-items:center;gap:12px;">
+            <span>Account</span>
+            <div v-if="connected" class="mm-status">
+              <span class="mm-dot"></span>
+              <span class="mm-status-text">Connected</span>
+            </div>
+          </div>
           <div class="mm-account-line">
             <template v-if="selectedAccount">
               <span class="mm-addr" :title="selectedAccount">{{ selectedAccount }}</span>
               <button v-if="connected" class="mm-btn mm-outline mm-copy" @click="onCopy">Copy</button>
+
             </template>
             <template v-else>
               <span class="mm-addr" style="color:#b45309;">please connect your wallet in wallet management</span>
             </template>
           </div>
-          <div v-if="connected && selectedAccount" class="mm-status" style="margin-top:6px;">
-            <span class="mm-dot"></span>
-            <span class="mm-status-text">Connected</span>
-          </div>
-          <button v-else class="mm-btn mm-outline" style="margin-top:6px;" @click="connect">Connect MetaMask</button>
+          <button v-if="!connected || !selectedAccount" class="mm-btn mm-outline" style="margin-top:6px;" @click="connect">Connect MetaMask</button>
         </div>
       </div>
     </header>
   </section>
 
   <!-- Wallet Management Section -->
-  <section v-if="connected" class="mm-wallet-management-section">
+  <!-- <section v-if="connected" class="mm-wallet-management-section">
     <div class="mm-wallet-management">
       <div class="field">
         <label class="mm-net-left">Wallet Management</label>
@@ -70,7 +73,7 @@
           <select v-model="walletAction" style="border:0;outline:none;width:180px;height:38px;background:#1d1d36;color:#ffffff;border-radius:8px;padding:0 8px;">
             <option value="" disabled style="background:#1d1d36;color:#94a3b8;">Choose…</option>
             <option value="link" style="background:#1d1d36;color:#ffffff;">Link new wallet</option> 
-            <option value="set-primary" style="background:#1d1d36;color:#ffffff;">Set primary wallet</option> -->
+            <option value="set-primary" style="background:#1d1d36;color:#ffffff;">Set primary wallet</option> 
             <option value="disconnect" style="background:#1d1d36;color:#ffffff;">Disconnect my wallet</option>
           </select>
           <template v-if="walletAction==='set-primary'||walletAction==='disconnect'">
@@ -86,13 +89,13 @@
         </div>
       </div>
     </div>
-  </section>
+  </section>  -->
 
   <!-- Main Dashboard Section -->
   <section v-if="connected && selectedAccount" class="mm-dashboard-section">
     <!-- 资产标题区 -->
     <div class="mm-hero">
-      <div class="mm-balance">{{ bigAudDisplay }}</div>
+      <div class="mm-balance">{{ nativeBalanceDisplay }} {{ nativeSymbol }}</div>
       <div class="mm-subline">
         <!-- <span>+A$0 (+0.00%)</span> 需要修改为投资累计余额的动态数据 -->
         <a href="#" @click.prevent="$router.push('/portfolio')" class="mm-link">Portfolio ↗</a>

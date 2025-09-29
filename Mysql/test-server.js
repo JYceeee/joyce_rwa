@@ -32,8 +32,8 @@ app.post('/user/transactionhistory', (req, res) => {
 })
 
 // 启动服务器
-const PORT = 3000
+const PORT = import.meta.env.db_port
 app.listen(PORT, () => {
   console.log(`测试服务器在端口 ${PORT} 启动成功`)
-  console.log(`访问地址: http://localhost:${PORT}`)
+  console.log(`访问地址: import.meta.env.VITE_API_BASE_URL:${PORT}`)
 })

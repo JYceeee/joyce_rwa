@@ -153,7 +153,7 @@ export default {
         // 发送注册数据
         console.log('🚀 发送注册请求:', payload);
         
-        const response = await fetch('http://localhost:3000/user/reguser', {
+        const response = await fetch(import.meta.env.VITE_API_SIGNUP_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

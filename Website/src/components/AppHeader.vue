@@ -1,8 +1,37 @@
 <template>
+  <!-- 解绑账号弹窗 -->
+  <div v-if="showDisconnectModal" class="modal-mask">
+    <div class="modal-wrapper">
+      <div class="modal-container">
+        <h2 style="margin-bottom:8px;color:#ffffff;">Disconnect Wallet</h2>
+        <p style="color:#ffffff;">Select the wallet account you want to disconnect:</p>
+        <div>
+          <span style="display:block;font-size:15px;padding:8px 0;color:#ffffff;background:#2a2a4a;border-radius:8px;">{{ selectedAccount }}</span>
+        </div>
+        <div style="text-align:right;">
+          <button class="mm-btn mm-outline" @click="showDisconnectModal=false">Cancel</button>
+          <button class="mm-btn mm-outline" style="margin-left:8px;" @click="disconnectAccount">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 解绑成功弹窗 -->
+  <div v-if="showDisconnectSuccess" class="modal-mask">
+    <div class="modal-wrapper">
+      <div class="modal-container">
+        <h2 style="margin-bottom:8px;color:#ffffff;">Wallet Disconnected</h2>
+        <p style="color:#ffffff;">{{ disconnectSuccessMsg }}</p>
+        <div style="text-align:right;">
+          <button class="mm-btn mm-outline" @click="showDisconnectSuccess=false">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
   <header class="header"> 
     <div class="container nav">
       <div class="left">
-        
         <a class="brand" href="#" @click.prevent="go('/')">
           <img src="/icons/RWA-logo.png" alt="Mortgage RWA" class="brand-logo" />
         </a>
@@ -11,38 +40,11 @@
           <a href="#" @click.prevent="go('/projects')" class="menu-item">Projects</a>
           <a href="#" @click.prevent="go('/portfolio')" class="menu-item">Portfolio</a>
           <div class="dropdown-container">
-            <a href="#" class="menu-item more-link" @click.prevent="toggleMoreDropdown">
-              More ▾
-            </a>
+            <a href="#" class="menu-item more-link" @click.prevent="toggleMoreDropdown">More ▾</a>
             <div v-if="moreDropdownOpen" class="dropdown-menu">
-              <a href="#" @click.prevent="go('/overview')" class="dropdown-item">
-                <span class="dropdown-icon">📋</span>
-                <span>Overview</span>
-              </a>
-              <a href="#" @click.prevent="go('/about')" class="dropdown-item">
-                <span class="dropdown-icon">🏢</span>
-                <span>About Us</span>
-              </a>
-              <a href="#" @click.prevent="go('/solutions')" class="dropdown-item">
-                <span class="dropdown-icon">🔧</span>
-                <span>Solutions</span>
-              </a>
-              <a href="#" @click.prevent="go('/tutorials')" class="dropdown-item">
-                <span class="dropdown-icon">📚</span>
-                <span>Tutorials</span>
-              </a>
-              <a href="#" @click.prevent="go('/pricing')" class="dropdown-item">
-                <span class="dropdown-icon">💰</span>
-                <span>Pricing</span>
-              </a>
-              <a href="#" @click.prevent="go('/contact')" class="dropdown-item">
-                <span class="dropdown-icon">📞</span>
-                <span>Contact</span>
-              </a>
-              <a href="#" @click.prevent="go('/faq')" class="dropdown-item">
-                <span class="dropdown-icon">❓</span>
-                <span>FAQ</span>
-              </a>
+              <a href="#" @click.prevent="go('/overview')" class="dropdown-item">Overview</a>
+              <a href="#" @click.prevent="go('/about')" class="dropdown-item">About Us</a>
+              <a href="#" @click.prevent="go('/contact')" class="dropdown-item">Contact</a>
             </div>
           </div>
         </nav>
@@ -79,24 +81,46 @@
         </div>
       
       <!-- User Auth Buttons -->
-        <template v-if="isLoggedIn">
-          <button class="btn orange pill" @click.prevent="goToWallet()">
-            <!-- <span>🔗</span> -->
-            <span>Wallet</span>
-          </button>
+        <div v-if="isLoggedIn">
+          <div class="wallet-dropdown-container">
+             <div class="wallet-btn-wrapper">
+               <button class="btn orange pill wallet-main-btn" @click.prevent="goToWallet()">
+                 <span>Wallet</span>
+               </button>
+               <div class="wallet-divider"></div>
+                <button class="btn orange pill wallet-dropdown-btn" 
+                @click.prevent="toggleWalletDropdown">
+                 <span class="dropdown-arrow">▾</span>
+               </button>
+             </div>
+            <div v-if="walletDropdownOpen" class="wallet-dropdown-menu">
+              <div class="wallet-dropdown-header">Wallet Management</div>
+              <a href="#" @click.prevent="linkNewWallet" class="wallet-dropdown-item">
+                <span>Link new wallet</span>
+              </a>
+              <a href="#" @click.prevent="addManualWallet" class="wallet-dropdown-item">
+                <!-- <span>➕</span> -->
+                <span>Add wallet manually</span>
+              </a>
+              <a href="#" @click.prevent="setPrimaryWallet" class="wallet-dropdown-item">
+                <!-- <span>⭐</span> -->
+                <span>Set primary wallet</span>
+              </a>
+              <a href="#" @click.prevent="disconnectWallet" class="wallet-dropdown-item">
+                <!-- <span>❌</span> -->
+                <span>Disconnect wallet</span>
+              </a>
+            </div>
+          </div>
           <button class="btn light pill" @click.prevent="goToProfile()">
             <span>👤</span>
-            <span>Profile</span>
           </button>
-          <button class="btn ghost pill settings-btn" @click.prevent="go('/settings')">
-            <span>⚙️</span>
-            <!-- <span>Settings</span> -->
-          </button>
-        </template>
-        <template v-else>
+          <button class="btn ghost pill settings-btn" @click.prevent="go('/settings')">⚙️</button>
+        </div>
+        <div v-else>
           <a class="btn ghost" href="#" @click.prevent="go('/login')">Log in</a>
           <a class="btn orange" href="#" @click.prevent="go('/signup')">Sign up</a>
-        </template>
+        </div>
       </div>
     </div>
     
@@ -162,7 +186,8 @@ export default {
       searchText: '', 
       isLoggedIn: false,
       moreDropdownOpen: false,
-      mobileMenuOpen: false
+      mobileMenuOpen: false,
+      walletDropdownOpen: false
     }
   },
 
@@ -181,6 +206,22 @@ export default {
     },
     closeMoreDropdown(){
       this.moreDropdownOpen = false;
+    },
+    toggleWalletDropdown(){
+      this.walletDropdownOpen = !this.walletDropdownOpen;
+      this.updateArrowRotation();
+    },
+    hideWalletDropdown(){
+      this.walletDropdownOpen = false;
+      this.updateArrowRotation();
+    },
+    updateArrowRotation(){
+      this.$nextTick(() => {
+        const arrow = this.$el.querySelector('.dropdown-arrow');
+        if (arrow) {
+          arrow.style.transform = this.walletDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+      });
     },
     toggleMobileMenu(){
       this.mobileMenuOpen = !this.mobileMenuOpen;
@@ -226,6 +267,7 @@ export default {
       const dropdown = this.$el.querySelector('.dropdown-container')
       const mobileMenuBtn = this.$el.querySelector('.mobile-menu-btn')
       const mobileMenu = this.$el.querySelector('.mobile-menu')
+      const walletDropdown = this.$el.querySelector('.wallet-dropdown-container')
       
       // 处理搜索框点击外部关闭
       if(input && this.searchOpen && !input.contains(e.target) && !btn.contains(e.target)){
@@ -235,6 +277,11 @@ export default {
       // 处理dropdown点击外部关闭
       if(dropdown && this.moreDropdownOpen && !dropdown.contains(e.target)){
         this.closeMoreDropdown()
+      }
+      
+      // 处理钱包下拉菜单点击外部关闭
+      if(walletDropdown && this.walletDropdownOpen && !walletDropdown.contains(e.target)){
+        this.hideWalletDropdown()
       }
       
       // 处理移动端菜单点击外部关闭
@@ -249,8 +296,17 @@ export default {
           const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
           this.account = accounts[0];
           console.log("钱包已连接：", this.account);
+          
+          // 将连接的钱包添加到列表中
+          this.addManualWalletAddress(this.account);
+          
+          // 设置为当前钱包
+          localStorage.setItem('walletConnected', 'true');
+          localStorage.setItem('walletAddress', this.account);
+          
         } catch (error) {
           console.error("连接失败", error);
+          alert("钱包连接失败：" + error.message);
         } 
       } else {
         alert("请先安装 MetaMask 插件！");
@@ -266,6 +322,110 @@ export default {
     goToProfile() {
       // alert('跳转到个人资料页面');
       this.go('/profile');
+    },
+    linkNewWallet() {
+      this.hideWalletDropdown();
+      // 实现连接新钱包的逻辑
+      this.connectWallet();
+    },
+    addManualWallet() {
+      this.hideWalletDropdown();
+      // 实现手动添加钱包的逻辑
+      const walletAddress = prompt('请输入钱包地址:');
+      if (walletAddress && walletAddress.trim()) {
+        this.addManualWalletAddress(walletAddress.trim());
+      }
+    },
+    addManualWalletAddress(address) {
+      // 验证地址格式（简单的以太坊地址验证）
+      if (address.length === 42 && address.startsWith('0x')) {
+        // 存储到localStorage
+        const existingWallets = JSON.parse(localStorage.getItem('linkedWallets') || '[]');
+        if (!existingWallets.includes(address)) {
+          existingWallets.push(address);
+          localStorage.setItem('linkedWallets', JSON.stringify(existingWallets));
+          alert(`钱包地址 ${address} 已添加`);
+          // 触发钱包更新事件
+          this.$emit('wallet-added', address);
+        } else {
+          alert('该钱包地址已存在');
+        }
+      } else {
+        alert('请输入有效的以太坊地址');
+      }
+    },
+    setPrimaryWallet() {
+      this.hideWalletDropdown();
+      // 获取已连接的钱包列表
+      const linkedWallets = JSON.parse(localStorage.getItem('linkedWallets') || '[]');
+      const currentWallet = localStorage.getItem('walletAddress');
+      
+      if (linkedWallets.length === 0) {
+        alert('没有可设置的钱包地址');
+        return;
+      }
+      
+      // 创建选择对话框
+      let options = linkedWallets.map((wallet, index) => 
+        `${index + 1}. ${wallet}${wallet === currentWallet ? ' (当前)' : ''}`
+      ).join('\n');
+      
+      const choice = prompt(`选择要设置为主钱包的地址:\n${options}\n\n请输入序号:`);
+      const selectedIndex = parseInt(choice) - 1;
+      
+      if (selectedIndex >= 0 && selectedIndex < linkedWallets.length) {
+        const selectedWallet = linkedWallets[selectedIndex];
+        localStorage.setItem('primaryWallet', selectedWallet);
+        localStorage.setItem('walletAddress', selectedWallet);
+        alert(`主钱包已设置为: ${selectedWallet}`);
+        this.$emit('primary-wallet-changed', selectedWallet);
+      } else if (choice !== null) {
+        alert('无效的选择');
+      }
+    },
+    disconnectWallet() {
+      this.hideWalletDropdown();
+      // 获取已连接的钱包列表
+      const linkedWallets = JSON.parse(localStorage.getItem('linkedWallets') || '[]');
+      
+      if (linkedWallets.length === 0) {
+        alert('没有可断开的钱包地址');
+        return;
+      }
+      
+      // 创建选择对话框
+      let options = linkedWallets.map((wallet, index) => 
+        `${index + 1}. ${wallet}`
+      ).join('\n');
+      
+      const choice = prompt(`选择要断开的钱包地址:\n${options}\n\n请输入序号:`);
+      const selectedIndex = parseInt(choice) - 1;
+      
+      if (selectedIndex >= 0 && selectedIndex < linkedWallets.length) {
+        const selectedWallet = linkedWallets[selectedIndex];
+        if (confirm(`确定要断开钱包 ${selectedWallet} 吗？`)) {
+          this.disconnectWalletConnection(selectedWallet);
+        }
+      } else if (choice !== null) {
+        alert('无效的选择');
+      }
+    },
+    disconnectWalletConnection(walletAddress) {
+      // 从列表中移除钱包
+      const linkedWallets = JSON.parse(localStorage.getItem('linkedWallets') || '[]');
+      const updatedWallets = linkedWallets.filter(wallet => wallet !== walletAddress);
+      localStorage.setItem('linkedWallets', JSON.stringify(updatedWallets));
+      
+      // 如果断开的是当前钱包，清除当前连接状态
+      const currentWallet = localStorage.getItem('walletAddress');
+      if (currentWallet === walletAddress) {
+        localStorage.removeItem('walletConnected');
+        localStorage.removeItem('walletAddress');
+        localStorage.removeItem('primaryWallet');
+      }
+      
+      alert(`钱包 ${walletAddress} 已断开连接`);
+      this.$emit('wallet-disconnected', walletAddress);
     }
   },
   mounted(){
@@ -288,7 +448,7 @@ export default {
   margin-right: 10px;
   border: none;
   background: transparent;
-  font-size: 20px;
+  font-size: 16px;
   line-height: 1;
   cursor: pointer;
 }
@@ -298,6 +458,115 @@ export default {
 .dropdown-container {
   position: relative;
   display: inline-block;
+}
+
+/* 钱包下拉菜单样式 */
+.wallet-dropdown-container {
+  position: relative;
+  display: inline-block;
+  margin-left:15px;
+  margin-right: 15px;
+}
+
+.wallet-btn-wrapper {
+  display: flex;
+  align-items: center;
+  background: #f97316;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid transparent;
+}
+
+.wallet-main-btn {
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 0;
+}
+
+.wallet-main-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.wallet-divider {
+  width: 1px;
+  height: 20px;
+  background: white;
+  opacity: 0.3;
+}
+
+.wallet-dropdown-btn {
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wallet-dropdown-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-arrow {
+  font-size: 20px;
+  transition: transform 0.2s ease;
+}
+
+/* 下拉箭头旋转效果通过JavaScript控制 */
+
+.wallet-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 200px;
+  background: #1d1d36;
+  border: 1px solid #2a2a4a;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  margin-top: 4px;
+  animation: dropdownFadeIn 0.2s ease-out;
+}
+
+.wallet-dropdown-header {
+  padding: 12px 16px;
+  color: #8ca0c3;
+  font-size: 14px;
+  font-weight: 600;
+  border-bottom: 1px solid #2a2a4a;
+  background: #23234a;
+  border-radius: 8px 8px 0 0;
+}
+
+.wallet-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: #ffffff;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #2a2a4a;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.wallet-dropdown-item:last-child {
+  border-bottom: none;
+  border-radius: 0 0 8px 8px;
+}
+
+.wallet-dropdown-item:hover {
+  background: #2a2a4a;
+  color: #ffffff;
 }
 
 .more-link {
@@ -311,7 +580,7 @@ export default {
   position: absolute;
   top: 100%;
   left: 0;
-  min-width: 200px;
+  min-width: 150px;
   background: #1d1d36;
   border: 1px solid #2a2a4a;
   border-radius: 8px;
@@ -363,7 +632,7 @@ export default {
   color: #ffffff;
   text-decoration: none;
   font-weight: 500;
-  font-size: 20px;
+  font-size: 16px;
   transition: color 0.2s ease;
   padding: 8px 12px;
   border-radius: 6px;
@@ -373,6 +642,7 @@ export default {
   color: #667eea;
 }
 
+/* Header样式 */
 /* Header右侧按钮样式 */
 .header .btn {
   font-size: 15px;
@@ -418,13 +688,27 @@ export default {
 /* 移动端菜单样式 */
 .mobile-menu {
   position: fixed;
-  top: 64px;
+  top: 60px; /* 匹配移动端header高度 */
   left: 0;
   right: 0;
   background: var(--bg);
   border-bottom: 1px solid var(--border);
   z-index: 999;
   animation: slideDown 0.3s ease-out;
+}
+
+/* 小屏幕移动端菜单位置调整 */
+@media (max-width: 480px) {
+  .mobile-menu {
+    top: 56px; /* 匹配小屏幕header高度 */
+  }
+}
+
+/* 超小屏幕移动端菜单位置调整 */
+@media (max-width: 360px) {
+  .mobile-menu {
+    top: 52px; /* 匹配超小屏幕header高度 */
+  }
 }
 
 @keyframes slideDown {
@@ -477,17 +761,31 @@ export default {
 
 /* 响应式设计 - 移动端适配 */
 @media (max-width: 768px) {
+  .header {
+    margin-left: 0;
+    margin-right: 0;
+  }
+  
   .nav {
-    padding: 0 16px;
-    gap: 12px;
+    padding-left: 16px;
+    padding-right: 16px;
+    gap: 8px;
+    height: 60px; /* 降低移动端header高度 */
   }
   
   .left {
-    gap: 12px;
+    gap: 8px;
+    margin-left: 0; /* 重置桌面端边距 */
+  }
+  
+  .right {
+    gap: 4px;
+    margin-right: 0; /* 重置桌面端边距 */
+    flex-wrap: nowrap; /* 防止换行 */
   }
   
   .brand-logo {
-    height: 40px;
+    height: 36px; /* 稍微缩小logo */
   }
   
   .menu {
@@ -496,50 +794,114 @@ export default {
   
   .mobile-menu-btn {
     display: flex; /* 显示汉堡菜单按钮 */
-  }
-  
-  .right {
-    gap: 8px;
+    width: 36px;
+    height: 36px;
   }
   
   .search-input.expanded {
-    width: 120px; /* 移动端搜索框更窄 */
+    width: 80px; /* 移动端搜索框更窄，为按钮留空间 */
+  }
+  
+  .search-toggle {
+    padding: 6px;
+  }
+  
+  .search-toggle img {
+    width: 18px;
+    height: 18px;
   }
   
   .btn {
-    padding: 8px 12px;
-    font-size: 14px;
+    padding: 6px 10px;
+    font-size: 13px;
+    white-space: nowrap; /* 防止文字换行 */
+    flex-shrink: 0; /* 防止收缩 */
   }
   
   .btn.pill {
+    padding: 4px 8px;
+  }
+  
+  /* Profile按钮样式 */
+  .btn.light.pill {
     padding: 6px 10px;
+    font-size: 12px;
+  }
+  
+  /* Settings按钮样式 */
+  .settings-btn {
+    font-size: 18px !important;
+    padding: 6px !important;
+    flex-shrink: 0;
   }
   
   .btn.pill span:last-child {
-    display: none; /* 移动端只显示图标 */
+    display: inline; /* 移动端显示完整文字 */
+  }
+  
+  .wallet-btn-wrapper {
+    flex-direction: row; /* 保持水平布局 */
+    min-width: auto;
+    flex-shrink: 0; /* 防止收缩 */
+  }
+  
+  .wallet-main-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+    white-space: nowrap; /* 防止文字换行 */
+  }
+  
+  .wallet-dropdown-btn {
+    padding: 6px 8px;
+    flex-shrink: 0; /* 防止收缩 */
+  }
+  
+  .wallet-divider {
+    width: 1px;
+    height: 20px;
+    margin: 0 2px;
   }
   
   .dropdown-menu {
     right: 0;
     left: auto;
-    min-width: 180px;
+    min-width: 160px;
+    top: 100%;
+  }
+  
+  .wallet-dropdown-menu {
+    right: 0;
+    left: auto;
+    min-width: 160px;
+    top: 100%;
   }
   
   .dropdown-item {
-    padding: 10px 12px;
-    font-size: 14px;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  
+  .wallet-dropdown-item {
+    padding: 8px 12px;
+    font-size: 13px;
   }
   
   .dropdown-icon {
-    font-size: 14px;
-    width: 18px;
+    font-size: 13px;
+    width: 16px;
+  }
+  
+  .wallet-dropdown-container {
+    margin-left: 8px;
+    margin-right: 8px;
   }
 }
 
 /* 平板端适配 */
 @media (min-width: 769px) and (max-width: 1024px) {
   .nav {
-    padding: 0 20px;
+    padding-left: 20px;
+    padding-right: 20px;
   }
   
   .menu {
@@ -557,59 +919,217 @@ export default {
 
 /* 小屏幕手机端 (小于480px) */
 @media (max-width: 480px) {
+  .header {
+    margin-left: 0;
+    margin-right: 0;
+  }
+  
   .nav {
-    padding: 0 12px;
-    gap: 8px;
+    padding-left: 12px;
+    padding-right: 12px;
+    gap: 6px;
+    height: 56px; /* 进一步降低高度 */
+  }
+  
+  .left {
+    gap: 6px;
+  }
+  
+  .right {
+    gap: 3px;
+    flex-wrap: nowrap;
   }
   
   .brand-logo {
-    height: 36px;
+    height: 32px; /* 更小的logo */
   }
   
-  .search-input.expanded {
-    width: 100px;
-  }
-  
-  .btn {
-    padding: 6px 8px;
-    font-size: 12px;
-  }
-  
-  .btn.pill span:first-child {
-    font-size: 16px;
-  }
-  
-  .dropdown-menu {
-    min-width: 160px;
-  }
-  
-  .dropdown-item {
-    padding: 8px 10px;
-    font-size: 13px;
-  }
-}
-
-/* 超小屏幕 (小于360px) */
-@media (max-width: 360px) {
-  .nav {
-    padding: 0 8px;
-  }
-  
-  .brand-logo {
+  .mobile-menu-btn {
+    width: 32px;
     height: 32px;
   }
   
   .search-input.expanded {
-    width: 80px;
+    width: 60px; /* 更窄的搜索框，为按钮留更多空间 */
+  }
+  
+  .search-toggle {
+    padding: 4px;
+  }
+  
+  .search-toggle img {
+    width: 16px;
+    height: 16px;
   }
   
   .btn {
     padding: 4px 6px;
     font-size: 11px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  
+  .btn.pill {
+    padding: 3px 6px;
+  }
+  
+  .btn.pill span:first-child {
+    font-size: 14px;
+  }
+  
+  /* Profile按钮样式 */
+  .btn.light.pill {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+  
+  /* Settings按钮样式 */
+  .settings-btn {
+    font-size: 16px !important;
+    padding: 4px !important;
+  }
+  
+  .wallet-main-btn {
+    padding: 4px 6px;
+    font-size: 11px;
+  }
+  
+  .wallet-dropdown-btn {
+    padding: 4px 4px;
+  }
+  
+  .wallet-divider {
+    height: 16px;
+    margin: 0 1px;
   }
   
   .dropdown-menu {
     min-width: 140px;
+  }
+  
+  .wallet-dropdown-menu {
+    min-width: 140px;
+  }
+  
+  .dropdown-item {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+  
+  .wallet-dropdown-item {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+  
+  .wallet-dropdown-container {
+    margin-left: 4px;
+    margin-right: 4px;
+  }
+}
+
+/* 超小屏幕 (小于360px) */
+@media (max-width: 360px) {
+  .header {
+    margin-left: 0;
+    margin-right: 0;
+  }
+  
+  .nav {
+    padding-left: 8px;
+    padding-right: 8px;
+    gap: 4px;
+    height: 52px; /* 最小高度 */
+  }
+  
+  .left {
+    gap: 4px;
+  }
+  
+  .right {
+    gap: 2px;
+    flex-wrap: nowrap;
+  }
+  
+  .brand-logo {
+    height: 28px; /* 最小logo */
+  }
+  
+  .mobile-menu-btn {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .search-input.expanded {
+    width: 50px; /* 最窄搜索框，为按钮留最大空间 */
+  }
+  
+  .search-toggle {
+    padding: 3px;
+  }
+  
+  .search-toggle img {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .btn {
+    padding: 3px 4px;
+    font-size: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  
+  .btn.pill {
+    padding: 2px 4px;
+  }
+  
+  /* Profile按钮样式 */
+  .btn.light.pill {
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+  
+  /* Settings按钮样式 */
+  .settings-btn {
+    font-size: 14px !important;
+    padding: 3px !important;
+  }
+  
+  .wallet-main-btn {
+    padding: 3px 4px;
+    font-size: 10px;
+  }
+  
+  .wallet-dropdown-btn {
+    padding: 3px 3px;
+  }
+  
+  .wallet-divider {
+    height: 14px;
+    margin: 0 1px;
+  }
+  
+  .dropdown-menu {
+    min-width: 120px;
+  }
+  
+  .wallet-dropdown-menu {
+    min-width: 120px;
+  }
+  
+  .dropdown-item {
+    padding: 4px 6px;
+    font-size: 11px;
+  }
+  
+  .wallet-dropdown-item {
+    padding: 4px 6px;
+    font-size: 11px;
+  }
+  
+  .wallet-dropdown-container {
+    margin-left: 2px;
+    margin-right: 2px;
   }
 }
 
