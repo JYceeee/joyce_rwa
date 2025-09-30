@@ -3,19 +3,26 @@
   <section class="container hero">
     <div class="grid">
       <div>
-        <h1 class="headline">Invest in RWA Property Loans with Monthly Returns</h1>
-        <p class="sub">
-          We are the RWA dealmaker who is good at originating real estate assets as RWA underlying assets that investors like
-        </p>
+        <h1 class="headline">我们专注于将房地产资产打造为<br>投资人偏爱的 RWA 底层资产</br>
+          <!-- Invest in RWA Property Loans with Monthly Returns -->
+        </h1>
+        <!-- <p class="sub">We specialize in originating real estate assets into RWA underlying assets that investors prefer</p> -->
+        <p class="sub">澳洲地产资产上链 · 安全、低风险、高回报的 RWA 投资平台
+          <!-- Australian Real Estate On-Chain · A safe, compliant, and high-return RWA investment platform-->
+          </p>
         <p class="foot">By continuing, you agree to our Terms and acknowledge our 
           <a href="/src/components/privacypolicy.vue" >Privacy Policy.</a></p>
+        <div style="margin-top: 40px;margin-left: 100px;display: flex;gap: 20px;width: 400px;">
+          <button class="btn-primary">Invest Now</button>
+          <button class="btn-secondary">Contact Us</button>
+        </div>
       </div>
         <!-- 区块链智能合约交易动态图样 -->
-         <video autoplay loop muted playsinline class="bg-video">
+         <!-- <video autoplay loop muted playsinline class="bg-video">
            <source src="/videos/Blockchainvideo.mp4" type="video/mp4">
-         </video>
-
+         </video> -->
     </div>
+
   </section>
 
   <!--New Listing-->
@@ -527,6 +534,7 @@ export default {
 
 .hero .foot{
   margin-left:100px;
+  font-size: 18px;
 }
 
 .hero-image {

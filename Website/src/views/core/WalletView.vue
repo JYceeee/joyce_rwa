@@ -93,13 +93,15 @@
 
   <!-- Main Dashboard Section -->
   <section v-if="connected && selectedAccount" class="mm-dashboard-section">
-    <!-- 资产标题区 -->
     <div class="mm-hero">
+      <!-- 当前网络 -->
       <div class="mm-card">
         <div class="mm-card-label">Current Network</div>
         <div class="mm-card-title">{{ networkLabel }}</div>
         <div class="mm-card-sub">Chain ID: {{ chainId }}</div>
       </div>
+
+      <!-- 资产标题区 -->
       <div class="mm-balance">{{ nativeBalanceDisplay }} {{ nativeSymbol }}</div>
       <div class="mm-subline">
         <span>A${{ nativeToAudDisplay || 0 }}</span> 
@@ -116,6 +118,11 @@
         <button class="mm-btn mm-outline" type="submit" :disabled="!customAddress">Add Token</button>
         <button class="mm-btn mm-outline" type="button" @click="refreshTokens">Refresh</button>
       </form>
+      <!-- 警告信息显示 -->
+      <div v-if="warning" class="mm-warning">
+        <span class="mm-warning-icon">⚠️</span>
+        <span class="mm-warning-text">{{ warning }}</span>
+      </div>
     </div>
     <!-- 信息条：网络 / 原生余额 -->
     <!-- <div class="mm-info">
@@ -144,7 +151,7 @@
       >Activity</button>
     </nav>
     <!-- 网络栏 -->
-    <div class="mm-networkbar">
+    <!-- <div class="mm-networkbar">
       <div class="mm-net-left">
         <select 
           v-model="selectedNetwork" 
@@ -167,17 +174,18 @@
           <button class="mm-sort-item" :class="{active: sortOrder==='asc'}" @click="setSort('asc')">Ascending by balance</button>
         </div>
       </div>
-    </div>
+    </div> -->
+
     <!-- Tokens 列表 -->
-      <div v-if="activeTab==='tokens'" class="mm-tokenlist" style="background:#1d1d36;">
+    <div v-if="activeTab==='tokens'" class="mm-tokenlist" style="background:#1d1d36;">
       <div class="mm-token">
         <div class="mm-token-left">
           <div class="mm-token-icon mm-eth"></div>
           <div>
             <div class="mm-token-title">
-              SepoliaETH 
+              {{ networkLabel }}
             </div>
-            <div class="mm-rise">+2.48%</div>
+            <div :class="priceChangeClass">{{ priceChangeDisplay }}</div>
           </div>
         </div>
         <div class="mm-token-right">
@@ -185,21 +193,21 @@
           <div class="mm-token-amount">A${{ nativeToAudDisplay || 0 }}</div>
         </div>
       </div>
+
       <div v-for="t in sortedTokens" :key="t.address" class="mm-token" @click="$router.push({ name: 'tokenDetail', params: { address: t.address } })">
         <div class="mm-token-left">
           <div class="mm-token-icon">{{ (t.symbol || 'T').slice(0,1) }}</div>
           <div>
-          <div class="mm-token-sub">{{ t.symbol }}</div>
-            <div class="mm-token-title">{{ t.symbol || 'Token' }}</div>
+            <!-- <div class="mm-token-title">{{ t.symbol || 'Token' }}</div> -->
             <div class="mm-token-sub">{{ t.name }}</div>
+            <div style="font-size:10px;color:#FFFFFF;">此处添加产品名称</div>
+            <div style="font-size:10px;color:#FFFFFF;">点击可查看详情</div>
+
           </div>
         </div>
         <div class="mm-token-right">
-          <div class="mm-token-sub">{{ t.symbol }}</div>
-          <div class="mm-token-amount">{{ t.displayBalance }}</div>
+          <div class="mm-token-sub">{{ t.displayBalance }}</div>
         </div>
-      </div>
-      <div class="mm-token-footer">
       </div>
     </div>
   </section>
@@ -229,14 +237,6 @@
             <option value="">All Types</option>
             <option value="buy">Buy</option>
             <option value="sell">Sell</option>
-            <!-- <option value="wallet_connect">Wallet Connect</option>
-            <option value="wallet_disconnect">Wallet Disconnect</option>
-            <option value="network_change">Network Change</option>
-            <option value="metamask_connect">MetaMask Connect</option>
-            <option value="metamask_disconnect">MetaMask Disconnect</option>
-            <option value="wallet_status_check">Status Check</option>
-            <option value="wallet_focus_check">Focus Check</option>
-            <option value="metamask_message">MetaMask Message</option> -->
           </select>
         </div>
         
@@ -610,7 +610,7 @@ chainId, networkLabel, nativeSymbol,
 nativeBalanceDisplay, nativeToAudDisplay, bigAudDisplay,
 tokens, warning, error, loadingTokens,
 activeTab, connect, disconnect, refreshTokens, copyAddress,
-addCustomToken
+addCustomToken, audPrice, priceChange24h
 } = useWallet()
 
 // Wallet Management 相关
@@ -1021,12 +1021,12 @@ onBeforeUnmount(() => {
 // 自定义代币输入
 const customAddress = ref('')
 const customLabel = ref('')
-function addToken(){
-const ok = addCustomToken(customAddress.value.trim(), customLabel.value.trim())
+async function addToken(){
+const ok = await addCustomToken(customAddress.value.trim(), customLabel.value.trim())
 if (ok) {
   customAddress.value = ''
   customLabel.value = ''
-  refreshTokens()
+  await refreshTokens()
 }
 }
 
@@ -1059,6 +1059,24 @@ if (addr && !accounts.value.includes(addr)) {
   warning.value = `New wallet ${addr} added and selected.`
 }
 }
+
+// 格式化价格变化率显示
+const priceChangeDisplay = computed(() => {
+  if (priceChange24h.value === null || priceChange24h.value === undefined) {
+    return '+0.00%'
+  }
+  const change = priceChange24h.value
+  const sign = change >= 0 ? '+' : ''
+  return `${sign}${change.toFixed(2)}%`
+})
+
+// 价格变化率样式类
+const priceChangeClass = computed(() => {
+  if (priceChange24h.value === null || priceChange24h.value === undefined) {
+    return 'mm-rise'
+  }
+  return priceChange24h.value >= 0 ? 'mm-rise' : 'mm-fall'
+})
 
 // Activity 相关方法
 function formatTime(timestamp) {
@@ -2055,7 +2073,7 @@ color:#FFFFFF;
 /* 网络选择器样式 */
 .mm-network-select {
   background: transparent;
-  border: none;
+  border: #FFFFFF;
   color: #ffffff;
   font-size: inherit;
   font-weight: inherit;
@@ -2478,7 +2496,7 @@ color:#FFFFFF;
 
 /* 网络栏 */
 .mm-networkbar{display:flex;align-items:center;justify-content:space-between;margin-top:16px;}
-.mm-net-left{font-weight:600;color:#FFFFFF}
+.mm-net-left{font-weight:600;color:#FFFFFF;}
 .mm-icon{color:#475569}
 
 /* Sort menu */
@@ -2497,6 +2515,7 @@ color:#FFFFFF;
 .mm-token-title{font-weight:600;color:#ffffff;}
 .mm-dim{color:#94a3b8;}
 .mm-rise{color:#10b981;font-size:12px;margin-top:2px;}
+.mm-fall{color:#ef4444;font-size:12px;margin-top:2px;}
 .mm-token-right{text-align:right;}
 .mm-token-amount{font-size:12px;color:#94a3b8;margin-top:2px;}
 .mm-token-sub{font-weight:600;color:#ffffff;}
@@ -2522,6 +2541,28 @@ background: #1d1d36;
 .mm-note{color:var(--muted);font-size:13px}
 .mm-input{height:36px;border:1px solid #2a2a4a;border-radius:10px;padding:0 10px;outline:none;background:#1d1d36;color:#ffffff;}
 .mm-input::placeholder{color:#94a3b8;}
+
+/* 警告信息样式 */
+.mm-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  color: #ef4444;
+  font-size: 0.85rem;
+}
+
+.mm-warning-icon {
+  font-size: 1rem;
+}
+
+.mm-warning-text {
+  flex: 1;
+}
 
 @media (max-width: 900px){
 .mm-actions{flex-wrap:wrap;}

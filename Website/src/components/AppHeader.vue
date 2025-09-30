@@ -6,20 +6,43 @@
         <h2 style="margin-bottom:8px;color:#ffffff;">Link New Wallet</h2>
         <p style="color:#ffffff;">Select a MetaMask account to link to your profile:</p>
         
-        <!-- 账户选择列表 -->
-        <div v-if="availableAccounts.length > 0" class="account-list">
+        <!-- 账户选择列表 - 图片样式 -->
+        <div v-if="availableAccounts.length > 0" class="account-grid">
           <div 
             v-for="(account, index) in availableAccounts" 
             :key="account"
-            class="account-item"
+            class="account-card"
             :class="{ selected: selectedAccountIndex === index }"
             @click="selectAccount(index)"
           >
-            <div class="account-info">
-              <span class="account-address">{{ account }}</span>
-              <span class="account-short">{{ formatAddress(account) }}</span>
+            <!-- 钱包头像 -->
+            <div class="wallet-avatar">
+              <img 
+                :src="generateWalletAvatar(account)" 
+                :alt="`Wallet ${index + 1}`"
+                class="avatar-image"
+              />
+              <div class="avatar-overlay">
+                <span class="avatar-icon">🦊</span>
+              </div>
             </div>
-            <div v-if="selectedAccountIndex === index" class="account-check">✓</div>
+            
+            <!-- 账户信息 -->
+            <div class="account-details">
+              <div class="account-name">Account {{ index + 1 }}</div>
+              <div class="account-address">{{ formatAddress(account) }}</div>
+              <div class="account-balance" v-if="accountBalances[account]">
+                {{ accountBalances[account] }} ETH
+              </div>
+              <div class="account-balance" v-else>
+                Loading...
+              </div>
+            </div>
+            
+            <!-- 选择状态指示器 -->
+            <div v-if="selectedAccountIndex === index" class="selection-indicator">
+              <div class="checkmark">✓</div>
+            </div>
           </div>
         </div>
         
@@ -257,7 +280,8 @@ export default {
       disconnectSuccessMsg: '',
       availableAccounts: [],
       selectedAccountIndex: -1,
-      loadingAccounts: false
+      loadingAccounts: false,
+      accountBalances: {}
     }
   },
 
@@ -450,6 +474,7 @@ export default {
       this.loadingAccounts = true;
       this.availableAccounts = [];
       this.selectedAccountIndex = -1;
+      this.accountBalances = {};
       
       try {
         if (typeof window.ethereum !== "undefined") {
@@ -463,6 +488,10 @@ export default {
           );
           
           console.log("Available accounts:", this.availableAccounts);
+          
+          // 获取每个账户的余额
+          await this.loadAccountBalances();
+          
         } else {
           console.error("MetaMask not detected");
         }
@@ -471,6 +500,65 @@ export default {
       } finally {
         this.loadingAccounts = false;
       }
+    },
+    
+    // 获取账户余额
+    async loadAccountBalances() {
+      for (const account of this.availableAccounts) {
+        try {
+          const balance = await window.ethereum.request({
+            method: 'eth_getBalance',
+            params: [account, 'latest']
+          });
+          
+          // 转换wei到ETH
+          const balanceInEth = (parseInt(balance, 16) / Math.pow(10, 18)).toFixed(4);
+          this.accountBalances[account] = balanceInEth;
+          
+          // 触发响应式更新
+          this.$forceUpdate();
+        } catch (error) {
+          console.error(`Failed to get balance for ${account}:`, error);
+          this.accountBalances[account] = 'Error';
+        }
+      }
+    },
+    
+    // 生成钱包头像
+    generateWalletAvatar(address) {
+      // 使用钱包地址生成确定性的头像
+      // 这里使用一个简单的SVG生成器，基于地址的前几个字符
+      const hash = this.simpleHash(address);
+      const colors = [
+        '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+        '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
+      ];
+      const bgColor = colors[hash % colors.length];
+      const textColor = '#FFFFFF';
+      
+      // 生成SVG头像
+      const svg = `
+        <svg width="80" height="80" xmlns="http://www.w3.org/2000/svg">
+          <rect width="80" height="80" fill="${bgColor}" rx="40"/>
+          <text x="40" y="45" font-family="Arial, sans-serif" font-size="24" font-weight="bold" 
+                text-anchor="middle" fill="${textColor}">
+            ${address.slice(2, 4).toUpperCase()}
+          </text>
+        </svg>
+      `;
+      
+      return `data:image/svg+xml;base64,${btoa(svg)}`;
+    },
+    
+    // 简单哈希函数
+    simpleHash(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+      }
+      return Math.abs(hash);
     },
     
     // 选择账户
@@ -1268,6 +1356,119 @@ export default {
   }
 }
 
+/* 钱包弹窗响应式样式 */
+@media (max-width: 768px) {
+  .modal-container {
+    min-width: 320px;
+    max-width: 90vw;
+    padding: 16px;
+  }
+  
+  .account-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    max-height: 300px;
+  }
+  
+  .account-card {
+    padding: 16px;
+    min-height: 140px;
+  }
+  
+  .wallet-avatar {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 8px;
+  }
+  
+  .avatar-image {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .avatar-overlay {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .avatar-icon {
+    font-size: 10px;
+  }
+  
+  .account-name {
+    font-size: 14px;
+  }
+  
+  .account-address {
+    font-size: 11px;
+  }
+  
+  .account-balance {
+    font-size: 12px;
+  }
+  
+  .selection-indicator {
+    width: 20px;
+    height: 20px;
+    top: 8px;
+    right: 8px;
+  }
+  
+  .checkmark {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-container {
+    min-width: 280px;
+    max-width: 95vw;
+    padding: 12px;
+  }
+  
+  .account-grid {
+    gap: 8px;
+    max-height: 250px;
+  }
+  
+  .account-card {
+    padding: 12px;
+    min-height: 120px;
+  }
+  
+  .wallet-avatar {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 6px;
+  }
+  
+  .avatar-image {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .avatar-overlay {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .avatar-icon {
+    font-size: 8px;
+  }
+  
+  .account-name {
+    font-size: 12px;
+  }
+  
+  .account-address {
+    font-size: 10px;
+  }
+  
+  .account-balance {
+    font-size: 11px;
+  }
+}
+
 /* 弹窗样式 */
 .modal-mask {
   position: fixed;
@@ -1341,61 +1542,151 @@ export default {
   cursor: not-allowed;
 }
 
-/* 账户选择列表样式 */
-.account-list {
-  max-height: 300px;
-  overflow-y: auto;
+/* 账户网格样式 - 图片卡片形式 */
+.account-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
   margin: 16px 0;
-  border: 1px solid #374151;
-  border-radius: 8px;
-  background: #1f2937;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 8px;
 }
 
-.account-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
+.account-card {
+  position: relative;
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  border: 2px solid #374151;
+  border-radius: 16px;
+  padding: 20px;
   cursor: pointer;
-  border-bottom: 1px solid #374151;
-  transition: background-color 0.2s ease;
-}
-
-.account-item:last-child {
-  border-bottom: none;
-}
-
-.account-item:hover {
-  background: #374151;
-}
-
-.account-item.selected {
-  background: #1e40af;
-}
-
-.account-info {
+  transition: all 0.3s ease;
+  overflow: hidden;
+  min-height: 160px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  text-align: center;
+}
+
+.account-card:hover {
+  border-color: #f97316;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(249, 115, 22, 0.2);
+}
+
+.account-card.selected {
+  border-color: #f97316;
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+/* 钱包头像样式 */
+.wallet-avatar {
+  position: relative;
+  margin-bottom: 12px;
+  width: 80px;
+  height: 80px;
+}
+
+.avatar-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.account-card:hover .avatar-image {
+  border-color: #f97316;
+  transform: scale(1.1);
+}
+
+.account-card.selected .avatar-image {
+  border-color: #ffffff;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.avatar-overlay {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 28px;
+  height: 28px;
+  background: #f97316;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #1f2937;
+}
+
+.avatar-icon {
+  font-size: 14px;
+}
+
+/* 账户详情样式 */
+.account-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.account-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 4px;
 }
 
 .account-address {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-  font-size: 14px;
-  color: #ffffff;
+  font-size: 12px;
+  color: #9ca3af;
+  font-weight: 500;
   word-break: break-all;
 }
 
-.account-short {
-  font-size: 12px;
-  color: #9ca3af;
+.account-balance {
+  font-size: 14px;
+  color: #10b981;
   font-weight: 600;
+  margin-top: 4px;
 }
 
-.account-check {
-  color: #10b981;
+/* 选择状态指示器 */
+.selection-indicator {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  background: #10b981;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse 2s infinite;
+}
+
+.checkmark {
+  color: #ffffff;
   font-weight: bold;
-  font-size: 16px;
+  font-size: 14px;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
 }
 
 /* 加载状态样式 */

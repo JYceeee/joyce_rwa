@@ -1,27 +1,27 @@
 <template>
   <div class="trade-page">
     <!-- 余额不足弹窗 -->
-    <div v-if="showInsufficientBalanceModal" class="modal-overlay" @click="closeInsufficientBalanceModal">
+    <!-- <div v-if="showInsufficientBalanceModal" class="modal-overlay" @click="closeInsufficientBalanceModal">
       <div class="modal-content error-modal" @click.stop>
         <div class="modal-header">
           <div class="error-icon">⚠️</div>
-          <h2 class="modal-title">Insufficient Balance</h2>
+          <h2 class="modal-title">余额不足</h2>
         </div>
         <div class="modal-body">
           <div class="error-message">
-            <p>Your token balance is insufficient to complete this transaction of  {{ projectCode }} .</p>
-            <p><strong>Current Balance:</strong> {{ userTokenBalance }} {{ projectCode }} tokens</p>
-            <p><strong>Required Amount:</strong> {{ tradeAmount }} {{ projectCode }} tokens</p>
+            <p>您的代币余额不足以完成 {{ projectCode }} 的交易。</p>
+            <p><strong>当前余额:</strong> {{ userTokenBalance }} {{ projectCode }} tokens</p>
+            <p><strong>所需金额:</strong> {{ tradeAmount }} {{ projectCode }} tokens</p>
           </div>
         </div>
         <div class="modal-footer">
           <button class="btn primary" @click="closeInsufficientBalanceModal">确定</button>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <!-- 加载中弹窗 -->
-    <div v-if="showLoadingModal" class="modal-overlay">
+    <div v-if="showLoadingModal" class="modal-overlay"> 
       <div class="modal-content loading-modal" @click.stop>
         <div class="loading-container">
           <div class="loading-icon">
@@ -40,7 +40,7 @@
     </div>
 
     <!-- 交易成功弹窗 -->
-    <div v-if="showSuccessModal" class="modal-overlay" @click="closeSuccessModal">
+    <div v-if="showSuccessModal" class="modal-overlay" @click="closeSuccessModal"> 
       <div class="modal-content success-modal" @click.stop>
         <div class="success-container">
           <div class="success-icon">
@@ -159,73 +159,214 @@
         </div>
       </div>
 
-      <!-- 交易表单 -->
+      <!-- 认购表单 -->
       <div class="trade-form-card">
-        <h2 class="form-title">Trade {{ projectCode }}</h2>
-        <!-- 交易数量 -->
+        <div class="form-header">
+          <h2 class="form-title">认购 {{ projectCode }}</h2>
+          <!-- 钱包状态 - 整合成一行显示 -->
+          <div class="wallet-status-inline">
+            <div class="wallet-status-item">
+              <span class="status-label">钱包:</span>
+              <span :class="['status-value', connected ? 'connected' : 'disconnected']">
+                {{ connected ? 'Connected' : 'Disconnected' }}
+              </span>
+            </div>
+            <div class="wallet-status-item" v-if="connected">
+              <span class="status-label">地址:</span>
+              <span class="status-value">{{ shortAddress }}</span>
+            </div>
+            <div class="wallet-status-item" v-if="connected">
+              <span class="status-label">网络:</span>
+              <span class="status-value">{{ networkLabel }}</span>
+            </div>
+            <div class="wallet-status-item" v-if="connected">
+              <span class="status-label">链ID:</span>
+              <span class="status-value">{{ getCurrentChainId() }}</span>
+            </div>
+            <div class="wallet-status-item" v-if="connected">
+              <span class="status-label">代币余额:</span>
+              <span class="status-value">{{ nativeBalanceDisplay }} LPT</span>
+            </div>
+            <button 
+              v-if="!connected" 
+              @click="connectWallet" 
+              class="btn primary tiny"
+              :disabled="loading"
+            >
+              Connect Wallet
+            </button>
+            <!-- <button 
+              v-if="connected" 
+              @click="disconnectWallet" 
+              class="btn secondary tiny"
+              :disabled="loading"
+            >
+              Disconnect Wallet
+            </button> -->
+          </div>
+        </div>
+        
+        <!-- 认购金额输入 -->
         <div class="form-section">
-          <h3 class="section-title">Amount</h3>
+          <h3 class="section-title">Purchase Amount</h3>
           <div class="amount-input-group">
             <input 
               type="number" 
-              v-model="tradeAmount" 
+              v-model="subscriptionAmount" 
               class="amount-input"
-              placeholder="Enter amount"
-              min="1"
-              step="1"
-              @input="clearError"
+              :class="{ 'error': amountError }"
+              placeholder="Please enter the purchase amount"
+              min="100"
+              max="10000"
+              step="0.01"
+              @input="onAmountInput"
+              @blur="validateAmount"
             />
-            <span class="amount-unit">tokens</span>
+            <span class="amount-unit">LPT</span>
           </div>
-          <div class="amount-info">
+          <!-- <div class="amount-info">
+            <p class="input-hint" v-if="!amountError">
+              Minimum purchase amount: {{ contractTerms.minSubscription || 100 }} LPT, Maximum purchase amount: {{ contractTerms.maxSubscription || 10000 }} LPT
+            </p>
+            <p class="input-error" v-if="amountError">
+              {{ amountError }}
+            </p>
+          </div> -->
+        </div>
+
+        <!-- 认购摘要 -->
+        <div class="subscription-summary" v-if="subscriptionAmount && subscriptionAmount > 0 && amountValid">
+          <h3>Purchase Summary</h3>
+          <div class="summary-item">
+            <span class="summary-label">Project Code:</span>
+            <span class="summary-value">{{ projectCode }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Purchase Amount:</span>
+            <span class="summary-value">{{ formatNumber(subscriptionAmount) }} LPT</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Annual Rate:</span>
+            <span class="summary-value">{{ projectData.metrics.targetLoanYield }} (合约设定)</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Loan Term:</span>
+            <span class="summary-value">{{ projectData.loanTerm || 'TBA' }} (合约设定) </span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Estimated Interest:</span>
+            <span class="summary-value">{{ calculateInterest() }} LIT</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Current Price:</span>
+            <span class="summary-value">$1.00</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Total Token Needed:</span>
+            <span class="summary-value">{{ calculateTotalTokenNeeded() }} LPT</span>
           </div>
         </div>
-        <!-- 交易类型选择 -->
+
+        <!-- 认购按钮 -->
         <div class="form-section">
-          <!-- <h3 class="section-title">Trade Type</h3> -->
           <div class="trade-type-buttons">
             <button 
-              v-if="showBuyButton"
-              class="trade-type-btn" 
-              :class="{ active: tradeType === 'buy' }"
-              @click="selectTradeType('buy')"
-              :disabled="loading"
+              class="trade-type-btn buy-btn" 
+              @click="deployContractsWithSubscription"
+              :disabled="!connected || !isFormValid || loading"
             >
-              <span class="btn-text">Buy</span>
+              <span class="btn-text">{{ loading ? 'Processing...' : 'BUY' }}</span>
             </button>
-
-            <button 
-              v-if="showSellButton"
-              class="trade-type-btn" 
-              :class="{ active: tradeType === 'sell' }"
-              @click="selectTradeType('sell')"
-              :disabled="loading"
-            >
-              <span class="btn-text">Sell Interest</span>
-            </button>
-          </div>
-          
-
-        </div>
-        <div>
-          <!-- View Contract Details按钮 -->
-          <div class="contract-details-section">
-            <button class="contract-details-btn" @click="viewContractDetails">
-              <!-- <span class="btn-icon">📋</span> -->
-              <span class="btn-text">View Contract Details</span>
-              <!-- <span class="btn-arrow">→</span> -->
-            </button>
+            <div class="button-hint" v-if="!connected">
+              请先连接钱包
+            </div>
+            <div class="button-hint" v-else-if="!isFormValid">
+              请填写完整的认购信息
+            </div>
           </div>
         </div>
+      </div>
 
-        <!-- 提交按钮 -->
-        <!-- <div class="form-actions">
-          <button class="btn secondary" @click="cancelTrade" :disabled="loading">Cancel</button>
-          <button class="btn primary" @click="submitTrade" :disabled="!canSubmit">
-            <span v-if="loading">Processing...</span>
-            <span v-else>{{ tradeType === 'buy' ? 'Buy Tokens' : 'Sell Tokens' }}</span>
-          </button>
+      <!-- 部署状态区域 -->
+      <div v-if="deploymentStatus" class="deployment-status-card">
+        <!-- <h3>部署状态</h3>
+        <div class="status-log">
+          <div 
+            v-for="(log, index) in deploymentLogs" 
+            :key="index"
+            :class="['log-item', log.type]"
+          >
+            <span class="log-time">{{ log.time }}</span>
+            <span class="log-message">{{ log.message }}</span>
+          </div>
         </div> -->
+
+      <!-- 已部署合约信息区域 -->
+      <div v-if="deployedContracts.length > 0" class="deployed-contracts-card">
+        <h3>已部署合约</h3>
+        <div class="contract-list">
+          <div 
+            v-for="contract in deployedContracts" 
+            :key="contract.name"
+            class="contract-item"
+          >
+            <div class="contract-name">{{ contract.name }}</div>
+            <div class="contract-address">{{ contract.address }}</div>
+            <button 
+              @click="copyAddress(contract.address)"
+              class="btn small"
+            >
+              复制地址
+            </button>
+          </div>
+          <!-- <button @click="goToWallet" class="btn primary">go to wallet add your address</button>  -->
+        </div>
+      </div>
+
+      <!-- 合约交互状态区域 -->
+      <!-- <div v-if="interactionStatus" class="interaction-status-card">
+        <h3>合约交互状态</h3>
+        <div class="status-log">
+          <div 
+            v-for="(log, index) in interactionLogs" 
+            :key="index"
+            :class="['log-item', log.type]"
+          >
+            <span class="log-time">{{ log.time }}</span>
+            <span class="log-message">{{ log.message }}</span>
+          </div>
+        </div>
+      </div> -->
+
+      <!-- 余额信息区域 -->
+      <div v-if="balanceInfo" class="balance-info-card">
+        <h3>余额信息</h3>
+        <div class="balance-list">
+          <div class="balance-item">
+            <span class="balance-label">LPT 余额:</span>
+            <span class="balance-value">{{ balanceInfo.lpt }} LPT</span>
+          </div>
+          <div class="balance-item">
+            <span class="balance-label">LIT 余额:</span>
+            <span class="balance-value">{{ balanceInfo.lit }} LIT</span>
+          </div>
+          <div class="balance-item">
+            <span class="balance-label">ETH 余额:</span>
+            <span class="balance-value">{{ balanceInfo.eth }} ETH</span>
+          </div>
+        </div>
+      </div>
+    </div>
+      <div>
+        <!-- View Contract Details按钮 -->
+        <!-- <div class="contract-details-section">
+          <button class="contract-details-btn" @click="viewContractDetails"> -->
+            <!-- <span class="btn-icon">📋</span> -->
+            <!-- <span class="btn-text">View Contract Details</span> -->
+            <!-- <span class="btn-arrow">→</span> -->
+          <!-- </button>
+        </div> -->
+      </div>
           
         <!-- 错误信息显示 -->
         <div v-if="formattedError" class="error-message">
@@ -308,11 +449,8 @@
             </div>
           </div>
           </div>
-          </div>
-        </div>
-
-
-  </div>
+      </div>
+    </div>
 </template>
 
 <script>
@@ -322,6 +460,10 @@ import { getKycStatus, isKycVerified, getKycLevel, setKycLevel, KYC_STATUS, KYC_
 import { useAuth } from '@/composables/useAuth.js'
 import { useWallet } from '@/composables/useWallet.js'
 import { isLoggedIn } from '@/utils/auth.js'
+import contractTestService from '@/services/contractTestService'
+import { ethers } from 'ethers'
+
+const { nativeBalanceDisplay } = useWallet()
 
 export default {
   name: 'TradeProjectView',
@@ -379,7 +521,27 @@ export default {
         'transaction_failed': 'Transaction failed',
         'network_error': 'Network error occurred',
         'unknown_error': 'An unknown error occurred'
-      }
+      },
+      // 认购相关数据
+      subscriptionAmount: null,
+      contractTerms: {
+        annualRate: 5.5,
+        loanTerm: 365,
+        minSubscription: 100,
+        maxSubscription: 10000
+      },
+      // 输入验证状态
+      amountError: null,
+      amountValid: false,
+      // 部署状态相关
+      deploymentStatus: false,
+      deploymentLogs: [],
+      deployedContracts: [],
+      // 交互状态相关
+      interactionStatus: false,
+      interactionLogs: [],
+      // 余额信息
+      balanceInfo: null
     }
   },
   computed: {
@@ -410,6 +572,31 @@ export default {
         return this.projectData
       }
       return null
+    },
+    // 表单验证
+    isFormValid() {
+      return this.amountValid && this.subscriptionAmount !== null && this.subscriptionAmount > 0
+    },
+    // 钱包状态
+    connected() {
+      const { connected } = useWallet()
+      return connected.value
+    },
+    address() {
+      const { address } = useWallet()
+      return address.value
+    },
+    shortAddress() {
+      const { shortAddress } = useWallet()
+      return shortAddress.value
+    },
+    networkLabel() {
+      const { networkLabel } = useWallet()
+      return networkLabel.value
+    },
+    chainId() {
+      const { chainId } = useWallet()
+      return chainId.value
     },
     projectData() {
       // 从ProductDetailsInfo获取项目数据（保留作为备用）
@@ -530,6 +717,381 @@ export default {
           from: 'trade'
         }
       })
+    },
+
+    // 格式化数字
+    formatNumber(num) {
+      if (!num) return '0.00'
+      return parseFloat(num).toFixed(2)
+    },
+
+    // 计算预计利息
+    calculateInterest() {
+      if (!this.subscriptionAmount) return '0.00'
+      
+      // 从项目数据获取实际的目标收益率和贷款期限
+      const targetYield = this.getProjectTargetYield()
+      const loanTerm = this.getProjectLoanTerm()
+      
+      console.log('计算利息参数:', {
+        subscriptionAmount: this.subscriptionAmount,
+        targetYield,
+        loanTerm,
+        projectData: this.projectData
+      })
+      
+      if (!targetYield || !loanTerm) {
+        console.warn('缺少必要的项目数据:', { targetYield, loanTerm })
+        return '0.00'
+      }
+      
+      // 计算利息: 认购金额 * 年化收益率 * 贷款期限(天) / 365
+      const interest = (this.subscriptionAmount * targetYield / 100 * loanTerm / 365)
+      console.log('利息计算结果:', interest)
+      return this.formatNumber(interest)
+    },
+
+    // 计算总代币需求
+    calculateTotalTokenNeeded() {
+      if (!this.subscriptionAmount) return '0.00'
+      
+      const currentPrice = 1.00 // 当前价格 $1.00
+      const totalTokenNeeded = this.subscriptionAmount * currentPrice
+      
+      console.log('计算总代币需求:', {
+        subscriptionAmount: this.subscriptionAmount,
+        currentPrice,
+        totalTokenNeeded
+      })
+      
+      return this.formatNumber(totalTokenNeeded)
+    },
+
+    // 获取项目目标收益率
+    getProjectTargetYield() {
+      if (!this.projectData) {
+        console.warn('projectData 不存在')
+        return null
+      }
+      
+      console.log('获取目标收益率，projectData:', this.projectData)
+      
+      // 从 targetYield 字段获取数值
+      if (this.projectData.targetYield) {
+        const targetYieldValue = parseFloat(this.projectData.targetYield)
+        console.log('从 targetYield 获取:', targetYieldValue)
+        return targetYieldValue
+      }
+      
+      // 从 metrics.targetLoanYield 解析 (格式: "6.5% p.a.")
+      if (this.projectData.metrics?.targetLoanYield) {
+        const yieldStr = this.projectData.metrics.targetLoanYield
+        console.log('从 metrics.targetLoanYield 解析:', yieldStr)
+        const match = yieldStr.match(/(\d+\.?\d*)/)
+        const targetYieldValue = match ? parseFloat(match[1]) : null
+        console.log('解析结果:', targetYieldValue)
+        return targetYieldValue
+      }
+      
+      console.warn('未找到目标收益率数据')
+      return null
+    },
+
+    // 获取项目贷款期限
+    getProjectLoanTerm() {
+      if (!this.projectData) {
+        console.warn('projectData 不存在')
+        return null
+      }
+      
+      console.log('获取贷款期限，projectData:', this.projectData)
+      
+      // 从 loanTerm 字段获取数值
+      if (this.projectData.loanTerm) {
+        const term = parseFloat(this.projectData.loanTerm)
+        console.log('从 loanTerm 获取:', term)
+        return term
+      }
+      
+      console.warn('未找到贷款期限数据')
+      return null
+    },
+
+    // 添加日志
+    addLog(logs, message, type = 'info') {
+      const now = new Date()
+      const time = now.toLocaleTimeString('en-US', { 
+        hour12: true, 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit' 
+      })
+      logs.push({ time, message, type })
+    },
+
+    // 获取当前链ID
+    getCurrentChainId() {
+      if (this.chainId) {
+        return this.chainId
+      }
+      return 11155111 // 默认使用 Sepolia 测试网
+    },
+
+    // 部署合约与认购
+    async deployContractsWithSubscription() {
+      try {
+        this.loading = true
+        this.error = null
+        this.deploymentStatus = true
+        this.deploymentLogs = []
+        
+        this.addLog(this.deploymentLogs, '开始认购流程...', 'info')
+        this.addLog(this.deploymentLogs, `当前网络: ${this.networkLabel || '未知网络'}`, 'info')
+        this.addLog(this.deploymentLogs, `链ID: ${this.getCurrentChainId()}`, 'info')
+        this.addLog(this.deploymentLogs, `项目代号: ${this.projectCode}`, 'info')
+        this.addLog(this.deploymentLogs, `认购金额: ${this.formatNumber(this.subscriptionAmount)} LPT`, 'info')
+        this.addLog(this.deploymentLogs, `年化利率: ${this.getProjectTargetYield() || 'N/A'}% (项目设定)`, 'info')
+        this.addLog(this.deploymentLogs, `贷款期限: ${this.getProjectLoanTerm() || 'N/A'} 天 (项目设定)`, 'info')
+        
+        // 调用合约服务获取真实合约地址
+        const result = await contractTestService.deployContractsWithSubscription({
+          subscriptionAmount: this.subscriptionAmount,
+          annualRate: this.getProjectTargetYield() || this.contractTerms.annualRate,
+          loanTerm: this.getProjectLoanTerm() || this.contractTerms.loanTerm,
+          projectCode: this.projectCode,
+          projectName: this.projectData?.name || 'Unknown Project',
+          walletAddress: this.address,
+          chainId: this.getCurrentChainId()
+        })
+        
+        this.addLog(this.deploymentLogs, '获取合约地址...', 'info')
+        this.addLog(this.deploymentLogs, `网络: ${result.networkInfo.name}`, 'info')
+        this.addLog(this.deploymentLogs, `贷款ID: ${result.loanId}`, 'info')
+        
+        // 发送ETH交易到指定地址
+        await this.sendEthTransaction()
+        
+        // 使用服务返回的合约地址
+        this.deployedContracts = [
+          { name: 'KYCRegistry', address: result.contracts.kycRegistry },
+          { name: 'LPT', address: result.contracts.lpt },
+          { name: 'LIT', address: result.contracts.lit },
+          { name: 'LoanIssuer', address: result.contracts.loanIssuer }
+        ]
+        
+        this.addLog(this.deploymentLogs, `交易哈希: ${result.transactionHash}`, 'info')
+        this.addLog(this.deploymentLogs, `Gas 使用: ${result.gasUsed}`, 'info')
+        this.addLog(this.deploymentLogs, `区块号: ${result.blockNumber}`, 'info')
+        this.addLog(this.deploymentLogs, '认购完成! 合约地址已获取', 'success')
+        
+        // 显示成功消息
+        this.showSuccessModal = true
+        this.successData = {
+          tradeType: 'subscription',
+          amount: this.subscriptionAmount,
+          transactionHash: result.transactionHash,
+          blockNumber: result.blockNumber
+        }
+        
+        // 开始合约交互测试
+        await this.startContractInteraction()
+        
+      } catch (err) {
+        this.error = `认购失败: ${err.message}`
+        this.addLog(this.deploymentLogs, `认购失败: ${err.message}`, 'error')
+      } finally {
+        this.loading = false
+      }
+    },
+
+    // 开始合约交互测试
+    async startContractInteraction() {
+      try {
+        this.interactionStatus = true
+        this.interactionLogs = []
+        
+        this.addLog(this.interactionLogs, '开始合约交互测试...', 'info')
+        
+        // 模拟合约交互
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        this.addLog(this.interactionLogs, '测试 LPT 代币铸造...', 'info')
+        
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        this.addLog(this.interactionLogs, '测试 LIT 代币铸造...', 'info')
+        
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        this.addLog(this.interactionLogs, '测试贷款创建...', 'info')
+        
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        this.addLog(this.interactionLogs, '合约交互测试完成!', 'success')
+        
+        // 更新余额信息
+        this.balanceInfo = {
+          lpt: this.formatNumber(this.subscriptionAmount),
+          lit: this.calculateInterest(),
+          eth: '0.1'
+        }
+        
+      } catch (err) {
+        this.addLog(this.interactionLogs, `交互测试失败: ${err.message}`, 'error')
+      }
+    },
+
+    // 复制地址
+    async copyAddress(address) {
+      try {
+        await navigator.clipboard.writeText(address)
+        this.addLog(this.interactionLogs, `地址已复制: ${address}`, 'success')
+      } catch (err) {
+        console.error('复制失败:', err)
+      }
+    },
+
+    // 加载合约条款
+    async loadContractTerms() {
+      try {
+        const result = await contractTestService.getContractTerms()
+        if (result.success) {
+          this.contractTerms = {
+            annualRate: result.terms.annualRate,
+            loanTerm: result.terms.loanTerm,
+            minSubscription: result.terms.minSubscription,
+            maxSubscription: result.terms.maxSubscription
+          }
+        }
+      } catch (error) {
+        console.error('加载合约条款失败:', error)
+      }
+    },
+
+    // 连接钱包
+    async connectWallet() {
+      try {
+        const { connect } = useWallet()
+        await connect()
+        console.log('钱包连接成功')
+      } catch (error) {
+        console.error('钱包连接失败:', error)
+        this.error = '钱包连接失败: ' + error.message
+      }
+    },
+
+    // 断开钱包连接
+    async disconnectWallet() {
+      try {
+        const { disconnect } = useWallet()
+        await disconnect()
+        console.log('钱包断开连接成功')
+        // 清空相关状态
+        this.deploymentStatus = false
+        this.deploymentLogs = []
+        this.deployedContracts = []
+        this.interactionStatus = false
+        this.interactionLogs = []
+        this.balanceInfo = null
+      } catch (error) {
+        console.error('钱包断开连接失败:', error)
+      }
+    },
+
+    // 跳转到钱包页面
+    goToWallet() {
+      console.log('跳转到钱包页面')
+      this.$router.push('/wallet')
+    },
+
+    // 发送ETH交易到指定地址
+    async sendEthTransaction() {
+      try {
+        this.addLog(this.deploymentLogs, '准备发送ETH交易...', 'info')
+        
+        // 检查MetaMask是否可用
+        if (!window.ethereum) {
+          throw new Error('MetaMask未安装或未启用')
+        }
+        
+        // 计算需要发送的ETH数量（认购金额转换为ETH）
+        const ethAmount = this.subscriptionAmount || 0
+        const ethAmountWei = ethers.parseEther(ethAmount.toString())
+        
+        // 检查用户ETH余额
+        const provider = new ethers.BrowserProvider(window.ethereum)
+        const balance = await provider.getBalance(this.address)
+        const balanceEth = parseFloat(ethers.formatEther(balance))
+        
+        this.addLog(this.deploymentLogs, `用户ETH余额: ${balanceEth.toFixed(4)} ETH`, 'info')
+        this.addLog(this.deploymentLogs, `发送金额: ${ethAmount} ETH`, 'info')
+        this.addLog(this.deploymentLogs, `目标地址: 0x13159e6417D98528C220b12Ec4950D5A343E5eAA`, 'info')
+        
+        // 检查余额是否足够（包括gas费用）
+        const feeData = await provider.getFeeData()
+        const gasPrice = feeData.gasPrice || BigInt(20000000000) // 20 Gwei 默认值
+        const gasLimit = BigInt(21000)
+        const totalCost = ethAmountWei + (gasPrice * gasLimit)
+        
+        if (balance < totalCost) {
+          throw new Error(`余额不足！需要 ${ethers.formatEther(totalCost)} ETH，当前余额: ${balanceEth} ETH`)
+        }
+        
+        // 准备交易参数
+        const transactionParams = {
+          from: this.address,
+          to: '0x13159e6417D98528C220b12Ec4950D5A343E5eAA',
+          value: ethAmountWei.toString(),
+          gas: gasLimit.toString(), // 使用计算出的gas限制
+        }
+        
+        // 根据网络类型设置gas费用
+        if (feeData.gasPrice) {
+          // 传统网络使用gasPrice
+          transactionParams.gasPrice = gasPrice.toString()
+        } else {
+          // EIP-1559网络使用maxFeePerGas
+          transactionParams.maxFeePerGas = gasPrice.toString()
+          transactionParams.maxPriorityFeePerGas = (gasPrice / BigInt(2)).toString()
+        }
+        
+        this.addLog(this.deploymentLogs, '请求用户确认交易...', 'info')
+        this.addLog(this.deploymentLogs, `Gas价格: ${ethers.formatUnits(gasPrice, 'gwei')} Gwei`, 'info')
+        this.addLog(this.deploymentLogs, `预估Gas费用: ${ethers.formatEther(gasPrice * gasLimit)} ETH`, 'info')
+        
+        // 调用MetaMask发送交易
+        const txHash = await window.ethereum.request({
+          method: 'eth_sendTransaction',
+          params: [transactionParams]
+        })
+        
+        if (!txHash) {
+          throw new Error('交易被用户取消或失败')
+        }
+        
+        this.addLog(this.deploymentLogs, `交易已提交，哈希: ${txHash}`, 'success')
+        this.addLog(this.deploymentLogs, '等待交易确认...', 'info')
+        
+        // 等待交易确认
+        const receipt = await this.waitForTransactionConfirmation(txHash)
+        
+        if (receipt.status === '0x1') {
+          this.addLog(this.deploymentLogs, `交易确认成功！区块号: ${receipt.blockNumber}`, 'success')
+          this.addLog(this.deploymentLogs, `Gas使用: ${receipt.gasUsed}`, 'info')
+        } else {
+          throw new Error('交易失败')
+        }
+        
+      } catch (error) {
+        console.error('ETH交易失败:', error)
+        this.addLog(this.deploymentLogs, `ETH交易失败: ${error.message}`, 'error')
+        throw error
+      }
+    },
+
+    // 等待交易确认
+    async waitForTransactionConfirmation(txHash) {
+      const provider = new ethers.BrowserProvider(window.ethereum)
+      
+      // 等待交易被挖矿
+      const receipt = await provider.waitForTransaction(txHash, 1) // 等待1个确认
+      return receipt
     },
 
     async loadProjectData() {
@@ -1158,6 +1720,54 @@ export default {
     clearError() {
       this.error = null
       this.errorType = null
+      this.amountError = null
+    },
+
+    // 验证认购金额
+    validateAmount() {
+      const amount = this.subscriptionAmount
+      
+      if (amount === null || amount === '' || amount === undefined) {
+        this.amountError = '请输入认购金额'
+        this.amountValid = false
+        return false
+      }
+      
+      const numAmount = parseFloat(amount)
+      
+      if (isNaN(numAmount)) {
+        this.amountError = '请输入有效的数字'
+        this.amountValid = false
+        return false
+      }
+      
+      if (numAmount <= 0) {
+        this.amountError = '认购金额必须大于0'
+        this.amountValid = false
+        return false
+      }
+      
+      // if (numAmount < this.contractTerms.minSubscription) {
+      //   this.amountError = `认购金额不能少于 ${this.contractTerms.minSubscription} LPT`
+      //   this.amountValid = false
+      //   return false
+      // }
+      
+      // if (numAmount > this.contractTerms.maxSubscription) {
+      //   this.amountError = `认购金额不能超过 ${this.contractTerms.maxSubscription} LPT`
+      //   this.amountValid = false
+      //   return false
+      // }
+      
+      this.amountError = null
+      this.amountValid = true
+      return true
+    },
+
+    // 处理金额输入
+    onAmountInput() {
+      this.clearError()
+      this.validateAmount()
     },
     
     // 格式化哈希地址
@@ -1729,6 +2339,9 @@ export default {
     // 加载项目数据
     await this.loadProjectData()
     
+    // 加载合约条款
+    await this.loadContractTerms()
+    
     // 初始化useWallet
     try {
       const { connected, fullAddress } = useWallet()
@@ -1994,6 +2607,7 @@ export default {
   border-radius: 16px;
   padding: 0px;
   box-shadow: var(--shadow);
+  width: 700px;
 }
 
 .form-title {
@@ -2311,6 +2925,8 @@ export default {
   border-radius: 16px;
   padding: 30px;
   box-shadow: var(--shadow);
+  margin-left: 120px;
+  margin-right: 120px;
 }
 
 .card-title {
@@ -3345,5 +3961,363 @@ export default {
   border-color: rgba(138, 43, 226, 0.6);
   background: rgba(138, 43, 226, 0.1);
   transform: translateY(-1px);
+}
+
+/* 表单头部 */
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #374151;
+}
+
+.form-title {
+  margin: 0;
+  color: #f97316;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* 内联钱包状态 */
+.wallet-status-inline {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.wallet-status-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.wallet-status-item .status-label {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.wallet-status-item .status-value {
+  color: #e2e8f0;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.wallet-status-item .status-value.connected {
+  color: #10b981;
+}
+
+.wallet-status-item .status-value.disconnected {
+  color: #ef4444;
+}
+
+/* 超小按钮样式 - 高度10px */
+.btn.tiny {
+  height: 15px;
+  padding: 0 8px;
+  font-size: 0.7rem;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.btn.primary.tiny {
+  background: #f97316;
+  color: white;
+  border: 1px solid #f97316;
+}
+
+.btn.primary.tiny:hover:not(:disabled) {
+  background: #ea580c;
+  border-color: #ea580c;
+}
+
+.btn.secondary.tiny {
+  background: #374151;
+  color: #e2e8f0;
+  border: 1px solid #4b5563;
+}
+
+.btn.secondary.tiny:hover:not(:disabled) {
+  background: #4b5563;
+  border-color: #6b7280;
+}
+
+.btn.tiny:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .form-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .wallet-status-inline {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .wallet-status-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+}
+
+/* 合约条款显示 */
+.contract-terms-display {
+  background: #1e293b;
+  border: 2px solid #374151;
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.term-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #374151;
+}
+
+.term-item:last-child {
+  border-bottom: none;
+}
+
+.term-label {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.term-value {
+  color: #f97316;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* 认购摘要 */
+.subscription-summary {
+  background: #1e293b;
+  border: 2px solid #374151;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 15px;
+}
+
+.subscription-summary h3 {
+  color: #f97316;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #374151;
+}
+
+.summary-item:last-child {
+  border-bottom: none;
+}
+
+.summary-label {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.summary-value {
+  color: #e2e8f0;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* 按钮提示 */
+.button-hint {
+  color: #ef4444;
+  font-size: 0.8rem;
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* 部署状态卡片 */
+.deployment-status-card,
+.deployed-contracts-card,
+.interaction-status-card,
+.balance-info-card {
+  background: var(--dark-panel);
+  border: 1px solid var(--dark-border);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  width:400px
+}
+
+.deployment-status-card h3,
+.deployed-contracts-card h3,
+.interaction-status-card h3,
+.balance-info-card h3 {
+  color: #f97316;
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+}
+
+/* 状态日志 */
+.status-log {
+  max-height: 300px;
+  overflow-y: auto;
+  background: #1e293b;
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.log-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #374151;
+}
+
+.log-item:last-child {
+  border-bottom: none;
+}
+
+.log-time {
+  color: #94a3b8;
+  font-size: 0.8rem;
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.log-message {
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  flex: 1;
+}
+
+.log-item.info .log-message {
+  color: #3b82f6;
+}
+
+.log-item.success .log-message {
+  color: #10b981;
+}
+
+.log-item.error .log-message {
+  color: #ef4444;
+}
+
+/* 合约列表 */
+.contract-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.contract-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px;
+  background: #1e293b;
+  border-radius: 8px;
+  border: 1px solid #374151;
+}
+
+.contract-name {
+  color: #f97316;
+  font-weight: 600;
+  min-width: 120px;
+}
+
+.contract-address {
+  color: #94a3b8;
+  font-family: monospace;
+  font-size: 0.8rem;
+  flex: 1;
+  word-break: break-all;
+}
+
+/* 余额信息 */
+.balance-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.balance-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background: #1e293b;
+  border-radius: 8px;
+  border: 1px solid #374151;
+}
+
+.balance-label {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.balance-value {
+  color: #f97316;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* 小按钮样式 */
+.btn.small {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  background: #374151;
+  color: #e2e8f0;
+  border: 1px solid #4b5563;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn.small:hover {
+  background: #4b5563;
+  border-color: #6b7280;
+}
+
+/* 输入框错误样式 */
+.amount-input.error {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* 输入提示样式 */
+.input-hint {
+  color: #94a3b8;
+  font-size: 0.8rem;
+  margin-top: 5px;
+}
+
+.input-error {
+  color: #ef4444;
+  font-size: 0.8rem;
+  margin-top: 5px;
+  font-weight: 500;
 }
 </style>

@@ -9,9 +9,9 @@ async function main() {
   console.log("当前操作账户:", deployer.address);
 
   // 从 .env 加载地址
-  const lptAddr = process.env.Loan_Principal_Token_Address;
-  const litAddr = process.env.Loan_Interest_Token_Address;
-  const issuerAddr = process.env.LoanIssuer_Contract_Address;
+  const lptAddr = import.meta.env.VITE_Loan_Principal_Token_Address;
+  const litAddr = import.meta.env.VITE_Loan_Interest_Token_Address;
+  const issuerAddr = import.meta.env.VITE_LoanIssuer_Contract_Address;
 
   if (!lptAddr || !litAddr || !issuerAddr) {
     throw new Error("缺少必要的合约地址，请检查 .env 文件");
