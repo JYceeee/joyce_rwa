@@ -887,7 +887,14 @@ export default {
         radial-gradient(circle at 40% 40%, rgba(25, 25, 112, 0.1) 0%, transparent 50%);
   min-height: 100vh;
   padding: 20px;
-  margin-left:50px;
+  margin:0;
+  width: 100vw;
+  max-width: none;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -45vw;
 }
 
 .doc-header{
@@ -1256,7 +1263,7 @@ export default {
 
 .main-content {
   display: grid;
-  grid-template-columns: 1fr 260px;
+  grid-template-columns: 1fr;
   gap: 20px;
   align-items: start;
 }
@@ -1346,11 +1353,6 @@ export default {
   margin: 6px 0 2px;
 }
 
-.right-content {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-}
 
 .doc-cover {
   width: 100%;
@@ -1496,10 +1498,6 @@ export default {
   .main-content {
     grid-template-columns: 1fr;
     gap: 16px;
-  }
-  
-  .right-content {
-    justify-content: flex-start;
   }
   
   .doc-cover {

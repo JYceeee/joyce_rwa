@@ -116,11 +116,13 @@
             </button>
         </div>
         <!-- 项目卡片容器 -->
-        <div v-else-if="upcomingProjects.length > 0" class="projects-grid">
+        <div v-else-if="upcomingProjects.length > 0" class="projects-grid" :class="{ 'fade-in': !loading }">
           <article 
             v-for="(project, index) in upcomingProjects" 
             :key="project.code" 
             class="listing-card"
+            :class="{ 'card-fade-in': !loading }"
+            :style="{ 'animation-delay': `${index * 0.2}s` }"
             :aria-labelledby="`listing-title-${index}`"
           >
           <!-- 卡片头部 -->
@@ -352,9 +354,27 @@ export default {
         const response = await productAPI.getAllProducts()
         
         if (response.status === 0) {
-          this.products = response.data || []
-          console.log('HomeView: 成功加载', this.products.length, '个产品')
+          const products = response.data || []
+          
+          // 立即更新产品列表，触发响应式更新
+          this.products = products
+          
+          console.log('HomeView: 成功加载', products.length, '个产品')
           console.log('HomeView: Upcoming项目:', this.upcomingProjects)
+          
+          // 如果有项目数据，显示成功消息
+          if (products.length > 0) {
+            const upcomingCount = this.upcomingProjects.length
+            if (upcomingCount > 0) {
+              this.notify(`成功加载 ${upcomingCount} 个即将发布的项目`)
+            }
+          }
+          
+          // 确保UI立即更新
+          this.$nextTick(() => {
+            console.log('HomeView: UI已更新，项目列表已显示')
+          })
+          
         } else {
           this.error = response.message || '加载产品数据失败'
           console.error('HomeView: 加载产品数据失败:', this.error)
@@ -376,18 +396,23 @@ export default {
       // 订阅产品列表更新
       this.unsubscribeProducts = subscribeProducts((products) => {
         console.log('🔄 HomeView: 收到产品数据更新，共', products.length, '个项目')
+        
+        const oldProducts = [...this.products]
         this.products = products
         
         // 检查是否有新的upcoming项目
-        const newUpcomingProjects = products.filter(product => 
-          product.status === 'upcoming' && 
-          !this.products.some(existing => existing.code === product.code)
-        )
+        const oldUpcomingCount = oldProducts.filter(p => p.status === 'INCOMING').length
+        const newUpcomingCount = products.filter(p => p.status === 'INCOMING').length
         
-        if (newUpcomingProjects.length > 0) {
-          console.log('🆕 HomeView: 发现', newUpcomingProjects.length, '个新的upcoming项目')
-          this.notify(`发现 ${newUpcomingProjects.length} 个新项目`)
+        if (newUpcomingCount > oldUpcomingCount) {
+          console.log('🆕 HomeView: 发现', newUpcomingCount - oldUpcomingCount, '个新的upcoming项目')
+          this.notify(`发现 ${newUpcomingCount - oldUpcomingCount} 个新项目`)
         }
+        
+        // 确保UI立即更新
+        this.$nextTick(() => {
+          console.log('HomeView: 实时更新完成，项目列表已刷新')
+        })
       })
       
       // 订阅新项目通知
@@ -427,7 +452,7 @@ export default {
       // 刷新项目列表
       this.notify('Refreshing listings...')
       console.log('🔄 Refreshing listings...')
-      // 这里可以添加实际的刷新逻辑
+      this.loadProducts()
     },
     viewAllProjects() {
       // 跳转到项目列表页面
@@ -455,7 +480,7 @@ export default {
       // 3秒后显示跳过按钮
       this.introVideoTimer = setTimeout(() => {
         this.showIntroSkipButton = true
-      }, 3000)
+      }, 0)
     },
     
     // 视频准备就绪
@@ -501,8 +526,8 @@ export default {
         setTimeout(() => {
           this.isTransitioning = false
           this.resetVideoState()
-        }, 300)
-      }, 300)
+        }, 10)
+      }, 10)
     },
     
     // 关闭视频覆盖层
@@ -591,10 +616,13 @@ export default {
     }
   },
   async mounted() {
+    console.log('🏠 HomeView: 组件已挂载，开始初始化...')
+    
     // 设置数据库同步
     this.setupDatabaseSync()
     
-    // 加载产品数据
+    // 立即加载产品数据
+    console.log('🏠 HomeView: 开始加载产品数据...')
     await this.loadProducts()
     
     // 测试数据关联
@@ -610,6 +638,11 @@ export default {
         targetYield: this.newListingProject.targetYield,
         loanTerm: this.newListingProject.loanTerm,
         status: this.newListingProject.status
+      })
+      
+      // 如果有项目数据，确保UI立即更新
+      this.$nextTick(() => {
+        console.log('🏠 HomeView: 项目列表已显示在UI中')
       })
     } else {
       console.log('ℹ️ HomeView: No upcoming project')
@@ -1154,6 +1187,14 @@ export default {
   width: 100%;
   max-width: 1000px;
   margin: 0 auto;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+}
+
+.projects-grid.fade-in {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .listing-card {
@@ -1167,6 +1208,14 @@ export default {
     border: 1px solid rgba(51, 204, 255, 0.1);
   position: relative;
   overflow: hidden;
+  opacity: 0;
+  transform: translateY(30px) scale(0.95);
+  transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+}
+
+.listing-card.card-fade-in {
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
 
 .listing-card::before {
@@ -1799,6 +1848,8 @@ export default {
   justify-content: center;
   padding: 60px 20px;
   text-align: center;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
 }
 
 .loading-spinner {
