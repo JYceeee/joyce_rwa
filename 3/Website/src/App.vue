@@ -1,11 +1,11 @@
 <!-- src/App.vue -->
 <template>
   <div id="app">
-    <AppHeader @search="handleSearch" />
+    <AppHeader v-if="!isIntroPage" @search="handleSearch" />
     <main class="page-wrap">
       <router-view />
     </main>
-  <AppFooter v-if="!isAuthPage" />
+  <AppFooter v-if="!isAuthPage && !isIntroPage" />
   </div>
 </template>
 
@@ -47,6 +47,9 @@ export default {
     isAuthPage() {
       const path = this.$route.path;
       return path === '/login' || path === '/signup';
+    },
+    isIntroPage() {
+      return this.$route.path === '/intro';
     }
   },
   methods: {

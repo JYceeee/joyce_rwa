@@ -7,6 +7,7 @@
 
     <div class="contact-content">
       <div class="contact-grid">
+        <!-- Contact Information -->
         <div class="contact-info">
           <h2>Contact Information</h2>
           <div class="contact-methods">
@@ -57,7 +58,8 @@
             </div>
           </div>
         </div>
-
+        
+        <!-- Send Message -->
         <div class="contact-form">
           <h2>Send Message</h2>
           <form @submit.prevent="submitForm" class="form-container">
@@ -72,19 +74,21 @@
                 <input type="email" id="email" v-model="form.email" required>
               </div>
 
-              <div class="form-group">
+              <!-- <div class="form-group">
                 <label for="phone">Phone</label>
                 <input type="tel" id="phone" v-model="form.phone">
-              </div>
+              </div> -->
 
               <div class="form-group">
                 <label for="subject">Subject *</label>
                 <select id="subject" v-model="form.subject" required>
                   <option value="">Please select a subject</option>
-                  <option value="general">General Consultation</option>
-                  <option value="technical">Technical Support</option>
-                  <option value="business">Business Cooperation</option>
-                  <option value="investment">Investment Consultation</option>
+                  <option value="investor">I am an Investor/I am interested in investing</option>
+                  <option value="asset_holder">I am an Asset Holder/I am interested in holding assets</option>
+                  <option value="general">I need General Consultation</option>
+                  <option value="technical">I need Technical Support</option>
+                  <option value="business">I need Business Cooperation</option>
+                  <option value="investment">I need Investment Consultation</option>
                   <option value="other">Other</option>
                 </select>
               </div>
@@ -101,28 +105,6 @@
               </button>
             </div>
           </form>
-        </div>
-      </div>
-
-      <div class="faq-section">
-        <h2>FAQ</h2>
-        <div class="faq-list">
-          <div class="faq-item">
-            <h4>How to start investing?</h4>
-            <p>First, you need to register an account and complete the KYC certification, then connect your digital wallet, and you can start browsing and investing in real estate tokens.</p>
-          </div>
-          <div class="faq-item">
-            <h4>Is there a minimum investment amount?</h4>
-            <p>The minimum investment amount for individual investors is 100 Australian dollars, and the minimum investment requirements for institutional investors and corporate clients are different.</p>
-          </div>
-          <div class="faq-item">
-            <h4>How to withdraw investment returns？</h4>
-            <p>You can view the investment returns on the investment portfolio page, and withdraw the returns to your bank account through the wallet function.</p>
-          </div>
-          <div class="faq-item">
-            <h4>Is the platform safe?</h4>
-            <p>We use bank-level security measures, including multiple encryption, cold wallet storage, etc., to ensure the security of user assets.</p>
-          </div>
         </div>
       </div>
     </div>
@@ -317,8 +299,8 @@ export default {
 }
 
 .form-submit {
-  margin-top: auto;
-  padding-top: 24px;
+  margin-top: 0;
+  padding-top: 0;
 }
 
 .form-group {
@@ -377,40 +359,6 @@ export default {
   cursor: not-allowed;
 }
 
-.faq-section h2 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 40px;
-  color: #ffffff;
-}
-
-.faq-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.faq-item {
-  background: #1d1d36;
-  border: 1px solid #2a2a4a;
-  border-radius: 12px;
-  padding: 24px;
-}
-
-.faq-item h4 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: #ffffff;
-}
-
-.faq-item p {
-  color: #94a3b8;
-  margin: 0;
-  line-height: 1.5;
-}
-
 @media (max-width: 768px) {
   .page-header h1 {
     font-size: 2rem;
@@ -424,6 +372,12 @@ export default {
   .contact-method {
     flex-direction: column;
     text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 20px 16px;
   }
 }
 </style>

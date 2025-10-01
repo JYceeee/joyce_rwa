@@ -7,20 +7,22 @@ interface ApiResponse<T = any> {
   data?: T
 }
 
-// 后端API基础URL
-const API_BASE_URL = 'http://localhost:3000/api'
+// API完整URL配置 - 直接从环境变量获取完整URL
+const getApiUrl = (envKey: string, fallback: string) => {
+  return (import.meta as any).env[envKey] || fallback
+}
 
-// 产品API接口
-export const productAPI = {
+// 项目API接口
+export const projectAPI = {
   /**
-   * 获取所有产品
-   * @returns {Promise<ApiResponse>} 产品列表
+   * 获取所有项目
+   * @returns {Promise<ApiResponse>} 项目列表
    */
-  async getAllProducts(): Promise<ApiResponse> {
+  async getAllProjects(): Promise<ApiResponse> {
     try {
-      console.log('📊 API: 从数据库获取所有产品数据')
+      console.log('📊 API: 从数据库获取所有项目数据')
       
-      const response = await fetch(`${API_BASE_URL}/product_details`, {
+      const response = await fetch(getApiUrl('VITE_API_PROJECT_URL', 'http://localhost:3000/api/project'), {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -36,7 +38,7 @@ export const productAPI = {
       
       return result
     } catch (error) {
-      console.error('❌ API: 获取产品数据失败:', error)
+      console.error('❌ API: 获取项目数据失败:', error)
       return {
         status: 1,
         message: error instanceof Error ? error.message : 'Unknown error',
@@ -46,15 +48,15 @@ export const productAPI = {
   },
 
   /**
-   * 根据代码获取产品
-   * @param {string} code - 产品代码
-   * @returns {Promise<ApiResponse>} 产品详情
+   * 根据代码获取项目
+   * @param {string} code - 项目代码
+   * @returns {Promise<ApiResponse>} 项目详情
    */
-  async getProductByCode(code: string): Promise<ApiResponse> {
+  async getProjectByCode(code: string): Promise<ApiResponse> {
     try {
-      console.log('📊 API: 从数据库根据代码获取产品:', code)
+      console.log('📊 API: 从数据库根据代码获取项目:', code)
       
-      const response = await fetch(`${API_BASE_URL}/product_details/${code}`, {
+      const response = await fetch(`${getApiUrl('VITE_API_PROJECT_BY_CODE_URL', 'http://localhost:3000/api/project')}/${code}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -66,11 +68,11 @@ export const productAPI = {
       }
       
       const result = await response.json()
-      console.log('📊 API: 数据库返回产品详情:', result)
+      console.log('📊 API: 数据库返回项目详情:', result)
       
       return result
     } catch (error) {
-      console.error('❌ API: 获取产品详情失败:', error)
+      console.error('❌ API: 获取项目详情失败:', error)
       return {
         status: 1,
         message: error instanceof Error ? error.message : 'Unknown error',
@@ -80,48 +82,48 @@ export const productAPI = {
   },
 
   /**
-   * 搜索产品
+   * 搜索项目
    * @param {string} query - 搜索关键词
    * @returns {Promise<ApiResponse>} 搜索结果
    */
-  async searchProducts(query: string): Promise<ApiResponse> {
+  async searchProjects(query: string): Promise<ApiResponse> {
     try {
-      console.log('📊 API: 搜索产品:', query)
+      console.log('📊 API: 搜索项目:', query)
       
-      // 先获取所有产品，然后在前端进行搜索过滤
-      const allProductsResponse = await this.getAllProducts()
+      // 先获取所有项目，然后在前端进行搜索过滤
+      const allProjectsResponse = await this.getAllProjects()
       
-      if (allProductsResponse.status !== 0) {
-        return allProductsResponse
+      if (allProjectsResponse.status !== 0) {
+        return allProjectsResponse
       }
       
-      const products = allProductsResponse.data || []
+      const projects = allProjectsResponse.data || []
       
       if (!query || query.trim() === '') {
         return {
           status: 0,
           message: 'Success',
-          data: products
+          data: projects
         }
       }
       
-      const filteredProducts = products.filter(product => {
+      const filteredProjects = projects.filter(project => {
         const searchTerm = query.toLowerCase()
         return (
-          product.code.toLowerCase().includes(searchTerm) ||
-          product.name.toLowerCase().includes(searchTerm) ||
-          product.subtitle.toLowerCase().includes(searchTerm) ||
-          product.region.toLowerCase().includes(searchTerm)
+          project.code.toLowerCase().includes(searchTerm) ||
+          project.name.toLowerCase().includes(searchTerm) ||
+          project.propertyLocation.toLowerCase().includes(searchTerm) ||
+          project.propertyState.toLowerCase().includes(searchTerm)
         )
       })
       
       return {
         status: 0,
         message: 'Success',
-        data: filteredProducts
+        data: filteredProjects
       }
     } catch (error) {
-      console.error('❌ API: 搜索产品失败:', error)
+      console.error('❌ API: 搜索项目失败:', error)
       return {
         status: 1,
         message: error instanceof Error ? error.message : 'Unknown error',
@@ -131,40 +133,40 @@ export const productAPI = {
   },
 
   /**
-   * 根据类型过滤产品
-   * @param {string} type - 产品类型
+   * 根据类型过滤项目
+   * @param {string} type - 项目类型
    * @returns {Promise<ApiResponse>} 过滤结果
    */
-  async getProductsByType(type: string): Promise<ApiResponse> {
+  async getProjectsByType(type: string): Promise<ApiResponse> {
     try {
-      console.log('📊 API: 根据类型获取产品:', type)
+      console.log('📊 API: 根据类型获取项目:', type)
       
-      // 先获取所有产品，然后在前端进行类型过滤
-      const allProductsResponse = await this.getAllProducts()
+      // 先获取所有项目，然后在前端进行类型过滤
+      const allProjectsResponse = await this.getAllProjects()
       
-      if (allProductsResponse.status !== 0) {
-        return allProductsResponse
+      if (allProjectsResponse.status !== 0) {
+        return allProjectsResponse
       }
       
-      const products = allProductsResponse.data || []
+      const projects = allProjectsResponse.data || []
       
       if (!type || type === 'all') {
         return {
           status: 0,
           message: 'Success',
-          data: products
+          data: projects
         }
       }
       
-      const filteredProducts = products.filter(product => product.type === type)
+      const filteredProjects = projects.filter(project => project.propertyType === type)
       
       return {
         status: 0,
         message: 'Success',
-        data: filteredProducts
+        data: filteredProjects
       }
     } catch (error) {
-      console.error('❌ API: 根据类型获取产品失败:', error)
+      console.error('❌ API: 根据类型获取项目失败:', error)
       return {
         status: 1,
         message: error instanceof Error ? error.message : 'Unknown error',
@@ -174,40 +176,40 @@ export const productAPI = {
   },
 
   /**
-   * 根据风险等级过滤产品
-   * @param {string} risk - 风险等级
+   * 根据状态过滤项目
+   * @param {string} status - 项目状态
    * @returns {Promise<ApiResponse>} 过滤结果
    */
-  async getProductsByRisk(risk: string): Promise<ApiResponse> {
+  async getProjectsByStatus(status: string): Promise<ApiResponse> {
     try {
-      console.log('📊 API: 根据风险等级获取产品:', risk)
+      console.log('📊 API: 根据状态获取项目:', status)
       
-      // 先获取所有产品，然后在前端进行风险等级过滤
-      const allProductsResponse = await this.getAllProducts()
+      // 先获取所有项目，然后在前端进行状态过滤
+      const allProjectsResponse = await this.getAllProjects()
       
-      if (allProductsResponse.status !== 0) {
-        return allProductsResponse
+      if (allProjectsResponse.status !== 0) {
+        return allProjectsResponse
       }
       
-      const products = allProductsResponse.data || []
+      const projects = allProjectsResponse.data || []
       
-      if (!risk || risk === 'all') {
+      if (!status || status === 'all') {
         return {
           status: 0,
           message: 'Success',
-          data: products
+          data: projects
         }
       }
       
-      const filteredProducts = products.filter(product => product.risk === risk)
+      const filteredProjects = projects.filter(project => project.status === status)
       
       return {
         status: 0,
         message: 'Success',
-        data: filteredProducts
+        data: filteredProjects
       }
     } catch (error) {
-      console.error('❌ API: 根据风险等级获取产品失败:', error)
+      console.error('❌ API: 根据状态获取项目失败:', error)
       return {
         status: 1,
         message: error instanceof Error ? error.message : 'Unknown error',
@@ -217,21 +219,21 @@ export const productAPI = {
   },
 
   /**
-   * 更新产品订阅信息
-   * @param {string} code - 产品代码
+   * 更新项目订阅信息
+   * @param {string} code - 项目代码
    * @param {object} subscriptionData - 订阅数据
    * @returns {Promise<ApiResponse>} 更新结果
    */
-  async updateProductSubscription(code: string, subscriptionData: any): Promise<ApiResponse> {
+  async updateProjectSubscription(code: string, subscriptionData: any): Promise<ApiResponse> {
     try {
-      console.log('📊 API: 更新产品订阅信息:', code, subscriptionData)
+      console.log('📊 API: 更新项目订阅信息:', code, subscriptionData)
       
       // 转换字段名以匹配后端API
       const apiData = {
-        current_subscribed_token: subscriptionData.subscribed || subscriptionData.current_subscribed_token
+        subscribe_token: subscriptionData.subscribed || subscriptionData.subscribe_token
       }
       
-      const response = await fetch(`${API_BASE_URL}/product_details/${code}/subscription`, {
+      const response = await fetch(`${getApiUrl('VITE_API_PROJECT_SUBSCRIPTION_URL', 'http://localhost:3000/api/loans')}/${code}/subscription`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -248,7 +250,7 @@ export const productAPI = {
       
       return result
     } catch (error) {
-      console.error('❌ API: 更新产品订阅信息失败:', error)
+      console.error('❌ API: 更新项目订阅信息失败:', error)
       return {
         status: 1,
         message: error instanceof Error ? error.message : 'Unknown error',
@@ -296,34 +298,28 @@ export const login = async (email: string, password: string): Promise<ApiRespons
   try {
     console.log('🔐 API: 用户登录:', email)
     
-    // 模拟API延迟
-    await new Promise(resolve => setTimeout(resolve, 500))
+    const response = await fetch(getApiUrl('VITE_API_LOGIN_URL', 'http://localhost:3000/api/user/login'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password })
+    })
     
-    // 模拟登录逻辑（实际项目中应该调用真实的API）
-    if (email && password) {
-      const mockUser = {
-        id: '1',
-        email: email,
-        name: email.split('@')[0],
-        token: 'mock-jwt-token-' + Date.now()
-      }
-      
-      // 存储到localStorage
-      localStorage.setItem('userInfo', JSON.stringify(mockUser))
-      localStorage.setItem('authToken', mockUser.token)
-      
-      return {
-        status: 0,
-        message: 'Login successful',
-        data: mockUser
-      }
-    } else {
-      return {
-        status: 1,
-        message: 'Email and password are required',
-        data: null
-      }
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
+    
+    const result = await response.json()
+    console.log('🔐 API: 登录结果:', result)
+    
+    if (result.status === 0 && result.data) {
+      // 存储到localStorage
+      localStorage.setItem('userInfo', JSON.stringify(result.data))
+      localStorage.setItem('authToken', result.data.token)
+    }
+    
+    return result
   } catch (error) {
     console.error('❌ API: 登录失败:', error)
     return {
@@ -338,27 +334,28 @@ export const signup = async (userData: any): Promise<ApiResponse> => {
   try {
     console.log('📝 API: 用户注册:', userData)
     
-    // 模拟API延迟
-    await new Promise(resolve => setTimeout(resolve, 800))
+    const response = await fetch(getApiUrl('VITE_API_REGISTER_URL', 'http://localhost:3000/api/user/reguser'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData)
+    })
     
-    // 模拟注册逻辑
-    const newUser = {
-      id: Date.now().toString(),
-      email: userData.email || '',
-      name: userData.name || '',
-      phone: userData.phone || '',
-      token: 'mock-jwt-token-' + Date.now()
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
     
-    // 存储到localStorage
-    localStorage.setItem('userInfo', JSON.stringify(newUser))
-    localStorage.setItem('authToken', newUser.token)
+    const result = await response.json()
+    console.log('📝 API: 注册结果:', result)
     
-    return {
-      status: 0,
-      message: 'Registration successful',
-      data: newUser
+    if (result.status === 0 && result.data) {
+      // 存储到localStorage
+      localStorage.setItem('userInfo', JSON.stringify(result.data))
+      localStorage.setItem('authToken', result.data.token)
     }
+    
+    return result
   } catch (error) {
     console.error('❌ API: 注册失败:', error)
     return {
@@ -369,8 +366,18 @@ export const signup = async (userData: any): Promise<ApiResponse> => {
   }
 }
 
+// 向后兼容的产品API别名
+export const productAPI = {
+  ...projectAPI,
+  // 添加向后兼容的方法名
+  getAllProducts: projectAPI.getAllProjects,
+  getProductByCode: projectAPI.getProjectByCode,
+  updateProductSubscription: projectAPI.updateProjectSubscription
+}
+
 // 默认导出
 export default {
-  productAPI,
+  projectAPI,
+  productAPI, // 向后兼容
   userAPI
 }

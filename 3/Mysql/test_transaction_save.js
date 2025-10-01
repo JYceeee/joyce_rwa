@@ -14,7 +14,7 @@ const testTransactionData = {
 };
 
 // API端点
-const apiUrl = 'http://localhost:3000/user/transactionhistory';
+const apiUrl = import.meta.env.VITE_API_BASE_URL + '/user/transactionhistory';
 
 async function testTransactionSave() {
   try {

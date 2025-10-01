@@ -34,14 +34,13 @@ const { expressjwt: expressJWT } = require('express-jwt')
 //导入路由模块
 const userRouter = require('./src/routers/userRouter')
 const transactionRouter = require('./src/routers/transactionRouter')
-const projectRouter = require('./src/routers/projectRouter')
-const productRouter = require('./src/routers/productRouter')
+const unifiedProjectRouter = require('./src/routers/unifiedProjectRouter')
 
 // 使用路由模块
 app.use('/user', userRouter)
 app.use('/transaction', transactionRouter)
-app.use('/api', projectRouter)
-app.use('/api', productRouter)
+app.use('/api', unifiedProjectRouter)
+app.use('/project', unifiedProjectRouter)  // 独立的project路由
 
 // 定义全局错误级别中间件
 app.use((err, req, res, next) => {
@@ -55,7 +54,8 @@ app.use((err, req, res, next) => {
 
 
 //启动服务器
-app.listen(3000, () => { console.log('服务器3000端口已启动成功') })
+const PORT = process.env.VITE_BACKEND_PORT || 3000
+app.listen(PORT, () => { console.log(`服务器${PORT}端口已启动成功`) })
 
 // 测试数据库连接，执行sql语句
 const sqlStr = 'select * from user'

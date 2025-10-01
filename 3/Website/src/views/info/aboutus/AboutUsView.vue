@@ -9,49 +9,42 @@
       <!-- 项目背景与愿景部分 -->
       <div class="background-vision-section">
         <h2>Background</h2>
-        <div class="vision-content">
+        <!-- <div class="vision-content"> -->
           <div class="vision-text">
             <p class="vision-intro">
-              <strong>RWATdealmaker</strong> is a global RWA matching SaaS platform that helps asset holders and investors establish compliant and transparent investment transactions. Our platform's first POC/MVP use case is "Australian residential real estate mortgage loan equity tokenization", with the goal of verifying a complete closed loop (registration/KYC → whitelist → subscription → interest calculation → redemption/default).
+              <strong>RWAT dealmaker</strong>
+              (stand for Real World Assets Tokenization deal maker) 
+              is the creator of the real world assets tokenization project, 
+              meaning that this platform is committed to protecting the investment safety of RWAT investors, 
+              organizing legally compliant, low-risk, high-return and high-quality asset. 
+              For example, residential mortgage loans with a mortgage rate of less than 70% and a rate of approximately 9% in Australia. 
+              This platform aims to promote the transaction between investors and asset holders.
             </p>
             
-            <div class="vision-timeline">
-              <h3>Our Vision</h3>
-              <div class="timeline-item">
-                <div class="timeline-phase">
-                  <span class="phase-icon">🎯</span>
-                  <h4>Short-term</h4>
-                </div>
-                <p>Implement single project Demo, complete the full closed loop;</p>
-              </div>
-              
-              <div class="timeline-item">
-                <div class="timeline-phase">
-                  <span class="phase-icon">📈</span>
-                  <h4>Medium-term</h4>
-                </div>
-                <p>Support multiple projects in parallel, investor Dashboard displays token quantities, amounts, shares and maturity for each project;</p>
-              </div>
-              
-              <div class="timeline-item">
-                <div class="timeline-phase">
-                  <span class="phase-icon">🌍</span>
-                  <h4>Long-term</h4>
-                </div>
-                <p>Expand to secondary market trading and DAO governance under compliance premises, serving global investors and asset owners.</p>
-              </div>
-            </div>
+            <p class="vision-intro">
+              The underlying assets displayed on this platform are protected by the laws of the country where they are located, 
+              and the funds can freely enter and exit that country. 
+              If investors require, 
+              the project transaction structure can be isolated and entrusted by a third-party institution to hold the underlying assets and funds.
+            </p>
+            
+            <p class="vision-intro">
+              In addition to facilitating transactions between investors and RWAT underlying asset holders, 
+              this platform can also integrate the cooperation of all institutions in the RWA tokenization chain, 
+              including professional RWA tokenization technology service companies and licensed issuers and exchanges of RWAT in various countries, 
+              to achieve the successful issuance of RWA tokenization legally, efficiently, at low cost, and publicly or privately.
+            </p>
           </div>
-          <div class="vision-image">
+          <!-- <div class="vision-image">
             <div class="image-placeholder">🚀</div>
-          </div>
-        </div>
+          </div> -->
+        <!-- </div> -->
       </div>
 
       <div class="mission-section">
         <div class="mission-text">
           <h2>Our Mission</h2>
-          <p>We are committed to revolutionizing traditional real estate investment through blockchain technology, allowing everyone to participate in优质房地产投资，共享房地产市场的增长红利。</p>
+          <p>We are committed to revolutionizing traditional real estate investment through blockchain technology, allowing everyone to participate in high-quality real estate investment, and share the growth红利 of the real estate market.</p>
           <p>Through tokenization technology, we will break down traditional real estate investment that requires a large amount of capital into small, tradable units, allowing ordinary investors to enjoy stable returns from real estate investment.</p>
         </div>
         <div class="mission-image">
@@ -170,6 +163,41 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 80px;
+}
+
+.background-vision-section h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 40px;
+  color: #ffffff;
+  text-align: center;
+}
+
+.vision-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 60px;
+  align-items: start;
+}
+
+.vision-text {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.vision-intro {
+  color: #94a3b8;
+  line-height: 1.8;
+  font-size: 1.1rem;
+  margin: 0;
+  text-align: justify;
+}
+
+.vision-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .mission-section {
@@ -325,6 +353,15 @@ export default {
 @media (max-width: 768px) {
   .page-header h1 {
     font-size: 2rem;
+  }
+  
+  .background-vision-section h2 {
+    font-size: 2rem;
+  }
+  
+  .vision-content {
+    grid-template-columns: 1fr;
+    gap: 40px;
   }
   
   .mission-section {

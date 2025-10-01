@@ -10,6 +10,7 @@ const networkLabel = ref('')
 const nativeSymbol = ref('ETH')
 const nativeBalance = ref(0n)
 const audPrice = ref(null)
+const priceChange24h = ref(null)
 const tokens = reactive([])
 const warning = ref('')
 const error = ref('')
@@ -92,18 +93,37 @@ function detachEventListeners() {
   }
 }
 async function handleAccountsChanged(accs) {
-  if (!accs || accs.length === 0) disconnect()
-  else { address.value = accs[0]; await refreshAll() }
+  console.log('🔄 Accounts changed:', accs)
+  if (!accs || accs.length === 0) {
+    disconnect()
+  } else {
+    const oldAddress = address.value
+    address.value = accs[0]
+    
+    // 如果地址发生变化，触发地址变化事件
+    if (oldAddress && oldAddress !== accs[0]) {
+      console.log('🔄 Wallet address changed from', oldAddress, 'to', accs[0])
+      window.dispatchEvent(new CustomEvent('walletAddressChanged', { 
+        detail: { oldAddress, newAddress: accs[0] } 
+      }))
+    }
+    
+    await refreshAll()
+  }
 }
 async function handleChainChanged() { await refreshAll() }
 
 async function fetchAudPriceSafely() {
   try {
     const id = (nativeSymbol.value === 'MATIC') ? 'matic-network' : 'ethereum'
-    const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=aud`)
+    const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=aud&include_24hr_change=true`)
     const json = await res.json()
     audPrice.value = json?.[id]?.aud || null
-  } catch { audPrice.value = null }
+    priceChange24h.value = json?.[id]?.aud_24h_change || null
+  } catch { 
+    audPrice.value = null
+    priceChange24h.value = null
+  }
 }
 
 // ===== Public actions =====
@@ -142,6 +162,11 @@ async function connect() {
     attachEventListeners()
     
     console.log('✅ Wallet connected successfully:', accounts[0])
+    
+    // 触发自定义事件通知其他组件
+    window.dispatchEvent(new CustomEvent('walletConnected', { 
+      detail: { address: accounts[0], chainId: chainId.value } 
+    }))
   } catch (e) { 
     console.error('❌ Wallet connection failed:', e)
     
@@ -160,6 +185,9 @@ async function connect() {
   }
 }
 function disconnect() {
+  const wasConnected = connected.value
+  const oldAddress = address.value
+  
   connected.value = false
   address.value = ''
   chainId.value = null
@@ -167,8 +195,17 @@ function disconnect() {
   nativeSymbol.value = 'ETH'
   nativeBalance.value = 0n
   audPrice.value = null
+  priceChange24h.value = null
   tokens.splice(0)
   detachEventListeners()
+  
+  // 如果之前是连接状态，触发断开连接事件
+  if (wasConnected) {
+    console.log('🔌 Wallet disconnected, triggering event...')
+    window.dispatchEvent(new CustomEvent('walletDisconnected', { 
+      detail: { address: oldAddress } 
+    }))
+  }
 }
 async function refreshAll() {
   if (!connected.value) return
@@ -195,25 +232,60 @@ async function refreshTokens() {
     const builtIn = TOKENS_BY_CHAIN[chainId.value] || []
     const custom = getCustomTokens(chainId.value)
     const list = [...builtIn, ...custom]
+    
     for (const item of list) {
       if (!ethers.isAddress(item.address)) continue
-      const c = new ethers.Contract(item.address, ERC20_ABI, provider)
-      const [raw, decimals, symbol, name] = await Promise.all([
-        c.balanceOf(address.value),
-        c.decimals(),
-        safeString(() => c.symbol(), item.label || 'TKN'),
-        safeString(() => c.name(), item.label || 'Token'),
-      ])
-      const display = formatUnitsSafe(raw, decimals)
-      tokens.push({
-        address: item.address,
-        symbol: symbol || item.label || 'TKN',
-        name: name || item.label || 'Token',
-        decimals,
-        displayBalance: display
-      })
+      
+      try {
+        const c = new ethers.Contract(item.address, ERC20_ABI, provider)
+        
+        // 先检查合约是否存在（通过调用一个简单的方法）
+        let contractExists = false
+        try {
+          await c.symbol()
+          contractExists = true
+        } catch (e) {
+          console.warn(`合约 ${item.address} 不存在或不是ERC20代币:`, e.message)
+          continue
+        }
+        
+        if (!contractExists) continue
+        
+        const [raw, decimals, symbol, name] = await Promise.all([
+          c.balanceOf(address.value).catch(e => {
+            console.warn(`查询 ${item.address} 余额失败:`, e.message)
+            return 0n
+          }),
+          c.decimals().catch(e => {
+            console.warn(`获取 ${item.address} 小数位失败:`, e.message)
+            return 18
+          }),
+          safeString(() => c.symbol(), item.label || 'TKN'),
+          safeString(() => c.name(), item.label || 'Token'),
+        ])
+        
+        const display = formatUnitsSafe(raw, decimals)
+        tokens.push({
+          address: item.address,
+          symbol: symbol || item.label || 'TKN',
+          name: name || item.label || 'Token',
+          decimals,
+          displayBalance: display
+        })
+        
+      } catch (e) {
+        console.warn(`处理代币 ${item.address} 时出错:`, e.message)
+        // 如果是自定义代币且调用失败，从列表中移除
+        if (item.source === 'ImportFromUs') {
+          console.log(`移除无效的自定义代币: ${item.address}`)
+          removeCustomToken(item.address)
+        }
+        continue
+      }
     }
-  } catch (e) { error.value = normalizeErr(e) }
+  } catch (e) { 
+    error.value = normalizeErr(e) 
+  }
   finally { loadingTokens.value = false }
 }
 function copyAddress() { if (address.value) navigator.clipboard.writeText(address.value) }
@@ -230,15 +302,78 @@ function getCustomTokens(cid){
 function setCustomTokens(cid, list){
   try { sessionStorage.setItem(customKey(cid), JSON.stringify(list || [])) } catch {}
 }
-function addCustomToken(addr, label){
+async function addCustomToken(addr, label){
   try {
-    if (!ethers.isAddress(addr)) { warning.value = 'Invalid token address.'; return false }
+    if (!ethers.isAddress(addr)) { 
+      warning.value = 'Invalid token address format.'; 
+      return false 
+    }
+    
     const list = getCustomTokens(chainId.value)
-    if (list.find(x => x.address.toLowerCase() === addr.toLowerCase())) return true
-    list.push({ address: addr, label: label || 'Token', addedAt: Date.now(), source: 'ImportFromUs' })
+    if (list.find(x => x.address.toLowerCase() === addr.toLowerCase())) {
+      warning.value = 'Token already exists in your list.'
+      return true
+    }
+    
+    // 验证合约是否存在且是ERC20代币
+    if (provider) {
+      try {
+        const c = new ethers.Contract(addr, ERC20_ABI, provider)
+        
+        // 尝试调用多个ERC20方法来验证合约
+        const [symbol, name, decimals] = await Promise.all([
+          c.symbol().catch(() => 'UNKNOWN'),
+          c.name().catch(() => 'Unknown Token'),
+          c.decimals().catch(() => 18)
+        ])
+        
+        console.log(`✅ 合约 ${addr} 验证成功:`, { symbol, name, decimals })
+        
+        // 如果是已知的RWA代币，提供更好的标签
+        let tokenLabel = label || symbol || 'Token'
+        if (symbol === 'LPT' || symbol === 'LIT') {
+          tokenLabel = `${symbol} (RWA ${symbol === 'LPT' ? '本金币' : '利息币'})`
+        }
+        
+        list.push({ 
+          address: addr, 
+          label: tokenLabel, 
+          addedAt: Date.now(), 
+          source: 'ImportFromUs',
+          symbol: symbol,
+          name: name,
+          decimals: decimals
+        })
+        
+      } catch (e) {
+        console.error(`❌ 合约 ${addr} 验证失败:`, e.message)
+        if (e.code === 'BAD_DATA' || e.message.includes('could not decode result data')) {
+          warning.value = 'Contract address is invalid or not an ERC20 token.'
+        } else if (e.code === 'CALL_EXCEPTION') {
+          warning.value = 'Contract call failed. Please check the address and network.'
+        } else {
+          warning.value = `Contract validation failed: ${e.message}`
+        }
+        return false
+      }
+    } else {
+      // 如果没有provider，仍然添加但标记为未验证
+      list.push({ 
+        address: addr, 
+        label: label || 'Token', 
+        addedAt: Date.now(), 
+        source: 'ImportFromUs',
+        unverified: true
+      })
+    }
+    
     setCustomTokens(chainId.value, list)
+    warning.value = '' // 清除警告
     return true
-  } catch { return false }
+  } catch (e) { 
+    warning.value = `Failed to add token: ${e.message}`
+    return false 
+  }
 }
 function removeCustomToken(addr){
   try {
@@ -298,6 +433,7 @@ export function useWallet() {
     chainId, networkLabel, nativeSymbol,
     nativeBalanceDisplay, nativeToAudDisplay, bigAudDisplay,
     tokens, warning, error, loadingTokens, activeTab,
+    audPrice, priceChange24h,
     // actions
     connect, disconnect, refreshTokens, copyAddress,
     addCustomToken, removeCustomToken,

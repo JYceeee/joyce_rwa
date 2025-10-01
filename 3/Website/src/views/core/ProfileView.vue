@@ -430,7 +430,7 @@ export default {
       }
       try {
         // 调用后端API发送验证码邮件
-        const res = await fetch('http://localhost:3000/user/send-email-code', {
+        const res = await fetch(import.meta.env.VITE_API_EmailVerify, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ user_email: this.form.email })
@@ -453,7 +453,7 @@ export default {
     async verifyEmailCode() {
       try {
         // 调用后端API校验验证码
-        const res = await fetch('http://localhost:3000/user/verify-email-code', {
+        const res = await fetch(import.meta.env.VITE_API_EmailVerify, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 

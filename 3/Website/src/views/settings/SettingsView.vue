@@ -1,19 +1,36 @@
 <template>
   <div class="settings-page">
-    <div class="container">
-      <div class="page-header">
-        <h1 class="page-title">Settings</h1>
-        <p class="page-subtitle">Manage your application preferences and system configurations</p>
+    <div class="settings-container">
+      <!-- 左侧边栏 -->
+      <div class="settings-sidebar">
+        <div class="sidebar-header">
+          <h1 class="sidebar-title">Settings</h1>
+        </div>
+        <nav class="sidebar-nav">
+          <button 
+            v-for="section in settingsSections" 
+            :key="section.id"
+            class="sidebar-item"
+            :class="{ active: activeSection === section.id }"
+            @click="setActiveSection(section.id)"
+          >
+            <span class="sidebar-icon">{{ section.icon }}</span>
+            <span class="sidebar-text">{{ section.title }}</span>
+          </button>
+        </nav>
       </div>
 
-      <div class="settings-grid">
-        <!-- General Settings -->
-        <div class="settings-section">
-          <div class="section-header">
-            <h2 class="section-title">General Settings</h2>
-            <span class="section-icon">⚙️</span>
-          </div>
-          <div class="settings-items">
+      <!-- 右侧主内容区 -->
+      <div class="settings-main">
+        <div class="main-header">
+          <h2 class="main-title">{{ getActiveSectionTitle() }}</h2>
+          <p class="main-subtitle">{{ getActiveSectionDescription() }}</p>
+        </div>
+        
+        <div class="main-content">
+          <!-- General Settings -->
+          <div v-if="activeSection === 'general'" class="settings-section">
+            <div class="settings-items">
             <div class="settings-item">
               <div class="settings-info">
                 <h3 class="settings-name">Language</h3>
@@ -57,16 +74,22 @@
                 </select>
               </div>
             </div>
+
+            <div class="settings-item">
+              <div class="settings-info">
+                <h3 class="settings-name">开场视频</h3>
+                <p class="settings-description">重新观看网站开场视频</p>
+              </div>
+              <div class="settings-control">
+                <button class="btn btn-secondary" @click="watchIntroVideo">观看开场视频</button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Security Settings -->
-        <div class="settings-section">
-          <div class="section-header">
-            <h2 class="section-title">Security Settings</h2>
-            <span class="section-icon">🔐</span>
-          </div>
-          <div class="settings-items">
+          <!-- Security Settings -->
+          <div v-if="activeSection === 'security'" class="settings-section">
+            <div class="settings-items">
             <div class="settings-item">
               <div class="settings-info">
                 <h3 class="settings-name">Password</h3>
@@ -107,13 +130,9 @@
           </div>
         </div>
 
-        <!-- Wallet Settings -->
-        <div class="settings-section">
-          <div class="section-header">
-            <h2 class="section-title">Wallet Settings</h2>
-            <span class="section-icon">💼</span>
-          </div>
-          <div class="settings-items">
+          <!-- Wallet Settings -->
+          <div v-if="activeSection === 'wallet'" class="settings-section">
+            <div class="settings-items">
             <div class="settings-item">
               <div class="settings-info">
                 <h3 class="settings-name">Default Wallet</h3>
@@ -153,13 +172,9 @@
           </div>
         </div>
 
-        <!-- Notification Settings -->
-        <div class="settings-section">
-          <div class="section-header">
-            <h2 class="section-title">Notifications</h2>
-            <span class="section-icon">🔔</span>
-          </div>
-          <div class="settings-items">
+          <!-- Notification Settings -->
+          <div v-if="activeSection === 'notifications'" class="settings-section">
+            <div class="settings-items">
             <div class="settings-item">
               <div class="settings-info">
                 <h3 class="settings-name">Push Notifications</h3>
@@ -201,13 +216,9 @@
           </div>
         </div>
 
-        <!-- Performance Settings -->
-        <div class="settings-section">
-          <div class="section-header">
-            <h2 class="section-title">Performance</h2>
-            <span class="section-icon">⚡</span>
-          </div>
-          <div class="settings-items">
+          <!-- Performance Settings -->
+          <div v-if="activeSection === 'performance'" class="settings-section">
+            <div class="settings-items">
             <div class="settings-item">
               <div class="settings-info">
                 <h3 class="settings-name">Auto-Refresh</h3>
@@ -250,13 +261,144 @@
           </div>
         </div>
 
-        <!-- Advanced Settings -->
-        <div class="settings-section">
-          <div class="section-header">
-            <h2 class="section-title">Advanced</h2>
-            <span class="section-icon">🔧</span>
+          <!-- Account Options -->
+          <div v-if="activeSection === 'account'" class="settings-section">
+            <div class="settings-items">
+            <div class="settings-item">
+              <div class="settings-info">
+                <h3 class="settings-name">Profile Visibility</h3>
+                <p class="settings-description">Control who can see your profile information</p>
+              </div>
+              <div class="settings-control">
+                <select class="settings-select">
+                  <option value="public">Public</option>
+                  <option value="friends">Friends Only</option>
+                  <option value="private">Private</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="settings-item">
+              <div class="settings-info">
+                <h3 class="settings-name">Two-Factor Authentication</h3>
+                <p class="settings-description">Add an extra layer of security to your account</p>
+              </div>
+              <div class="settings-control">
+                <button class="btn btn-secondary">Enable 2FA</button>
+              </div>
+            </div>
           </div>
-          <div class="settings-items">
+        </div>
+
+          <!-- Trading Options -->
+          <div v-if="activeSection === 'trading'" class="settings-section">
+            <div class="settings-items">
+            <div class="settings-item">
+              <div class="settings-info">
+                <h3 class="settings-name">Default Trading Pair</h3>
+                <p class="settings-description">Set your preferred trading pair for quick access</p>
+              </div>
+              <div class="settings-control">
+                <select class="settings-select">
+                  <option value="ETH/USDT">ETH/USDT</option>
+                  <option value="BTC/USDT">BTC/USDT</option>
+                  <option value="USDC/USDT">USDC/USDT</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="settings-item">
+              <div class="settings-info">
+                <h3 class="settings-name">Auto-Confirm Trades</h3>
+                <p class="settings-description">Automatically confirm trades under specified amount</p>
+              </div>
+              <div class="settings-control">
+                <label class="toggle-switch">
+                  <input type="checkbox">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="settings-item">
+              <div class="settings-info">
+                <h3 class="settings-name">Price Alerts</h3>
+                <p class="settings-description">Get notified when prices reach your target</p>
+              </div>
+              <div class="settings-control">
+                <button class="btn btn-secondary">Manage Alerts</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+          <!-- Privacy Options -->
+          <div v-if="activeSection === 'privacy'" class="settings-section">
+            <div class="settings-items">
+            <div class="settings-item">
+              <div class="settings-info">
+                <h3 class="settings-name">Data Collection</h3>
+                <p class="settings-description">Allow us to collect anonymous usage data</p>
+              </div>
+              <div class="settings-control">
+                <label class="toggle-switch">
+                  <input type="checkbox" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="settings-item">
+              <div class="settings-info">
+                <h3 class="settings-name">Marketing Emails</h3>
+                <p class="settings-description">Receive promotional emails and updates</p>
+              </div>
+              <div class="settings-control">
+                <label class="toggle-switch">
+                  <input type="checkbox">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="settings-item">
+              <div class="settings-info">
+                <h3 class="settings-name">Third-Party Sharing</h3>
+                <p class="settings-description">Allow sharing data with trusted partners</p>
+              </div>
+              <div class="settings-control">
+                <label class="toggle-switch">
+                  <input type="checkbox">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+          <!-- Advanced Settings -->
+          <div v-if="activeSection === 'advanced'" class="settings-section">
+            <div class="settings-items">
+            <div class="settings-item">
+              <div class="settings-info">
+                <h3 class="settings-name">API Access</h3>
+                <p class="settings-description">Manage your API keys and permissions</p>
+              </div>
+              <div class="settings-control">
+                <button class="btn btn-secondary">API Settings</button>
+              </div>
+            </div>
+
+            <div class="settings-item">
+              <div class="settings-info">
+                <h3 class="settings-name">Export Data</h3>
+                <p class="settings-description">Download your account data</p>
+              </div>
+              <div class="settings-control">
+                <button class="btn btn-secondary">Export</button>
+              </div>
+            </div>
+
             <div class="settings-item">
               <div class="settings-info">
                 <h3 class="settings-name">Developer Mode</h3>
@@ -285,20 +427,22 @@
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Reset All Settings</h3>
-                <p class="settings-description">Reset all settings to default values</p>
+                <h3 class="settings-name">Reset Preferences</h3>
+                <p class="settings-description">Reset all options to default values</p>
               </div>
               <div class="settings-control">
-                <button class="btn btn-danger">Reset Settings</button>
+                <button class="btn btn-danger">Reset All</button>
               </div>
+            </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="page-actions">
-        <button class="btn btn-primary" @click="saveSettings">Save Settings</button>
-        <button class="btn btn-secondary" @click="resetSettings">Reset to Default</button>
+        <!-- 页面操作按钮 -->
+        <div class="page-actions">
+          <button class="btn btn-primary" @click="saveSettings">Save Settings</button>
+          <button class="btn btn-secondary" @click="resetSettings">Reset to Default</button>
+        </div>
       </div>
     </div>
   </div>
@@ -309,6 +453,18 @@ export default {
   name: 'SettingsView',
   data() {
     return {
+      activeSection: 'general', // 默认显示General Settings
+      settingsSections: [
+        { id: 'general', title: 'General', icon: '⚙️', description: 'Basic application settings and preferences' },
+        { id: 'security', title: 'Security', icon: '🔐', description: 'Password, authentication, and security settings' },
+        { id: 'wallet', title: 'Wallet', icon: '💼', description: 'Wallet connection and transaction settings' },
+        { id: 'notifications', title: 'Notifications', icon: '🔔', description: 'Notification preferences and alerts' },
+        { id: 'performance', title: 'Performance', icon: '⚡', description: 'Performance optimization and caching settings' },
+        { id: 'account', title: 'Account', icon: '👤', description: 'Account options and profile settings' },
+        { id: 'trading', title: 'Trading', icon: '📊', description: 'Trading preferences and options' },
+        { id: 'privacy', title: 'Privacy', icon: '🔒', description: 'Privacy controls and data settings' },
+        { id: 'advanced', title: 'Advanced', icon: '🔧', description: 'Advanced settings and developer options' }
+      ],
       settings: {
         language: 'en',
         theme: 'dark',
@@ -322,11 +478,32 @@ export default {
         autoRefresh: 60,
         cacheSize: 250,
         developerMode: false,
-        analytics: true
+        analytics: true,
+        // Account Options
+        profileVisibility: 'public',
+        twoFactorAuth: false,
+        // Trading Options
+        defaultTradingPair: 'ETH/USDT',
+        autoConfirmTrades: false,
+        // Privacy Options
+        dataCollection: true,
+        marketingEmails: false,
+        thirdPartySharing: false
       }
     }
   },
   methods: {
+    setActiveSection(sectionId) {
+      this.activeSection = sectionId;
+    },
+    getActiveSectionTitle() {
+      const section = this.settingsSections.find(s => s.id === this.activeSection);
+      return section ? section.title : 'Settings';
+    },
+    getActiveSectionDescription() {
+      const section = this.settingsSections.find(s => s.id === this.activeSection);
+      return section ? section.description : 'Manage your application preferences';
+    },
     saveSettings() {
       // Save settings logic
       console.log('Settings saved:', this.settings);
@@ -350,11 +527,26 @@ export default {
           autoRefresh: 60,
           cacheSize: 250,
           developerMode: false,
-          analytics: true
+          analytics: true,
+          // Account Options
+          profileVisibility: 'public',
+          twoFactorAuth: false,
+          // Trading Options
+          defaultTradingPair: 'ETH/USDT',
+          autoConfirmTrades: false,
+          // Privacy Options
+          dataCollection: true,
+          marketingEmails: false,
+          thirdPartySharing: false
         };
         localStorage.removeItem('userSettings');
         alert('Settings reset to default values!');
       }
+    },
+    watchIntroVideo() {
+      // 清除开场视频观看记录，跳转到开场视频页面
+      localStorage.removeItem('rwa_intro_seen');
+      this.$router.push('/intro');
     }
   },
   mounted() {
@@ -374,63 +566,119 @@ export default {
   padding: 40px 0;
 }
 
-.container {
-  max-width: 1200px;
+.settings-container {
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 20px;
+  display: flex;
+  gap: 30px;
+  min-height: calc(100vh - 80px);
 }
 
-.page-header {
-  text-align: center;
-  margin-bottom: 40px;
+/* 左侧边栏样式 */
+.settings-sidebar {
+  width: 280px;
+  background: var(--card-bg, #1a1a2e);
+  border-radius: 16px;
+  padding: 24px 0;
+  height: fit-content;
+  position: sticky;
+  top: 40px;
 }
 
-.page-title {
-  font-size: 2.5rem;
+.sidebar-header {
+  padding: 0 24px 20px;
+  border-bottom: 1px solid var(--border, #303049);
+  margin-bottom: 20px;
+}
+
+.sidebar-title {
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--text, #ffffff);
-  margin-bottom: 8px;
+  margin: 0;
 }
 
-.page-subtitle {
+.sidebar-nav {
+  padding: 0 12px;
+}
+
+.sidebar-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 4px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  color: var(--text-secondary, #a0a0a0);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.sidebar-item:hover {
+  background: var(--hover-bg, #30304c);
+  color: var(--text, #ffffff);
+}
+
+.sidebar-item.active {
+  background: var(--brand, #667eea);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.sidebar-icon {
   font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
+}
+
+.sidebar-text {
+  flex: 1;
+}
+
+/* 右侧主内容区样式 */
+.settings-main {
+  flex: 1;
+  background: var(--card-bg, #1a1a2e);
+  border-radius: 16px;
+  padding: 32px;
+}
+
+.main-header {
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border, #2a2a4a);
+}
+
+.main-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text, #ffffff);
+  margin: 0 0 8px;
+}
+
+.main-subtitle {
+  font-size: 1rem;
   color: var(--text-secondary, #a0a0a0);
   margin: 0;
 }
 
-.settings-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-  gap: 30px;
-  margin-bottom: 40px;
+.main-content {
+  min-height: 400px;
 }
 
 .settings-section {
-  background: var(--card-bg, #1a1a2e);
-  border: 1px solid var(--border, #2a2a4a);
-  border-radius: 12px;
-  padding: 24px;
+  padding: 0;
+  margin-bottom: 0;
 }
 
-.section-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border, #2a2a4a);
-}
-
-.section-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--text, #ffffff);
-  margin: 0;
-}
-
-.section-icon {
-  font-size: 1.5rem;
-}
+/* section-header 样式已移除，现在使用 main-header */
 
 .settings-items {
   display: flex;
@@ -545,8 +793,8 @@ input:checked + .toggle-slider:before {
 }
 
 .btn-primary {
-  background: var(--brand, #ffa500);
-  color: #000;
+  background: var(--brand, #3f3d39);
+  color: #fffefe;
 }
 
 .btn-primary:hover {
@@ -582,11 +830,62 @@ input:checked + .toggle-slider:before {
   border-top: 1px solid var(--border, #2a2a4a);
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .settings-grid {
-    grid-template-columns: 1fr;
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  .settings-container {
+    flex-direction: column;
     gap: 20px;
+  }
+
+  .settings-sidebar {
+    width: 100%;
+    position: static;
+    order: 2;
+  }
+
+  .settings-main {
+    order: 1;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 24px;
+  }
+
+  .sidebar-item {
+    flex: 1;
+    min-width: 120px;
+    justify-content: center;
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .settings-container {
+    padding: 0 16px;
+  }
+
+  .settings-main {
+    padding: 20px;
+  }
+
+  .main-title {
+    font-size: 1.5rem;
+  }
+
+  .sidebar-item {
+    min-width: 100px;
+    padding: 8px 12px;
+  }
+
+  .sidebar-text {
+    display: none;
+  }
+
+  .sidebar-icon {
+    font-size: 1.2rem;
   }
 
   .settings-item {
@@ -600,12 +899,24 @@ input:checked + .toggle-slider:before {
     align-self: flex-end;
   }
 
-  .page-title {
-    font-size: 2rem;
+  .page-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar-nav {
+    padding: 0 16px;
   }
 
-  .container {
-    padding: 0 16px;
+  .sidebar-item {
+    min-width: 80px;
+    padding: 6px 8px;
+  }
+
+  .sidebar-icon {
+    font-size: 1rem;
   }
 }
 </style>

@@ -70,7 +70,7 @@ exports.regUser = (req, res) => {
       console.log('✅ 插入结果:', results);
       console.log('✅ 影响行数:', results.affectedRows);
       console.log('✅ 插入ID:', results.insertId);
-      res.send({ status: 0, message: '注册成功!!' });
+      res.cc('注册成功!!', 0);
     })
   })
 }
@@ -99,10 +99,9 @@ exports.login = (req, res) => {
 
     console.log('用户: ' + userinfo.user_email + ' 登录成功！')
 
-    res.send({
-      status: 0,
-      message: '登录成功！',
+    res.cc('登录成功！', 0, {
       token: 'Bearer ' + tokenStr,
+      user: user
     })
   })
 }

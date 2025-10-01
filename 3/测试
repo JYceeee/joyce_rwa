@@ -1,0 +1,11 @@
+注册模块
+$ $body = @{user_email='test@example.com';user_password='123456';user_name='Test User';user_phone='1234567890';user_id='test123'} | ConvertTo-Json; Invoke-WebRequest -Uri 'http://localhost:3000/user/reguser' -Method POST -Body $body -ContentType 'application/json'
+
+登录mokuai
+$ $body = @{user_email='test@example.com';user_password='123456'} | ConvertTo-Json; Invoke-WebRequest -Uri 'http://localhost:3000/user/login' -Method POST -Body $body -ContentType 'application/json'
+
+检查后端服务器是否真的在运行
+$ Get-Process -Name node -ErrorAction SilentlyContinue
+
+停止所有Node.js进程并重新启动后端服务器
+$ Stop-Process -Name node -Force -ErrorAction SilentlyContinue; Start-Sleep -Seconds 3; cd ..; cd Mysql; node index.js

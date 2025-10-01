@@ -3,170 +3,142 @@
 CREATE DATABASE IF NOT EXISTS rwa CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE rwa;
 
--- 创建product_details表
-CREATE TABLE IF NOT EXISTS product_details (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  code VARCHAR(50) NOT NULL UNIQUE COMMENT '产品代码',
-  name VARCHAR(255) NOT NULL COMMENT '产品名称',
-  subtitle VARCHAR(500) COMMENT '产品副标题',
-  type ENUM('residential', 'commercial') NOT NULL COMMENT '产品类型',
-  region VARCHAR(100) NOT NULL COMMENT '地区',
-  risk ENUM('low', 'medium', 'high') NOT NULL COMMENT '风险等级',
-  target_yield DECIMAL(5,2) COMMENT '目标收益率',
-  status ENUM('active', 'upcoming', 'research', 'planning', 'completed') NOT NULL COMMENT '项目状态',
-  summary TEXT COMMENT '项目摘要',
-  
-  -- 投资信息
-  total_token VARCHAR(100) COMMENT '总认购额度',
-  current_subscribed_token VARCHAR(100) COMMENT '已认购额度',
- 
-  -- 关键事实
-  loan_amount VARCHAR(100) COMMENT '贷款金额',
-  annual_interest_rate VARCHAR(50) COMMENT '年利率',
-  loan_term VARCHAR(50) COMMENT '贷款期限',
-  LTV VARCHAR(50) COMMENT '贷款价值比',
-  drawdown_date DATE COMMENT '提款日期',
-  early_repayment VARCHAR(200) COMMENT '提前还款选项',
-  repayment_arrangement TEXT COMMENT '还款安排',
-  
-  -- 相关主体
-  issuer VARCHAR(255) COMMENT '发币主体',
-  pw_shareholders VARCHAR(500) COMMENT 'PW股东',
-  lender VARCHAR(255) COMMENT '贷款方',
-  borrower VARCHAR(255) COMMENT '借款方',
-  guarantor VARCHAR(255) COMMENT '担保人',
-  
-  -- 提款与利息
-  disbursement_method VARCHAR(200) COMMENT '提款方式',
-  interest VARCHAR(200) COMMENT '利息详情',
-  early_repayment_details VARCHAR(200) COMMENT '提前还款详情',
-  maturity_date DATE COMMENT '到期日',
-  
-  -- 抵押物
-  property_address VARCHAR(500) COMMENT '房产地址',
-  valuation VARCHAR(100) COMMENT '评估价值',
-  security_rank VARCHAR(100) COMMENT '抵押等级',
-  lvr VARCHAR(50) COMMENT '贷款价值比',
-  
-  -- 违约与补救
-  default_interest_rate VARCHAR(50) COMMENT '违约利率',
-  default_triggers VARCHAR(500) COMMENT '违约触发条件',
-  default_process TEXT COMMENT '违约处理流程',
-  
-  -- 链上与文档
-  issuer_token VARCHAR(500) COMMENT '发币代币',
-  loan_token VARCHAR(500) COMMENT '贷款代币',
-  valuation_report VARCHAR(200) COMMENT '评估报告',
-  mortgage_deed VARCHAR(200) COMMENT '抵押契约',
-  
-  -- 系统字段
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  
-  INDEX idx_code (code),
-  INDEX idx_status (status),
-  INDEX idx_type (type),
-  INDEX idx_region (region),
-  INDEX idx_risk (risk)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='产品详情表';
+-- 创建project表
+CREATE TABLE IF NOT EXISTS project (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    project_code VARCHAR(50) UNIQUE NOT NULL COMMENT '项目编号',
+    project_name VARCHAR(50) NOT NULL COMMENT '项目名称',
+    loan_status VARCHAR(50) DEFAULT 'INCOMING' COMMENT '贷款状态 (INCOMING, ACTIVE, PERFORMING, DEFAULT等)',
+    subscribe_token DECIMAL(15, 2) COMMENT '现有认购额',
+    total_offering_token DECIMAL(15, 2) COMMENT '总认购额',
+
+    -- 抵押资产物业信息
+    property_location VARCHAR(255) NOT NULL COMMENT '物业位置（如：St Ives）',
+    property_state VARCHAR(255) NOT NULL COMMENT '物业州',
+    property_type VARCHAR(50) NOT NULL COMMENT '物业类型（如：Single House, Unit, etc.）',
+    property_value DECIMAL(15, 2) COMMENT '物业价值',
+    property_summary VARCHAR(255) NOT NULL COMMENT '物业描述',
+
+    -- 贷款基本信息
+    loan_type VARCHAR(50) NOT NULL COMMENT '贷款类型（如：1st Mortgage, 2nd Mortgage）',
+    loan_product VARCHAR(100) NOT NULL COMMENT '贷款产品（如：FlexiBiz）',
+    loan_amount DECIMAL(15, 2) NOT NULL COMMENT '贷款金额/限额',
+    loan_purpose VARCHAR(255) NOT NULL COMMENT '贷款用途（如：Working Capital）',
+
+    -- 贷款条款
+    loan_term_months INT NOT NULL COMMENT '贷款期限（月）',
+
+    -- 贷款比率
+    lvr DECIMAL(5, 2) NOT NULL COMMENT 'Loan to Value Ratio (%)',
+    interest_rate DECIMAL(5, 2) COMMENT '利率 (%)',
+    default_rate DECIMAL(5, 2) COMMENT '违约利率 (%)',
+
+    -- 贷款周期
+    commencement_date DATE COMMENT '开始日期（当状态为PERFORMING时）',
+    expiry_date DATE COMMENT '到期日期（当状态为PERFORMING时）',
+    expected_recovery_date DATE COMMENT '违约后预计回款日期',
+
+    -- 审计字段
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_by VARCHAR(100),
+    updated_by VARCHAR(100),
+
+    -- 索引
+    INDEX idx_loan_type (loan_type),
+    INDEX idx_loan_product (loan_product),
+    INDEX idx_property_status (loan_status),
+    INDEX idx_property_location (property_location)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='项目表';
 
 -- 插入示例数据
-INSERT INTO product_details (
-  code, name, subtitle, 
-  type, region, risk, target_yield, status, summary,
-  total_token, current_subscribed_token,
-  loan_amount, annual_interest_rate, loan_term, LTV, drawdown_date, early_repayment, repayment_arrangement,
-  issuer, pw_shareholders, lender, borrower, guarantor,
-  disbursement_method, interest, early_repayment_details, maturity_date,
-  property_address, valuation, security_rank, lvr,
-  default_interest_rate, default_triggers, default_process,
-  issuer_token, loan_token, valuation_report, mortgage_deed
-) VALUES 
-(
-  'RWA001', 'St Ives NSW Residential Project', 'Prosper Way Holdings Ltd - Residential Mortgage', 
-  'residential', 'NSW', 'low', 9.9, 'active', 
-  'First-lien residential mortgage with monthly interest payments and controlled LTV.',
-  '1000000', '350000', 
-  'AUD 1,000,000', '9.9%', '12 months', '67%', '2025-08-06', 'Permitted after 6 months', 
-  'Monthly interest payments (the first month\'s interest prepaid on the start date). Principal repaid in full at maturity.',
-  'Prosper Way Holdings Ltd (PW)', 'A, B, C, D – each holding 25%', 'CA Capital Pty Ltd', 
-  'Warby Street Development Pty Ltd', 'D Song',
-  'Lump-sum, single drawdown', '9.9% p.a., payable monthly; first month prepaid at drawdown', 
-  'Allowed after 6 months', '2026-08-06',
-  '16 Cranford Avenue, St Ives NSW 2075', 'AUD 1,500,000', 'First mortgage', '67%',
-  '18% p.a.', 'Interest or principal overdue by more than 5 days', 
-  'If default occurs and remains unresolved 1 month after written notice, the lender\'s lawyer will initiate foreclosure proceedings',
-  'PW issues tokens to A/B/C/D (25% each) as equity certificates', 
-  'Placeholder – planned ERC-20 token to record principal and distribute interest', 'PDF available', 'PDF available'
-),
-(
-  'RWA002', 'SQNB Property Loan', 'Commercial Mortgage Loan', 
-  'commercial', 'CBD', 'medium', 7.2, 'upcoming', 
-  'Commercial mortgage opportunity in CBD with stable tenancy and monthly coupons.',
-  '1800000', '0', 
-  'AUD 1,800,000', '7.2%', '24 months', '75%', '2025-09-15', 'Permitted after 12 months', 
-  'Monthly interest payments with principal repayment at maturity.',
-  'SQNB Holdings Ltd', 'E, F, G – each holding 33.33%', 'CBD Capital Pty Ltd', 
-  'Commercial Development Group Pty Ltd', 'H Johnson',
-  'Staged drawdown over 3 months', '7.2% p.a., payable monthly', 
-  'Allowed after 12 months with penalty', '2027-09-15',
-  '123 Collins Street, Melbourne VIC 3000', 'AUD 2,400,000', 'First mortgage', '75%',
-  '15% p.a.', 'Interest or principal overdue by more than 7 days', 
-  'Standard foreclosure proceedings initiated after 30 days notice',
-  'SQNB issues tokens to E/F/G as equity certificates', 
-  'Planned ERC-20 token for debt recording', 'PDF available', 'PDF available'
-),
-(
-  'RWA003', 'LZYT Property Loan', 'Suburban Residential Loan', 
-  'residential', 'Suburban', 'medium', 6.9, 'research', 
-  'Suburban residential mortgage with moderate yield and steady income profile.',
-  '750000', '0', 
-  'AUD 750,000', '6.9%', '18 months', '76.5%', '2025-10-01', 'Permitted after 9 months', 
-  'Monthly interest payments with balloon payment at maturity.',
-  'LZYT Property Holdings Pty Ltd', 'I, J, K – each holding 33.33%', 'Suburban Finance Pty Ltd', 
-  'Residential Development Co. Pty Ltd', 'L Smith',
-  'Single drawdown at settlement', '6.9% p.a., payable monthly', 
-  'Allowed after 9 months without penalty', '2027-04-01',
-  '456 Suburban Drive, Brisbane QLD 4000', 'AUD 980,000', 'First mortgage', '76.5%',
-  '12% p.a.', 'Interest or principal overdue by more than 10 days', 
-  'Mortgagee sale proceedings after 45 days default notice',
-  'LZYT issues tokens to I/J/K as equity certificates', 
-  'Planned ERC-20 token for debt management', 'PDF available', 'PDF available'
-),
-(
-  'YYD', 'YYD Property Loan', 'CBD Apartment Mortgage', 
-  'residential', 'CBD', 'low', 6.1, 'planning', 
-  'CBD apartment mortgage targeting stable monthly income and lower risk.',
-  '1200000', '0', 
-  'AUD 1,200,000', '6.1%', '36 months', '72.7%', '2025-11-15', 'Permitted after 18 months', 
-  'Monthly interest payments with principal amortization over final 12 months.',
-  'YYD Apartment Holdings Pty Ltd', 'M, N, O, P – each holding 25%', 'CBD Residential Finance Pty Ltd', 
-  'Apartment Development Group Pty Ltd', 'Q Wilson',
-  'Progressive drawdown based on construction milestones', '6.1% p.a., payable monthly', 
-  'Allowed after 18 months with reduced penalty', '2028-11-15',
-  '789 CBD Plaza, Sydney NSW 2000', 'AUD 1,650,000', 'First mortgage', '72.7%',
-  '10% p.a.', 'Interest or principal overdue by more than 14 days', 
-  'Receivership and sale proceedings after 60 days notice',
-  'YYD issues tokens to M/N/O/P as equity certificates', 
-  'Planned ERC-20 token for debt tracking', 'PDF available', 'PDF available'
-),
-(
-  'COMP', 'COMPLETED Project', 'Fully Subscribed Project', 
-  'residential', 'Sydney', 'low', 8.5, 'completed', 
-  'This project has been fully subscribed and is now closed for new investments.',
-  '2000000', '2000000', 
-  'AUD 2,000,000', '8.5%', '30 months', '71.4%', '2024-06-01', 'Permitted after 15 months', 
-  'Monthly interest payments with principal repayment at maturity.',
-  'COMP Property Holdings Pty Ltd', 'R, S, T, U, V – each holding 20%', 'Sydney Capital Finance Pty Ltd', 
-  'Premium Development Group Pty Ltd', 'W Brown',
-  'Single drawdown at settlement', '8.5% p.a., payable monthly', 
-  'Allowed after 15 months without penalty', '2026-12-01',
-  '321 Premium Street, Sydney NSW 2000', 'AUD 2,800,000', 'First mortgage', '71.4%',
-  '16% p.a.', 'Interest or principal overdue by more than 5 days', 
-  'Foreclosure proceedings after 30 days written notice',
-  'COMP issues tokens to R/S/T/U/V as equity certificates', 
-  'Active ERC-20 token for debt management', 'PDF available', 'PDF available'
-);
+INSERT INTO project (
+    project_code, project_name, loan_status, subscribe_token, total_offering_token,
+    property_location, property_state, property_type, property_value, property_summary,
+    loan_type, loan_product, loan_amount, loan_purpose,
+    loan_term_months, lvr, interest_rate, default_rate,
+    commencement_date, expiry_date, expected_recovery_date,
+    created_by, updated_by
+) VALUES
+-- 1. St Ives Residential Mortgage
+('RWA001', 'St Ives NSW Residential Project', 'ACTIVE', 350000, 1000000,
+ '16 Cranford Avenue, St Ives', 'NSW', 'Single House', 1500000, 'First-lien residential mortgage with monthly interest payments and controlled LTV.',
+ '1st Mortgage', 'Standard Mortgage', 1000000, 'Residential development financing',
+ 12, 67.00, 9.90, 18.00,
+ '2025-08-06', '2026-08-06', NULL,
+ 'system', 'system'),
+
+-- 2. SQNB Commercial Loan
+('RWA002', 'SQNB Property Loan', 'INCOMING', 0, 1800000,
+ '88 George Street, Sydney', 'NSW', 'Commercial Building', 5000000, 'CBD commercial office building with strong tenant base.',
+ '1st Mortgage', 'Commercial Flexi', 1800000, 'Working Capital',
+ 18, 55.00, 8.50, 16.00,
+ NULL, NULL, NULL,
+ 'system', 'system'),
+
+-- 3. LZYT Development Loan
+('RWA003', 'LZYT Property Loan', 'INCOMING', 0, 750000,
+ '12 Bay Road, Waverton', 'NSW', 'Unit Development', 2100000, 'Boutique apartment development near train station.',
+ '1st Mortgage', 'Development Loan', 750000, 'Construction funding',
+ 15, 60.00, 10.50, 18.00,
+ NULL, NULL, NULL,
+ 'system', 'system'),
+
+-- 4. YYD Residential Loan
+('RWA004', 'YYD Property Loan', 'INCOMING', 0, 1200000,
+ '200 Pacific Highway, Gordon', 'NSW', 'Residential Land', 3000000, 'Large land subdivision with DA approved.',
+ '1st Mortgage', 'Land Loan', 1200000, 'Land banking',
+ 24, 40.00, 7.50, 15.00,
+ NULL, NULL, NULL,
+ 'system', 'system'),
+
+-- 5. Bondi Beach Hotel Refinance
+('RWA005', 'Bondi Beach Hotel Refinance', 'ACTIVE', 800000, 800000,
+ '75 Hall Street, Bondi Beach', 'NSW', 'Commercial Building', 3500000, 'Prime hospitality asset near Bondi Beach.',
+ '1st Mortgage', 'Refinance Facility', 800000, 'Refinancing existing debt',
+ 36, 23.00, 6.75, 14.00,
+ '2024-06-01', '2027-06-01', NULL,
+ 'system', 'system'),
+
+-- 6. Parramatta Mixed-Use Development
+('RWA006', 'Parramatta Mixed-Use Development', 'PERFORMING', 1500000, 2000000,
+ '120 Church Street, Parramatta', 'NSW', 'Mixed Use', 6000000, 'Retail and residential complex in Western Sydney.',
+ '1st Mortgage', 'Construction Loan', 2000000, 'Development funding',
+ 24, 33.00, 8.20, 16.50,
+ '2024-05-15', '2026-05-15', NULL,
+ 'system', 'system'),
+
+-- 7. Manly Retail Strip Loan
+('RWA007', 'Manly Retail Strip Loan', 'ACTIVE', 500000, 500000,
+ '25 The Corso, Manly', 'NSW', 'Retail', 2000000, 'Fully leased retail strip near the beach.',
+ '1st Mortgage', 'Retail Investment', 500000, 'Investment loan',
+ 12, 25.00, 7.80, 15.50,
+ '2025-01-10', '2026-01-10', NULL,
+ 'system', 'system'),
+
+-- 8. Chatswood Office Expansion
+('RWA008', 'Chatswood Office Expansion', 'INCOMING', 0, 1500000,
+ '10 Help Street, Chatswood', 'NSW', 'Office', 4500000, 'Expansion and refurbishment of existing office premises.',
+ '2nd Mortgage', 'Office Growth Facility', 1500000, 'Office expansion funding',
+ 30, 33.00, 9.20, 17.00,
+ NULL, NULL, NULL,
+ 'system', 'system'),
+
+-- 9. Central Coast Industrial Estate
+('RWA009', 'Central Coast Industrial Estate', 'INCOMING', 0, 2500000,
+ '1 Industry Drive, Gosford', 'NSW', 'Industrial', 8000000, 'Modern warehouse facility with long-term lease.',
+ '1st Mortgage', 'Industrial Term Loan', 2500000, 'Acquisition financing',
+ 60, 31.00, 8.80, 17.00,
+ NULL, NULL, NULL,
+ 'system', 'system'),
+
+-- 10. Penrith Student Housing
+('RWA010', 'Penrith Student Housing Project', 'INCOMING', 0, 1000000,
+ '50 High Street, Penrith', 'NSW', 'Student Accommodation', 3000000, 'New student housing close to university campus.',
+ '1st Mortgage', 'Construction Facility', 1000000, 'Student housing construction',
+ 18, 33.00, 9.50, 18.00,
+ NULL, NULL, NULL,
+ 'system', 'system');
 
 -- 创建用户表
 CREATE TABLE IF NOT EXISTS user (
@@ -183,12 +155,12 @@ CREATE TABLE IF NOT EXISTS user (
   is_active TINYINT(1) DEFAULT 1 COMMENT '账户激活状态'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
 
--- -- 插入测试用户
--- INSERT IGNORE INTO user (user_id, user_wallet, user_name, user_email, user_password, user_phone, email_verified, is_active) VALUES 
--- ('USR001', '0x1234567890abcdef1234567890abcdef12345678', '管理员', 'admin@rwa.com', '123456', '13800138000', 1, 1),
--- ('USR002', '0xabcdef1234567890abcdef1234567890abcdef12', '测试用户', 'test@rwa.com', '123456', '13800138001', 0, 1);
+-- 插入测试用户
+INSERT IGNORE INTO user (user_id, user_wallet, user_name, user_email, user_password, user_phone, email_verified, is_active) VALUES 
+('USR001', '0x1234567890abcdef1234567890abcdef12345678', '管理员', 'admin@rwa.com', '123456', '13800138000', 1, 1),
+('USR002', '0xabcdef1234567890abcdef1234567890abcdef12', '测试用户', 'test@rwa.com', '123456', '13800138001', 0, 1);
 
--- -- 显示创建结果
--- SELECT 'Database initialization completed successfully!' as message;
--- SELECT COUNT(*) as product_count FROM product_details;
--- SELECT COUNT(*) as user_count FROM user;
+-- 显示创建结果
+SELECT 'Database initialization completed successfully!' as message;
+SELECT COUNT(*) as project_count FROM project;
+SELECT COUNT(*) as user_count FROM user;
