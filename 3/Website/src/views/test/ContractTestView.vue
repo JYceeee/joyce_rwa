@@ -163,7 +163,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { contractService } from '@/service/contractService.js'
+import { unifiedContractService as contractService } from '@/service/unifiedContractService.js'
 import CONTRACT_CONFIG from '@/config/contractConfig.js'
 
 // 响应式数据

@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProfileView深色主题演示</title>
+    <style>
+        /* 复制ProfileView的深色主题样式 */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        /* 页面容器深色主题 - 与图片风格一致 */
+        .profile-page { 
+            padding-bottom: 64px; 
+            background: linear-gradient(180deg, #0f1419 0%, #1a1f2e 50%, #2d3748 100%);
+            min-height: 100vh;
+            color: #ffffff;
+        }
+
+        .container {
+            max-width: 920px;
+            margin: 0 auto;
+            background: transparent;
+        }
+
+        /* 顶部 */
+        .topbar { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            gap: 16px; 
+            padding: 24px 16px; 
+        }
+
+        .breadcrumb { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            color: #9ca3af; 
+        }
+
+        .crumb-back { 
+            border: 0; 
+            background: transparent; 
+            cursor: pointer; 
+            color: #9ca3af; 
+        }
+
+        .sep { opacity: .6; }
+        .crumb-current { color: #ffffff; font-weight: 600; }
+
+        /* 标题块 */
+        .head { 
+            display: flex; 
+            align-items: center; 
+            gap: 16px; 
+            padding: 0 16px 8px; 
+        }
+
+        .avatar { 
+            width: 44px; 
+            height: 44px; 
+            border-radius: 999px; 
+            background: #374151; 
+            display: grid; 
+            place-items: center;
+        }
+
+        .avatar-initial { 
+            font-weight: 700; 
+            color: #ffffff; 
+        }
+
+        .title { 
+            font-size: 24px; 
+            line-height: 1.2; 
+            margin: 0; 
+            color: #ffffff; 
+        }
+
+        .subtitle { 
+            margin: 2px 0 0; 
+            color: #9ca3af; 
+        }
+
+        /* 表单与控件 */
+        .form { 
+            margin-top: 24px; 
+            padding: 0 16px; 
+        }
+
+        .field { 
+            margin: 18px 0; 
+        }
+
+        .label { 
+            display: block; 
+            font-size: 12px; 
+            color: #9ca3af; 
+            margin-bottom: 8px; 
+        }
+
+        .req { 
+            color: #f97316; 
+        }
+
+        /* 用户联系信息样式 */
+        .user-contact-info {
+            margin: 12px 0;
+            padding: 12px;
+            background: #2f3031;
+            border-radius: 6px;
+            border: 1px solid #404243;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            margin: 6px 0;
+            padding: 4px 0;
+        }
+
+        .contact-item:first-child {
+            margin-top: 0;
+        }
+
+        .contact-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .contact-label {
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-right: 8px;
+            min-width: 60px;
+        }
+
+        .contact-value {
+            color: #ffffff;
+            font-family: monospace;
+            background: #4a5568;
+            padding: 2px 6px;
+            border-radius: 3px;
+            border: 1px solid #6b7280;
+            flex: 1;
+            max-width: 300px;
+            word-break: break-all;
+        }
+
+        /* 状态显示区域样式 */
+        .status-section {
+            max-width: 500px;
+            margin-left: 200px;
+            padding: 20px;
+            background: rgba(45, 55, 72, 0.6);
+            border-radius: 12px;
+            border: 1px solid rgba(74, 85, 104, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .status-title {
+            margin: 0 0 16px 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #f4f7f9;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(74, 85, 104, 0.3);
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-label {
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            color: #e2e8f0;
+        }
+
+        .status-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+        }
+
+        .status-badge, .permission-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-approved, .permission-full {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending, .permission-limited {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-none {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .permission-none {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* 交易权限详细信息样式 */
+        .permission-details {
+            margin-top: 8px;
+            padding: 12px;
+            background: rgba(31, 41, 55, 0.9);
+            border-radius: 6px;
+            border-left: 3px solid #3b82f6;
+        }
+
+        .permission-description {
+            display: block;
+            font-size: 13px;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .permission-requirements {
+            margin-top: 8px;
+        }
+
+        .requirements-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .requirements-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .requirements-list li {
+            display: flex;
+            align-items: center;
+            padding: 4px 0;
+            font-size: 12px;
+            color: #cbd5e1;
+            transition: all 0.2s ease;
+        }
+
+        .requirements-list li:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 4px;
+            padding-left: 8px;
+        }
+
+        .requirement-icon {
+            margin-right: 8px;
+            font-size: 14px;
+            width: 16px;
+            text-align: center;
+        }
+
+        .requirement-met {
+            color: #10b981;
+        }
+
+        .requirement-met .requirement-icon {
+            color: #10b981;
+        }
+
+        .requirements-list li:not(.requirement-met) {
+            color: #ef4444;
+        }
+
+        .requirements-list li:not(.requirement-met) .requirement-icon {
+            color: #ef4444;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            border: 1px solid transparent;
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            font-weight: 600;
+            line-height: 1;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+        }
+
+        .btn.orange {
+            background: #ea7a2e;
+            color: #fff;
+        }
+
+        .btn.orange:hover {
+            filter: brightness(.96);
+        }
+
+        .btn.light {
+            background: #374151;
+            color: #ffffff;
+            border-color: #4b5563;
+        }
+
+        .btn.light:hover {
+            background: #4b5563;
+        }
+
+        /* 演示控制 */
+        .demo-controls {
+            margin: 20px;
+            padding: 15px;
+            background: rgba(31, 41, 55, 0.8);
+            border-radius: 8px;
+            border: 1px solid rgba(74, 85, 104, 0.3);
+        }
+
+        .demo-controls h3 {
+            margin-top: 0;
+            color: #e2e8f0;
+        }
+
+        .demo-controls p {
+            color: #cbd5e1;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-page">
+        <div class="container">
+            <!-- 顶部导航 -->
+            <div class="topbar">
+                <nav class="breadcrumb">
+                    <button class="crumb-back">←</button>
+                    <span class="sep">/</span>
+                    <span class="crumb">Settings</span>
+                    <span class="sep">/</span>
+                    <span class="crumb-current">Profile</span>
+                </nav>
+            </div>
+
+            <!-- 标题块 -->
+            <div class="head">
+                <div class="avatar">
+                    <span class="avatar-initial">JD</span>
+                </div>
+                <div>
+                    <h1 class="title">John Doe</h1>
+                    <p class="subtitle">john.doe@example.com</p>
+                </div>
+            </div>
+
+            <!-- 表单 -->
+            <form class="form">
+                <!-- 个人信息 -->
+                <div class="field">
+                    <label class="label">Personal Information <span class="req">*</span></label>
+                    <div class="user-contact-info">
+                        <div class="contact-item">
+                            <span class="contact-label">Email:</span>
+                            <span class="contact-value">john.doe@example.com</span>
+                        </div>
+                        <div class="contact-item">
+                            <span class="contact-label">Phone:</span>
+                            <span class="contact-value">+1 (555) 123-4567</span>
+                        </div>
+                        <div class="contact-item">
+                            <button class="btn light">Change my password</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 状态信息 -->
+                <div class="status-section">
+                    <h3 class="status-title">Account Status</h3>
+                    
+                    <!-- KYC Status -->
+                    <div class="status-item">
+                        <div class="status-label">
+                            <span class="status-icon">🛡️</span>
+                            KYC Status
+                        </div>
+                        <div class="status-value">
+                            <span class="status-badge status-approved">Level 2 (Verified)</span>
+                        </div>
+                    </div>
+
+                    <!-- Whitelist Status -->
+                    <div class="status-item">
+                        <div class="status-label">
+                            <span class="status-icon">✅</span>
+                            Whitelist Status
+                        </div>
+                        <div class="status-value">
+                            <span class="status-badge status-approved">Approved</span>
+                        </div>
+                    </div>
+
+                    <!-- Trading Permission -->
+                    <div class="status-item">
+                        <div class="status-label">
+                            <span class="status-icon">💼</span>
+                            Trading Permission
+                        </div>
+                        <div class="status-value">
+                            <span class="permission-badge permission-full">Full Access</span>
+                            <div class="permission-details">
+                                <span class="permission-description">
+                                    Complete trading access to all RWA products and features
+                                </span>
+                                <div class="permission-requirements">
+                                    <span class="requirements-label">Requirements:</span>
+                                    <ul class="requirements-list">
+                                        <li class="requirement-met">
+                                            <span class="requirement-icon">✅</span>
+                                            All requirements met
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部按钮 -->
+                <div style="margin-top: 24px; padding: 0 16px;">
+                    <button class="btn light">Cancel</button>
+                    <button class="btn orange">Save</button>
+                    <button class="btn light" style="margin-left: auto;">Log out</button>
+                </div>
+            </form>
+
+            <!-- 演示说明 -->
+            <div class="demo-controls">
+                <h3>🎨 ProfileView深色主题演示</h3>
+                <p><strong>设计特点:</strong></p>
+                <ul style="color: #cbd5e1;">
+                    <li>深色渐变背景：从深蓝/黑色顶部过渡到深蓝/灰色底部</li>
+                    <li>半透明状态卡片：带有模糊效果和边框</li>
+                    <li>现代化的颜色方案：使用Tailwind CSS色彩系统</li>
+                    <li>高对比度文本：确保在深色背景下的可读性</li>
+                    <li>优雅的悬停效果：提供良好的交互反馈</li>
+                </ul>
+                <p><strong>颜色方案:</strong></p>
+                <ul style="color: #cbd5e1;">
+                    <li>背景渐变：<code>#0f1419 → #1a1f2e → #2d3748</code></li>
+                    <li>主文本：<code>#ffffff</code> (白色)</li>
+                    <li>次要文本：<code>#cbd5e1</code> (浅灰)</li>
+                    <li>标签文本：<code>#9ca3af</code> (中灰)</li>
+                    <li>成功状态：<code>#10b981</code> (绿色)</li>
+                    <li>错误状态：<code>#ef4444</code> (红色)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

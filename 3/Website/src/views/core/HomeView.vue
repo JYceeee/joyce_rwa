@@ -837,7 +837,7 @@ export default {
 /* 品牌信息 */
 .brand-info {
   position: absolute;
-  bottom: 60px;
+  bottom: 100px;
   left: 50%;
   transform: translateX(-50%);
   text-align: center;

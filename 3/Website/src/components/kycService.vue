@@ -159,7 +159,7 @@
 
 <script>
 import { setKycStatus, KYC_STATUS } from '@/service/kycService'
-import { contractService } from '@/service/contractService'
+import { unifiedContractService as contractService } from '@/service/unifiedContractService'
 
 export default {
   name: 'KycServicePage',

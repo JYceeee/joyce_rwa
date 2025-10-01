@@ -41,6 +41,8 @@
         <option value="INCOMING">Incoming</option>
         <option value="ACTIVE">Active</option>
         <option value="PERFORMING">Performing</option>
+        <option value="COMPLETED">Completed</option>
+        <option value="COMPLETE">Completed</option>
         <option value="DEFAULT">Default</option>
       </select>
       <div class="yield-range-filter">
@@ -166,6 +168,16 @@
               <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">View Details</a>
             </template>
             
+            <!-- COMPLETED状态: View Details -->
+            <template v-else-if="currentProduct.status === 'COMPLETED'">
+              <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">View Details</a>
+            </template>
+            
+            <!-- COMPLETE状态: View Details -->
+            <template v-else-if="currentProduct.status === 'COMPLETE'">
+              <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">View Details</a>
+            </template>
+            
             <!-- DEFAULT状态: View Details -->
             <template v-else-if="currentProduct.status === 'DEFAULT'">
               <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">View Details</a>
@@ -212,7 +224,7 @@
            </div>
            <div class="pf-project-metric">
              <span class="pf-metric-label">TERM</span>
-             <span class="pf-metric-value">{{ p.loanTerm }} months</span>
+             <span class="pf-metric-value">{{ p.loanTerm }}</span>
            </div>
          </div>
 
@@ -221,15 +233,11 @@
            <div class="pf-progress-metrics">
              <div class="pf-progress-metric">
                <span class="pf-progress-label">SUBSCRIBED</span>
-               <span class="pf-progress-value">A${{ formatNumber(p.subscribed || 0) }}</span>
+               <span class="pf-progress-value">{{ formatNumber(p.subscribed || 0) }}</span>
              </div>
              <div class="pf-progress-metric">
                <span class="pf-progress-label">TOTAL OFFERING</span>
-               <span class="pf-progress-value">A${{ formatNumber(p.totalOffering || 0) }}</span>
-             </div>
-             <div class="pf-progress-metric">
-               <span class="pf-progress-label">PROGRESS</span>
-               <span class="pf-progress-value" style="color: #10b981;">{{ getSubscriptionProgress(p) }}%</span>
+               <span class="pf-progress-value">{{ formatNumber(p.totalOffering || 0) }}</span>
              </div>
            </div>
            <!-- 进度条 -->
@@ -256,6 +264,16 @@
            
            <!-- PERFORMING状态: View Details -->
            <template v-else-if="p.status === 'PERFORMING'">
+             <button class="pf-project-btn" @click="openDetail(p.code)">DETAILS</button>
+           </template>
+           
+           <!-- COMPLETED状态: View Details -->
+           <template v-else-if="p.status === 'COMPLETED'">
+             <button class="pf-project-btn" @click="openDetail(p.code)">DETAILS</button>
+           </template>
+           
+           <!-- COMPLETE状态: View Details -->
+           <template v-else-if="p.status === 'COMPLETE'">
              <button class="pf-project-btn" @click="openDetail(p.code)">DETAILS</button>
            </template>
            
@@ -289,7 +307,7 @@ export default {
   },
   data(){
     return {
-      filters: { q: '', type: '', risk: '', status: '', minYield: 0, maxYield: 20 },
+      filters: { q: '', type: '', status: '', minYield: 0, maxYield: 20 },
       products: [],
       currentProduct: null, // 当前选中的产品详情
       loading: true,
@@ -658,7 +676,8 @@ export default {
         'INCOMING': 'Incoming',
         'ACTIVE': 'Active',
         'PERFORMING': 'Performing',
-        'DEFAULT': 'Default'
+        'DEFAULT': 'Default',
+        'COMPLETED': 'Completed',
       }
       return statusMap[status] || 'Unknown'
     },
@@ -681,7 +700,7 @@ export default {
         
         // 检查是否已经在 watchlist 中
         if (watchlist.includes(code)) {
-          alert('该项目已在您的关注列表中！')
+          alert('This Project is already in your watchlist!')
           return
         }
         
@@ -690,11 +709,11 @@ export default {
         localStorage.setItem('projectWatchlist', JSON.stringify(watchlist))
         
         const product = this.products.find(x => x.code === code)
-        alert(`已添加 ${product.name} 到关注列表！`)
+        alert(`Added ${product.name} to your watchlist!`)
         console.log('Added to watchlist:', code)
       } catch (error) {
-        console.error('❌ Projects: 添加到 watchlist 失败:', error)
-        alert('添加到关注列表失败，请重试')
+        console.error('❌ Projects: Failed to add to watchlist:', error)
+        alert('Failed to add to watchlist, please try again')
       }
     },
     
@@ -705,14 +724,14 @@ export default {
       const diff = now - date
       const minutes = Math.floor(diff / 60000)
       
-      if (minutes < 1) return '刚刚'
-      if (minutes < 60) return `${minutes}分钟前`
+      if (minutes < 1) return 'Just now'
+      if (minutes < 60) return `${minutes} minutes ago`
       
       const hours = Math.floor(minutes / 60)
-      if (hours < 24) return `${hours}小时前`
+      if (hours < 24) return `${hours} hours ago`
       
       const days = Math.floor(hours / 24)
-      return `${days}天前`
+      return `${days} days ago`
     },
     
     // 获取产品图片
@@ -1065,35 +1084,35 @@ export default {
 }
 
 .yield-slider-min::-webkit-slider-thumb {
-  background: #10b981;
+  background: #242524;
 }
 
 .yield-slider-min::-webkit-slider-thumb:hover {
-  background: #059669;
+  background: #242524;
 }
 
 .yield-slider-min::-moz-range-thumb {
-  background: #10b981;
+  background: #242524;
 }
 
 .yield-slider-min::-moz-range-thumb:hover {
-  background: #059669;
+  background: #242524;
 }
 
 .yield-slider-max::-webkit-slider-thumb {
-  background: #f59e0b;
+  background: #09740f;
 }
 
 .yield-slider-max::-webkit-slider-thumb:hover {
-  background: #d97706;
+  background: #09740f;
 }
 
 .yield-slider-max::-moz-range-thumb {
-  background: #f59e0b;
+  background: #09740f;
 }
 
 .yield-slider-max::-moz-range-thumb:hover {
-  background: #d97706;
+  background: #09740f;
 }
 
 .refresh-btn:hover:not(:disabled) { 
@@ -1195,16 +1214,20 @@ export default {
 
 .pf-progress-metrics{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:repeat(2,1fr);
   gap:12px;
   margin-bottom:16px;
+  align-items:stretch;
+  text-align:justify;
 }
 
 .pf-progress-metric{
+  width:100%;
   display:flex;
   flex-direction:column;
-  align-items:center;
-  text-align:center;
+  align-items:stretch;
+  text-align:justify;
+  margin-left:30px;
 }
 
 .pf-progress-label{
@@ -1213,6 +1236,7 @@ export default {
   text-transform:uppercase;
   letter-spacing:0.5px;
   margin-bottom:4px;
+  margin-left:15px;
 }
 
 .pf-progress-value{
@@ -1344,34 +1368,40 @@ export default {
   white-space: nowrap;
 }
 
-.status-active {
+.status-ACTIVE {
   background: rgba(16, 185, 129, 0.2);
   color: #10b981;
   border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
-.status-upcoming {
+.status-INCOMING {
   background: rgba(59, 130, 246, 0.2);
   color: #3b82f6;
   border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
-.status-research {
+.status-PERFORMING {
   background: rgba(245, 158, 11, 0.2);
   color: #f59e0b;
   border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
-.status-planning {
+.status-COMPLETED {
+  background: rgba(107, 128, 107, 0.2);
+  color: #6b7280;
+  border: 1px solid rgba(107, 114, 128, 0.3);
+}
+
+.status-COMPLETE {
+  background: rgba(107, 128, 107, 0.2);
+  color: #6b7280;
+  border: 1px solid rgba(107, 114, 128, 0.3);
+}
+
+.status-DEFAULT {
   background: rgba(139, 92, 246, 0.2);
   color: #8b5cf6;
   border: 1px solid rgba(139, 92, 246, 0.3);
-}
-
-.status-completed {
-  background: rgba(107, 114, 128, 0.2);
-  color: #6b7280;
-  border: 1px solid rgba(107, 114, 128, 0.3);
 }
 
 .doc-code {

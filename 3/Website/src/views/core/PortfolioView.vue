@@ -727,23 +727,47 @@ async function loadWatchlistProjects() {
     }
 
     console.log('🔄 Portfolio: 加载 watchlist 项目详情...')
-    const response = await productAPI.getAllProducts()
     
-    if (response.status === 0) {
-      const allProjects = response.data || []
-      // 过滤出在 watchlist 中的项目
-      watchlistProjects.value = allProjects.filter(project => 
-        watchlist.value.includes(project.code)
-      )
-      console.log('✅ Portfolio: watchlist 项目加载成功，共', watchlistProjects.value.length, '个项目')
+    // 优先使用已缓存的项目数据
+    const cachedProjects = projects.value.length > 0 ? projects.value : null
+    
+    if (cachedProjects) {
+      // 使用缓存的项目数据
+      updateWatchlistProjects(cachedProjects)
     } else {
-      console.error('❌ Portfolio: 获取 watchlist 项目失败:', response)
-      watchlistProjects.value = []
+      // 如果没有缓存数据，从API获取
+      const response = await productAPI.getAllProducts()
+      
+      if (response.status === 0) {
+        const allProjects = response.data || []
+        updateWatchlistProjects(allProjects)
+      } else {
+        console.error('❌ Portfolio: 获取 watchlist 项目失败:', response)
+        watchlistProjects.value = []
+      }
     }
   } catch (error) {
     console.error('❌ Portfolio: 加载 watchlist 项目失败:', error)
     watchlistProjects.value = []
   }
+}
+
+// 更新 watchlist 项目数据
+function updateWatchlistProjects(allProjects) {
+  // 过滤出在 watchlist 中的项目，并添加原始数值用于计算
+  watchlistProjects.value = allProjects.filter(project => 
+    watchlist.value.includes(project.code)
+  ).map(project => ({
+    ...project,
+    // 添加原始数值用于进度计算
+    totalOfferingRaw: project.total_offering_token || 0,
+    subscribedRaw: project.subscribe_token || 0,
+    // 格式化显示字段
+    totalOffering: project.total_offering_token ? `A$${project.total_offering_token.toLocaleString()}` : 'A$0',
+    subscribed: project.subscribe_token ? `A$${project.subscribe_token.toLocaleString()}` : 'A$0'
+  }))
+  
+  console.log('✅ Portfolio: watchlist 项目更新成功，共', watchlistProjects.value.length, '个项目')
 }
 
 // 从 watchlist 移除项目
@@ -776,43 +800,25 @@ function getProjectImage(code) {
   return imageMap[code] || '/pics/TYMU.png'
 }
 
-// 获取状态文本
-function getStatusText(status) {
-  const statusMap = {
-    'active': 'Active',
-    'upcoming': 'Upcoming',
-    'research': 'Research',
-    'planning': 'Planning',
-    'completed': 'Completed'
-  }
-  return statusMap[status] || 'Unknown'
-}
-
-// 获取状态颜色
-function getStatusColor(status) {
-  const colorMap = {
-    'active': '#16a34a',
-    'upcoming': '#d97706',
-    'research': '#3b82f6',
-    'planning': '#8b5cf6',
-    'completed': '#6b7280'
-  }
-  return colorMap[status] || '#6b7280'
-}
-
-// 计算 watchlist 项目进度
-function getWatchlistProgress(project) {
-  if (!project || !project.total_token || !project.current_subscribed_token) {
+// 计算认购进度
+function getSubscriptionProgress(product) {
+  if (!product) {
     return 0
   }
   
-  const total = parseFloat(project.total_token)
-  const subscribed = parseFloat(project.current_subscribed_token)
+  // 使用原始数值进行计算
+  const total = product.totalOfferingRaw || 0
+  const subscribed = product.subscribedRaw || 0
   
   if (total === 0) return 0
   
   const progress = (subscribed / total) * 100
-  return Math.round(progress * 100) / 100
+  return Math.round(progress * 100) / 100 // 保留两位小数
+}
+
+// 计算 watchlist 项目进度
+function getWatchlistProgress(product) {
+  return getSubscriptionProgress(product)
 }
 
 // 格式化数字
@@ -823,27 +829,47 @@ function formatNumber(value) {
   return num.toLocaleString()
 }
 
-// 跳转到项目详情
-function goToProjectDetail(projectCode) {
-  router.push({
-    name: 'detail',
-    params: { id: projectCode }
-  })
+// 获取状态颜色
+function getStatusColor(status) {
+  const colorMap = {
+    'ACTIVE': '#16a34a',
+    'INCOMING': '#d97706',
+    'PERFORMING': '#2563eb',
+    'COMPLETED': '#6b7280',
+
+  }
+  return colorMap[status] || '#6b7280'
 }
 
-// 跳转到交易页面
-function goToTrade(projectCode) {
-  router.push({
-    name: 'tradeProject',
-    params: { code: projectCode }
-  })
+// 获取状态文本
+function getStatusText(status) {
+  const statusMap = {
+    'ACTIVE': 'Active',
+    'INCOMING': 'Incoming',
+    'PERFORMING': 'Performing',
+    'COMPLETED': 'Completed',
+    'active': 'Active',
+    'upcoming': 'Upcoming',
+    'research': 'Research',
+    'planning': 'Planning',
+    'completed': 'Completed'
+  }
+  return statusMap[status] || 'Unknown'
 }
 
-// 跳转到 Projects 页面
+// 导航到项目详情
+function goToProjectDetail(code) {
+  router.push({ name: 'detail', params: { id: code } })
+}
+
+// 导航到交易页面
+function goToTrade(code) {
+  router.push({ name: 'tradeProject', params: { code } })
+}
+
+// 导航到项目页面
 function goToProjects() {
-  router.push({
-    name: 'projects'
-  })
+  router.push({ name: 'projects' })
 }
 
 // 从localStorage加载绑定的钱包账户，与WalletView保持一致
@@ -886,11 +912,10 @@ function loadBoundAccounts() {
     
   } catch (error) {
     console.error('❌ Failed to load bound accounts:', error)
-    // 即使出错也提供默认演示账户
     accounts.value = [{
-      address: '0x1234567890123456789012345678901234567890',
-      name: 'Demo Account',
-      balance: 1.5
+      address: 'Please connect your wallet',
+      name: 'No Account',
+      balance: 0
     }]
     // 初始化交易数据
     initializeTransactionData()
@@ -2290,6 +2315,11 @@ const setupDatabaseSync = () => {
   unsubscribeProducts = subscribeProducts((products) => {
     console.log('📡 PortfolioView: 收到产品数据更新，共', products.length, '个项目')
     projects.value = products
+    
+    // 同时更新 watchlist 项目数据
+    if (watchlist.value.length > 0) {
+      updateWatchlistProjects(products)
+    }
   })
   
   // 设置最后刷新时间

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradeProjectView 调试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover { background-color: #0056b3; }
+        .btn-success { background-color: #28a745; }
+        .btn-success:hover { background-color: #1e7e34; }
+        .btn-danger { background-color: #dc3545; }
+        .btn-danger:hover { background-color: #c82333; }
+        .code {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-ok { background-color: #28a745; }
+        .status-error { background-color: #dc3545; }
+        .status-warning { background-color: #ffc107; }
+        .status-info { background-color: #17a2b8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 TradeProjectView 调试工具</h1>
+        
+        <div class="test-section info">
+            <h3>📋 当前状态</h3>
+            <div id="current-status">
+                <p>正在检查TradeProjectView状态...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 测试链接</h3>
+            <p>点击以下链接测试TradeProjectView：</p>
+            <a href="/trade/RWA001" class="btn" target="_blank">测试 RWA001</a>
+            <a href="/trade/RWA007" class="btn" target="_blank">测试 RWA007</a>
+            <a href="/trade/TEST" class="btn" target="_blank">测试 TEST</a>
+            <a href="/projects" class="btn btn-success" target="_blank">返回项目列表</a>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 诊断信息</h3>
+            <div id="diagnostic-info">
+                <p>正在收集诊断信息...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 路由测试</h3>
+            <div id="route-test">
+                <p>正在测试路由...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🛠️ 修复建议</h3>
+            <div id="fix-suggestions">
+                <p>正在分析问题...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 检查当前状态
+        function checkCurrentStatus() {
+            const statusDiv = document.getElementById('current-status');
+            let html = '<h4>系统状态检查:</h4>';
+            
+            // 检查URL
+            const currentUrl = window.location.href;
+            const isLocalhost = currentUrl.includes('localhost');
+            
+            html += `<div class="test-section ${isLocalhost ? 'success' : 'warning'}">
+                <span class="status-indicator ${isLocalhost ? 'status-ok' : 'status-warning'}"></span>
+                <strong>当前URL:</strong> ${currentUrl}
+            </div>`;
+            
+            // 检查端口
+            const port = window.location.port;
+            html += `<div class="test-section ${port ? 'success' : 'error'}">
+                <span class="status-indicator ${port ? 'status-ok' : 'status-error'}"></span>
+                <strong>端口:</strong> ${port || '未设置'}
+            </div>`;
+            
+            statusDiv.innerHTML = html;
+        }
+
+        // 收集诊断信息
+        function collectDiagnosticInfo() {
+            const diagnosticDiv = document.getElementById('diagnostic-info');
+            let html = '<h4>诊断信息:</h4>';
+            
+            // 浏览器信息
+            const userAgent = navigator.userAgent;
+            html += `<div class="test-section info">
+                <span class="status-indicator status-info"></span>
+                <strong>浏览器:</strong> ${userAgent}
+            </div>`;
+            
+            // 控制台错误检查
+            const originalError = console.error;
+            const errors = [];
+            console.error = function(...args) {
+                errors.push(args.join(' '));
+                originalError.apply(console, args);
+            };
+            
+            html += `<div class="test-section ${errors.length === 0 ? 'success' : 'error'}">
+                <span class="status-indicator ${errors.length === 0 ? 'status-ok' : 'status-error'}"></span>
+                <strong>JavaScript错误:</strong> ${errors.length === 0 ? '无错误' : errors.length + '个错误'}
+            </div>`;
+            
+            // 网络连接状态
+            const isOnline = navigator.onLine;
+            html += `<div class="test-section ${isOnline ? 'success' : 'error'}">
+                <span class="status-indicator ${isOnline ? 'status-ok' : 'status-error'}"></span>
+                <strong>网络状态:</strong> ${isOnline ? '在线' : '离线'}
+            </div>`;
+            
+            diagnosticDiv.innerHTML = html;
+        }
+
+        // 测试路由
+        function testRoutes() {
+            const routeDiv = document.getElementById('route-test');
+            let html = '<h4>路由测试:</h4>';
+            
+            const routes = [
+                { path: '/trade/RWA001', name: 'Trade RWA001' },
+                { path: '/trade/RWA007', name: 'Trade RWA007' },
+                { path: '/projects', name: 'Projects List' },
+                { path: '/home', name: 'Home' }
+            ];
+            
+            routes.forEach(route => {
+                html += `<div class="test-section info">
+                    <a href="${route.path}" class="btn" target="_blank">测试 ${route.name}</a>
+                    <span style="margin-left: 10px;">路径: ${route.path}</span>
+                </div>`;
+            });
+            
+            routeDiv.innerHTML = html;
+        }
+
+        // 生成修复建议
+        function generateFixSuggestions() {
+            const fixDiv = document.getElementById('fix-suggestions');
+            let html = '<h4>修复建议:</h4>';
+            
+            html += `<div class="test-section warning">
+                <h5>常见问题及解决方案:</h5>
+                <ol>
+                    <li><strong>路由无法访问:</strong>
+                        <div class="code">检查Vue Router配置是否正确
+检查组件导入路径是否正确
+检查路由参数传递是否正确</div>
+                    </li>
+                    <li><strong>组件无法加载:</strong>
+                        <div class="code">检查TradeProjectView.vue文件是否存在
+检查组件语法是否正确
+检查依赖导入是否正确</div>
+                    </li>
+                    <li><strong>参数传递问题:</strong>
+                        <div class="code">检查路由参数 :code 是否正确传递
+检查组件props配置是否正确
+检查参数获取逻辑是否正确</div>
+                    </li>
+                    <li><strong>CSS错误:</strong>
+                        <div class="code">检查CSS语法是否正确
+检查是否有未闭合的CSS规则
+检查是否有无效的CSS属性</div>
+                    </li>
+                </ol>
+            </div>`;
+            
+            html += `<div class="test-section info">
+                <h5>调试步骤:</h5>
+                <ol>
+                    <li>打开浏览器开发者工具 (F12)</li>
+                    <li>查看Console标签页中的错误信息</li>
+                    <li>查看Network标签页中的网络请求</li>
+                    <li>查看Elements标签页中的DOM结构</li>
+                    <li>尝试访问不同的路由路径</li>
+                </ol>
+            </div>`;
+            
+            fixDiv.innerHTML = html;
+        }
+
+        // 页面加载完成后执行所有检查
+        document.addEventListener('DOMContentLoaded', function() {
+            checkCurrentStatus();
+            collectDiagnosticInfo();
+            testRoutes();
+            generateFixSuggestions();
+        });
+
+        // 监听页面错误
+        window.addEventListener('error', function(e) {
+            console.error('页面错误:', e.error);
+        });
+
+        // 监听路由变化
+        window.addEventListener('popstate', function(e) {
+            console.log('路由变化:', e.state);
+        });
+    </script>
+</body>
+</html>

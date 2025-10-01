@@ -104,7 +104,7 @@
 </template>
 
 <script>
-import { contractService } from '@/service/contractService'
+import { unifiedContractService as contractService } from '@/service/unifiedContractService'
 import { getKycStatus, getKycLevel, setKycLevel, KYC_STATUS, KYC_LEVELS } from '@/service/kycService.js'
 import { useAuth } from '@/composables/useAuth.js'
 import { isLoggedIn } from '@/utils/auth.js'

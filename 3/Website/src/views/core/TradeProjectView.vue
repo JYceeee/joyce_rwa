@@ -56,7 +56,7 @@
             <div class="success-details">
               <div class="detail-card">
                 <div class="detail-header">
-                  <span class="detail-icon">📊</span>
+                  <!-- <span class="detail-icon">📊</span> -->
                   <span class="detail-label">Transaction Details</span>
                 </div>
                 <div class="detail-grid">
@@ -73,7 +73,7 @@
               
               <div class="detail-card">
                 <div class="detail-header">
-                  <span class="detail-icon">🔗</span>
+                  <!-- <span class="detail-icon">🔗</span> -->
                   <span class="detail-label">Blockchain Info</span>
                 </div>
                 <div class="detail-grid">
@@ -115,48 +115,75 @@
 
     <!-- 主要内容区域 -->
     <div class="container main-content">
+      <!-- 加载状态 -->
+      <div v-if="projectLoading" class="loading-container">
+        <div class="loading-spinner"></div>
+        <h2>Loading Project Data...</h2>
+        <p>Please wait while we load the project information.</p>
+      </div>
+      
+      <!-- 错误状态 -->
+      <div v-else-if="projectError" class="error-container"> 
+        <div class="error-icon">⚠️</div>
+        <h2>Failed to Load Project</h2>
+         <p>{{ projectError }}</p> 
+        <button class="btn primary" @click="loadProjectData">Retry</button>
+      </div>
+      
       <!-- 项目信息卡片 -->
-      <div class="project-info-card">
+      <div v-else-if="projectData" class="project-info-card">
         <div class="project-header">
           <img :src="projectData.image" :alt="projectCode" class="project-image" />
           <div class="project-details">
-            <h1 class="project-title">{{ projectData.code }} - {{ projectData.name }}</h1>
+            <h1 class="project-title">{{ projectData.code }} • {{ projectData.name }}</h1>
             <p class="project-subtitle">{{ projectData.subtitle }}</p>
             <div class="project-meta">
-              <span class="meta-item">Type: {{ projectData.type }}</span>
-              <span class="meta-item">Region: {{ projectData.region }}</span>
-              <!-- <span class="meta-item">Risk: {{ projectData.risk }}</span> -->
+              <span class="meta-item">{{ projectData.propertyType || projectData.type }}</span>
+              <span class="meta-item">{{ projectData.propertyLocation || projectData.region }}</span>
+              <span class="meta-item">{{ projectData.loanProduct || 'Loan Product' }}</span>
             </div>
           </div>
         </div>
         
-        <!-- 项目指标 -->
-        <div class="project-metrics">
-          <!-- <div class="metric-item">
-            <span class="metric-label">Current Price</span>
-            <span class="metric-value">{{ projectData.metrics.currentElaraPrice }}</span>
-          </div> -->
-          <div class="metric-item">
-            <span class="metric-label">Property Value</span>
-            <span class="metric-value">{{ projectData.metrics.collateralPropertyValue }}</span>
+          <!-- 项目指标 -->
+          <div class="project-metrics">
+            <div class="metric-item">
+              <span class="metric-label">LOAN SIZE</span>
+              <span class="metric-value">{{ projectData.loanAmount || 'A$0' }}</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">EST. YIELD (IRR)</span>
+              <span class="metric-value" style="color: #16a34a;">{{ projectData.metrics.targetLoanYield }}</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">TERM</span>
+              <span class="metric-value">{{ projectData.loanTerm || '12 months' }}</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">PROPERTY VALUE</span>
+              <span class="metric-value">{{ projectData.metrics.collateralPropertyValue }}</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">LTV</span>
+              <span class="metric-value">{{ projectData.metrics.loanToValue }}</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">SUBSCRIPTION PROGRESS</span>
+              <span class="metric-value" style="color: #3b82f6;">{{ projectData.subscriptionProgress }}</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">TOTAL OFFERING</span>
+              <span class="metric-value">{{ projectData.totalOffering }}</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">SUBSCRIBED</span>
+              <span class="metric-value">{{ projectData.subscribed }}</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">DEFAULT RATE</span>
+              <span class="metric-value">{{ projectData.metrics.defaultRate }}</span>
+            </div>
           </div>
-          <div class="metric-item">
-            <span class="metric-label">Loan Amount</span>
-            <span class="metric-value">{{ projectData.loanAmount || 'TBA' }}</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">Target Yield</span>
-            <span class="metric-value">{{ projectData.metrics.targetLoanYield }}</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">LTV</span>
-            <span class="metric-value">{{ projectData.ltv || 'TBA' }}</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">Loan Term</span>
-            <span class="metric-value">{{ projectData.loanTerm || 'TBA' }}</span>
-          </div>
-        </div>
       </div>
 
       <!-- 认购表单 -->
@@ -187,14 +214,14 @@
               <span class="status-label">代币余额:</span>
               <span class="status-value">{{ nativeBalanceDisplay }} LPT</span>
             </div>
-            <button 
+            <!-- <button 
               v-if="!connected" 
               @click="connectWallet" 
               class="btn primary tiny"
               :disabled="loading"
             >
               Connect Wallet
-            </button>
+            </button> -->
             <!-- <button 
               v-if="connected" 
               @click="disconnectWallet" 
@@ -247,11 +274,11 @@
           </div>
           <div class="summary-item">
             <span class="summary-label">Annual Rate:</span>
-            <span class="summary-value">{{ projectData.metrics.targetLoanYield }} (合约设定)</span>
+            <span class="summary-value">9.5% p.a. (标准利率)</span>
           </div>
           <div class="summary-item">
             <span class="summary-label">Loan Term:</span>
-            <span class="summary-value">{{ projectData.loanTerm || 'TBA' }} (合约设定) </span>
+            <span class="summary-value">12 months (标准期限)</span>
           </div>
           <div class="summary-item">
             <span class="summary-label">Estimated Interest:</span>
@@ -263,7 +290,13 @@
           </div>
           <div class="summary-item">
             <span class="summary-label">Total Token Needed:</span>
-            <span class="summary-value">{{ calculateTotalTokenNeeded() }} LPT</span>
+            <span class="summary-value">{{ formatNumber(subscriptionAmount) }} LPT</span>
+          </div>
+          <div class="button-hint" v-if="!connected">
+              Please connect your wallet
+          </div>
+          <div class="button-hint" v-else-if="!isFormValid">
+            Please fill in the complete subscription information
           </div>
         </div>
 
@@ -277,19 +310,14 @@
             >
               <span class="btn-text">{{ loading ? 'Processing...' : 'BUY' }}</span>
             </button>
-            <div class="button-hint" v-if="!connected">
-              请先连接钱包
-            </div>
-            <div class="button-hint" v-else-if="!isFormValid">
-              请填写完整的认购信息
-            </div>
           </div>
         </div>
       </div>
 
       <!-- 部署状态区域 -->
-      <div v-if="deploymentStatus" class="deployment-status-card">
-        <!-- <h3>部署状态</h3>
+      <!-- <div v-if="deploymentStatus" class="deployment-status-card"> -->
+      <div class="deployment-status-card">
+        <h3>部署状态</h3>
         <div class="status-log">
           <div 
             v-for="(log, index) in deploymentLogs" 
@@ -299,10 +327,11 @@
             <span class="log-time">{{ log.time }}</span>
             <span class="log-message">{{ log.message }}</span>
           </div>
-        </div> -->
+        </div> 
 
       <!-- 已部署合约信息区域 -->
-      <div v-if="deployedContracts.length > 0" class="deployed-contracts-card">
+      <!-- <div v-if="deployedContracts.length > 0" class="deployed-contracts-card"> -->
+      <div class="deployed-contracts-card">
         <h3>已部署合约</h3>
         <div class="contract-list">
           <div 
@@ -324,7 +353,8 @@
       </div>
 
       <!-- 合约交互状态区域 -->
-      <!-- <div v-if="interactionStatus" class="interaction-status-card">
+      <!-- <div v-if="interactionStatus" class="interaction-status-card"> -->
+      <div class="interaction-status-card">
         <h3>合约交互状态</h3>
         <div class="status-log">
           <div 
@@ -336,10 +366,11 @@
             <span class="log-message">{{ log.message }}</span>
           </div>
         </div>
-      </div> -->
+      </div>
 
       <!-- 余额信息区域 -->
-      <div v-if="balanceInfo" class="balance-info-card">
+      <!-- <div v-if="balanceInfo" class="balance-info-card"> -->
+      <div class="balance-info-card">
         <h3>余额信息</h3>
         <div class="balance-list">
           <div class="balance-item">
@@ -455,7 +486,7 @@
 
 <script>
 import { productAPI } from '@/service/api'
-import { contractService } from '@/service/contractService.js'
+import { unifiedContractService as contractService } from '@/service/unifiedContractService.js'
 import { getKycStatus, isKycVerified, getKycLevel, setKycLevel, KYC_STATUS, KYC_LEVELS } from '@/service/kycService.js'
 import { useAuth } from '@/composables/useAuth.js'
 import { useWallet } from '@/composables/useWallet.js'
@@ -463,7 +494,7 @@ import { isLoggedIn } from '@/utils/auth.js'
 import contractTestService from '@/services/contractTestService'
 import { ethers } from 'ethers'
 
-const { nativeBalanceDisplay } = useWallet()
+const { nativeBalanceDisplay,nativeSymbol,nativeToAudDisplay,bigAudDisplay } = useWallet()
 
 export default {
   name: 'TradeProjectView',
@@ -488,6 +519,7 @@ export default {
       showLoadingModal: false,
       loadingStatus: '',
       userTokenBalance: 0,
+      products: [],
       successData: {
         tradeType: '',
         amount: 0,
@@ -523,7 +555,7 @@ export default {
         'unknown_error': 'An unknown error occurred'
       },
       // 认购相关数据
-      subscriptionAmount: null,
+      subscriptionAmount: 0,
       contractTerms: {
         annualRate: 5.5,
         loanTerm: 365,
@@ -575,7 +607,7 @@ export default {
     },
     // 表单验证
     isFormValid() {
-      return this.amountValid && this.subscriptionAmount !== null && this.subscriptionAmount > 0
+      return this.amountValid && this.subscriptionAmount && this.subscriptionAmount > 0
     },
     // 钱包状态
     connected() {
@@ -597,6 +629,361 @@ export default {
     chainId() {
       const { chainId } = useWallet()
       return chainId.value
+    },
+    
+    // 获取项目目标收益率
+    getProjectTargetYield() {
+      if (!this.projectData) {
+        console.warn('projectData 不存在')
+        return null
+      }
+      
+      console.log('获取目标收益率，projectData:', this.projectData)
+      
+      // 优先从数据库字段 interest_rate 获取数值
+      if (this.projectData.interest_rate) {
+        const targetYieldValue = parseFloat(this.projectData.interest_rate)
+        console.log('从数据库 interest_rate 获取:', targetYieldValue)
+        return targetYieldValue
+      }
+      
+      // 兼容旧字段 targetYield
+      if (this.projectData.targetYield) {
+        const targetYieldValue = parseFloat(this.projectData.targetYield)
+        console.log('从 targetYield 获取:', targetYieldValue)
+        return targetYieldValue
+      }
+      
+      // 兼容旧字段 interestRate
+      if (this.projectData.interestRate) {
+        const targetYieldValue = parseFloat(this.projectData.interestRate)
+        console.log('从 interestRate 获取:', targetYieldValue)
+        return targetYieldValue
+      }
+      
+      // 从 metrics.targetLoanYield 解析 (格式: "6.5% p.a.")
+      if (this.projectData.metrics?.targetLoanYield) {
+        const yieldStr = this.projectData.metrics.targetLoanYield
+        console.log('从 metrics.targetLoanYield 解析:', yieldStr)
+        const match = yieldStr.match(/(\d+\.?\d*)/)
+        const targetYieldValue = match ? parseFloat(match[1]) : null
+        console.log('解析结果:', targetYieldValue)
+        return targetYieldValue
+      }
+      
+      console.warn('未找到目标收益率数据')
+      return null
+    },
+    
+    // 获取项目贷款期限
+    getProjectLoanTerm() {
+      if (!this.projectData) {
+        console.warn('projectData 不存在')
+        return null
+      }
+      
+      console.log('获取贷款期限，projectData:', this.projectData)
+      
+      // 优先从数据库字段 loan_term_months 获取数值（月数）
+      if (this.projectData.loan_term_months) {
+        const termInDays = this.projectData.loan_term_months * 30.44 // 转换为天数
+        console.log('从数据库 loan_term_months 获取:', this.projectData.loan_term_months, '个月，转换为天数:', termInDays)
+        return termInDays
+      }
+      
+      // 兼容旧字段 loanTermMonths
+      if (this.projectData.loanTermMonths) {
+        const termInDays = this.projectData.loanTermMonths * 30.44 // 转换为天数
+        console.log('从 loanTermMonths 获取:', this.projectData.loanTermMonths, '个月，转换为天数:', termInDays)
+        return termInDays
+      }
+      
+      // 兼容旧字段 loanTerm
+      if (this.projectData.loanTerm) {
+        const term = parseFloat(this.projectData.loanTerm)
+        console.log('从 loanTerm 获取:', term)
+        return term
+      }
+      
+      console.warn('未找到贷款期限数据')
+      return null
+    }
+  },
+  methods: {
+    // 加载单个产品详情
+    async loadSingleProduct() {
+      try {
+        this.loading = true
+        this.error = null
+        console.log('🔄 ProjectsView: 从数据库加载单个产品数据...', this.code)
+        
+        const response = await productAPI.getProductByCode(this.code)
+        
+        if (response.status === 0) {
+          // 映射数据库字段到前端期望的字段名
+          const rawData = response.data
+          const product = {
+            ...rawData,
+            totalOffering: rawData.total_token,
+            subscribed: rawData.current_subscribed_token,
+            targetYield: rawData.target_yield,
+            ltv: rawData.LTV,
+            annualInterestRate: rawData.annual_interest_rate,
+            loanAmount: rawData.loan_amount,
+            valuation: rawData.valuation,
+            image: rawData.image || this.getProductImage(rawData.code),
+            
+            // 原始数值用于计算
+            totalOfferingRaw: rawData.total_token || 0,
+            subscribedRaw: rawData.current_subscribed_token || 0
+          }
+          
+          // 构建与TradeProjectView一致的数据结构
+          this.currentProduct = {
+            // 基本信息
+            code: product.code,
+            name: product.name,
+            image: product.image,
+            subtitle: product.subtitle,
+            type: product.type,
+            risk: product.risk,
+            targetYield: product.targetYield,
+            status: product.status,
+            summary: product.summary,
+            
+            // 投资信息
+            totalOffering: product.totalOffering,
+            subscribed: product.subscribed,
+            totalSubscriptionTokens: product.totalSubscriptionTokens,
+            subscribedTokens: product.subscribedTokens,
+            
+            // 计算指标
+            metrics: {
+              currentElaraPrice: this.calculateTokenPrice(product),
+              collateralPropertyValue: product.valuation || 'TBA',
+              rentalIncome: this.calculateRentalIncome(product),
+              targetLoanYield: `${product.targetYield}% p.a.`
+            },
+            
+            // Key Facts 关键信息
+            loanAmount: product.loanAmount,
+            annualInterestRate: product.annualInterestRate,
+            loanTerm: product.loanTerm,
+            ltv: product.ltv,
+            drawdownDate: product.drawdownDate,
+            earlyRepayment: product.earlyRepayment,
+            repaymentArrangement: product.repaymentArrangement,
+            
+            // Parties 相关主体
+            issuer: product.issuer,
+            pwShareholders: product.pwShareholders,
+            lender: product.lender,
+            borrower: product.borrower,
+            guarantor: product.guarantor,
+            
+            // Disbursement & Interest 放款和利息
+            disbursementMethod: product.disbursementMethod,
+            interest: product.interest,
+            earlyRepaymentDetails: product.earlyRepaymentDetails,
+            maturityDate: product.maturityDate,
+            
+            // Collateral 抵押品
+            propertyAddress: product.propertyAddress,
+            valuation: product.valuation,
+            securityRank: product.securityRank,
+            
+            // Default & Remedies 违约和补救措施
+            defaultInterestRate: product.defaultInterestRate,
+            defaultTriggers: product.defaultTriggers,
+            defaultProcess: product.defaultProcess,
+            
+            // On-Chain & Documents 链上和文档
+            issuerToken: product.issuerToken,
+            loanToken: product.loanToken,
+            valuationReport: product.valuationReport,
+            mortgageDeed: product.mortgageDeed
+          }
+          
+          this.lastRefreshTime = new Date()
+          console.log('✅ ProjectsView: 单个产品数据加载成功:', this.currentProduct)
+        } else {
+          this.error = response.message || '获取产品数据失败'
+          console.error('❌ ProjectsView: API返回错误:', response)
+        }
+      } catch (error) {
+        this.error = '网络错误，无法获取产品数据'
+        console.error('❌ ProjectsView: 获取单个产品数据失败:', error)
+      } finally {
+        this.loading = false
+      }
+    },
+    
+    async loadProducts() {
+      try {
+        this.loading = true
+        this.error = null
+        console.log('🔄 从数据库加载产品数据...')
+        
+        const response = await productAPI.getAllProducts()
+        
+        if (response.status === 0) {
+          // 映射新的数据库字段到前端期望的字段名
+          this.products = (response.data || []).map(project => {
+            const mappedProduct = {
+              // 基础信息
+              id: project.id,
+              code: project.code,
+              name: project.name,
+              status: project.status,
+              
+              // 认购信息
+              totalOffering: project.total_offering_token ? `A$${project.total_offering_token.toLocaleString()}` : 'A$0',
+              subscribed: project.subscribe_token ? `A$${project.subscribe_token.toLocaleString()}` : 'A$0',
+              
+              // 原始数值用于计算
+              totalOfferingRaw: project.total_offering_token || 0,
+              subscribedRaw: project.subscribe_token || 0,
+              
+              // 物业信息
+              property_location: project.propertyLocation,
+              property_state: project.propertyState,
+              property_type: project.propertyType,
+              property_value: project.propertyValue,
+              property_summary: project.propertySummary,
+              
+              // 贷款信息
+              loan_type: project.loanType,
+              loan_product: project.loanProduct,
+              loan_amount: project.loanAmount,
+              loan_purpose: project.loanPurpose,
+              loan_term_months: project.loanTermMonths,
+              
+              // 贷款比率
+              lvr: project.lvr,
+              interest_rate: project.interestRate,
+              default_rate: project.defaultRate,
+              
+              // 贷款周期
+              commencement_date: project.commencementDate,
+              expiry_date: project.expiryDate,
+              expected_recovery_date: project.expectedRecoveryDate,
+              
+              // 前端显示字段
+              subtitle: `${project.loanProduct} - ${project.propertyType}`,
+              loanAmount: project.loanAmount ? `A$${project.loanAmount.toLocaleString()}` : 'A$0',
+              loanTerm: `${project.loanTermMonths} months`,
+              targetYield: project.interestRate,
+              image: project.image || this.getProductImage(project.code)
+            }
+            
+            // 添加计算指标
+            mappedProduct.metrics = {
+              currentElaraPrice: this.calculateTokenPrice(mappedProduct),
+              collateralPropertyValue: project.propertyValue ? `A$${project.propertyValue.toLocaleString()}` : 'TBA',
+              rentalIncome: this.calculateRentalIncome(mappedProduct),
+              targetLoanYield: `${project.interestRate}% p.a.`
+            }
+            
+            return mappedProduct
+          })
+          this.lastRefreshTime = new Date()
+          console.log('✅ 产品数据加载成功，共', this.products.length, '个项目')
+        } else {
+          this.error = response.message || '获取产品数据失败'
+          console.error('❌ API返回错误:', response)
+        }
+      } catch (error) {
+        this.error = '网络错误，无法获取产品数据'
+        console.error('❌ 加载产品数据失败:', error)
+      } finally {
+        this.loading = false
+      }
+    },
+        // 刷新数据
+    async refreshProducts() {
+      console.log('🔄 手动刷新产品数据...')
+      if (this.isDetailView) {
+        await this.loadSingleProduct()
+      } else {
+        await this.loadProducts()
+      }
+    },
+    
+    // 设置数据库同步
+    setupDatabaseSync() {
+      const { subscribeProducts, subscribeNewProjects, getLastRefreshTime } = useDatabaseSync()
+      
+      // 订阅产品列表更新
+      this.unsubscribeProducts = subscribeProducts((products) => {
+        console.log('📡 ProjectsView: 收到产品数据更新，共', products.length, '个项目')
+        // 映射数据库字段到前端期望的字段名
+        this.products = products.map(product => ({
+          ...product,
+          totalOffering: product.total_token,
+          subscribed: product.current_subscribed_token,
+          targetYield: product.target_yield,
+          ltv: product.LTV,
+          annualInterestRate: product.annual_interest_rate,
+          
+          // 原始数值用于计算
+          totalOfferingRaw: product.total_token || 0,
+          subscribedRaw: product.current_subscribed_token || 0,
+          loanAmount: product.loan_amount,
+          valuation: product.valuation,
+          image: product.image || this.getProductImage(product.code)
+        }))
+        this.lastRefreshTime = new Date()
+      })
+      
+      // 订阅新项目通知
+      this.unsubscribeNewProjects = subscribeNewProjects((newProjects) => {
+        console.log('🆕 ProjectsView: 发现', newProjects.length, '个新项目')
+        // 可以在这里添加新项目通知逻辑
+        this.showNewProjectsNotification(newProjects)
+      })
+      
+      // 设置最后刷新时间
+      const lastRefresh = getLastRefreshTime()
+      if (lastRefresh) {
+        this.lastRefreshTime = lastRefresh
+      }
+    },
+    
+    // 清理数据库同步
+    cleanupDatabaseSync() {
+      if (this.unsubscribeProducts) {
+        this.unsubscribeProducts()
+      }
+      if (this.unsubscribeNewProjects) {
+        this.unsubscribeNewProjects()
+      }
+    },
+    
+    // 显示新项目通知
+    showNewProjectsNotification(newProjects) {
+      if (newProjects.length > 0) {
+        const projectNames = newProjects.map(p => p.name).join(', ')
+        console.log('🆕 发现新项目:', projectNames)
+        // 可以在这里添加用户通知
+      }
+    },
+    
+    // 开始自动刷新（保留作为备用）
+    startAutoRefresh() {
+      // 每30秒自动刷新一次数据
+      this.refreshInterval = setInterval(() => {
+        console.log('🔄 自动刷新产品数据...')
+        this.loadProducts()
+      }, 30) // 30秒
+    },
+    
+    // 停止自动刷新（保留作为备用）
+    stopAutoRefresh() {
+      if (this.refreshInterval) {
+        clearInterval(this.refreshInterval)
+        this.refreshInterval = null
+        console.log('⏹️ 停止自动刷新')
+      }
     },
     projectData() {
       // 从ProductDetailsInfo获取项目数据（保留作为备用）
@@ -702,9 +1089,8 @@ export default {
         (activity.type === 'buy' || activity.type === 'sell') && 
         activity.project_code === this.projectCode
       ).sort((a, b) => b.timestamp - a.timestamp) // 按时间倒序排列
-    }
-  },
-  methods: {
+    },
+    
     // 查看合约详情
     viewContractDetails() {
       console.log('📄 查看合约详情:', this.projectCode)
@@ -729,24 +1115,18 @@ export default {
     calculateInterest() {
       if (!this.subscriptionAmount) return '0.00'
       
-      // 从项目数据获取实际的目标收益率和贷款期限
-      const targetYield = this.getProjectTargetYield()
-      const loanTerm = this.getProjectLoanTerm()
+      // 使用固定的标准利率和期限，不依赖项目数据
+      const standardRate = 9.5 // 标准年化利率 9.5%
+      const standardTermMonths = 12 // 标准期限 12个月
       
-      console.log('计算利息参数:', {
+      console.log('计算利息参数 (使用标准值):', {
         subscriptionAmount: this.subscriptionAmount,
-        targetYield,
-        loanTerm,
-        projectData: this.projectData
+        standardRate,
+        standardTermMonths
       })
       
-      if (!targetYield || !loanTerm) {
-        console.warn('缺少必要的项目数据:', { targetYield, loanTerm })
-        return '0.00'
-      }
-      
-      // 计算利息: 认购金额 * 年化收益率 * 贷款期限(天) / 365
-      const interest = (this.subscriptionAmount * targetYield / 100 * loanTerm / 365)
+      // 计算利息: 认购金额 * 年化收益率 * 贷款期限(月) / 12
+      const interest = (this.subscriptionAmount * standardRate / 100 * standardTermMonths / 12)
       console.log('利息计算结果:', interest)
       return this.formatNumber(interest)
     },
@@ -776,10 +1156,24 @@ export default {
       
       console.log('获取目标收益率，projectData:', this.projectData)
       
-      // 从 targetYield 字段获取数值
+      // 优先从数据库字段 interest_rate 获取数值
+      if (this.projectData.interest_rate) {
+        const targetYieldValue = parseFloat(this.projectData.interest_rate)
+        console.log('从数据库 interest_rate 获取:', targetYieldValue)
+        return targetYieldValue
+      }
+      
+      // 兼容旧字段 targetYield
       if (this.projectData.targetYield) {
         const targetYieldValue = parseFloat(this.projectData.targetYield)
         console.log('从 targetYield 获取:', targetYieldValue)
+        return targetYieldValue
+      }
+      
+      // 兼容旧字段 interestRate
+      if (this.projectData.interestRate) {
+        const targetYieldValue = parseFloat(this.projectData.interestRate)
+        console.log('从 interestRate 获取:', targetYieldValue)
         return targetYieldValue
       }
       
@@ -806,7 +1200,21 @@ export default {
       
       console.log('获取贷款期限，projectData:', this.projectData)
       
-      // 从 loanTerm 字段获取数值
+      // 优先从数据库字段 loan_term_months 获取数值（月数）
+      if (this.projectData.loan_term_months) {
+        const termInDays = this.projectData.loan_term_months * 30.44 // 转换为天数
+        console.log('从数据库 loan_term_months 获取:', this.projectData.loan_term_months, '个月，转换为天数:', termInDays)
+        return termInDays
+      }
+      
+      // 兼容旧字段 loanTermMonths
+      if (this.projectData.loanTermMonths) {
+        const termInDays = this.projectData.loanTermMonths * 30.44 // 转换为天数
+        console.log('从 loanTermMonths 获取:', this.projectData.loanTermMonths, '个月，转换为天数:', termInDays)
+        return termInDays
+      }
+      
+      // 兼容旧字段 loanTerm
       if (this.projectData.loanTerm) {
         const term = parseFloat(this.projectData.loanTerm)
         console.log('从 loanTerm 获取:', term)
@@ -850,16 +1258,16 @@ export default {
         this.addLog(this.deploymentLogs, `链ID: ${this.getCurrentChainId()}`, 'info')
         this.addLog(this.deploymentLogs, `项目代号: ${this.projectCode}`, 'info')
         this.addLog(this.deploymentLogs, `认购金额: ${this.formatNumber(this.subscriptionAmount)} LPT`, 'info')
-        this.addLog(this.deploymentLogs, `年化利率: ${this.getProjectTargetYield() || 'N/A'}% (项目设定)`, 'info')
-        this.addLog(this.deploymentLogs, `贷款期限: ${this.getProjectLoanTerm() || 'N/A'} 天 (项目设定)`, 'info')
+        this.addLog(this.deploymentLogs, `年化利率: 9.5% (标准设定)`, 'info')
+        this.addLog(this.deploymentLogs, `贷款期限: 12 个月 (标准设定)`, 'info')
         
         // 调用合约服务获取真实合约地址
         const result = await contractTestService.deployContractsWithSubscription({
           subscriptionAmount: this.subscriptionAmount,
-          annualRate: this.getProjectTargetYield() || this.contractTerms.annualRate,
-          loanTerm: this.getProjectLoanTerm() || this.contractTerms.loanTerm,
+          annualRate: 9.5, // 使用标准利率
+          loanTerm: 365, // 使用标准期限 (12个月 = 365天)
           projectCode: this.projectCode,
-          projectName: this.projectData?.name || 'Unknown Project',
+          projectName: this.projectCode, // 使用项目代码作为名称
           walletAddress: this.address,
           chainId: this.getCurrentChainId()
         })
@@ -1103,8 +1511,91 @@ export default {
         const response = await productAPI.getProductByCode(this.projectCode)
         
         if (response.status === 0) {
-          this.projectData = response.data
-          console.log('✅ TradeProjectView: 项目数据加载成功:', this.projectData)
+          // 基于call-mysql-project-table.js的SQL查询结构进行数据映射
+          const project = response.data
+          
+          // 计算认购进度
+          const totalOfferingRaw = parseFloat(project.total_offering_token) || 0
+          const subscribedRaw = parseFloat(project.subscribe_token) || 0
+          const subscriptionProgress = totalOfferingRaw > 0 ? (subscribedRaw / totalOfferingRaw * 100).toFixed(2) : 0
+          
+          const mappedProduct = {
+            // 基础信息 - 完全基于数据库字段
+            id: project.id,
+            code: project.project_code,
+            name: project.project_name,
+            status: project.loan_status,
+            created_at: project.created_at,
+            
+            // 认购信息 - 基于数据库字段
+            totalOffering: totalOfferingRaw > 0 ? `A$${totalOfferingRaw.toLocaleString()}` : 'A$0',
+            subscribed: subscribedRaw > 0 ? `A$${subscribedRaw.toLocaleString()}` : 'A$0',
+            subscriptionProgress: `${subscriptionProgress}%`,
+            
+            // 原始数值用于计算
+            totalOfferingRaw: totalOfferingRaw,
+            subscribedRaw: subscribedRaw,
+            
+            // 物业信息 - 基于数据库字段
+            property_location: project.property_location,
+            property_state: project.property_state,
+            property_type: project.property_type,
+            property_value: project.property_value,
+            property_summary: project.property_summary,
+            
+            // 贷款信息 - 基于数据库字段
+            loan_type: project.loan_type,
+            loan_product: project.loan_product,
+            loan_amount: project.loan_amount,
+            loan_purpose: project.loan_purpose,
+            loan_term_months: project.loan_term_months,
+            
+            // 贷款比率 - 基于数据库字段
+            lvr: project.lvr,
+            interest_rate: project.interest_rate,
+            default_rate: project.default_rate,
+            
+            // 贷款周期 - 基于数据库字段
+            commencement_date: project.commencement_date,
+            expiry_date: project.expiry_date,
+            expected_recovery_date: project.expected_recovery_date,
+            
+            // 前端显示字段 - 基于数据库字段格式化
+            subtitle: `${project.loan_product} - ${project.property_type}`,
+            loanAmount: project.loan_amount ? `A$${parseFloat(project.loan_amount).toLocaleString()}` : 'A$0',
+            loanTerm: `${project.loan_term_months} months`,
+            targetYield: project.interest_rate ? `${project.interest_rate}% p.a.` : 'TBA',
+            image: project.image || this.getProductImage(project.project_code),
+            
+            // 兼容字段（用于模板显示）
+            propertyType: project.property_type,
+            propertyLocation: project.property_location,
+            loanProduct: project.loan_product,
+            propertyValue: project.property_value ? `A$${parseFloat(project.property_value).toLocaleString()}` : 'TBA',
+            ltv: project.lvr ? `${project.lvr}%` : 'TBA'
+          }
+          
+          // 添加计算指标 - 基于数据库字段计算
+          mappedProduct.metrics = {
+            currentElaraPrice: this.calculateTokenPrice(mappedProduct),
+            collateralPropertyValue: project.property_value ? `A$${parseFloat(project.property_value).toLocaleString()}` : 'TBA',
+            rentalIncome: this.calculateRentalIncome(mappedProduct),
+            targetLoanYield: project.interest_rate ? `${project.interest_rate}% p.a.` : 'TBA',
+            loanToValue: project.lvr ? `${project.lvr}%` : 'TBA',
+            defaultRate: project.default_rate ? `${project.default_rate}%` : 'TBA'
+          }
+          
+          // 添加时间信息
+          mappedProduct.timeline = {
+            created: project.created_at,
+            commencement: project.commencement_date,
+            expiry: project.expiry_date,
+            expectedRecovery: project.expected_recovery_date
+          }
+          
+          this.projectData = mappedProduct
+          console.log('✅ TradeProjectView: 项目数据映射成功:', this.projectData)
+          console.log('📊 认购进度:', subscriptionProgress + '%', `(${subscribedRaw}/${totalOfferingRaw})`)
         } else {
           this.projectError = response.message || '获取项目数据失败'
           console.error('❌ TradeProjectView: API返回错误:', response)
@@ -1129,21 +1620,23 @@ export default {
     },
     
     calculateTokenPrice(product) {
-      // 基于目标收益率计算代币价格
+      // 基于数据库字段计算代币价格
       const basePrice = 1.00
-      const yieldMultiplier = (product.targetYield || 6.0) / 6.0
+      const yieldMultiplier = (parseFloat(product.interest_rate) || 6.0) / 6.0
       const adjustedPrice = basePrice * yieldMultiplier
       return `A$${adjustedPrice.toFixed(2)}`
     },
     
     calculateRentalIncome(product) {
-      // 基于房产价值和收益率估算租金收入
-      if (!product.valuation) return 'TBA'
+      // 基于数据库字段计算租金收入
+      if (!product.property_value || product.property_value === 'TBA') {
+        return 'TBA'
+      }
       
-      const valuationStr = product.valuation.replace(/[A$,]/g, '')
-      const valuation = parseFloat(valuationStr)
-      const monthlyYield = (product.targetYield || 6.0) / 12 / 100
-      const estimatedRental = valuation * monthlyYield
+      const propertyValue = parseFloat(product.property_value) || 0
+      const interestRate = parseFloat(product.interest_rate) || 6.0
+      const monthlyYield = interestRate / 12 / 100
+      const estimatedRental = propertyValue * monthlyYield
       
       return `A$${estimatedRental.toLocaleString('en-AU', { maximumFractionDigits: 0 })} / month`
     },
@@ -1727,8 +2220,9 @@ export default {
     validateAmount() {
       const amount = this.subscriptionAmount
       
-      if (amount === null || amount === '' || amount === undefined) {
-        this.amountError = '请输入认购金额'
+      // 如果金额为空或0，不显示错误但也不验证通过
+      if (amount === null || amount === '' || amount === undefined || amount === 0) {
+        this.amountError = null
         this.amountValid = false
         return false
       }
@@ -1747,17 +2241,19 @@ export default {
         return false
       }
       
-      // if (numAmount < this.contractTerms.minSubscription) {
-      //   this.amountError = `认购金额不能少于 ${this.contractTerms.minSubscription} LPT`
-      //   this.amountValid = false
-      //   return false
-      // }
+      // 设置最小值验证（可选）
+      if (numAmount < 1) {
+        this.amountError = '认购金额不能少于1 LPT'
+        this.amountValid = false
+        return false
+      }
       
-      // if (numAmount > this.contractTerms.maxSubscription) {
-      //   this.amountError = `认购金额不能超过 ${this.contractTerms.maxSubscription} LPT`
-      //   this.amountValid = false
-      //   return false
-      // }
+      // 设置最大值验证（可选）
+      if (numAmount > 100000) {
+        this.amountError = '认购金额不能超过100,000 LPT'
+        this.amountValid = false
+        return false
+      }
       
       this.amountError = null
       this.amountValid = true
@@ -1767,7 +2263,13 @@ export default {
     // 处理金额输入
     onAmountInput() {
       this.clearError()
-      this.validateAmount()
+      const isValid = this.validateAmount()
+      console.log('🔍 TradeProjectView: 金额输入验证结果:', {
+        subscriptionAmount: this.subscriptionAmount,
+        amountValid: this.amountValid,
+        isValid: isValid,
+        amountError: this.amountError
+      })
     },
     
     // 格式化哈希地址
@@ -2502,7 +3004,7 @@ export default {
 .main-content {
   padding: 30px 0;
   display: grid;
-  gap: 30px;
+  gap: 0px;
   grid-template-columns: 1fr 1fr;
   grid-template-areas: 
     "project-info project-info"
@@ -2615,6 +3117,7 @@ export default {
   font-weight: 700;
   color: var(--dark-text);
   margin: 0 0 30px 0;
+  width:50px;
 }
 
 .form-section {
@@ -4319,5 +4822,95 @@ export default {
   font-size: 0.8rem;
   margin-top: 5px;
   font-weight: 500;
+}
+
+/* 加载状态样式 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  margin: 20px 0;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+.loading-container h2 {
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.loading-container p {
+  color: #9ca3af;
+  font-size: 16px;
+  margin: 0;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 错误状态样式 */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 12px;
+  margin: 20px 0;
+}
+
+.error-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.error-container h2 {
+  color: #ef4444;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.error-container p {
+  color: #fca5a5;
+  font-size: 16px;
+  margin: 0 0 20px 0;
+}
+
+.error-container .btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.error-container .btn:hover {
+  background: #dc2626;
 }
 </style>

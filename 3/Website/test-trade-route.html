@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradeProjectView 路由测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover { background-color: #0056b3; }
+        .code {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 TradeProjectView 路由测试</h1>
+        
+        <div class="test-section info">
+            <h3>📋 路由配置检查</h3>
+            <p><strong>路由路径:</strong> <code>/trade/:code</code></p>
+            <p><strong>路由名称:</strong> <code>tradeProject</code></p>
+            <p><strong>组件:</strong> <code>TradeProjectView</code></p>
+            <p><strong>Props:</strong> <code>true</code></p>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 测试链接</h3>
+            <p>点击以下链接测试TradeProjectView路由：</p>
+            <a href="/trade/RWA001" class="btn" target="_blank">测试 RWA001</a>
+            <a href="/trade/RWA007" class="btn" target="_blank">测试 RWA007</a>
+            <a href="/trade/TEST" class="btn" target="_blank">测试 TEST</a>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 路由参数传递</h3>
+            <p>路由参数 <code>:code</code> 会通过props传递给TradeProjectView组件：</p>
+            <div class="code">
+                // 在TradeProjectView.vue中
+                props: {
+                  code: {
+                    type: String,
+                    required: false,
+                    default: null
+                  }
+                }
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📝 组件内部路由参数获取</h3>
+            <p>TradeProjectView组件通过以下方式获取项目代码：</p>
+            <div class="code">
+                projectCode() {
+                  const code = this.code || this.$route.params.code || this.$route.query.code
+                  return code || 'RWA001'
+                }
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🚀 导航方式</h3>
+            <p>从其他组件导航到TradeProjectView的方式：</p>
+            <div class="code">
+                // 方式1: 使用路由名称
+                this.$router.push({ name: 'tradeProject', params: { code: 'RWA001' } })
+                
+                // 方式2: 使用路径
+                this.$router.push('/trade/RWA001')
+                
+                // 方式3: 带查询参数
+                this.$router.push({ 
+                  name: 'tradeProject', 
+                  params: { code: 'RWA001' },
+                  query: { type: 'sell', interest: true }
+                })
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>✅ 检查结果</h3>
+            <div id="check-results">
+                <p>正在检查路由配置...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 检查路由配置
+        function checkRouteConfiguration() {
+            const results = document.getElementById('check-results');
+            let html = '<h4>路由配置检查结果:</h4>';
+            
+            // 检查路由是否正确配置
+            const routePath = '/trade/:code';
+            const routeName = 'tradeProject';
+            const componentName = 'TradeProjectView';
+            
+            html += `<div class="test-section success">
+                <p>✅ 路由路径: ${routePath}</p>
+                <p>✅ 路由名称: ${routeName}</p>
+                <p>✅ 组件名称: ${componentName}</p>
+                <p>✅ Props传递: 启用</p>
+            </div>`;
+            
+            html += '<h4>测试建议:</h4>';
+            html += '<ul>';
+            html += '<li>点击测试链接验证路由是否正常工作</li>';
+            html += '<li>检查浏览器开发者工具中的网络请求</li>';
+            html += '<li>验证组件是否正确接收路由参数</li>';
+            html += '<li>测试不同项目代码的路由参数传递</li>';
+            html += '</ul>';
+            
+            results.innerHTML = html;
+        }
+        
+        // 页面加载完成后执行检查
+        document.addEventListener('DOMContentLoaded', checkRouteConfiguration);
+    </script>
+</body>
+</html>

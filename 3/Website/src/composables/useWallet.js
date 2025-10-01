@@ -28,11 +28,12 @@ let initialized = false
 const TOKENS_BY_CHAIN = {
   1: [
     { address: '0x7b21325dcB87A8167A7eFF504ec876C0F520dc17', label: 'PWL-P' },
-    { address: '#', label: 'PWL-I' },
+    { address: '#', label: 'PWL-P' }, //需要替换为实际的PWL-P地址
+    { address: '#', label: 'PWL-I' }, //需要替换为实际的PWL-I地址
   ],
   11155111: [
-    { address: '0xYOUR_PWLP_SEPOLIA', label: 'PWL-P' },
-    { address: '0xYOUR_PWLI_SEPOLIA', label: 'PWL-I' },
+    { address: '0xYOUR_PWLP_SEPOLIA', label: 'PWL-P' }, //需要替换为实际的PWL-P地址
+    { address: '0xYOUR_PWLI_SEPOLIA', label: 'PWL-I' }, //需要替换为实际的PWL-I地址
   ],
 }
 const ERC20_ABI = [

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试getProductByCode功能</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover { background-color: #0056b3; }
+        .btn-success { background-color: #28a745; }
+        .btn-success:hover { background-color: #1e7e34; }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-success { background-color: #28a745; }
+        .status-error { background-color: #dc3545; }
+        .status-warning { background-color: #ffc107; }
+        .status-info { background-color: #17a2b8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 测试getProductByCode功能</h1>
+        
+        <div class="test-section info">
+            <h3>📋 测试说明</h3>
+            <p>测试TradeProjectView使用的getProductByCode API功能是否正常工作。</p>
+        </div>
+
+        <div class="test-section">
+            <h3>1. 后端服务器状态检查</h3>
+            <button class="btn" onclick="checkBackendStatus()">检查后端状态</button>
+            <div id="backendStatus" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>2. 测试getProductByCode API</h3>
+            <button class="btn btn-success" onclick="testGetProductByCode('RWA001')">测试 RWA001</button>
+            <button class="btn btn-success" onclick="testGetProductByCode('RWA002')">测试 RWA002</button>
+            <button class="btn btn-success" onclick="testGetProductByCode('RWA007')">测试 RWA007</button>
+            <div id="apiResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>3. 模拟前端API调用</h3>
+            <button class="btn" onclick="simulateFrontendCall()">模拟TradeProjectView API调用</button>
+            <div id="frontendResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>4. 数据映射验证</h3>
+            <button class="btn" onclick="validateDataMapping()">验证数据映射</button>
+            <div id="mappingResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>5. 错误处理测试</h3>
+            <button class="btn" onclick="testErrorHandling()">测试错误处理</button>
+            <div id="errorResult" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+        
+        async function checkBackendStatus() {
+            const resultDiv = document.getElementById('backendStatus');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '🔄 正在检查后端服务器状态...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/project`, { method: 'HEAD' });
+                resultDiv.innerHTML = `✅ 后端服务器运行正常
+状态码: ${response.status}
+服务器地址: ${API_BASE}
+响应头: ${JSON.stringify([...response.headers.entries()], null, 2)}`;
+                resultDiv.style.backgroundColor = '#d4edda';
+            } catch (error) {
+                resultDiv.innerHTML = `❌ 后端服务器连接失败
+错误: ${error.message}
+建议: 请确保后端服务器已启动在端口3000`;
+                resultDiv.style.backgroundColor = '#f8d7da';
+            }
+        }
+        
+        async function testGetProductByCode(code) {
+            const resultDiv = document.getElementById('apiResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `🔄 正在测试获取项目 ${code}...`;
+            
+            try {
+                const response = await fetch(`${API_BASE}/project/${code}`);
+                const data = await response.json();
+                
+                if (data.status === 0 && data.data) {
+                    resultDiv.innerHTML = `✅ 成功获取项目 ${code}
+状态码: ${response.status}
+项目数据:
+${JSON.stringify(data, null, 2)}
+
+关键字段验证:
+- 项目代码: ${data.data.project_code || 'N/A'}
+- 项目名称: ${data.data.project_name || 'N/A'}
+- 项目状态: ${data.data.loan_status || 'N/A'}
+- 认购代币: ${data.data.subscribe_token || 'N/A'}
+- 总发行代币: ${data.data.total_offering_token || 'N/A'}`;
+                    resultDiv.style.backgroundColor = '#d4edda';
+                } else {
+                    resultDiv.innerHTML = `⚠️ API返回错误状态
+状态码: ${response.status}
+错误信息: ${data.message || '未知错误'}
+响应数据:
+${JSON.stringify(data, null, 2)}`;
+                    resultDiv.style.backgroundColor = '#fff3cd';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `❌ 获取项目 ${code} 失败
+错误: ${error.message}
+可能原因:
+1. 后端服务器未启动
+2. 网络连接问题
+3. API端点不存在`;
+                resultDiv.style.backgroundColor = '#f8d7da';
+            }
+        }
+        
+        async function simulateFrontendCall() {
+            const resultDiv = document.getElementById('frontendResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '🔄 正在模拟前端API调用...';
+            
+            try {
+                // 模拟TradeProjectView中的API调用
+                console.log('📊 API: 从数据库根据代码获取项目: RWA001');
+                
+                const response = await fetch(`${API_BASE}/project/RWA001`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('📊 API: 数据库返回项目详情:', result);
+                
+                if (result.status === 0 && result.data) {
+                    // 模拟前端数据映射
+                    const mappedProduct = {
+                        id: result.data.id,
+                        code: result.data.project_code,
+                        name: result.data.project_name,
+                        status: result.data.loan_status,
+                        totalOffering: result.data.total_offering_token ? `A$${result.data.total_offering_token.toLocaleString()}` : 'A$0',
+                        subscribed: result.data.subscribe_token ? `A$${result.data.subscribe_token.toLocaleString()}` : 'A$0',
+                        propertyLocation: result.data.property_location,
+                        propertyType: result.data.property_type,
+                        loanProduct: result.data.loan_product,
+                        loanAmount: result.data.loan_amount,
+                        interestRate: result.data.interest_rate
+                    };
+                    
+                    resultDiv.innerHTML = `✅ 前端API调用成功
+原始API响应:
+${JSON.stringify(result, null, 2)}
+
+映射后的前端数据:
+${JSON.stringify(mappedProduct, null, 2)}
+
+TradeProjectView应该能够正常显示项目信息。`;
+                    resultDiv.style.backgroundColor = '#d4edda';
+                } else {
+                    resultDiv.innerHTML = `❌ API返回错误状态
+状态码: ${response.status}
+错误信息: ${result.message}
+这会导致TradeProjectView显示"Failed to Load Project"错误。`;
+                    resultDiv.style.backgroundColor = '#f8d7da';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `❌ 前端API调用失败
+错误: ${error.message}
+这会导致TradeProjectView显示网络错误。`;
+                resultDiv.style.backgroundColor = '#f8d7da';
+            }
+        }
+        
+        async function validateDataMapping() {
+            const resultDiv = document.getElementById('mappingResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '🔄 正在验证数据映射...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/project/RWA001`);
+                const data = await response.json();
+                
+                if (data.status === 0 && data.data) {
+                    const mappingValidation = {
+                        '基础信息': {
+                            'id': data.data.id ? '✅' : '❌',
+                            'project_code': data.data.project_code ? '✅' : '❌',
+                            'project_name': data.data.project_name ? '✅' : '❌',
+                            'loan_status': data.data.loan_status ? '✅' : '❌'
+                        },
+                        '认购信息': {
+                            'subscribe_token': data.data.subscribe_token ? '✅' : '❌',
+                            'total_offering_token': data.data.total_offering_token ? '✅' : '❌'
+                        },
+                        '物业信息': {
+                            'property_location': data.data.property_location ? '✅' : '❌',
+                            'property_type': data.data.property_type ? '✅' : '❌',
+                            'property_value': data.data.property_value ? '✅' : '❌'
+                        },
+                        '贷款信息': {
+                            'loan_product': data.data.loan_product ? '✅' : '❌',
+                            'loan_amount': data.data.loan_amount ? '✅' : '❌',
+                            'interest_rate': data.data.interest_rate ? '✅' : '❌',
+                            'loan_term_months': data.data.loan_term_months ? '✅' : '❌'
+                        }
+                    };
+                    
+                    resultDiv.innerHTML = `✅ 数据映射验证完成
+字段验证结果:
+${JSON.stringify(mappingValidation, null, 2)}
+
+原始数据样本:
+${JSON.stringify(data.data, null, 2)}`;
+                    resultDiv.style.backgroundColor = '#d4edda';
+                } else {
+                    resultDiv.innerHTML = `❌ 无法验证数据映射
+API返回错误: ${data.message}`;
+                    resultDiv.style.backgroundColor = '#f8d7da';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `❌ 数据映射验证失败
+错误: ${error.message}`;
+                resultDiv.style.backgroundColor = '#f8d7da';
+            }
+        }
+        
+        async function testErrorHandling() {
+            const resultDiv = document.getElementById('errorResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '🔄 正在测试错误处理...';
+            
+            const testCases = [
+                { name: '不存在的项目代码', code: 'NONEXISTENT' },
+                { name: '空项目代码', code: '' },
+                { name: '特殊字符', code: 'RWA@#$' }
+            ];
+            
+            let results = [];
+            
+            for (const testCase of testCases) {
+                try {
+                    const response = await fetch(`${API_BASE}/project/${testCase.code}`);
+                    const data = await response.json();
+                    
+                    if (data.status === 1) {
+                        results.push(`✅ ${testCase.name}: 正确处理错误 (${data.message})`);
+                    } else {
+                        results.push(`⚠️ ${testCase.name}: 未返回预期错误状态`);
+                    }
+                } catch (error) {
+                    results.push(`❌ ${testCase.name}: 网络错误 (${error.message})`);
+                }
+            }
+            
+            resultDiv.innerHTML = `错误处理测试结果:
+${results.join('\n')}
+
+TradeProjectView应该能够正确处理这些错误情况。`;
+            
+            if (results.every(r => r.includes('✅'))) {
+                resultDiv.style.backgroundColor = '#d4edda';
+            } else {
+                resultDiv.style.backgroundColor = '#fff3cd';
+            }
+        }
+        
+        // 页面加载时自动检查后端状态
+        window.onload = function() {
+            setTimeout(checkBackendStatus, 1000);
+        };
+    </script>
+</body>
+</html>

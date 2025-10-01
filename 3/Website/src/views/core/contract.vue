@@ -1,6 +1,6 @@
-<template>
+<!-- <template>
   <div class="contract-page">
-    <!-- 合同头部 -->
+    <!-- 合同头部 
     <div class="contract-header">
       <div class="contract-header-content">
         <button class="back-btn" @click="goBack">
@@ -13,9 +13,9 @@
       </div>
     </div>
 
-    <!-- 合同内容 -->
+    <!-- 合同内容 
     <div class="contract-content">
-      <!-- 合同信息卡片 -->
+      <!-- 合同信息卡片 
       <div class="contract-card">
         <div class="contract-card-header">
           <div class="contract-icon">📄</div>
@@ -28,7 +28,7 @@
           </div>
         </div>
 
-        <!-- 房产信息 -->
+        <!-- 房产信息 
         <div class="contract-section">
           <h3 class="section-title">
             <span class="section-icon">🏠</span>
@@ -62,7 +62,7 @@
           </div>
         </div>
 
-        <!-- 合同增发机制 -->
+        <!-- 合同增发机制 
         <div class="contract-section">
           <h3 class="section-title">
             <span class="section-icon">🔄</span>
@@ -96,7 +96,7 @@
           </div>
         </div>
 
-        <!-- 认购信息 -->
+        <!-- 认购信息 
         <div class="contract-section">
           <h3 class="section-title">
             <span class="section-icon">💰</span>
@@ -134,7 +134,7 @@
           </div>
         </div>
 
-        <!-- 利息计息周期 -->
+        <!-- 利息计息周期 
         <div class="contract-section">
           <h3 class="section-title">
             <span class="section-icon">📅</span>
@@ -168,7 +168,7 @@
           </div>
         </div>
 
-        <!-- 发息日信息 -->
+        <!-- 发息日信息 
         <div class="contract-section">
           <h3 class="section-title">
             <span class="section-icon">💸</span>
@@ -202,7 +202,7 @@
           </div>
         </div>
 
-        <!-- 合约条款 -->
+        <!-- 合约条款 
         <div class="contract-section">
           <h3 class="section-title">
             <span class="section-icon">📋</span>
@@ -228,7 +228,7 @@
           </div>
         </div>
 
-        <!-- 操作按钮 -->
+        <!-- 操作按钮 
         <div class="contract-actions">
           <button class="action-btn primary" @click="viewTransaction">
             View Transaction Details
@@ -780,4 +780,4 @@ onMounted(() => {
     max-width: 200px;
   }
 }
-</style>
+</style> -->

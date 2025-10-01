@@ -1,11 +1,11 @@
-<template>
+<!-- <template>
   <div class="test-contract-container">
     <div class="test-header">
       <h1>智能合约测试页面</h1>
       <p>测试 RWA 合约部署和交互功能</p>
     </div>
 
-    <!-- 连接状态 -->
+    <!-- 连接状态 
     <div class="connection-status">
       <div class="status-item">
         <span class="status-label">钱包状态:</span>
@@ -27,7 +27,7 @@
       </div>
     </div>
 
-    <!-- 操作按钮 -->
+    操作按钮 
     <div class="action-buttons">
       <button 
         v-if="!connected" 
@@ -47,7 +47,7 @@
       </button>
     </div>
 
-    <!-- 项目认购区域 -->
+    项目认购区域 
     <div class="test-section">
       <h2>项目认购测试</h2>
       <div class="section-content">
@@ -149,7 +149,7 @@
             <span v-else>BUY & 部署合约</span>
           </button>
           <div class="button-hint" v-if="!isFormValid">
-            请填写完整的认购信息
+            Please fill in the complete subscription information
           </div>
         </div>
         
@@ -189,7 +189,7 @@
       </div>
     </div>
 
-    <!-- 合约交互区域 -->
+    合约交互区域 
     <div class="test-section">
       <h2>合约交互测试</h2>
       <div class="section-content">
@@ -279,13 +279,13 @@
       </div>
     </div>
 
-    <!-- 错误显示 -->
+     错误显示 
     <div v-if="error" class="error-message">
       <h3>错误信息</h3>
       <p>{{ error }}</p>
     </div>
 
-    <!-- 成功消息 -->
+    成功消息 
     <div v-if="successMessage" class="success-message">
       <h3>操作成功</h3>
       <p>{{ successMessage }}</p>
@@ -1167,4 +1167,4 @@ watch(contractAddresses, (newVal) => {
     text-align: left;
   }
 }
-</style>
+</style> -->

@@ -275,8 +275,8 @@
 
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
-import { contractService } from '@/service/contractService.js'
-import { contractAddressService, contractAddressUtils } from '@/service/contractAddressService.js'
+import { unifiedContractService as contractService } from '@/service/unifiedContractService.js'
+import { unifiedContractService as contractAddressService, contractUtils as contractAddressUtils } from '@/service/unifiedContractService.js'
 import { ethers } from 'ethers'
 
 // 响应式数据

@@ -10,68 +10,63 @@
         <span class="crumb-current">Profile</span>
       </nav>
     </header>
-
-
       
     <!-- 标题块 -->
     <div class="container head">
-      <div class="avatar"><span class="avatar-initial">{{ userInitial }}</span></div>
+      <div class="avatar">
+        <span class="avatar-initial">{{ userInitial }}</span>
+        </div>
       <div>
         <h1 class="title">{{ userName }}</h1>
-        <!-- <p class="subtitle">@{{ userEmail }}</p> -->
       </div>
+     
     </div>
     <form class="container form" @submit.prevent="onSave">
 
-    <div >
-       <!-- KYC -->
-      <div class="field">
-        <label class="label">KYC verification <span class="req">*</span></label>
-        <div class="kyc-banner" :class="isVerified ? 'green' : 'orange'" role="status">
-          <span class="icon">
-            <svg viewBox="0 0 24 24" class="i">
-              <path d="M12 2 2 7l10 5 10-5-10-5Zm0 7L2 4v13l10 5 10-5V4L12 9Zm0 9.5-7-3.5V9l7 3.5V20.5Z"/>
-            </svg>
+    <!-- 用户联系信息 -->
+    <div class="user-contact-info">
+      <!--email and phone-->
+      <div>
+        <label class="label">Personal Information <span class="req">*</span></label>
+        <div class="contact-item">
+          <!-- <span class="contact-icon">📧</span> -->
+          <span class="contact-label">Email:</span>
+          <span class="contact-value">
+            {{ userEmail || 'Not provided' }}
+            <span class="contact-value email-status" :class="emailVerificationClass">{{ emailVerificationText }}</span>
           </span>
-          <!-- 文案：未验证=Verify now；已验证=Verified(+对勾) -->
-          <span v-if="!isVerified">Verify now</span>
-          <span v-else class="verified">
-            <svg viewBox="0 0 24 24" class="i"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
-            Verified
+        </div>
+        <!-- Email Verification Status -->
+        <div class="contact-item" style="margin-left: 60px;">
+          <button v-if="!emailVerified" class="btn-small" type="button" @click="sendEmailVerification">
+            Verify Email
+          </button>
+        </div>
+        <div class="contact-item">
+          <!-- <span class="contact-icon">📱</span> -->
+          <span class="contact-label">Phone:</span>
+          <span class="contact-value">
+            {{ userPhone || 'Not provided' }}
           </span>
-          <!-- 右侧按钮：未验证=Start；已验证=Cancel -->
-          <button v-if="!isVerified" class="link" type="button" @click="verifyKYC">Start</button>
-          <button v-else class="link danger" type="button" @click="cancelKYC">Cancel verification</button>
+        </div>
+        <div class="contact-item">
+          <span class="contact-label">Password:</span>
+          <button class="btn-small" type="button" >change my password</button>
+        </div>
+        <div v-if="userLoading" class="contact-item loading-item">
+          <span class="contact-icon">🔄</span>
+          <span class="contact-label">Status:</span>
+          <span class="contact-value">Loading user information...</span>
+        </div>
+        <div v-if="userError && !userLoading" class="contact-item error-item">
+          <span class="contact-icon">⚠️</span>
+          <span class="contact-label">Status:</span>
+          <span class="contact-value">{{ userError }}</span>
         </div>
       </div>
 
-
-
-      <!-- Whitelist Application Component -->
-      <WhitelistApplication 
-        v-if="isVerified"
-        :is-kyc-verified="isVerified"
-        :user-info="userInfo"
-        @success="handleWhitelistSuccess"
-        @error="handleWhitelistError"
-        @info="handleWhitelistInfo"
-      />
-
-    </div>
-      <!-- Email with verification -->
-      <!-- <div class="field">
-        <label class="label">Email Address</label>
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <input class="input" type="email" placeholder="name@example.com" v-model.trim="form.email" style="flex:1;" />
-          <button class="btn light" type="button" @click="sendEmailCode" :disabled="emailCodeSent || !form.email || !isValidEmail(form.email)">Send Code</button>
-        </div>
-        <div v-if="emailCodeSent" style="margin-top: 10px; display: flex; gap: 8px; align-items: center;">
-          <input class="input" type="text" placeholder="Enter verification code" v-model.trim="form.emailCode" style="flex:1;" />
-          <button class="btn orange" type="button" @click="verifyEmailCode" :disabled="!form.emailCode">Verify</button>
-        </div>
-        <div v-if="emailVerified" style="margin-top: 8px; color: #17683a; font-weight: 600;">Email verified and bound to account.</div>
-      <!-- 邮箱验证弹窗 -->
-      <!-- <div v-if="showEmailModal" class="modal-mask">
+        <!-- 邮箱验证弹窗 -->
+      <div v-if="showEmailModal" class="modal-mask">
         <div class="modal-wrapper">
           <div class="modal-container">
             <h2 style="margin-bottom:8px;">Check Your Email</h2>
@@ -92,42 +87,45 @@
             </div>
           </div>
         </div>
-      </div> -->
-      <!-- </div> -->
+      </div> 
 
-          <!-- KYC & Whitelist Status Section -->
-          <div class="status-section">
+
+    </div>
+      <!-- KYC & Whitelist Status Section -->
+      <div class="status-section">
         <h3 class="status-title">Account Status</h3>
-        
-        <!-- KYC Level Display -->
-        <div class="status-item">
-          <div class="status-label">
-            <span class="status-icon kyc-icon">
-              <svg viewBox="0 0 24 24" class="i">
-                <path d="M12 2 2 7l10 5 10-5-10-5Zm0 7L2 4v13l10 5 10-5V4L12 9Zm0 9.5-7-3.5V9l7 3.5V20.5Z"/>
-              </svg>
-            </span>
-            KYC Level
-          </div>
-          <div class="status-value kyc-level">
+       <!-- KYC -->
+       <div class="field">
+        <label class="label">KYC verification <span class="req">*</span></label>
+        <div class="kyc-banner" :class="isVerified ? 'green' : 'orange'" role="status">
+          <span class="icon">
+            <svg viewBox="0 0 24 24" class="i">
+              <path d="M12 2 2 7l10 5 10-5-10-5Zm0 7L2 4v13l10 5 10-5V4L12 9Zm0 9.5-7-3.5V9l7 3.5V20.5Z"/>
+            </svg>
+          </span>
+          <!-- 文案：未验证=Verify now；已验证=Verified(+对勾) -->
+          <span v-if="!isVerified">Verify now</span>
+          <span v-else class="verified">
+            <svg viewBox="0 0 24 24" class="i"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+            Verified
             <span class="level-badge" :class="kycLevelClass">{{ kycLevelText }}</span>
-          </div>
+          </span>
+          <!-- 右侧按钮：未验证=Start；已验证=Cancel -->
+          <button v-if="!isVerified" class="link" type="button" @click="verifyKYC">Start</button>
+          <button v-else class="link danger" type="button" @click="cancelKYC">Cancel verification</button>
         </div>
+      </div>
 
-        <!-- Whitelist Status Display -->
-        <div class="status-item">
-          <div class="status-label">
-            <span class="status-icon whitelist-icon">
-              <svg viewBox="0 0 24 24" class="i">
-                <path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/>
-              </svg>
-            </span>
-            Whitelist Status
-          </div>
-          <div class="status-value whitelist-status">
-            <span class="status-badge" :class="whitelistStatusClass">{{ whitelistStatusText }}</span>
-          </div>
-        </div>
+      <!-- Whitelist Application Component -->
+      <WhitelistApplication 
+        v-if="isVerified"
+        :is-kyc-verified="isVerified"
+        :user-info="userInfo"
+        @success="handleWhitelistSuccess"
+        @error="handleWhitelistError"
+        @info="handleWhitelistInfo"
+      />
+ 
 
         <!-- Trading Permission Display -->
         <div class="status-item">
@@ -141,10 +139,22 @@
           </div>
           <div class="status-value trading-permission">
             <span class="permission-badge" :class="tradingPermissionClass">{{ tradingPermissionText }}</span>
+            <div class="permission-details">
+              <span class="permission-description">{{ tradingPermissionDescription }}</span>
+              <div v-if="tradingPermissionRequirements.length > 0" class="permission-requirements">
+                <span class="requirements-label">Requirements:</span>
+                <ul class="requirements-list">
+                  <li v-for="requirement in tradingPermissionRequirements" :key="requirement" 
+                      :class="{ 'requirement-met': isRequirementMet(requirement) }">
+                    <span class="requirement-icon">{{ isRequirementMet(requirement) ? '✅' : '❌' }}</span>
+                    {{ requirement }}
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-
       <!-- 底部按钮 -->
       <div class="actions bottom">
         <button class="btn light" type="button" @click="onCancel">Cancel</button>
@@ -175,7 +185,7 @@ import {
   setUserInfo,
   USER_INFO_EVENT
 } from '@/service/userService'
-import { contractService } from '@/service/contractService'
+import { unifiedContractService as contractService } from '@/service/unifiedContractService'
 
 export default {
   name: 'ProfileView',
@@ -203,16 +213,122 @@ export default {
   userInfo: getUserInfo(),
   // 状态信息
   whitelistStatus: 'none',
-  kycLevel: getKycLevel()
+  kycLevel: getKycLevel(),
+  // API获取的用户数据
+  apiUserData: null,
+  userLoading: false,
+  userError: null
     }
   },
   computed:{
     isVerified(){ return this.kycStatus === KYC_STATUS.VERIFIED },
     isPending(){ return this.kycStatus === KYC_STATUS.PENDING },
     // 用户信息计算属性
-    userName(){ return getUserName() },
-    userInitial(){ return getUserInitial() },
-    userEmail(){ return getUserEmail() },
+    userName(){ 
+      // 多重fallback策略
+      if (this.apiUserData?.name) {
+        return this.apiUserData.name
+      }
+      
+      const localName = getUserName()
+      if (localName) {
+        return localName
+      }
+      
+      // 从邮箱生成用户名
+      const email = this.userEmail
+      if (email && email.includes('@')) {
+        return email.split('@')[0]
+      }
+      
+      return 'User'
+    },
+    
+    userInitial(){ 
+      // 多重fallback策略
+      if (this.apiUserData?.name) {
+        return this.apiUserData.name.charAt(0).toUpperCase()
+      }
+      
+      const localInitial = getUserInitial()
+      if (localInitial) {
+        return localInitial
+      }
+      
+      // 从邮箱生成首字母
+      const email = this.userEmail
+      if (email && email.includes('@')) {
+        return email.charAt(0).toUpperCase()
+      }
+      
+      return 'U'
+    },
+    
+    userEmail(){ 
+      // 多重fallback策略
+      if (this.apiUserData?.email) {
+        return this.apiUserData.email
+      }
+      
+      const localEmail = getUserEmail()
+      if (localEmail) {
+        return localEmail
+      }
+      
+      // 从localStorage获取记住的邮箱
+      const rememberEmail = localStorage.getItem('remember_email')
+      if (rememberEmail) {
+        return rememberEmail
+      }
+      
+      return ''
+    },
+    
+    userPhone() {
+      // 多重fallback策略
+      if (this.apiUserData?.phone) {
+        return this.apiUserData.phone
+      }
+      
+      // 从本地存储获取手机号
+      const userInfo = getUserInfo()
+      if (userInfo.phone) {
+        return userInfo.phone
+      }
+      
+      return ''
+    },
+    
+    // Email验证状态
+    emailVerificationText() {
+      if (this.emailVerified) {
+        return 'Verified'
+      } else if (this.emailCodeSent) {
+        return 'Verification Sent'
+      } else {
+        return 'Not Verified'
+      }
+    },
+    
+    emailVerificationIcon() {
+      if (this.emailVerified) {
+        return '✅'
+      } else if (this.emailCodeSent) {
+        return '📧'
+      } else {
+        return '❌'
+      }
+    },
+    
+    emailVerificationClass() {
+      if (this.emailVerified) {
+        return 'email-verified'
+      } else if (this.emailCodeSent) {
+        return 'email-pending'
+      } else {
+        return 'email-unverified'
+      }
+    },
     
     // KYC等级显示
     kycLevelText() {
@@ -275,6 +391,45 @@ export default {
       } else {
         return 'permission-none'
       }
+    },
+    
+    // 交易权限详细描述
+    tradingPermissionDescription() {
+      if (this.kycLevel >= KYC_LEVELS.LEVEL_2 && this.whitelistStatus === 'approved') {
+        return 'Complete trading access to all RWA products and features'
+      } else if (this.kycLevel >= KYC_LEVELS.LEVEL_2) {
+        return 'Limited trading access - whitelist approval required for full access'
+      } else {
+        return 'Trading access requires KYC verification and whitelist approval'
+      }
+    },
+    
+    // 交易权限要求列表
+    tradingPermissionRequirements() {
+      const requirements = []
+      
+      // KYC要求
+      if (this.kycLevel < KYC_LEVELS.LEVEL_2) {
+        requirements.push('Complete KYC verification (Level 2+)')
+      }
+      
+      // 白名单要求
+      if (this.whitelistStatus !== 'approved') {
+        if (this.whitelistStatus === 'none') {
+          requirements.push('Apply for whitelist approval')
+        } else if (this.whitelistStatus === 'pending') {
+          requirements.push('Wait for whitelist approval')
+        } else if (this.whitelistStatus === 'rejected') {
+          requirements.push('Reapply for whitelist approval')
+        }
+      }
+      
+      // 其他要求（如果有的话）
+      if (this.kycLevel >= KYC_LEVELS.LEVEL_2 && this.whitelistStatus === 'approved') {
+        requirements.push('All requirements met')
+      }
+      
+      return requirements
     }
   },
   watch: {
@@ -311,7 +466,7 @@ export default {
       immediate: false
     }
   },
-  mounted(){
+  async mounted(){
     // 刷新函数：从 localStorage 读取最新状态
     const refresh = () => { 
       this.kycStatus = getKycStatus()
@@ -327,7 +482,21 @@ export default {
     refreshUserInfo()
     refreshStatus()
     
-    // 2) 标签激活（从 /kycService 返回就会触发）
+    // 2) 立即初始化用户信息显示
+    this.initializeUserDisplay()
+    
+    // 3) 从API获取用户信息
+    await this.loadUserFromAPI()
+    
+    // 3) 监听登录状态变化
+    const onAuthChange = () => {
+      console.log('🔄 ProfileView: 检测到登录状态变化，重新加载用户信息')
+      this.loadUserFromAPI()
+    }
+    window.addEventListener('auth-changed', onAuthChange)
+    this._offAuthChange = () => window.removeEventListener('auth-changed', onAuthChange)
+    
+    // 4) 标签激活（从 /kycService 返回就会触发）
     const onVis = () => document.visibilityState === 'visible' && (refresh(), refreshUserInfo(), refreshStatus())
     document.addEventListener('visibilitychange', onVis)
     this._offVis = () => document.removeEventListener('visibilitychange', onVis)
@@ -377,8 +546,226 @@ export default {
     this._offAfterEach && this._offAfterEach()
     this._offUserInfo && this._offUserInfo()
     this._offKycSuccess && this._offKycSuccess()
+    this._offAuthChange && this._offAuthChange()
   },
   methods:{
+    // 初始化用户信息显示
+    initializeUserDisplay() {
+      console.log('🚀 ProfileView: 初始化用户信息显示')
+      
+      // 立即尝试显示本地存储的用户信息
+      const localUserInfo = getUserInfo()
+      const rememberEmail = localStorage.getItem('remember_email')
+      
+      if (localUserInfo.name || localUserInfo.email || rememberEmail) {
+        this.apiUserData = {
+          name: localUserInfo.name || (rememberEmail ? rememberEmail.split('@')[0] : ''),
+          email: localUserInfo.email || rememberEmail || '',
+          phone: localUserInfo.phone || '',
+          firstName: localUserInfo.firstName || '',
+          lastName: localUserInfo.lastName || ''
+        }
+        console.log('✅ ProfileView: 立即显示本地用户信息:', this.apiUserData)
+      }
+    },
+    
+    // 从API获取用户信息
+    async loadUserFromAPI() {
+      try {
+        this.userLoading = true
+        this.userError = null
+        console.log('🔄 ProfileView: 开始获取用户信息...')
+        
+        // 检查用户是否已登录
+        const isLoggedIn = localStorage.getItem('isLoggedIn')
+        const token = localStorage.getItem('token')
+        const rememberEmail = localStorage.getItem('remember_email')
+        
+        console.log('📊 ProfileView: 登录状态检查:', { isLoggedIn, hasToken: !!token, rememberEmail })
+        
+        // 如果用户未登录，尝试使用本地存储的信息
+        if (!isLoggedIn || !token) {
+          console.log('⚠️ ProfileView: 用户未登录，使用本地存储信息')
+          
+          // 从本地存储获取用户信息
+          const localUserInfo = getUserInfo()
+          if (localUserInfo.name || localUserInfo.email) {
+            this.apiUserData = {
+              name: localUserInfo.name,
+              email: localUserInfo.email,
+              phone: localUserInfo.phone,
+              firstName: localUserInfo.firstName,
+              lastName: localUserInfo.lastName
+            }
+            console.log('✅ ProfileView: 使用本地存储用户信息:', this.apiUserData)
+            return
+          }
+          
+          // 如果有记住的邮箱，使用它
+          if (rememberEmail) {
+            this.apiUserData = {
+              email: rememberEmail,
+              name: rememberEmail.split('@')[0] // 使用邮箱前缀作为默认用户名
+            }
+            console.log('✅ ProfileView: 使用记住的邮箱信息:', this.apiUserData)
+            return
+          }
+          
+          this.userError = '用户未登录，请先登录'
+          return
+        }
+        
+        // 构建请求头
+        const headers = {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+        
+        console.log('🔑 ProfileView: 使用token进行API请求')
+        
+        // 尝试多个可能的API端点
+        const apiEndpoints = [
+          'http://localhost:3000/user/login',
+          'http://localhost:3000/user/userinfo',
+          'http://localhost:3000/api/user',
+          'http://localhost:3000/user'
+        ]
+        
+        let userData = null
+        let lastError = null
+        
+        // 尝试每个端点
+        for (const endpoint of apiEndpoints) {
+          try {
+            console.log(`🔍 ProfileView: 尝试API端点: ${endpoint}`)
+            
+            const response = await fetch(endpoint, {
+              method: 'GET',
+              headers: headers,
+            })
+            
+            console.log(`📡 ProfileView: ${endpoint} 响应状态:`, response.status)
+            
+            if (response.ok) {
+              const data = await response.json()
+              console.log(`✅ ProfileView: ${endpoint} 返回数据:`, data)
+              
+              // 处理不同的响应格式
+              if (data.status === 0 && data.data) {
+                userData = data.data
+              } else if (data.user_email || data.name || data.email) {
+                userData = data
+              }
+              
+              if (userData) {
+                console.log(`✅ ProfileView: 从 ${endpoint} 成功获取用户数据`)
+                break
+              }
+            } else if (response.status === 401) {
+              console.warn(`⚠️ ProfileView: ${endpoint} 认证失败`)
+              lastError = '认证失败，token可能已过期'
+            } else {
+              console.warn(`⚠️ ProfileView: ${endpoint} 返回错误:`, response.status)
+              lastError = `API请求失败: ${response.status} ${response.statusText}`
+            }
+          } catch (error) {
+            console.warn(`❌ ProfileView: ${endpoint} 请求失败:`, error.message)
+            lastError = error.message
+          }
+        }
+        
+        if (userData) {
+          console.log('✅ ProfileView: 成功获取用户数据:', userData)
+          
+          // 保存API获取的用户数据
+          this.apiUserData = userData
+          
+          // 处理并更新用户信息
+          const processedUserData = {
+            // 处理邮箱字段
+            email: userData.user_email || userData.email || userData.userEmail,
+            // 处理姓名字段
+            name: userData.user_name || userData.name || userData.userName,
+            // 处理电话字段
+            phone: userData.user_phone || userData.phone || userData.userPhone,
+            // 处理其他字段
+            firstName: userData.firstName || userData.first_name,
+            lastName: userData.lastName || userData.last_name,
+            id: userData.user_id || userData.id || userData.userId
+          }
+          
+          // 过滤掉空值
+          const validUserData = Object.fromEntries(
+            Object.entries(processedUserData).filter(([_, value]) => value)
+          )
+          
+          if (Object.keys(validUserData).length > 0) {
+            const updatedUserInfo = {
+              ...getUserInfo(),
+              ...validUserData
+            }
+            
+            // 更新本地用户信息
+            setUserInfo(updatedUserInfo)
+            this.userInfo = updatedUserInfo
+            
+            console.log('✅ ProfileView: 本地用户信息已更新:', updatedUserInfo)
+          }
+        } else {
+          console.warn('⚠️ ProfileView: 所有API端点都失败，使用本地存储信息')
+          
+          // 如果所有API都失败，使用本地存储信息
+          const localUserInfo = getUserInfo()
+          if (localUserInfo.name || localUserInfo.email) {
+            this.apiUserData = {
+              name: localUserInfo.name,
+              email: localUserInfo.email,
+              phone: localUserInfo.phone
+            }
+            console.log('✅ ProfileView: 使用本地存储作为fallback:', this.apiUserData)
+          } else {
+            this.userError = lastError || '无法获取用户信息'
+          }
+        }
+        
+      } catch (error) {
+        console.error('❌ ProfileView: 获取用户信息失败:', error)
+        
+        // 检查是否是网络错误
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+          this.userError = '网络连接失败，使用本地存储信息'
+          
+          // 网络失败时使用本地存储
+          const localUserInfo = getUserInfo()
+          if (localUserInfo.name || localUserInfo.email) {
+            this.apiUserData = {
+              name: localUserInfo.name,
+              email: localUserInfo.email,
+              phone: localUserInfo.phone
+            }
+            console.log('✅ ProfileView: 网络失败，使用本地存储:', this.apiUserData)
+          }
+        } else {
+          this.userError = `获取用户信息失败: ${error.message}`
+        }
+      } finally {
+        this.userLoading = false
+        console.log('🏁 ProfileView: 用户信息加载完成')
+      }
+    },
+    
+    // 检查要求是否满足
+    isRequirementMet(requirement) {
+      if (requirement.includes('KYC verification')) {
+        return this.kycLevel >= KYC_LEVELS.LEVEL_2
+      } else if (requirement.includes('whitelist approval')) {
+        return this.whitelistStatus === 'approved'
+      } else if (requirement.includes('All requirements met')) {
+        return this.kycLevel >= KYC_LEVELS.LEVEL_2 && this.whitelistStatus === 'approved'
+      }
+      return false
+    },
+    
     // 加载状态信息
     async loadStatusInfo() {
       try {
@@ -420,6 +807,38 @@ export default {
     // 校验邮箱格式
     isValidEmail(email) {
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    },
+
+    // 发送邮箱验证
+    async sendEmailVerification() {
+      const email = this.userEmail;
+      if (!email || !this.isValidEmail(email)) {
+        this.$emit('notify', 'Please provide a valid email address');
+        return;
+      }
+
+      try {
+        console.log('📧 发送邮箱验证到:', email);
+        
+        // 调用后端API发送验证邮件
+        const res = await fetch(import.meta.env.VITE_API_EmailVerify || 'http://localhost:3000/api/email/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_email: email })
+        });
+
+        if (res.ok) {
+          this.emailCodeSent = true;
+          this.$emit('notify', 'Verification email sent successfully');
+          console.log('✅ 邮箱验证邮件发送成功');
+        } else {
+          this.$emit('notify', 'Failed to send verification email');
+          console.error('❌ 邮箱验证邮件发送失败:', res.status);
+        }
+      } catch (error) {
+        console.error('❌ 发送邮箱验证失败:', error);
+        this.$emit('notify', 'Network error, please try again');
+      }
     },
 
     // 发送验证码
@@ -517,33 +936,231 @@ export default {
 
   // 白名单组件事件处理
   handleWhitelistSuccess(message) {
+    console.log('✅ Whitelist application successful:', message)
     this.$emit('notify', message);
+    
+    // 更新白名单状态
+    this.whitelistStatus = 'pending'
+    localStorage.setItem('whitelistStatus', 'pending')
+    
     // 刷新状态信息
     this.loadStatusInfo();
+    
+    // 更新Trading Permission显示
+    console.log('🔄 Trading Permission updated after whitelist application')
   },
 
   handleWhitelistError(message) {
+    console.log('❌ Whitelist application error:', message)
     this.$emit('notify', message);
   },
 
   handleWhitelistInfo(message) {
+    console.log('ℹ️ Whitelist application info:', message)
     this.$emit('notify', message);
+    
     // 刷新状态信息
     this.loadStatusInfo();
+    
+    // 更新Trading Permission显示
+    console.log('🔄 Trading Permission updated after whitelist info update')
   }
 }
 }
 </script>
 
 <style scoped>
+/* 加载指示器样式 */
+.loading-indicator {
+  display: inline-block;
+  margin-left: 8px;
+  animation: spin 1s linear infinite;
+  font-size: 0.8em;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 错误文本样式 */
+.error-text {
+  color: #dc3545;
+  font-size: 0.9em;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* 用户操作区域样式 */
+.user-actions {
+  margin-top: 8px;
+}
+
+.btn-refresh {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-refresh:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.btn-refresh:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.btn-retry {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 8px;
+}
+
+.btn-retry:hover:not(:disabled) {
+  background: #c82333;
+}
+
+.btn-retry:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+/* 用户联系信息样式 */
+.user-contact-info {
+  margin: 12px 0;
+  padding: 12px;
+  background: #141426;;
+  border-radius: 6px;
+  border: 1px solid #404243;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  margin: 6px 0;
+  padding: 4px 0;
+}
+
+.contact-item:first-child {
+  margin-top: 0;
+}
+
+.contact-item:last-child {
+  margin-bottom: 0;
+}
+
+.contact-icon {
+  font-size: 16px;
+  margin-right: 8px;
+  width: 20px;
+  text-align: center;
+}
+
+.contact-label {
+  font-weight: 600;
+  font-size: 12px;
+  color: #cbd5e1;
+  margin-right: 8px;
+  min-width: 60px;
+}
+
+.contact-value {
+  color: #ffffff;
+  font-family: monospace;
+  background: transparent;
+  padding: 2px 6px;
+  border-radius: 3px;
+  flex: 1;
+  max-width: 300px;
+  word-break: break-all;
+}
+
+/* Email验证状态样式 */
+.email-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.email-status-icon {
+  font-size: 14px;
+}
+
+.email-verified {
+  color: #10b981;
+}
+
+.email-pending {
+  color: #f59e0b;
+}
+
+.email-unverified {
+  color: #ef4444;
+}
+
+.btn-small {
+  background: #374151;
+  color: #ffffff;
+  border: 1px solid #4b5563;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-small:hover {
+  background: #4b5563;
+}
+
+/* 加载状态样式 */
+.loading-item .contact-value {
+  background: #92400e;
+  border-color: #b45309;
+  color: #fbbf24;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* 错误状态样式 */
+.error-item .contact-value {
+  background: #7f1d1d;
+  border-color: #991b1b;
+  color: #fca5a5;
+}
+
+/* 脉冲动画 */
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* 加载图标动画 */
+.loading-item .contact-icon {
+  animation: spin 1s linear infinite;
+}
 /* 状态显示区域样式 */
 .status-section {
   max-width: 500px;
   margin-left: 200px;
   padding: 20px;
-  background: #29333d;
+  background: rgba(45, 55, 72, 0.6);
   border-radius: 12px;
-  border: 1px solid #2f3235;
+  border: 1px solid rgba(74, 85, 104, 0.3);
+  backdrop-filter: blur(10px);
 }
 
 .status-title {
@@ -558,7 +1175,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid rgba(74, 85, 104, 0.3);
 }
 
 .status-item:last-child {
@@ -569,7 +1186,7 @@ export default {
   display: flex;
   align-items: center;
   font-weight: 500;
-  color: #d7dadd;
+  color: #e2e8f0;
 }
 
 .status-icon {
@@ -699,6 +1316,81 @@ export default {
   color: #721c24;
 }
 
+/* 交易权限详细信息样式 */
+.permission-details {
+  margin-top: 8px;
+  padding: 12px;
+  background: rgba(31, 41, 55, 0.9);
+  border-radius: 6px;
+  border-left: 3px solid #3b82f6;
+}
+
+.permission-description {
+  display: block;
+  font-size: 13px;
+  color: #cbd5e1;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.permission-requirements {
+  margin-top: 8px;
+}
+
+.requirements-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.requirements-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.requirements-list li {
+  display: flex;
+  align-items: center;
+  padding: 4px 0;
+  font-size: 12px;
+  color: #cbd5e1;
+  transition: all 0.2s ease;
+}
+
+.requirements-list li:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 4px;
+  padding-left: 8px;
+}
+
+.requirement-icon {
+  margin-right: 8px;
+  font-size: 14px;
+  width: 16px;
+  text-align: center;
+}
+
+.requirement-met {
+  color: #10b981;
+}
+
+.requirement-met .requirement-icon {
+  color: #10b981;
+}
+
+.requirements-list li:not(.requirement-met) {
+  color: #ef4444;
+}
+
+.requirements-list li:not(.requirement-met) .requirement-icon {
+  color: #ef4444;
+}
+
 /* 简易弹窗样式 */
 .modal-mask {
   position: fixed;
@@ -707,7 +1399,7 @@ export default {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0,0,0,0.3);
+  background: rgba(0,0,0,0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -717,18 +1409,21 @@ export default {
   max-width: 420px;
 }
 .modal-container {
-  background: #fff;
+  background: #1f2937;
   border-radius: 12px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.12);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
   padding: 28px 24px 18px;
   font-size: 15px;
+  color: #ffffff;
+  border: 1px solid rgba(74, 85, 104, 0.3);
 }
 .container { max-width: 920px; margin: 0 auto; }
-/* 页面容器深色主题 */
+/* 页面容器深色主题 - 与图片风格一致 */
 .profile-page { 
   padding-bottom: 64px; 
-  background: #0a0a1a;
+  background: linear-gradient(180deg, #0f1419 0%, #1a1f2e 50%, #2d3748 100%);
   min-height: 100vh;
+  color: #ffffff;
 }
 
 .container {
@@ -736,8 +1431,7 @@ export default {
 }
 
 /* 顶部 */
-.topbar { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:24px 16px; }
-.breadcrumb { display:flex; align-items:center; gap:10px; color:#9ca3af; }
+.topbar { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:24px 16px;font-size: 20px; }.breadcrumb { display:flex; align-items:center; gap:10px; color:#9ca3af; }
 .crumb-back { border:0; background:transparent; cursor:pointer; color:#9ca3af; }
 .sep{ opacity:.6; }
 .crumb-current{ color:#ffffff; font-weight:600; }

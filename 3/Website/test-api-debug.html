@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API调试测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover { background-color: #0056b3; }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 API调试测试</h1>
+        
+        <div class="test-section info">
+            <h3>📋 测试说明</h3>
+            <p>点击下面的按钮测试API端点，检查TradeProjectView加载失败的原因。</p>
+        </div>
+
+        <div class="test-section">
+            <h3>1. 测试获取所有项目</h3>
+            <button class="btn" onclick="testGetAllProjects()">测试 /api/project</button>
+            <div id="allProjectsResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>2. 测试根据代码获取项目</h3>
+            <button class="btn" onclick="testGetProjectByCode('RWA001')">测试 /api/project/RWA001</button>
+            <button class="btn" onclick="testGetProjectByCode('RWA002')">测试 /api/project/RWA002</button>
+            <div id="projectResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>3. 测试后端服务器状态</h3>
+            <button class="btn" onclick="testServerStatus()">测试服务器连接</button>
+            <div id="serverResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>4. 模拟前端API调用</h3>
+            <button class="btn" onclick="simulateFrontendCall()">模拟TradeProjectView API调用</button>
+            <div id="frontendResult" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+        
+        async function testGetAllProjects() {
+            const resultDiv = document.getElementById('allProjectsResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '🔄 正在测试获取所有项目...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/project`);
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `✅ 成功获取所有项目
+状态码: ${response.status}
+响应数据:
+${JSON.stringify(data, null, 2)}`;
+                
+                if (data.status === 0 && data.data && data.data.length > 0) {
+                    resultDiv.style.backgroundColor = '#d4edda';
+                } else {
+                    resultDiv.style.backgroundColor = '#f8d7da';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `❌ 获取所有项目失败
+错误: ${error.message}`;
+                resultDiv.style.backgroundColor = '#f8d7da';
+            }
+        }
+        
+        async function testGetProjectByCode(code) {
+            const resultDiv = document.getElementById('projectResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `🔄 正在测试获取项目 ${code}...`;
+            
+            try {
+                const response = await fetch(`${API_BASE}/project/${code}`);
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `✅ 成功获取项目 ${code}
+状态码: ${response.status}
+响应数据:
+${JSON.stringify(data, null, 2)}`;
+                
+                if (data.status === 0 && data.data) {
+                    resultDiv.style.backgroundColor = '#d4edda';
+                } else {
+                    resultDiv.style.backgroundColor = '#f8d7da';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `❌ 获取项目 ${code} 失败
+错误: ${error.message}`;
+                resultDiv.style.backgroundColor = '#f8d7da';
+            }
+        }
+        
+        async function testServerStatus() {
+            const resultDiv = document.getElementById('serverResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '🔄 正在测试服务器连接...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/project`, {
+                    method: 'HEAD'
+                });
+                
+                resultDiv.innerHTML = `✅ 服务器连接正常
+状态码: ${response.status}
+响应头: ${JSON.stringify([...response.headers.entries()], null, 2)}`;
+                resultDiv.style.backgroundColor = '#d4edda';
+            } catch (error) {
+                resultDiv.innerHTML = `❌ 服务器连接失败
+错误: ${error.message}
+可能原因:
+1. 后端服务器未启动
+2. 端口3000被占用
+3. 网络连接问题`;
+                resultDiv.style.backgroundColor = '#f8d7da';
+            }
+        }
+        
+        async function simulateFrontendCall() {
+            const resultDiv = document.getElementById('frontendResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '🔄 正在模拟前端API调用...';
+            
+            try {
+                // 模拟TradeProjectView中的API调用
+                console.log('📊 API: 从数据库根据代码获取项目: RWA001');
+                
+                const response = await fetch(`${API_BASE}/project/RWA001`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('📊 API: 数据库返回项目详情:', result);
+                
+                if (result.status === 0) {
+                    resultDiv.innerHTML = `✅ 模拟前端调用成功
+状态码: ${response.status}
+响应数据:
+${JSON.stringify(result, null, 2)}
+
+前端应该能够正常加载项目数据。`;
+                    resultDiv.style.backgroundColor = '#d4edda';
+                } else {
+                    resultDiv.innerHTML = `⚠️ API返回错误状态
+状态码: ${response.status}
+错误信息: ${result.message}
+响应数据:
+${JSON.stringify(result, null, 2)}
+
+这可能是TradeProjectView加载失败的原因。`;
+                    resultDiv.style.backgroundColor = '#fff3cd';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `❌ 模拟前端调用失败
+错误: ${error.message}
+
+这可能是TradeProjectView加载失败的原因：
+1. 网络连接问题
+2. 后端服务器未响应
+3. API端点不存在`;
+                resultDiv.style.backgroundColor = '#f8d7da';
+            }
+        }
+        
+        // 页面加载时自动测试服务器状态
+        window.onload = function() {
+            testServerStatus();
+        };
+    </script>
+</body>
+</html>

@@ -119,12 +119,12 @@
             <div v-if="moreDropdownOpen" class="dropdown-menu">
               <a href="#" @click.prevent="go('/overview')" class="dropdown-item">Overview</a>
               <a href="#" @click.prevent="go('/about')" class="dropdown-item">About Us</a>
-              <a href="#" @click.prevent="go('/contact')" class="dropdown-item">Contact</a>
-              <div class="dropdown-divider"></div>
+              <!-- <a href="#" @click.prevent="go('/contact')" class="dropdown-item">Contact</a> -->
+              <!-- <div class="dropdown-divider"></div>
               <a href="#" @click.prevent="go('/test/contract-deployment-verification')" class="dropdown-item test-link">
                 <span class="dropdown-icon">🔍</span>
                 合约部署验证
-              </a>
+              </a> -->
             </div>
           </div>
         </nav>

@@ -270,7 +270,7 @@ export default {
 /* 品牌信息 */
 .brand-info {
   position: absolute;
-  top: 60px;
+  top: 40px;
   right: 50%;
   transform: translateX(-50%);
   text-align: center;
