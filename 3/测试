@@ -1,11 +1,25 @@
+cd Website
+npm run dev
+
+cd Mysql
+node index.js
+
 注册模块
 $ $body = @{user_email='test@example.com';user_password='123456';user_name='Test User';user_phone='1234567890';user_id='test123'} | ConvertTo-Json; Invoke-WebRequest -Uri 'http://localhost:3000/user/reguser' -Method POST -Body $body -ContentType 'application/json'
 
 登录mokuai
 $ $body = @{user_email='test@example.com';user_password='123456'} | ConvertTo-Json; Invoke-WebRequest -Uri 'http://localhost:3000/user/login' -Method POST -Body $body -ContentType 'application/json'
 
+$ curl http://localhost:3000/api/project
+让我检查后端服务器的状态：
+$ netstat -an | findstr :3000
+$ netstat -an | findstr :5173
+$ netstat -an | findstr :517
+
 检查后端服务器是否真的在运行
 $ Get-Process -Name node -ErrorAction SilentlyContinue
 
 停止所有Node.js进程并重新启动后端服务器
+
+$ taskkill /f /im node.exe
 $ Stop-Process -Name node -Force -ErrorAction SilentlyContinue; Start-Sleep -Seconds 3; cd ..; cd Mysql; node index.js

@@ -76,8 +76,8 @@
         <p class="foot">By continuing, you agree to our Terms and acknowledge our 
           <a href="/src/components/privacypolicy.vue" >Privacy Policy.</a></p>
         <div style="margin-top: 40px;margin-left: 100px;display: flex;gap: 20px;width: 500px;">
-          <button class="btn-primary">Invest Now</button>
-          <button class="btn-secondary">Contact Us</button>
+          <button class="btn-primary" @click="goToProjects">Invest Now</button>
+          <button class="btn-secondary" @click="goToContact">Contact Us</button>
           <button class="btn-intro" @click="playIntroVideo">
             <span class="btn-icon">🎬</span>
             观看介绍视频
@@ -173,7 +173,7 @@
       </div>
       <!-- 查看所有项目按钮 -->
       <div v-if="!loading && !error && upcomingProjects.length > 0" class="view-all-section">
-        <button class="view-all-projects btn-outline" @click.prevent="go('/projects')">
+        <button class="view-all-projects btn-outline" @click.prevent="goToProjects">
           VIEW ALL PROJECTS
         </button>
       </div>
@@ -480,7 +480,24 @@ export default {
       // 3秒后显示跳过按钮
       this.introVideoTimer = setTimeout(() => {
         this.showIntroSkipButton = true
-      }, 0)
+      }, 3000)
+    },
+    
+    // 跳转到项目页面
+    goToProjects() {
+      this.$router.push('/projects')
+    },
+    
+    // 跳转到联系我们页面
+    goToContact() {
+      // 滚动到页面底部的联系我们部分
+      const contactSection = document.querySelector('.contact-content')
+      if (contactSection) {
+        contactSection.scrollIntoView({ behavior: 'smooth' })
+      } else {
+        // 如果找不到联系我们部分，跳转到项目页面
+        this.$router.push('/projects')
+      }
     },
     
     // 视频准备就绪

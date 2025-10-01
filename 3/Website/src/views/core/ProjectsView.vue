@@ -459,52 +459,52 @@ export default {
             const mappedProduct = {
               // 基础信息
               id: project.id,
-              code: project.project_code,
-              name: project.project_name,
-              status: project.loan_status,
+              code: project.code,
+              name: project.name,
+              status: project.status,
               
               // 认购信息
               totalOffering: project.total_offering_token ? `A$${project.total_offering_token.toLocaleString()}` : 'A$0',
               subscribed: project.subscribe_token ? `A$${project.subscribe_token.toLocaleString()}` : 'A$0',
               
               // 物业信息
-              property_location: project.property_location,
-              property_state: project.property_state,
-              property_type: project.property_type,
-              property_value: project.property_value,
-              property_summary: project.property_summary,
+              property_location: project.propertyLocation,
+              property_state: project.propertyState,
+              property_type: project.propertyType,
+              property_value: project.propertyValue,
+              property_summary: project.propertySummary,
               
               // 贷款信息
-              loan_type: project.loan_type,
-              loan_product: project.loan_product,
-              loan_amount: project.loan_amount,
-              loan_purpose: project.loan_purpose,
-              loan_term_months: project.loan_term_months,
+              loan_type: project.loanType,
+              loan_product: project.loanProduct,
+              loan_amount: project.loanAmount,
+              loan_purpose: project.loanPurpose,
+              loan_term_months: project.loanTermMonths,
               
               // 贷款比率
               lvr: project.lvr,
-              interest_rate: project.interest_rate,
-              default_rate: project.default_rate,
+              interest_rate: project.interestRate,
+              default_rate: project.defaultRate,
               
               // 贷款周期
-              commencement_date: project.commencement_date,
-              expiry_date: project.expiry_date,
-              expected_recovery_date: project.expected_recovery_date,
+              commencement_date: project.commencementDate,
+              expiry_date: project.expiryDate,
+              expected_recovery_date: project.expectedRecoveryDate,
               
               // 前端显示字段
-              subtitle: `${project.loan_product} - ${project.property_type}`,
-              loanAmount: project.loan_amount ? `A$${project.loan_amount.toLocaleString()}` : 'A$0',
-              loanTerm: `${project.loan_term_months} months`,
-              targetYield: project.interest_rate,
-              image: project.image || this.getProductImage(project.project_code)
+              subtitle: `${project.loanProduct} - ${project.propertyType}`,
+              loanAmount: project.loanAmount ? `A$${project.loanAmount.toLocaleString()}` : 'A$0',
+              loanTerm: `${project.loanTermMonths} months`,
+              targetYield: project.interestRate,
+              image: project.image || this.getProductImage(project.code)
             }
             
             // 添加计算指标
             mappedProduct.metrics = {
               currentElaraPrice: this.calculateTokenPrice(mappedProduct),
-              collateralPropertyValue: project.property_value ? `A$${project.property_value.toLocaleString()}` : 'TBA',
+              collateralPropertyValue: project.propertyValue ? `A$${project.propertyValue.toLocaleString()}` : 'TBA',
               rentalIncome: this.calculateRentalIncome(mappedProduct),
-              targetLoanYield: `${project.interest_rate}% p.a.`
+              targetLoanYield: `${project.interestRate}% p.a.`
             }
             
             return mappedProduct
@@ -887,7 +887,7 @@ export default {
         radial-gradient(circle at 40% 40%, rgba(25, 25, 112, 0.1) 0%, transparent 50%);
   min-height: 100vh;
   padding: 20px;
-  margin:0;
+  margin: 0;
   width: 100vw;
   max-width: none;
   position: relative;
