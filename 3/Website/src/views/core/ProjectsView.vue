@@ -1,5 +1,7 @@
 <template>
   <div class="container">
+<div class="project-container">
+    <!-- 项目头部 -->
     <header class="doc-header">
       <h1 class="headline">
         <template v-if="isDetailView && currentProduct">
@@ -13,9 +15,9 @@
         <template v-if="isDetailView && currentProduct">
           {{ currentProduct.subtitle }}
         </template>
-        <template v-else>
+        <!-- <template v-else>
           First-lien mortgages · LTV control · Monthly interest
-        </template>
+        </template> -->
       </p>
     </header>
 
@@ -41,14 +43,8 @@
         <option value="PERFORMING">Performing</option>
         <option value="DEFAULT">Default</option>
       </select>
-      <!-- <select v-model="filters.risk" class="input" style="max-width:160px;height:38px">
-        <option value="">All Risk</option>
-        <option value="low">Low</option>
-        <option value="medium">Medium</option>
-        <option value="high">High</option>
-      </select> -->
       <div class="yield-range-filter">
-        <label class="yield-range-label">Target Yield Range:</label>
+        <label class="yield-range-label">EST. YIELD (IRR) Range:</label>
         <div class="yield-range-container">
           <div class="yield-range-slider">
             <input 
@@ -57,6 +53,7 @@
               :min="0" 
               :max="filters.maxYield - 0.5" 
               :step="0.5"
+              @input="onFilterChange"
               class="yield-slider yield-slider-min"
             />
             <input 
@@ -65,6 +62,7 @@
               :min="filters.minYield + 0.5" 
               :max="20" 
               :step="0.5"
+              @input="onFilterChange"
               class="yield-slider yield-slider-max"
             />
           </div>
@@ -91,7 +89,7 @@
           Last Updated: {{ formatTime(lastRefreshTime) }}
         </span>
         <button @click="refreshProducts" :disabled="loading" class="refresh-btn" style="background: #374151; border: 1px solid #4b5563; color: #ffffff; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease;" :style="{ opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer' }">
-          {{ loading ? '刷新中...' : '刷新数据' }}
+          {{ loading ? 'Refreshing...' : 'Refresh Data' }}
         </button>
       </div>
     </div>
@@ -106,7 +104,7 @@
     <div v-else-if="error" class="error-container">
       <div class="error-message">
         <h3>Load Failed</h3>
-        <p>{{ error }}</p>
+        <!-- <p>{{ error }}</p> -->
         <button @click="loadProducts" class="btn retry-btn">Retry</button>
       </div>
     </div>
@@ -273,6 +271,7 @@
          </div>
       </article>
     </section>
+    </div>
   </div>
 </template>
 
@@ -362,7 +361,11 @@ export default {
             annualInterestRate: rawData.annual_interest_rate,
             loanAmount: rawData.loan_amount,
             valuation: rawData.valuation,
-            image: rawData.image || this.getProductImage(rawData.code)
+            image: rawData.image || this.getProductImage(rawData.code),
+            
+            // 原始数值用于计算
+            totalOfferingRaw: rawData.total_token || 0,
+            subscribedRaw: rawData.current_subscribed_token || 0
           }
           
           // 构建与TradeProjectView一致的数据结构
@@ -467,6 +470,10 @@ export default {
               totalOffering: project.total_offering_token ? `A$${project.total_offering_token.toLocaleString()}` : 'A$0',
               subscribed: project.subscribe_token ? `A$${project.subscribe_token.toLocaleString()}` : 'A$0',
               
+              // 原始数值用于计算
+              totalOfferingRaw: project.total_offering_token || 0,
+              subscribedRaw: project.subscribe_token || 0,
+              
               // 物业信息
               property_location: project.propertyLocation,
               property_state: project.propertyState,
@@ -548,6 +555,10 @@ export default {
           targetYield: product.target_yield,
           ltv: product.LTV,
           annualInterestRate: product.annual_interest_rate,
+          
+          // 原始数值用于计算
+          totalOfferingRaw: product.total_token || 0,
+          subscribedRaw: product.current_subscribed_token || 0,
           loanAmount: product.loan_amount,
           valuation: product.valuation,
           image: product.image || this.getProductImage(product.code)
@@ -611,7 +622,14 @@ export default {
       if (isNaN(num)) return value
       return `A$${num.toLocaleString()}`
     },
-    resetFilters(){ this.filters = { q: '', type: '', status: '', minYield: 0, maxYield: 20 } },
+    resetFilters(){ this.filters = { q: '', type: '', risk: '', status: '', minYield: 0, maxYield: 20 } },
+    
+    // 监听筛选器变化
+    onFilterChange() {
+      console.log('筛选器变化:', this.filters)
+      // 强制重新计算筛选结果
+      this.$forceUpdate()
+    },
     openDetail(code){
       const product = this.products.find(x => x.code === code)
       try { sessionStorage.setItem('lastProduct', JSON.stringify(product)) } catch(e) {}
@@ -624,14 +642,11 @@ export default {
       this.$router.push({ name: 'tradeProject', params: { code } })
     },
     getProgressPercentage(product) {
-      if (!product.totalOffering || !product.subscribed) return 0
+      if (!product) return 0
       
-      // 提取数字部分（移除货币符号和逗号）
-      const totalStr = product.totalOffering.toString().replace(/[A$,]/g, '')
-      const subscribedStr = product.subscribed.toString().replace(/[A$,]/g, '')
-      
-      const total = parseFloat(totalStr)
-      const subscribed = parseFloat(subscribedStr)
+      // 使用原始数值进行计算
+      const total = product.totalOfferingRaw || 0
+      const subscribed = product.subscribedRaw || 0
       
       if (total === 0) return 0
       
@@ -736,12 +751,13 @@ export default {
 
     // 计算认购进度
     getSubscriptionProgress(product) {
-      if (!product || !product.totalOffering || !product.subscribed) {
+      if (!product) {
         return 0
       }
       
-      const total = parseFloat(product.totalOffering)
-      const subscribed = parseFloat(product.subscribed)
+      // 使用原始数值进行计算
+      const total = product.totalOfferingRaw || 0
+      const subscribed = product.subscribedRaw || 0
       
       if (total === 0) return 0
       
@@ -773,9 +789,14 @@ export default {
         // 状态匹配
         const matchStatus = !this.filters.status || p.status === this.filters.status
         
-        // 收益率区间匹配
+        // EST. YIELD (IRR) 区间匹配
         const targetYield = parseFloat(p.targetYield) || 0
         const matchYield = targetYield >= this.filters.minYield && targetYield <= this.filters.maxYield
+        
+        // 调试输出（可以在开发时启用）
+        // if (p.code === 'RWA001') {
+        //   console.log(`Project ${p.code}: targetYield=${targetYield}, min=${this.filters.minYield}, max=${this.filters.maxYield}, match=${matchYield}`)
+        // }
         
         return matchQ && matchType && matchStatus && matchYield
       }).sort((a, b) => {
@@ -886,7 +907,7 @@ export default {
         radial-gradient(circle at 80% 20%, rgba(0, 153, 204, 0.15) 0%, transparent 50%),
         radial-gradient(circle at 40% 40%, rgba(25, 25, 112, 0.1) 0%, transparent 50%);
   min-height: 100vh;
-  padding: 20px;
+  padding: 20px 130px;
   margin: 0;
   width: 100vw;
   max-width: none;
@@ -894,7 +915,15 @@ export default {
   left: 50%;
   right: 50%;
   margin-left: -50vw;
-  margin-right: -45vw;
+  margin-right: -50vw;
+}
+
+.project-container{
+  min-height: 100vh;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  max-width: none;
 }
 
 .doc-header{
@@ -916,7 +945,7 @@ export default {
   background: transparent;
   padding: 16px 0;
   border: none;
-  margin-bottom: 8px;
+  margin-bottom: 20px;
 }
 .filters .input {
   background: #141426;
@@ -983,6 +1012,22 @@ export default {
   -webkit-appearance: none;
   appearance: none;
   cursor: pointer;
+}
+
+.yield-slider::-webkit-slider-track {
+  width: 100%;
+  height: 4px;
+  background: #4b5563;
+  border-radius: 2px;
+  border: none;
+}
+
+.yield-slider::-moz-range-track {
+  width: 100%;
+  height: 4px;
+  background: #4b5563;
+  border-radius: 2px;
+  border: none;
 }
 
 .yield-slider::-webkit-slider-thumb {
@@ -1111,7 +1156,7 @@ export default {
 
 .doc-list{
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
 
@@ -1490,7 +1535,7 @@ export default {
 
 @media (max-width: 1200px){
   .doc-list {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -1506,12 +1551,6 @@ export default {
   }
 }
 
-@media (max-width: 1200px){
-  .doc-list {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-  }
-}
 
 @media (max-width: 768px){
   .doc-list {
