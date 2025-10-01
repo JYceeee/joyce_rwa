@@ -185,8 +185,8 @@
                 <div class="mapping-card">
                     <div class="mapping-title">认购信息</div>
                     <div class="mapping-fields">
-                        totalOffering: A$format(project.total_offering_token)<br>
-                        subscribed: A$format(project.subscribe_token)<br>
+                        totalOffering: AUD$format(project.total_offering_token)<br>
+                        subscribed: AUD$format(project.subscribe_token)<br>
                         totalOfferingRaw: project.total_offering_token<br>
                         subscribedRaw: project.subscribe_token
                     </div>
@@ -225,7 +225,7 @@
                     <div class="mapping-title">前端显示字段</div>
                     <div class="mapping-fields">
                         subtitle: loanProduct - propertyType<br>
-                        loanAmount: A$format(loanAmount)<br>
+                        loanAmount: AUD$format(loanAmount)<br>
                         loanTerm: loanTermMonths months<br>
                         targetYield: interestRate
                     </div>
@@ -247,8 +247,8 @@ async loadProjectData() {
     status: project.status,
     
     // 认购信息
-    totalOffering: project.total_offering_token ? `A$${project.total_offering_token.toLocaleString()}` : 'A$0',
-    subscribed: project.subscribe_token ? `A$${project.subscribe_token.toLocaleString()}` : 'A$0',
+    totalOffering: project.total_offering_token ? `AUD$${project.total_offering_token.toLocaleString()}` : 'AUD$0',
+    subscribed: project.subscribe_token ? `AUD$${project.subscribe_token.toLocaleString()}` : 'AUD$0',
     
     // 物业信息（按照loadProducts映射）
     property_location: project.propertyLocation,
@@ -262,7 +262,7 @@ async loadProjectData() {
     
     // 前端显示字段（按照loadProducts映射）
     subtitle: `${project.loanProduct} - ${project.propertyType}`,
-    loanAmount: project.loanAmount ? `A$${project.loanAmount.toLocaleString()}` : 'A$0',
+    loanAmount: project.loanAmount ? `AUD$${project.loanAmount.toLocaleString()}` : 'AUD$0',
     loanTerm: `${project.loanTermMonths} months`,
     targetYield: project.interestRate,
     
@@ -275,7 +275,7 @@ async loadProjectData() {
   // 添加计算指标（按照loadProducts映射）
   mappedProduct.metrics = {
     currentElaraPrice: this.calculateTokenPrice(mappedProduct),
-    collateralPropertyValue: project.propertyValue ? `A$${project.propertyValue.toLocaleString()}` : 'TBA',
+    collateralPropertyValue: project.propertyValue ? `AUD$${project.propertyValue.toLocaleString()}` : 'TBA',
     rentalIncome: this.calculateRentalIncome(mappedProduct),
     targetLoanYield: `${project.interestRate}% p.a.`
   }

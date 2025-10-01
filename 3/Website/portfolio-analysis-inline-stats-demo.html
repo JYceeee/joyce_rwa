@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Analysis内联统计样式演示</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(180deg, #0f1419 0%, #1a1f2e 50%, #2d3748 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        .demo-container {
+            display: flex;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        .demo-section {
+            flex: 1;
+        }
+        .demo-title {
+            color: #e2e8f0;
+            margin-bottom: 15px;
+            font-size: 20px;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        /* 原有样式 */
+        .pf-analysis-stats-old {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .pf-analysis-stat-card-old {
+            background: rgba(45, 55, 72, 0.8);
+            border: 1px solid rgba(74, 85, 104, 0.4);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .pf-stat-icon {
+            font-size: 32px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 12px;
+        }
+
+        .pf-stat-content {
+            flex: 1;
+        }
+
+        .pf-stat-number-old {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1.2;
+        }
+
+        .pf-stat-label-old {
+            font-size: 14px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+
+         /* 新的内联样式 */
+         .pf-analysis-stats {
+             display: grid;
+             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+             gap: 16px;
+             margin-bottom: 30px;
+         }
+
+         /* 一行四个统计卡片 */
+         .pf-analysis-stats-four {
+             display: grid;
+             grid-template-columns: repeat(4, 1fr);
+             gap: 8px;
+             margin-bottom: 30px;
+         }
+
+         /* 响应式设计 */
+         @media (max-width: 1200px) {
+             .pf-analysis-stats-four {
+                 grid-template-columns: repeat(2, 1fr);
+                 gap: 8px;
+             }
+         }
+
+         @media (max-width: 768px) {
+             .pf-analysis-stats-four {
+                 grid-template-columns: 1fr;
+                 gap: 8px;
+             }
+         }
+
+        .pf-analysis-stat-card {
+            background: rgba(45, 55, 72, 0.8);
+            border: 1px solid rgba(74, 85, 104, 0.4);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .pf-analysis-stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .pf-stat-label-inline {
+            font-size: 14px;
+            color: #9ca3af;
+            line-height: 1.2;
+        }
+
+        .pf-stat-label-inline .pf-stat-number {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-left: 4px;
+        }
+
+        .comparison-item {
+            background: rgba(45, 55, 72, 0.6);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid rgba(74, 85, 104, 0.3);
+        }
+
+        .comparison-item h4 {
+            margin-top: 0;
+            color: #e2e8f0;
+            font-size: 16px;
+        }
+
+        .style-comparison {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #93c5fd;
+        }
+
+        .style-comparison h4 {
+            margin-top: 0;
+            color: #3b82f6;
+        }
+
+        .measurement {
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>📊 Portfolio Analysis内联统计样式演示</h1>
+    
+    <div class="style-comparison">
+        <h4>🎯 样式优化说明</h4>
+        <p>缩小字体并将标签和数值写在同一行，使统计卡片更加紧凑：</p>
+        <ul>
+            <li><strong>内联布局</strong>: 标签和数值在同一行显示</li>
+            <li><strong>字体缩小</strong>: 标签字体从24px缩小到14px，数值字体从24px缩小到16px</li>
+            <li><strong>紧凑设计</strong>: 移除了图标，减少了垂直空间占用</li>
+            <li><strong>视觉层次</strong>: 通过颜色和字重区分标签和数值</li>
+        </ul>
+    </div>
+
+    <div class="demo-container">
+        <!-- 修改前 -->
+        <div class="demo-section">
+            <h3 class="demo-title">❌ 修改前 (Before)</h3>
+            
+            <div class="comparison-item">
+                <h4>原有统计卡片样式</h4>
+                <div class="pf-analysis-stats-old">
+                    <div class="pf-analysis-stat-card-old">
+                        <div class="pf-stat-icon">📊</div>
+                        <div class="pf-stat-content">
+                            <div class="pf-stat-number-old">15</div>
+                            <div class="pf-stat-label-old">Total Transactions</div>
+                        </div>
+                    </div>
+                    <div class="pf-analysis-stat-card-old">
+                        <div class="pf-stat-icon">📈</div>
+                        <div class="pf-stat-content">
+                            <div class="pf-stat-number-old">8</div>
+                            <div class="pf-stat-label-old">Buy Orders</div>
+                        </div>
+                    </div>
+                    <div class="pf-analysis-stat-card-old">
+                        <div class="pf-stat-icon">📉</div>
+                        <div class="pf-stat-content">
+                            <div class="pf-stat-number-old">7</div>
+                            <div class="pf-stat-label-old">Sell Orders</div>
+                        </div>
+                    </div>
+                    <div class="pf-analysis-stat-card-old">
+                        <div class="pf-stat-icon">💰</div>
+                        <div class="pf-stat-content">
+                            <div class="pf-stat-number-old">AUD$125,430.50</div>
+                            <div class="pf-stat-label-old">Total Value</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comparison-item">
+                <h4>样式规格</h4>
+                <div class="measurement">图标: 32px</div>
+                <div class="measurement">数值字体: 24px</div>
+                <div class="measurement">标签字体: 14px</div>
+                <div class="measurement">布局: 垂直排列</div>
+                <div class="measurement">卡片高度: 较大</div>
+            </div>
+        </div>
+
+        <!-- 修改后 -->
+        <div class="demo-section">
+            <h3 class="demo-title">✅ 修改后 (After)</h3>
+            
+             <div class="comparison-item">
+                 <h4>新的内联统计卡片样式 (一行四个)</h4>
+                 <div class="pf-analysis-stats-four">
+                     <div class="pf-analysis-stat-card">
+                         <div class="pf-stat-content">
+                             <div class="pf-stat-label-inline">Total Transactions: <span class="pf-stat-number">15</span></div>
+                         </div>
+                     </div>
+                     <div class="pf-analysis-stat-card">
+                         <div class="pf-stat-content">
+                             <div class="pf-stat-label-inline">Buy Orders: <span class="pf-stat-number">8</span></div>
+                         </div>
+                     </div>
+                     <div class="pf-analysis-stat-card">
+                         <div class="pf-stat-content">
+                             <div class="pf-stat-label-inline">Sell Orders: <span class="pf-stat-number">7</span></div>
+                         </div>
+                     </div>
+                     <div class="pf-analysis-stat-card">
+                         <div class="pf-stat-content">
+                             <div class="pf-stat-label-inline">Total Value: <span class="pf-stat-number">AUD$125,430.50</span></div>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+
+            <div class="comparison-item">
+                <h4>样式规格</h4>
+                <div class="measurement">图标: 移除</div>
+                <div class="measurement">数值字体: 16px</div>
+                <div class="measurement">标签字体: 14px</div>
+                <div class="measurement">布局: 内联排列</div>
+                <div class="measurement">排列方式: 一行四个</div>
+                <div class="measurement">卡片间距: 8px</div>
+                <div class="measurement">卡片内边距: 16px</div>
+                <div class="measurement">卡片高度: 紧凑</div>
+                <div class="measurement">响应式: 自适应</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="style-comparison">
+        <h4>📊 优化效果对比</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <h5>❌ 原有样式问题:</h5>
+                <ul>
+                    <li>字体过大，占用过多空间</li>
+                    <li>图标占用额外空间</li>
+                    <li>垂直布局增加卡片高度</li>
+                    <li>卡片间距过大，浪费空间</li>
+                    <li>视觉层次不够清晰</li>
+                </ul>
+            </div>
+            <div>
+                <h5>✅ 新样式优势:</h5>
+                <ul>
+                    <li>字体适中，节省空间</li>
+                    <li>移除图标，更加简洁</li>
+                    <li>内联布局，减少高度</li>
+                    <li>缩小间距，更紧凑</li>
+                    <li>清晰的视觉层次</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="style-comparison">
+        <h4>🔧 技术实现</h4>
+        <p><strong>HTML结构变化:</strong></p>
+        <pre style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px; overflow-x: auto;">
+<!-- 修改前 -->
+&lt;div class="pf-analysis-stat-card"&gt;
+  &lt;div class="pf-stat-icon"&gt;📊&lt;/div&gt;
+  &lt;div class="pf-stat-content"&gt;
+    &lt;div class="pf-stat-number"&gt;15&lt;/div&gt;
+    &lt;div class="pf-stat-label"&gt;Total Transactions&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+<!-- 修改后 -->
+&lt;div class="pf-analysis-stat-card"&gt;
+  &lt;div class="pf-stat-content"&gt;
+    &lt;div class="pf-stat-label-inline"&gt;
+      Total Transactions: &lt;span class="pf-stat-number"&gt;15&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+        
+         <p><strong>CSS样式变化:</strong></p>
+         <pre style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px; overflow-x: auto;">
+ /* 一行四个统计卡片 */
+ .pf-analysis-stats-four {
+   display: grid;
+   grid-template-columns: repeat(4, 1fr);  /* 一行四个 */
+   gap: 8px;                               /* 缩小间距 */
+   margin-bottom: 30px;
+ }
+ 
+ .pf-analysis-stat-card {
+   padding: 16px;                          /* 缩小内边距 */
+   gap: 8px;                               /* 缩小内部间距 */
+ }
+ 
+ .pf-stat-label-inline {
+   font-size: 14px;           /* 标签字体 */
+   color: var(--dark-muted);  /* 标签颜色 */
+   line-height: 1.2;
+ }
+ 
+ .pf-stat-label-inline .pf-stat-number {
+   font-size: 16px;           /* 数值字体(从24px缩小) */
+   font-weight: 700;          /* 数值字重 */
+   color: var(--dark-text);   /* 数值颜色 */
+   margin-left: 4px;          /* 数值间距 */
+ }
+ 
+ /* 响应式设计 */
+ @media (max-width: 1200px) {
+   .pf-analysis-stats-four {
+     grid-template-columns: repeat(2, 1fr);  /* 中等屏幕: 一行两个 */
+   }
+ }
+ 
+ @media (max-width: 768px) {
+   .pf-analysis-stats-four {
+     grid-template-columns: 1fr;  /* 小屏幕: 一行一个 */
+   }
+ }</pre>
+    </div>
+
+    <div class="style-comparison">
+        <h4>🎨 视觉改进效果</h4>
+         <p><strong>空间利用效率:</strong></p>
+         <div style="font-family: monospace; font-size: 14px; background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px;">
+             <p><strong>修改前:</strong></p>
+             <pre>📊     Total Transactions    📈     Buy Orders    📉     Sell Orders    💰     Total Value
+        15                       8                       7                   125,430.50</pre>
+             
+             <p><strong>修改后 (一行四个):</strong></p>
+             <pre>Total Transactions: 15    Buy Orders: 8    Sell Orders: 7    Total Value: AUD$125,430.50</pre>
+         </div>
+         <p>新的内联样式使统计信息在一行内显示四个卡片，最大化利用水平空间，同时保持了良好的可读性。</p>
+    </div>
+
+    <div class="style-comparison">
+        <h4>🔗 相关页面</h4>
+        <p>查看实际效果：</p>
+        <ul>
+            <li><a href="/portfolio?tab=Analysis" target="_blank" style="color: #3b82f6;">Portfolio Analysis页面</a> - 查看内联统计样式的实际效果</li>
+            <li><a href="/portfolio-analysis-tab-demo.html" target="_blank" style="color: #3b82f6;">Analysis Tab演示</a> - 查看完整的Analysis tab功能</li>
+        </ul>
+    </div>
+
+    <script>
+        console.log('📊 Portfolio Analysis内联统计样式演示页面已加载');
+        
+        // 添加一些交互效果
+        document.querySelectorAll('.pf-analysis-stat-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-3px)';
+                this.style.transition = 'transform 0.2s ease';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -52,7 +52,7 @@
           </div>
           <div class="info-item">
             <div class="info-label">Value of Collateral Assets</div>
-            <div class="info-value">A${{ formatNumber(model.collateralValue) }}</div>
+            <div class="info-value">AUD${{ formatNumber(model.collateralValue) }}</div>
           </div>
           <div class="info-item">
             <div class="info-label">Loan Issuer</div>
@@ -75,11 +75,11 @@
         <div class="info-grid">
           <div class="info-item">
             <div class="info-label">Subscribed</div>
-            <div class="info-value">A${{ formatNumber(model.subscribed) }}</div>
+            <div class="info-value">AUD${{ formatNumber(model.subscribed) }}</div>
           </div>
           <div class="info-item">
             <div class="info-label">Total Offering</div>
-            <div class="info-value">A${{ formatNumber(model.totalOffering) }}</div>
+            <div class="info-value">AUD${{ formatNumber(model.totalOffering) }}</div>
           </div>
           <div class="info-item">
             <div class="info-label">认购进度</div>
@@ -101,7 +101,7 @@
         <div class="info-grid">
           <div class="info-item">
             <div class="info-label">Loan Amount</div>
-            <div class="info-value">A${{ formatNumber(model.loanAmount) }}</div>
+            <div class="info-value">AUD${{ formatNumber(model.loanAmount) }}</div>
           </div>
           <div class="info-item">
             <div class="info-label">Annual Interest Rate</div>
@@ -182,7 +182,7 @@
           </div>
           <div class="collateral-item">
             <div class="collateral-label">Valuation</div>
-            <div class="collateral-value">A${{ formatNumber(model.valuation) }}</div>
+            <div class="collateral-value">AUD${{ formatNumber(model.valuation) }}</div>
           </div>
           <div class="collateral-item">
             <div class="collateral-label">Security Ranking</div>

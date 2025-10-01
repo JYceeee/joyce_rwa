@@ -39,7 +39,7 @@ async function testAPI() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        current_subscribed_token: 'A$400,000'
+        current_subscribed_token: 'AUD$400,000'
       })
     });
     const updateData = await updateResponse.json();

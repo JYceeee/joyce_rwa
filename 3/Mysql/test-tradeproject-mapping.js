@@ -100,8 +100,8 @@ async function testProjectDataMapping(code) {
         created_at: project.created_at,
         
         // 认购信息 - 基于数据库字段
-        totalOffering: totalOfferingRaw > 0 ? `A$${totalOfferingRaw.toLocaleString()}` : 'A$0',
-        subscribed: subscribedRaw > 0 ? `A$${subscribedRaw.toLocaleString()}` : 'A$0',
+        totalOffering: totalOfferingRaw > 0 ? `AUD$${totalOfferingRaw.toLocaleString()}` : 'AUD$0',
+        subscribed: subscribedRaw > 0 ? `AUD$${subscribedRaw.toLocaleString()}` : 'AUD$0',
         subscriptionProgress: `${subscriptionProgress}%`,
         
         // 原始数值用于计算
@@ -134,7 +134,7 @@ async function testProjectDataMapping(code) {
         
         // 前端显示字段 - 基于数据库字段格式化
         subtitle: `${project.loan_product} - ${project.property_type}`,
-        loanAmount: project.loan_amount ? `A$${parseFloat(project.loan_amount).toLocaleString()}` : 'A$0',
+        loanAmount: project.loan_amount ? `AUD$${parseFloat(project.loan_amount).toLocaleString()}` : 'AUD$0',
         loanTerm: `${project.loan_term_months} months`,
         targetYield: project.interest_rate ? `${project.interest_rate}% p.a.` : 'TBA',
         
@@ -142,14 +142,14 @@ async function testProjectDataMapping(code) {
         propertyType: project.property_type,
         propertyLocation: project.property_location,
         loanProduct: project.loan_product,
-        propertyValue: project.property_value ? `A$${parseFloat(project.property_value).toLocaleString()}` : 'TBA',
+        propertyValue: project.property_value ? `AUD$${parseFloat(project.property_value).toLocaleString()}` : 'TBA',
         ltv: project.lvr ? `${project.lvr}%` : 'TBA'
       }
       
       // 添加计算指标 - 基于数据库字段计算
       mappedProduct.metrics = {
         currentElaraPrice: calculateTokenPrice(mappedProduct),
-        collateralPropertyValue: project.property_value ? `A$${parseFloat(project.property_value).toLocaleString()}` : 'TBA',
+        collateralPropertyValue: project.property_value ? `AUD$${parseFloat(project.property_value).toLocaleString()}` : 'TBA',
         rentalIncome: calculateRentalIncome(mappedProduct),
         targetLoanYield: project.interest_rate ? `${project.interest_rate}% p.a.` : 'TBA',
         loanToValue: project.lvr ? `${project.lvr}%` : 'TBA',
@@ -205,7 +205,7 @@ function calculateTokenPrice(product) {
   const basePrice = 1.00
   const yieldMultiplier = (parseFloat(product.interest_rate) || 6.0) / 6.0
   const adjustedPrice = basePrice * yieldMultiplier
-  return `A$${adjustedPrice.toFixed(2)}`
+  return `AUD$${adjustedPrice.toFixed(2)}`
 }
 
 function calculateRentalIncome(product) {
@@ -219,7 +219,7 @@ function calculateRentalIncome(product) {
   const monthlyYield = interestRate / 12 / 100
   const estimatedRental = propertyValue * monthlyYield
   
-  return `A$${estimatedRental.toLocaleString('en-AU', { maximumFractionDigits: 0 })} / month`
+  return `AUD$${estimatedRental.toLocaleString('en-AU', { maximumFractionDigits: 0 })} / month`
 }
 
 // 错误处理

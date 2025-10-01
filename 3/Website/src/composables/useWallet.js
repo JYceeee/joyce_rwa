@@ -58,7 +58,7 @@ const nativeToAudDisplay = computed(() => {
   const aud = eth * audPrice.value
   return aud.toLocaleString(undefined, { maximumFractionDigits: 2 })
 })
-const bigAudDisplay = computed(() => `A$${(nativeToAudDisplay.value || '0')} AUD`)
+const bigAudDisplay = computed(() => `AUD$${(nativeToAudDisplay.value || '0')} AUD`)
 
 // ===== Helpers =====
 function formatUnitsSafe(raw, decimals) {

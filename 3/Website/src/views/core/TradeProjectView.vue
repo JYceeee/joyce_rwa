@@ -149,7 +149,7 @@
           <div class="project-metrics">
             <div class="metric-item">
               <span class="metric-label">LOAN SIZE</span>
-              <span class="metric-value">{{ projectData.loanAmount || 'A$0' }}</span>
+              <span class="metric-value">{{ projectData.loanAmount || 'AUD$0' }}</span>
             </div>
             <div class="metric-item">
               <span class="metric-label">EST. YIELD (IRR)</span>
@@ -837,8 +837,8 @@ export default {
               status: project.status,
               
               // 认购信息
-              totalOffering: project.total_offering_token ? `A$${project.total_offering_token.toLocaleString()}` : 'A$0',
-              subscribed: project.subscribe_token ? `A$${project.subscribe_token.toLocaleString()}` : 'A$0',
+              totalOffering: project.total_offering_token ? `AUD$${project.total_offering_token.toLocaleString()}` : 'AUD$0',
+              subscribed: project.subscribe_token ? `AUD$${project.subscribe_token.toLocaleString()}` : 'AUD$0',
               
               // 原始数值用于计算
               totalOfferingRaw: project.total_offering_token || 0,
@@ -870,7 +870,7 @@ export default {
               
               // 前端显示字段
               subtitle: `${project.loanProduct} - ${project.propertyType}`,
-              loanAmount: project.loanAmount ? `A$${project.loanAmount.toLocaleString()}` : 'A$0',
+              loanAmount: project.loanAmount ? `AUD$${project.loanAmount.toLocaleString()}` : 'AUD$0',
               loanTerm: `${project.loanTermMonths} months`,
               targetYield: project.interestRate,
               image: project.image || this.getProductImage(project.code)
@@ -879,7 +879,7 @@ export default {
             // 添加计算指标
             mappedProduct.metrics = {
               currentElaraPrice: this.calculateTokenPrice(mappedProduct),
-              collateralPropertyValue: project.propertyValue ? `A$${project.propertyValue.toLocaleString()}` : 'TBA',
+              collateralPropertyValue: project.propertyValue ? `AUD$${project.propertyValue.toLocaleString()}` : 'TBA',
               rentalIncome: this.calculateRentalIncome(mappedProduct),
               targetLoanYield: `${project.interestRate}% p.a.`
             }
@@ -1528,8 +1528,8 @@ export default {
             created_at: project.created_at,
             
             // 认购信息 - 基于数据库字段
-            totalOffering: totalOfferingRaw > 0 ? `A$${totalOfferingRaw.toLocaleString()}` : 'A$0',
-            subscribed: subscribedRaw > 0 ? `A$${subscribedRaw.toLocaleString()}` : 'A$0',
+            totalOffering: totalOfferingRaw > 0 ? `AUD$${totalOfferingRaw.toLocaleString()}` : 'AUD$0',
+            subscribed: subscribedRaw > 0 ? `AUD$${subscribedRaw.toLocaleString()}` : 'AUD$0',
             subscriptionProgress: `${subscriptionProgress}%`,
             
             // 原始数值用于计算
@@ -1562,7 +1562,7 @@ export default {
             
             // 前端显示字段 - 基于数据库字段格式化
             subtitle: `${project.loan_product} - ${project.property_type}`,
-            loanAmount: project.loan_amount ? `A$${parseFloat(project.loan_amount).toLocaleString()}` : 'A$0',
+            loanAmount: project.loan_amount ? `AUD$${parseFloat(project.loan_amount).toLocaleString()}` : 'AUD$0',
             loanTerm: `${project.loan_term_months} months`,
             targetYield: project.interest_rate ? `${project.interest_rate}% p.a.` : 'TBA',
             image: project.image || this.getProductImage(project.project_code),
@@ -1571,14 +1571,14 @@ export default {
             propertyType: project.property_type,
             propertyLocation: project.property_location,
             loanProduct: project.loan_product,
-            propertyValue: project.property_value ? `A$${parseFloat(project.property_value).toLocaleString()}` : 'TBA',
+            propertyValue: project.property_value ? `AUD$${parseFloat(project.property_value).toLocaleString()}` : 'TBA',
             ltv: project.lvr ? `${project.lvr}%` : 'TBA'
           }
           
           // 添加计算指标 - 基于数据库字段计算
           mappedProduct.metrics = {
             currentElaraPrice: this.calculateTokenPrice(mappedProduct),
-            collateralPropertyValue: project.property_value ? `A$${parseFloat(project.property_value).toLocaleString()}` : 'TBA',
+            collateralPropertyValue: project.property_value ? `AUD$${parseFloat(project.property_value).toLocaleString()}` : 'TBA',
             rentalIncome: this.calculateRentalIncome(mappedProduct),
             targetLoanYield: project.interest_rate ? `${project.interest_rate}% p.a.` : 'TBA',
             loanToValue: project.lvr ? `${project.lvr}%` : 'TBA',
@@ -1624,7 +1624,7 @@ export default {
       const basePrice = 1.00
       const yieldMultiplier = (parseFloat(product.interest_rate) || 6.0) / 6.0
       const adjustedPrice = basePrice * yieldMultiplier
-      return `A$${adjustedPrice.toFixed(2)}`
+      return `AUD$${adjustedPrice.toFixed(2)}`
     },
     
     calculateRentalIncome(product) {
@@ -1638,7 +1638,7 @@ export default {
       const monthlyYield = interestRate / 12 / 100
       const estimatedRental = propertyValue * monthlyYield
       
-      return `A$${estimatedRental.toLocaleString('en-AU', { maximumFractionDigits: 0 })} / month`
+      return `AUD$${estimatedRental.toLocaleString('en-AU', { maximumFractionDigits: 0 })} / month`
     },
     
     calculateTotal() {

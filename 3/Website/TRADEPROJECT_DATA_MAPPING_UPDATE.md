@@ -71,7 +71,7 @@ timeline: {
 ```javascript
 metrics: {
   currentElaraPrice: this.calculateTokenPrice(mappedProduct),
-  collateralPropertyValue: project.property_value ? `A$${parseFloat(project.property_value).toLocaleString()}` : 'TBA',
+  collateralPropertyValue: project.property_value ? `AUD$${parseFloat(project.property_value).toLocaleString()}` : 'TBA',
   rentalIncome: this.calculateRentalIncome(mappedProduct),
   targetLoanYield: project.interest_rate ? `${project.interest_rate}% p.a.` : 'TBA',
   loanToValue: project.lvr ? `${project.lvr}%` : 'TBA',
@@ -117,7 +117,7 @@ const yieldMultiplier = (parseFloat(product.interest_rate) || 6.0) / 6.0
 #### calculateRentalIncome函数
 ```javascript
 // 更新前: 使用valuation字段
-const valuationStr = product.valuation.replace(/[A$,]/g, '')
+const valuationStr = product.valuation.replace(/[AUD$,]/g, '')
 
 // 更新后: 使用数据库字段property_value
 const propertyValue = parseFloat(product.property_value) || 0

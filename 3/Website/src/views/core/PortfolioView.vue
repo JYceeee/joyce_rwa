@@ -65,12 +65,12 @@
             <div class="pf-stats">
               <div class="pf-stat-card">
                 <div class="pf-stat-label">Total Investment</div>
-                <div class="pf-stat-value">A${{ getAccountTotalInvestment(selectedAccount).toFixed(2) }}</div>
+                <div class="pf-stat-value">AUD${{ getAccountTotalInvestment(selectedAccount).toFixed(2) }}</div>
               </div>
               <div class="pf-stat-card">
                 <div class="pf-stat-label">Interest Income</div>
                 <div class="pf-stat-value" :class="{ positive: getAccountTotalGain(selectedAccount) >= 0, negative: getAccountTotalGain(selectedAccount) < 0 }">
-                  {{ getAccountTotalGain(selectedAccount) >= 0 ? '+' : '' }}A${{ getAccountTotalGain(selectedAccount).toFixed(2) }}
+                  {{ getAccountTotalGain(selectedAccount) >= 0 ? '+' : '' }}AUD${{ getAccountTotalGain(selectedAccount).toFixed(2) }}
                 </div>
               </div>
               <div class="pf-stat-card">
@@ -142,7 +142,7 @@
                     </g>
                   </svg>
                   <div class="pf-pie-center">
-                    <div class="pf-pie-total">A${{ currentValue.toFixed(2) }}</div>
+                    <div class="pf-pie-total">AUD${{ currentValue.toFixed(2) }}</div>
                     <div class="pf-pie-label">Total Value</div>
                   </div>
                 </div>
@@ -155,7 +155,7 @@
                       <div class="pf-legend-code">{{ holding.code }}</div>
                     </div>
                     <div class="pf-legend-right">
-                      <div class="pf-legend-value">A${{ (holding.amount * holding.currentPrice).toFixed(2) }}</div>
+                      <div class="pf-legend-value">AUD${{ (holding.amount * holding.currentPrice).toFixed(2) }}</div>
                       <!-- <div class="pf-legend-percentage">{{ getAssetPercentage(holding).toFixed(2) }}%</div> -->
                     </div>
                   </div>
@@ -170,13 +170,13 @@
           <!-- 投资概览 -->
           <div class="pf-hero">
             <div class="pf-balance">
-              A${{ getAccountTotalInvestment(selectedAccount).toFixed(2) }}
+              AUD${{ getAccountTotalInvestment(selectedAccount).toFixed(2) }}
             </div>
             <!-- <div class="pf-change">
-                A${{ currentValue.toFixed(2) }}
+                AUD${{ currentValue.toFixed(2) }}
             </div> -->
             <!-- <div class="pf-change" :class="{ positive: totalGain >= 0, negative: totalGain < 0 }">
-              {{ totalGain >= 0 ? '+' : '' }}A${{ totalGain.toFixed(2) }} ({{ roi >= 0 ? '+' : '' }}{{ roi.toFixed(2) }}%)
+              {{ totalGain >= 0 ? '+' : '' }}AUD${{ totalGain.toFixed(2) }} ({{ roi >= 0 ? '+' : '' }}{{ roi.toFixed(2) }}%)
             </div> -->
           </div>
 
@@ -193,7 +193,15 @@
           
           <!-- 项目详情 -->
           <div v-if="activeTab==='Projects'" class="pf-projects">
-            <div class="pf-projects-grid">
+            <div v-if="accountProjects.length === 0" class="pf-empty-projects">
+              <div class="pf-empty-icon"></div>
+              <h4>No project available</h4>
+              <p>Complete some trades in the Trade page to see your project dashboard</p>
+              <button class="pf-btn pf-btn-primary" @click="goToProjects">
+                Browse Projects
+              </button>
+            </div>
+            <div v-else class="pf-projects-grid">
               <div v-for="project in accountProjects" :key="project.code" class="pf-project-card">
                 <div class="pf-project-header">
                   <img :src="project.image" :alt="project.code" class="pf-project-image" />
@@ -269,7 +277,7 @@
                 <div class="pf-watchlist-metrics">
                   <div class="pf-watchlist-metric">
                     <span class="pf-watchlist-label">LOAN SIZE</span>
-                    <span class="pf-watchlist-value">A${{ formatNumber(project.loan_amount || 0) }}</span>
+                    <span class="pf-watchlist-value">AUD${{ formatNumber(project.loan_amount || 0) }}</span>
                   </div>
                   <div class="pf-watchlist-metric">
                     <span class="pf-watchlist-label">EST. YIELD</span>
@@ -302,8 +310,113 @@
 
           <!-- 项目分析 -->
           <div v-if="activeTab==='Analysis'" class="pf-analysis">
+            <!-- 交易分析概览 -->
+            <div class="pf-analysis-overview">
+              <div class="pf-analysis-header">
+                <h3>Transaction Analysis</h3>
+                <div class="pf-analysis-actions">
+                  <button class="pf-analysis-btn" @click="refreshTransactionData" :disabled="loadingTransactions">
+                    <span v-if="loadingTransactions">🔄</span>
+                    <span v-else>Refresh</span>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- 交易统计卡片 -->
+              <div class="pf-analysis-stats-four">
+                  <div class="pf-analysis-stat-card">
+                    <div class="pf-stat-content">
+                      <div class="pf-stat-label-inline">Total Transactions: <span class="pf-stat-number">{{ totalTransactionCount }}</span></div>
+                    </div>
+                  </div>
+                  <div class="pf-analysis-stat-card">
+                    <div class="pf-stat-content">
+                      <div class="pf-stat-label-inline">Buy Orders: <span class="pf-stat-number">{{ totalBuyCount }}</span></div>
+                    </div>
+                  </div>
+                  <div class="pf-analysis-stat-card">
+                    <div class="pf-stat-content">
+                      <div class="pf-stat-label-inline">Sell Orders: <span class="pf-stat-number">{{ totalSellCount }}</span></div>
+                    </div>
+                  </div>
+                  <div class="pf-analysis-stat-card">
+                    <div class="pf-stat-content">
+                      <div class="pf-stat-label-inline">Total Value: <span class="pf-stat-number">AUD${{ totalTransactionValue.toFixed(2) }}</span></div>
+                    </div>
+                  </div>
+              </div>
+            </div>
+
+            <!-- 按日期和类型分组显示交易 -->
+            <div class="pf-transaction-breakdown">
+              <div class="pf-breakdown-header">
+                <h4>Transaction Breakdown by Date & Type</h4>
+                <div class="pf-breakdown-controls">
+                  <select v-model="analysisTimeframe" class="pf-select">
+                    <option value="7d">Last 7 Days</option>
+                    <option value="30d">Last 30 Days</option>
+                    <option value="90d">Last 3 Months</option>
+                    <option value="1y">Last Year</option>
+                    <option value="all">All Time</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="pf-breakdown-content">
+                <div v-if="loadingTransactions" class="pf-analysis-loading">
+                  <div class="pf-spinner"></div>
+                  <span>Loading transaction analysis...</span>
+                </div>
+                <div v-else-if="transactionBreakdownData.length === 0" class="pf-analysis-empty">
+                  <!-- <div class="pf-empty-icon">📊</div> -->
+                  <p>No transaction data available</p>
+                  <p class="pf-empty-hint">Complete some trades to see detailed analysis</p>
+                </div>
+                <div v-else class="pf-breakdown-list">
+                  <div v-for="dayGroup in transactionBreakdownData" :key="dayGroup.date" class="pf-day-group">
+                    <div class="pf-day-header">
+                      <div class="pf-day-date">{{ formatAnalysisDate(dayGroup.date) }}</div>
+                      <div class="pf-day-summary">
+                        <span class="pf-day-total">{{ dayGroup.totalTransactions }} transactions</span>
+                        <span class="pf-day-value">AUD${{ dayGroup.totalValue.toFixed(2) }}</span>
+                      </div>
+                    </div>
+                    <div class="pf-day-transactions">
+                      <div v-for="typeGroup in dayGroup.types" :key="typeGroup.type" class="pf-type-group">
+                        <div class="pf-type-header">
+                          <div class="pf-type-icon" :class="typeGroup.type">
+                            {{ typeGroup.type === 'buy' ? '📈' : '📉' }}
+                          </div>
+                          <div class="pf-type-info">
+                            <div class="pf-type-name">{{ typeGroup.type.toUpperCase() }}</div>
+                            <div class="pf-type-count">{{ typeGroup.count }} transactions</div>
+                          </div>
+                          <div class="pf-type-value">
+                            <div class="pf-type-amount">AUD${{ typeGroup.totalAmount.toFixed(2) }}</div>
+                            <div class="pf-type-avg">Avg: AUD${{ typeGroup.averageAmount.toFixed(2) }}</div>
+                          </div>
+                        </div>
+                        <div class="pf-type-projects">
+                          <div v-for="project in typeGroup.projects" :key="project.projectCode" class="pf-project-summary">
+                            <div class="pf-project-info">
+                              <div class="pf-project-code">{{ project.projectCode }}</div>
+                              <div class="pf-project-name">{{ project.projectName }}</div>
+                            </div>
+                            <div class="pf-project-stats">
+                              <div class="pf-project-count">{{ project.count }} txns</div>
+                              <div class="pf-project-value">AUD${{ project.totalAmount.toFixed(2) }}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- 资产总结图表 -->
-            <div class="pf-asset-summary">
+            <!-- <div class="pf-asset-summary">
               <div class="pf-summary-header">
                 <h3>Asset Summary</h3>
                 <div class="pf-summary-stats">
@@ -311,21 +424,15 @@
                     <span class="pf-stat-number">{{ holdings.length }}</span>
                     <span class="pf-stat-label">Assets</span>
                   </div>
-                  <!-- <div class="pf-summary-stat">
-                    <span class="pf-stat-number" :class="{ positive: totalGain >= 0, negative: totalGain < 0 }">
-                      {{ totalGain >= 0 ? '+' : '' }}{{ roi.toFixed(1) }}%
-                    </span>
-                    <span class="pf-stat-label">Total Return</span>
-                  </div> -->
                   <div class="pf-summary-stat">
-                    <span class="pf-stat-number">A${{ currentValue.toFixed(2) }}</span>
+                    <span class="pf-stat-number">AUD${{ currentValue.toFixed(2) }}</span>
                     <span class="pf-stat-label">Total Value</span>
                   </div>
                 </div>
-              </div>
+              </div> -->
               
               <!-- 交易记录柱状图 -->
-              <div class="pf-transaction-chart">
+              <!-- <div class="pf-transaction-chart">
                 <div class="pf-chart-header">
                   <h4>Transaction History</h4>
                   <div class="pf-chart-controls">
@@ -340,16 +447,16 @@
                   </div>
                 </div>
                 
-                <!-- 交易摘要统计 -->
+                <!-- 交易摘要统计
                 <div class="pf-chart-summary">
                   <!-- <div class="pf-chart-summary-header">
                     <h3>Today's Transactions</h3>
-                  </div> -->
+                  </div> 
                   <div class="pf-summary-item">
                     <div class="pf-summary-label">Total</div>
                     <div class="pf-summary-value">
                       {{ todayTransactionStats.totalTransactions.toFixed(2) }} 
-                      <!-- (A${{ (todayTransactionStats.totalBuy + todayTransactionStats.totalSell).toFixed(2) }}) -->
+                      <!-- (AUD${{ (todayTransactionStats.totalBuy + todayTransactionStats.totalSell).toFixed(2) }}) 
                     </div>
                   </div>
                   <div class="pf-summary-item">
@@ -392,51 +499,51 @@
                         </div>
                         <div class="pf-bar-label">{{ item.date }}</div>
                         <div class="pf-bar-tooltip">
-                          <div class="pf-tooltip-buy">Cumulative Buy: A${{ item.cumulativeBuyValue.toFixed(2) }}</div>
-                          <div class="pf-tooltip-sell">Cumulative Sell: A${{ item.cumulativeSellValue.toFixed(2) }}</div>
-                          <div class="pf-tooltip-net">Net Value: A${{ item.netValue.toFixed(2) }}</div>
+                          <div class="pf-tooltip-buy">Cumulative Buy: AUD${{ item.cumulativeBuyValue.toFixed(2) }}</div>
+                          <div class="pf-tooltip-sell">Cumulative Sell: AUD${{ item.cumulativeSellValue.toFixed(2) }}</div>
+                          <div class="pf-tooltip-net">Net Value: AUD${{ item.netValue.toFixed(2) }}</div>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </div> -->
                   
                   <!-- 折线图 -->
-                  <div v-if="transactionChartData.length > 0" class="pf-line-chart">
+                  <!-- <div v-if="transactionChartData.length > 0" class="pf-line-chart">
                     <div class="pf-line-chart-container">
                       <svg 
                         ref="lineChartSvg"
                         class="pf-line-svg"
                         :viewBox="`0 0 ${lineChartWidth} ${lineChartHeight}`"
                         preserveAspectRatio="none"
-                      >
+                      > -->
                         <!-- 网格线 -->
-                        <defs>
+                        <!-- <defs>
                           <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
                             <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#374151" stroke-width="0.5" opacity="0.3"/>
                           </pattern>
                         </defs>
                         <rect width="100%" height="100%" fill="url(#grid)" />
                         
-                        <!-- Buy折线 -->
+                        <!-- Buy折线
                         <polyline
                           :points="buyLinePoints"
                           fill="none"
                           stroke="#10b981"
                           stroke-width="2"
                           class="pf-line-buy"
-                        />
+                        /> 
                         
                         <!-- Sell折线 -->
-                        <polyline
+                        <!-- <polyline
                           :points="sellLinePoints"
                           fill="none"
                           stroke="#ef4444"
                           stroke-width="2"
                           class="pf-line-sell"
-                        />
+                        /> -->
                         
                         <!-- Buy数据点 -->
-                        <circle
+                        <!-- <circle
                           v-for="(point, index) in buyDataPoints"
                           :key="`buy-${index}`"
                           :cx="point.x"
@@ -446,10 +553,10 @@
                           class="pf-line-point pf-line-point-buy"
                           @mouseenter="showTooltip($event, point, 'buy')"
                           @mouseleave="hideTooltip"
-                        />
+                        /> -->
                         
                         <!-- Sell数据点 -->
-                        <circle
+                        <!-- <circle
                           v-for="(point, index) in sellDataPoints"
                           :key="`sell-${index}`"
                           :cx="point.x"
@@ -461,10 +568,10 @@
                           @mouseleave="hideTooltip"
                         />
                       </svg>
-                    </div>
+                    </div> -->
                     
                     <!-- 折线图tooltip -->
-                    <div 
+                    <!-- <div 
                       v-if="lineTooltip.visible"
                       class="pf-line-tooltip"
                       :style="{ 
@@ -479,27 +586,27 @@
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </div> -->
                   
                   <!-- 统一图例 -->
-                  <div class="pf-unified-legend">
+                  <!-- <div class="pf-unified-legend">
                     <div class="pf-legend-item">
                       <div class="pf-legend-color pf-buy-color"></div>
-                      <span>Buy Value (A$)</span>
+                      <span>Buy Value (AUD$)</span>
                     </div>
                     <div class="pf-legend-item">
                       <div class="pf-legend-color pf-sell-color"></div>
-                      <span>Sell Value (A$)</span>
+                      <span>Sell Value (AUD$)</span>
                     </div>
-                  </div>
-                </div>
-              </div>
+                  </div> -->
+                <!-- </div>
+              </div> -->
 
-            </div>
+            <!-- </div>
 
-            <div class="pf-analysis-grid">
+            <div class="pf-analysis-grid"> -->
               <!-- 收益分布图 -->
-              <div class="pf-analysis-card">
+              <!-- <div class="pf-analysis-card">
                 <h4>Return Distribution</h4>
                 <div class="pf-chart-placeholder">
                   <div class="pf-chart-bars">
@@ -509,10 +616,10 @@
                     </div>
                   </div>
                 </div>
-              </div>
+              </div> -->
 
               <!-- 风险评估 -->
-              <div class="pf-analysis-card">
+              <!-- <div class="pf-analysis-card">
                 <h4>Risk Assessment</h4>
                 <div class="pf-risk-metrics">
                   <div class="pf-risk-item">
@@ -524,7 +631,7 @@
                     <span class="pf-risk-value">{{ diversification.toFixed(2) }}%</span>
                   </div>
                 </div>
-              </div>
+              </div> -->
 
               <!-- 交易建议 -->
               <!-- <div class="pf-analysis-card">
@@ -536,13 +643,13 @@
                   </div>
                 </div>
               </div> -->
-            </div>
+            
+            <!-- </div> -->
           </div>
 
           <!-- 交易历史 -->
           <div v-if="activeTab==='Transactions'" class="pf-transactions">
             <div class="pf-transactions-header">
-              <h3>Recent Transactions</h3>
               <div class="pf-transactions-actions">
                 <button class="pf-filter-btn" @click="showFilters = !showFilters">
                   Filter
@@ -589,7 +696,7 @@
                   </div>
                   <div class="pf-transaction-value">
                     <div class="pf-transaction-time">{{ formatTime(transaction.timestamp) }}</div>
-                    <div class="pf-transaction-price">A${{ transaction.amount}}</div>
+                    <div class="pf-transaction-price">AUD${{ transaction.amount}}</div>
                   </div>
                 </div>
               </div>
@@ -645,6 +752,9 @@ const selectedTimeframe = ref('1d')
 const chartTimeframe = ref('3d')
 const loadingTransactions = ref(false)
 const transactionChartData = ref([])
+
+// 分析页面相关数据
+const analysisTimeframe = ref('30d')
 
 // 折线图相关数据
 const lineChartWidth = ref(800)
@@ -763,8 +873,8 @@ function updateWatchlistProjects(allProjects) {
     totalOfferingRaw: project.total_offering_token || 0,
     subscribedRaw: project.subscribe_token || 0,
     // 格式化显示字段
-    totalOffering: project.total_offering_token ? `A$${project.total_offering_token.toLocaleString()}` : 'A$0',
-    subscribed: project.subscribe_token ? `A$${project.subscribe_token.toLocaleString()}` : 'A$0'
+    totalOffering: project.total_offering_token ? `AUD$${project.total_offering_token.toLocaleString()}` : 'AUD$0',
+    subscribed: project.subscribe_token ? `AUD$${project.subscribe_token.toLocaleString()}` : 'AUD$0'
   }))
   
   console.log('✅ Portfolio: watchlist 项目更新成功，共', watchlistProjects.value.length, '个项目')
@@ -1537,6 +1647,114 @@ const todayTransactionStats = computed(() => {
   return stats
 })
 
+// 总交易统计
+const totalTransactionCount = computed(() => {
+  return filteredTransactions.value.length
+})
+
+const totalBuyCount = computed(() => {
+  return filteredTransactions.value.filter(tx => tx.type === 'buy').length
+})
+
+const totalSellCount = computed(() => {
+  return filteredTransactions.value.filter(tx => tx.type === 'sell').length
+})
+
+const totalTransactionValue = computed(() => {
+  return filteredTransactions.value.reduce((total, tx) => total + parseFloat(tx.amount || 0), 0)
+})
+
+// 交易分析数据 - 按日期和类型分组
+const transactionBreakdownData = computed(() => {
+  if (filteredTransactions.value.length === 0) return []
+  
+  // 根据时间范围过滤交易
+  const now = new Date()
+  const filteredTxs = filteredTransactions.value.filter(tx => {
+    if (analysisTimeframe.value === 'all') return true
+    
+    const txDate = new Date(tx.timestamp)
+    const daysDiff = Math.floor((now - txDate) / (1000 * 60 * 60 * 24))
+    
+    switch (analysisTimeframe.value) {
+      case '7d': return daysDiff <= 7
+      case '30d': return daysDiff <= 30
+      case '90d': return daysDiff <= 90
+      case '1y': return daysDiff <= 365
+      default: return true
+    }
+  })
+  
+  // 按日期分组
+  const groupedByDate = {}
+  filteredTxs.forEach(tx => {
+    const dateKey = new Date(tx.timestamp).toISOString().split('T')[0]
+    if (!groupedByDate[dateKey]) {
+      groupedByDate[dateKey] = []
+    }
+    groupedByDate[dateKey].push(tx)
+  })
+  
+  // 转换为数组并按日期排序
+  return Object.entries(groupedByDate)
+    .map(([date, transactions]) => {
+      // 按类型分组
+      const groupedByType = {}
+      transactions.forEach(tx => {
+        if (!groupedByType[tx.type]) {
+          groupedByType[tx.type] = []
+        }
+        groupedByType[tx.type].push(tx)
+      })
+      
+      // 计算每种类型的统计信息
+      const types = Object.entries(groupedByType).map(([type, txs]) => {
+        // 按项目分组
+        const groupedByProject = {}
+        txs.forEach(tx => {
+          const key = tx.projectCode || 'Unknown'
+          if (!groupedByProject[key]) {
+            groupedByProject[key] = []
+          }
+          groupedByProject[key].push(tx)
+        })
+        
+        // 计算项目统计
+        const projects = Object.entries(groupedByProject).map(([projectCode, projectTxs]) => {
+          const totalAmount = projectTxs.reduce((sum, tx) => sum + parseFloat(tx.amount || 0), 0)
+          return {
+            projectCode,
+            projectName: projectTxs[0].projectName || 'Unknown Project',
+            count: projectTxs.length,
+            totalAmount
+          }
+        })
+        
+        const totalAmount = txs.reduce((sum, tx) => sum + parseFloat(tx.amount || 0), 0)
+        const averageAmount = txs.length > 0 ? totalAmount / txs.length : 0
+        
+        return {
+          type,
+          count: txs.length,
+          totalAmount,
+          averageAmount,
+          projects
+        }
+      })
+      
+      const totalTransactions = transactions.length
+      const totalValue = transactions.reduce((sum, tx) => sum + parseFloat(tx.amount || 0), 0)
+      
+      return {
+        date,
+        totalTransactions,
+        totalValue,
+        types
+      }
+    })
+    .sort((a, b) => new Date(b.date) - new Date(a.date)) // 按日期降序排列
+})
+
 // 基于All Assets Distribution的交易统计
 const assetBasedTransactionStats = computed(() => {
   const currentVal = currentValue.value
@@ -2035,7 +2253,7 @@ const showTooltip = (event, point, type) => {
     visible: true,
     x: rect.left - containerRect.left + rect.width / 2,
     y: rect.top - containerRect.top - 50,
-    content: `${type === 'buy' ? 'Buy' : 'Sell'}: ${point.count} (A$${point.value.toFixed(2)})`,
+    content: `${type === 'buy' ? 'Buy' : 'Sell'}: ${point.count} (AUD$${point.value.toFixed(2)})`,
     type: type,
     date: point.date
   }
@@ -2101,6 +2319,32 @@ const formatTime = (timestamp) => {
   if (hours > 0) return `${hours}h ago`
   if (minutes > 0) return `${minutes}m ago`
   return 'Just now'
+}
+
+// 格式化分析页面日期
+const formatAnalysisDate = (dateString) => {
+  if (!dateString) return 'Unknown'
+  const date = new Date(dateString)
+  const today = new Date()
+  const yesterday = new Date(today)
+  yesterday.setDate(yesterday.getDate() - 1)
+  
+  // 检查是否是今天
+  if (date.toDateString() === today.toDateString()) {
+    return 'Today'
+  }
+  
+  // 检查是否是昨天
+  if (date.toDateString() === yesterday.toDateString()) {
+    return 'Yesterday'
+  }
+  
+  // 返回格式化的日期
+  return date.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric'
+  })
 }
 
 const getPriceBarHeight = (change) => {
@@ -2949,7 +3193,7 @@ window.addEventListener('storage', (e) => {
   border-radius: 8px;
   border: 1px solid #374151;
   background: #1f2937;
-  color: #ffffff;
+  color: #343232;
   font-size: 14px;
   cursor: pointer;
 }
@@ -2966,7 +3210,7 @@ window.addEventListener('storage', (e) => {
 
 .pf-refresh-btn:hover{
   background: #374151;
-  color: #ffffff;
+  color: #5a5757;
 }
 
 .pf-bar-chart-container{
@@ -3385,9 +3629,399 @@ window.addEventListener('storage', (e) => {
 
 
 /* 分析页面样式 */
+.pf-analysis {
+  padding: 20px;
+}
+
 .pf-analysis-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:16px;}
 .pf-analysis-card{padding:16px;border-radius:12px;background:#141426;border:1px solid var(--border);}
 .pf-analysis-card h4{margin:0 0 12px 0;font-size:16px;font-weight:700;color:#ffffff;}
+
+/* 交易分析概览 */
+.pf-analysis-overview {
+  margin-bottom: 30px;
+}
+
+.pf-analysis-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.pf-analysis-header h3 {
+  color: var(--dark-text);
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.pf-analysis-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.pf-analysis-btn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.pf-analysis-btn:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.pf-analysis-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+/* 交易统计卡片 */
+.pf-analysis-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+/* 一行四个统计卡片 */
+.pf-analysis-stats-four {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 30px;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .pf-analysis-stats-four {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .pf-analysis-stats-four {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+.pf-analysis-stat-card {
+  background: var(--dark-panel);
+  border: 1px solid var(--dark-border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  width: 180px;
+}
+
+.pf-analysis-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.pf-stat-icon {
+  font-size: 32px;
+  width: 12px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 12px;
+}
+
+.pf-stat-content {
+  flex: 1;
+  width: 12px;
+  height: 12px;
+  margin:2px;
+  padding:2px;
+  
+}
+
+.pf-stat-number {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--dark-text);
+  line-height: 1.2;
+}
+
+.pf-stat-label {
+  font-size: 14px;
+  color: var(--dark-muted);
+  margin-top: 4px;
+}
+
+.pf-stat-label-inline {
+  font-size: 14px;
+  color: var(--dark-muted);
+  line-height: 1.2;
+}
+
+.pf-stat-label-inline .pf-stat-number {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--dark-text);
+  margin-left: 4px;
+}
+
+/* 交易分析详情 */
+.pf-transaction-breakdown {
+  background: var(--dark-panel);
+  border: 1px solid var(--dark-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.pf-breakdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid var(--dark-border);
+  background: rgba(31, 41, 55, 0.5);
+}
+
+.pf-breakdown-header h4 {
+  color: var(--dark-text);
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.pf-breakdown-controls {
+  display: flex;
+  gap: 10px;
+  background: var(--dark-bg);
+}
+
+.pf-select {
+  background: var(--dark-bg);
+  border: 1px solid var(--dark-border);
+  color: var(--dark-text);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.pf-breakdown-content {
+  padding: 0;
+}
+
+.pf-analysis-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--dark-muted);
+}
+
+.pf-analysis-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--dark-muted);
+  text-align: center;
+}
+
+.pf-analysis-empty .pf-empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.pf-empty-hint {
+  font-size: 14px;
+  margin-top: 8px;
+  color: var(--dark-muted);
+}
+
+/* 日期分组 */
+.pf-breakdown-list {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.pf-day-group {
+  border-bottom: 1px solid var(--dark-border);
+}
+
+.pf-day-group:last-child {
+  border-bottom: none;
+}
+
+.pf-day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: rgba(31, 41, 55, 0.3);
+  border-bottom: 1px solid var(--dark-border);
+}
+
+.pf-day-date {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dark-text);
+}
+
+.pf-day-summary {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.pf-day-total {
+  font-size: 14px;
+  color: var(--dark-muted);
+}
+
+.pf-day-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.pf-day-transactions {
+  padding: 0;
+}
+
+/* 类型分组 */
+.pf-type-group {
+  border-bottom: 1px solid rgba(74, 85, 104, 0.2);
+}
+
+.pf-type-group:last-child {
+  border-bottom: none;
+}
+
+.pf-type-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: rgba(31, 41, 55, 0.1);
+}
+
+.pf-type-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.pf-type-icon.buy {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.pf-type-icon.sell {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.pf-type-info {
+  flex: 1;
+}
+
+.pf-type-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dark-text);
+}
+
+.pf-type-count {
+  font-size: 14px;
+  color: var(--dark-muted);
+  margin-top: 2px;
+}
+
+.pf-type-value {
+  text-align: right;
+}
+
+.pf-type-amount {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dark-text);
+}
+
+.pf-type-avg {
+  font-size: 14px;
+  color: var(--dark-muted);
+  margin-top: 2px;
+}
+
+/* 项目详情 */
+.pf-type-projects {
+  padding: 0 20px 16px 20px;
+}
+
+.pf-project-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba(31, 41, 55, 0.2);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+}
+
+.pf-project-summary:hover {
+  background: rgba(31, 41, 55, 0.3);
+}
+
+.pf-project-summary:last-child {
+  margin-bottom: 0;
+}
+
+.pf-project-info {
+  flex: 1;
+}
+
+.pf-project-code {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dark-text);
+}
+
+.pf-project-name {
+  font-size: 12px;
+  color: var(--dark-muted);
+  margin-top: 2px;
+}
+
+.pf-project-stats {
+  text-align: right;
+}
+
+.pf-project-count {
+  font-size: 14px;
+  color: var(--dark-muted);
+}
+
+.pf-project-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dark-text);
+  margin-top: 2px;
+}
 
 /* Asset Distribution 图例响应式样式 */
 @media (max-width: 768px) {
@@ -3664,6 +4298,12 @@ window.addEventListener('storage', (e) => {
   color: var(--muted);
 }
 
+.pf-empty-projects {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+}
+
 .pf-empty-icon {
   font-size: 48px;
   margin-bottom: 16px;
@@ -3675,7 +4315,19 @@ window.addEventListener('storage', (e) => {
   color: var(--text);
 }
 
+.pf-empty-projects h4 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  color: var(--text);
+}
+
 .pf-empty-watchlist p {
+  margin: 0 0 24px 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.pf-empty-projects p {
   margin: 0 0 24px 0;
   font-size: 14px;
   line-height: 1.5;

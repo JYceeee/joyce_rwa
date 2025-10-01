@@ -109,11 +109,11 @@
             </div>
             <div class="info-item">
               <span class="info-label">Subscription Price</span>
-              <span class="info-value">A${{ contractData.subscriptionPrice }}</span>
+              <span class="info-value">AUD${{ contractData.subscriptionPrice }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Total Subscription Value</span>
-              <span class="info-value">A${{ contractData.totalSubscriptionValue }}</span>
+              <span class="info-value">AUD${{ contractData.totalSubscriptionValue }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Subscription Date</span>
@@ -159,7 +159,7 @@
             </div>
             <div class="info-item">
               <span class="info-label">Minimum Interest Amount</span>
-              <span class="info-value">A${{ contractData.minInterestAmount }}</span>
+              <span class="info-value">AUD${{ contractData.minInterestAmount }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Interest Start Date</span>
@@ -185,15 +185,15 @@
             </div>
             <div class="info-item">
               <span class="info-label">Accumulated Interest</span>
-              <span class="info-value">A${{ contractData.accumulatedInterest }}</span>
+              <span class="info-value">AUD${{ contractData.accumulatedInterest }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Distributed Interest</span>
-              <span class="info-value">A${{ contractData.distributedInterest }}</span>
+              <span class="info-value">AUD${{ contractData.distributedInterest }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Pending Interest</span>
-              <span class="info-value">A${{ contractData.pendingInterest }}</span>
+              <span class="info-value">AUD${{ contractData.pendingInterest }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Distribution Method</span>
@@ -313,7 +313,7 @@ const loadContractData = async () => {
         contractData.value.propertyAddress = project.address || '123 Bondi Beach Road, Bondi NSW 2026'
         contractData.value.propertyType = project.propertyType || 'Apartment'
         contractData.value.propertySize = project.size || '85 sqm'
-        contractData.value.propertyValue = `A$${project.valuation || '1,200,000'}`
+        contractData.value.propertyValue = `AUD$${project.valuation || '1,200,000'}`
         contractData.value.location = project.location || 'Bondi Beach, NSW'
         contractData.value.buildYear = project.buildYear || '2018'
         contractData.value.annualYield = project.targetYield || 8.5
@@ -342,7 +342,7 @@ const setDefaultData = () => {
     propertyAddress: '123 Bondi Beach Road, Bondi NSW 2026',
     propertyType: 'Apartment',
     propertySize: '85 sqm',
-    propertyValue: 'A$1,200,000',
+    propertyValue: 'AUD$1,200,000',
     location: 'Bondi Beach, NSW',
     buildYear: '2018',
     totalSupply: 1000000,

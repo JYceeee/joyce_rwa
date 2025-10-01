@@ -48,13 +48,13 @@ interest_rate: project.interest_rate,
 
 **修复前**:
 ```javascript
-collateralPropertyValue: project.propertyValue ? `A$${project.propertyValue.toLocaleString()}` : 'TBA',
+collateralPropertyValue: project.propertyValue ? `AUD$${project.propertyValue.toLocaleString()}` : 'TBA',
 targetLoanYield: `${project.interestRate}% p.a.`
 ```
 
 **修复后**:
 ```javascript
-collateralPropertyValue: project.property_value ? `A$${project.property_value.toLocaleString()}` : 'TBA',
+collateralPropertyValue: project.property_value ? `AUD$${project.property_value.toLocaleString()}` : 'TBA',
 targetLoanYield: `${project.interest_rate}% p.a.`
 ```
 

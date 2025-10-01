@@ -72,7 +72,7 @@
         <!-- 资产标题区 -->
         <div class="mm-balance">{{ nativeBalanceDisplay }} {{ nativeSymbol }}</div>
         <div class="mm-subline">
-          <span>A${{ nativeToAudDisplay || 0 }}</span> 
+          <span>AUD${{ nativeToAudDisplay || 0 }}</span> 
           <a href="#" @click.prevent="$router.push('/portfolio')" class="mm-link">Portfolio ↗</a>
         </div>
       </div>
@@ -158,7 +158,7 @@
           </div>
           <div class="mm-token-right">
             <div class="mm-token-sub">{{ nativeBalanceDisplay }} {{ nativeSymbol }}</div>
-            <div class="mm-token-amount">A${{ nativeToAudDisplay || 0 }}</div>
+            <div class="mm-token-amount">AUD${{ nativeToAudDisplay || 0 }}</div>
           </div>
         </div>
 

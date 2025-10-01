@@ -1027,32 +1027,44 @@ export default {
   cursor: not-allowed;
 }
 
-/* 用户联系信息样式 - 与Account Status section风格一致 */
+/* 用户联系信息样式 - 与标题风格一致 */
 .user-contact-info {
   max-width: 1000px;
   margin: 20px 0;
   margin-left: 50px;
-  padding: 20px;
-  background: rgba(45, 55, 72, 0.6);
-  border-radius: 12px;
-  border: 1px solid rgba(74, 85, 104, 0.3);
-  backdrop-filter: blur(10px);
+  padding: 24px;
+  background: rgba(45, 55, 72, 0.8);
+  border-radius: 16px;
+  border: 1px solid rgba(74, 85, 104, 0.4);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .user-contact-info .label {
-  margin: 0 0 16px 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #f4f7f9;
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
   display: block;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.5px;
 }
 
 .contact-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(74, 85, 104, 0.3);
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(74, 85, 104, 0.4);
+  transition: background-color 0.2s ease;
+}
+
+.contact-item:hover {
+  background-color: rgba(74, 85, 104, 0.1);
+  border-radius: 8px;
+  margin: 0 -8px;
+  padding-left: 8px;
+  padding-right: 8px;
 }
 
 .contact-item:first-child {
@@ -1074,18 +1086,21 @@ export default {
 .contact-label {
   display: flex;
   align-items: center;
-  font-weight: 500;
-  color: #e2e8f0;
+  font-weight: 600;
+  color: #f4f7f9;
   min-width: 80px;
   flex-shrink: 0;
+  font-size: 14px;
+  letter-spacing: 0.3px;
 }
 
 .contact-value {
   color: #ffffff;
-  font-family: monospace;
-  background: transparent;
-  padding: 2px 6px;
-  border-radius: 3px;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  background: rgba(31, 41, 55, 0.6);
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(74, 85, 104, 0.3);
   flex: 1;
   max-width: 300px;
   word-break: break-all;
@@ -1093,6 +1108,13 @@ export default {
   align-items: center;
   gap: 8px;
   justify-content: flex-start;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.contact-value:hover {
+  background: rgba(31, 41, 55, 0.8);
+  border-color: rgba(74, 85, 104, 0.5);
 }
 
 /* Email验证状态样式 */

@@ -159,7 +159,7 @@
                     <h4>更新后</h4>
                     <div class="field-item match">
                         <span class="field-label">LOAN SIZE</span>
-                        <span class="field-value">projectData.loanAmount || 'A$0'</span>
+                        <span class="field-value">projectData.loanAmount || 'AUD$0'</span>
                     </div>
                     <div class="field-item match">
                         <span class="field-label">EST. YIELD (IRR)</span>
@@ -231,7 +231,7 @@
             <div class="metric-grid">
                 <div class="metric-card">
                     <div class="metric-label">LOAN SIZE</div>
-                    <div class="metric-value">A$2,500,000</div>
+                    <div class="metric-value">AUD$2,500,000</div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-label">EST. YIELD (IRR)</div>
@@ -243,7 +243,7 @@
                 </div>
                 <div class="metric-card">
                     <div class="metric-label">PROPERTY VALUE</div>
-                    <div class="metric-value">A$3,200,000</div>
+                    <div class="metric-value">AUD$3,200,000</div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-label">LTV</div>
@@ -251,7 +251,7 @@
                 </div>
                 <div class="metric-card">
                     <div class="metric-label">CURRENT PRICE</div>
-                    <div class="metric-value">A$1.30</div>
+                    <div class="metric-value">AUD$1.30</div>
                 </div>
             </div>
         </div>
@@ -263,7 +263,7 @@
 &lt;div class="project-metrics"&gt;
   &lt;div class="metric-item"&gt;
     &lt;span class="metric-label"&gt;LOAN SIZE&lt;/span&gt;
-    &lt;span class="metric-value"&gt;{{ projectData.loanAmount || 'A$0' }}&lt;/span&gt;
+    &lt;span class="metric-value"&gt;{{ projectData.loanAmount || 'AUD$0' }}&lt;/span&gt;
   &lt;/div&gt;
   &lt;div class="metric-item"&gt;
     &lt;span class="metric-label"&gt;EST. YIELD (IRR)&lt;/span&gt;
@@ -295,7 +295,7 @@
                 <li><strong>字段标签统一:</strong> 使用与ProjectsView相同的字段标签（LOAN SIZE, EST. YIELD (IRR), TERM）</li>
                 <li><strong>显示格式优化:</strong> 收益率字段使用绿色高亮显示</li>
                 <li><strong>字段顺序调整:</strong> 按照重要性重新排列指标显示顺序</li>
-                <li><strong>默认值改进:</strong> 提供更合理的默认值（A$0, 12 months）</li>
+                <li><strong>默认值改进:</strong> 提供更合理的默认值（AUD$0, 12 months）</li>
                 <li><strong>项目详情更新:</strong> 使用更具体的字段（propertyType, propertyLocation, loanProduct）</li>
                 <li><strong>标题格式统一:</strong> 使用"•"分隔符与ProjectsView保持一致</li>
             </ul>
@@ -325,12 +325,12 @@
             <h3>📝 预期效果</h3>
             <p>更新后的TradeProjectView项目信息卡片应该显示：</p>
             <ul>
-                <li>✅ <strong>LOAN SIZE:</strong> A$2,500,000</li>
+                <li>✅ <strong>LOAN SIZE:</strong> AUD$2,500,000</li>
                 <li>✅ <strong>EST. YIELD (IRR):</strong> 7.80% p.a. (绿色)</li>
                 <li>✅ <strong>TERM:</strong> 12 months</li>
-                <li>✅ <strong>PROPERTY VALUE:</strong> A$3,200,000</li>
+                <li>✅ <strong>PROPERTY VALUE:</strong> AUD$3,200,000</li>
                 <li>✅ <strong>LTV:</strong> 78.1%</li>
-                <li>✅ <strong>CURRENT PRICE:</strong> A$1.30</li>
+                <li>✅ <strong>CURRENT PRICE:</strong> AUD$1.30</li>
             </ul>
             <p>项目详情应显示：<strong>RWA001 • Project Name</strong> 格式的标题，以及物业类型、位置和贷款产品信息。</p>
         </div>

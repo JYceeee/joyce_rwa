@@ -35,7 +35,7 @@
       <div class="project-metrics">
         <div class="metric-item">
           <span class="metric-label">LOAN SIZE</span>
-          <span class="metric-value">{{ projectData.loanAmount || 'A$0' }}</span>
+          <span class="metric-value">{{ projectData.loanAmount || 'AUD$0' }}</span>
         </div>
         <div class="metric-item">
           <span class="metric-label">EST. YIELD (IRR)</span>
@@ -125,7 +125,7 @@ export default {
             code: project.project_code,
             name: project.project_name,
             subtitle: `${project.loan_product} - ${project.property_type}`,
-            loanAmount: project.loan_amount ? `A$${parseFloat(project.loan_amount).toLocaleString()}` : 'A$0',
+            loanAmount: project.loan_amount ? `AUD$${parseFloat(project.loan_amount).toLocaleString()}` : 'AUD$0',
             loanTerm: project.loan_term_months ? `${project.loan_term_months} months` : '12 months',
             metrics: {
               targetLoanYield: project.interest_rate ? `${project.interest_rate}% p.a.` : 'TBA'

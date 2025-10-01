@@ -144,7 +144,7 @@
                     </div>
                     <div class="field-item match">
                         <span class="field-name">loanAmount</span>
-                        <span class="field-value">A$format(rawData.loanAmount)</span>
+                        <span class="field-value">AUD$format(rawData.loanAmount)</span>
                     </div>
                     <div class="field-item match">
                         <span class="field-name">loanTerm</span>
@@ -158,8 +158,8 @@
             <h3>📊 新增字段映射</h3>
             <div class="code-block">
 // 认购信息
-totalOffering: rawData.total_offering_token ? `A$${rawData.total_offering_token.toLocaleString()}` : 'A$0',
-subscribed: rawData.subscribe_token ? `A$${rawData.subscribe_token.toLocaleString()}` : 'A$0',
+totalOffering: rawData.total_offering_token ? `AUD$${rawData.total_offering_token.toLocaleString()}` : 'AUD$0',
+subscribed: rawData.subscribe_token ? `AUD$${rawData.subscribe_token.toLocaleString()}` : 'AUD$0',
 
 // 原始数值用于计算
 totalOfferingRaw: rawData.total_offering_token || 0,
@@ -174,7 +174,7 @@ propertyValue: rawData.propertyValue,
 // 贷款信息
 loanType: rawData.loanType,
 loanProduct: rawData.loanProduct,
-loanAmount: rawData.loanAmount ? `A$${rawData.loanAmount.toLocaleString()}` : 'A$0',
+loanAmount: rawData.loanAmount ? `AUD$${rawData.loanAmount.toLocaleString()}` : 'AUD$0',
 loanTermMonths: rawData.loanTermMonths,
 loanTerm: `${rawData.loanTermMonths || 12} months`,
 

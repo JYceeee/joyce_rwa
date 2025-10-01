@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Analysis Tab关联Transaction演示</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(180deg, #0f1419 0%, #1a1f2e 50%, #2d3748 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        .demo-container {
+            display: flex;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        .demo-section {
+            flex: 1;
+        }
+        .demo-title {
+            color: #e2e8f0;
+            margin-bottom: 15px;
+            font-size: 20px;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        /* 交易分析概览样式 */
+        .pf-analysis-overview {
+            margin-bottom: 30px;
+        }
+
+        .pf-analysis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .pf-analysis-header h3 {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .pf-analysis-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .pf-analysis-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .pf-analysis-btn:hover:not(:disabled) {
+            background: #2563eb;
+        }
+
+        /* 交易统计卡片 */
+        .pf-analysis-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .pf-analysis-stat-card {
+            background: rgba(45, 55, 72, 0.8);
+            border: 1px solid rgba(74, 85, 104, 0.4);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .pf-analysis-stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .pf-stat-icon {
+            font-size: 32px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 12px;
+        }
+
+        .pf-stat-content {
+            flex: 1;
+        }
+
+        .pf-stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1.2;
+        }
+
+        .pf-stat-label {
+            font-size: 14px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+
+        /* 交易分析详情 */
+        .pf-transaction-breakdown {
+            background: rgba(45, 55, 72, 0.8);
+            border: 1px solid rgba(74, 85, 104, 0.4);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .pf-breakdown-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid rgba(74, 85, 104, 0.4);
+            background: rgba(31, 41, 55, 0.5);
+        }
+
+        .pf-breakdown-header h4 {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .pf-breakdown-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .pf-select {
+            background: #1f2937;
+            border: 1px solid rgba(74, 85, 104, 0.4);
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .pf-breakdown-content {
+            padding: 0;
+        }
+
+        /* 日期分组 */
+        .pf-breakdown-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .pf-day-group {
+            border-bottom: 1px solid rgba(74, 85, 104, 0.4);
+        }
+
+        .pf-day-group:last-child {
+            border-bottom: none;
+        }
+
+        .pf-day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: rgba(31, 41, 55, 0.3);
+            border-bottom: 1px solid rgba(74, 85, 104, 0.4);
+        }
+
+        .pf-day-date {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .pf-day-summary {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .pf-day-total {
+            font-size: 14px;
+            color: #9ca3af;
+        }
+
+        .pf-day-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #3b82f6;
+        }
+
+        .pf-day-transactions {
+            padding: 0;
+        }
+
+        /* 类型分组 */
+        .pf-type-group {
+            border-bottom: 1px solid rgba(74, 85, 104, 0.2);
+        }
+
+        .pf-type-group:last-child {
+            border-bottom: none;
+        }
+
+        .pf-type-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 20px;
+            background: rgba(31, 41, 55, 0.1);
+        }
+
+        .pf-type-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .pf-type-icon.buy {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .pf-type-icon.sell {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .pf-type-info {
+            flex: 1;
+        }
+
+        .pf-type-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .pf-type-count {
+            font-size: 14px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+
+        .pf-type-value {
+            text-align: right;
+        }
+
+        .pf-type-amount {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .pf-type-avg {
+            font-size: 14px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+
+        /* 项目详情 */
+        .pf-type-projects {
+            padding: 0 20px 16px 20px;
+        }
+
+        .pf-project-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(31, 41, 55, 0.2);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .pf-project-summary:hover {
+            background: rgba(31, 41, 55, 0.3);
+        }
+
+        .pf-project-summary:last-child {
+            margin-bottom: 0;
+        }
+
+        .pf-project-info {
+            flex: 1;
+        }
+
+        .pf-project-code {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .pf-project-name {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+
+        .pf-project-stats {
+            text-align: right;
+        }
+
+        .pf-project-count {
+            font-size: 14px;
+            color: #9ca3af;
+        }
+
+        .pf-project-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-top: 2px;
+        }
+
+        .comparison-item {
+            background: rgba(45, 55, 72, 0.6);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid rgba(74, 85, 104, 0.3);
+        }
+
+        .comparison-item h4 {
+            margin-top: 0;
+            color: #e2e8f0;
+            font-size: 16px;
+        }
+
+        .feature-comparison {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #93c5fd;
+        }
+
+        .feature-comparison h4 {
+            margin-top: 0;
+            color: #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <h1>📊 Portfolio Analysis Tab关联Transaction演示</h1>
+    
+    <div class="feature-comparison">
+        <h4>🎯 功能改进说明</h4>
+        <p>修改Portfolio页面的Analysis tab，使其关联到transaction tab，并按照日期和交易类型展示总计交易信息：</p>
+        <ul>
+            <li><strong>交易分析概览</strong>: 显示总交易数、买入订单数、卖出订单数、总交易价值</li>
+            <li><strong>按日期分组</strong>: 按日期显示交易，支持Today、Yesterday等智能日期格式</li>
+            <li><strong>按类型分组</strong>: 在每个日期内按buy/sell类型分组显示交易</li>
+            <li><strong>按项目分组</strong>: 在每种类型内按项目分组显示详细统计</li>
+            <li><strong>时间范围筛选</strong>: 支持7天、30天、90天、1年、全部时间等筛选</li>
+        </ul>
+    </div>
+
+    <div class="demo-container">
+        <!-- 修改前 -->
+        <div class="demo-section">
+            <h3 class="demo-title">❌ 修改前 (Before)</h3>
+            
+            <div class="comparison-item">
+                <h4>原有Analysis Tab</h4>
+                <ul>
+                    <li>简单的资产总结图表</li>
+                    <li>基础的交易记录柱状图</li>
+                    <li>与Transaction tab无关联</li>
+                    <li>缺少详细的交易分析</li>
+                    <li>没有按日期和类型分组</li>
+                </ul>
+            </div>
+
+            <div class="comparison-item">
+                <h4>功能限制</h4>
+                <ul>
+                    <li>无法查看详细的交易统计</li>
+                    <li>无法按日期分析交易模式</li>
+                    <li>无法按交易类型分析</li>
+                    <li>无法按项目分析交易分布</li>
+                    <li>缺少时间范围筛选功能</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 修改后 -->
+        <div class="demo-section">
+            <h3 class="demo-title">✅ 修改后 (After)</h3>
+            
+            <div class="comparison-item">
+                <h4>新的Analysis Tab功能</h4>
+                
+                <!-- 交易分析概览 -->
+                <div class="pf-analysis-overview">
+                    <div class="pf-analysis-header">
+                        <h3>Transaction Analysis</h3>
+                        <div class="pf-analysis-actions">
+                            <button class="pf-analysis-btn">Refresh</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 交易统计卡片 -->
+                    <div class="pf-analysis-stats">
+                        <div class="pf-analysis-stat-card">
+                            <div class="pf-stat-icon">📊</div>
+                            <div class="pf-stat-content">
+                                <div class="pf-stat-number">15</div>
+                                <div class="pf-stat-label">Total Transactions</div>
+                            </div>
+                        </div>
+                        <div class="pf-analysis-stat-card">
+                            <div class="pf-stat-icon">📈</div>
+                            <div class="pf-stat-content">
+                                <div class="pf-stat-number">8</div>
+                                <div class="pf-stat-label">Buy Orders</div>
+                            </div>
+                        </div>
+                        <div class="pf-analysis-stat-card">
+                            <div class="pf-stat-icon">📉</div>
+                            <div class="pf-stat-content">
+                                <div class="pf-stat-number">7</div>
+                                <div class="pf-stat-label">Sell Orders</div>
+                            </div>
+                        </div>
+                        <div class="pf-analysis-stat-card">
+                            <div class="pf-stat-icon">💰</div>
+                            <div class="pf-stat-content">
+                                <div class="pf-stat-number">AUD$125,430.50</div>
+                                <div class="pf-stat-label">Total Value</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 按日期和类型分组显示交易 -->
+                <div class="pf-transaction-breakdown">
+                    <div class="pf-breakdown-header">
+                        <h4>Transaction Breakdown by Date & Type</h4>
+                        <div class="pf-breakdown-controls">
+                            <select class="pf-select">
+                                <option value="30d">Last 30 Days</option>
+                                <option value="7d">Last 7 Days</option>
+                                <option value="90d">Last 3 Months</option>
+                                <option value="1y">Last Year</option>
+                                <option value="all">All Time</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="pf-breakdown-content">
+                        <div class="pf-breakdown-list">
+                            <!-- 今天的交易 -->
+                            <div class="pf-day-group">
+                                <div class="pf-day-header">
+                                    <div class="pf-day-date">Today</div>
+                                    <div class="pf-day-summary">
+                                        <span class="pf-day-total">5 transactions</span>
+                                        <span class="pf-day-value">AUD$45,230.50</span>
+                                    </div>
+                                </div>
+                                <div class="pf-day-transactions">
+                                    <!-- Buy类型 -->
+                                    <div class="pf-type-group">
+                                        <div class="pf-type-header">
+                                            <div class="pf-type-icon buy">📈</div>
+                                            <div class="pf-type-info">
+                                                <div class="pf-type-name">BUY</div>
+                                                <div class="pf-type-count">3 transactions</div>
+                                            </div>
+                                            <div class="pf-type-value">
+                                                <div class="pf-type-amount">AUD$28,500.00</div>
+                                                <div class="pf-type-avg">Avg: AUD$9,500.00</div>
+                                            </div>
+                                        </div>
+                                        <div class="pf-type-projects">
+                                            <div class="pf-project-summary">
+                                                <div class="pf-project-info">
+                                                    <div class="pf-project-code">RWA001</div>
+                                                    <div class="pf-project-name">Real Estate Investment Fund</div>
+                                                </div>
+                                                <div class="pf-project-stats">
+                                                    <div class="pf-project-count">2 txns</div>
+                                                    <div class="pf-project-value">AUD$20,000.00</div>
+                                                </div>
+                                            </div>
+                                            <div class="pf-project-summary">
+                                                <div class="pf-project-info">
+                                                    <div class="pf-project-code">RWA002</div>
+                                                    <div class="pf-project-name">Commercial Property Token</div>
+                                                </div>
+                                                <div class="pf-project-stats">
+                                                    <div class="pf-project-count">1 txns</div>
+                                                    <div class="pf-project-value">AUD$8,500.00</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Sell类型 -->
+                                    <div class="pf-type-group">
+                                        <div class="pf-type-header">
+                                            <div class="pf-type-icon sell">📉</div>
+                                            <div class="pf-type-info">
+                                                <div class="pf-type-name">SELL</div>
+                                                <div class="pf-type-count">2 transactions</div>
+                                            </div>
+                                            <div class="pf-type-value">
+                                                <div class="pf-type-amount">AUD$16,730.50</div>
+                                                <div class="pf-type-avg">Avg: AUD$8,365.25</div>
+                                            </div>
+                                        </div>
+                                        <div class="pf-type-projects">
+                                            <div class="pf-project-summary">
+                                                <div class="pf-project-info">
+                                                    <div class="pf-project-code">RWA001</div>
+                                                    <div class="pf-project-name">Real Estate Investment Fund</div>
+                                                </div>
+                                                <div class="pf-project-stats">
+                                                    <div class="pf-project-count">2 txns</div>
+                                                    <div class="pf-project-value">AUD$16,730.50</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 昨天的交易 -->
+                            <div class="pf-day-group">
+                                <div class="pf-day-header">
+                                    <div class="pf-day-date">Yesterday</div>
+                                    <div class="pf-day-summary">
+                                        <span class="pf-day-total">4 transactions</span>
+                                        <span class="pf-day-value">AUD$32,150.00</span>
+                                    </div>
+                                </div>
+                                <div class="pf-day-transactions">
+                                    <!-- Buy类型 -->
+                                    <div class="pf-type-group">
+                                        <div class="pf-type-header">
+                                            <div class="pf-type-icon buy">📈</div>
+                                            <div class="pf-type-info">
+                                                <div class="pf-type-name">BUY</div>
+                                                <div class="pf-type-count">2 transactions</div>
+                                            </div>
+                                            <div class="pf-type-value">
+                                                <div class="pf-type-amount">AUD$25,000.00</div>
+                                                <div class="pf-type-avg">Avg: AUD$12,500.00</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Sell类型 -->
+                                    <div class="pf-type-group">
+                                        <div class="pf-type-header">
+                                            <div class="pf-type-icon sell">📉</div>
+                                            <div class="pf-type-info">
+                                                <div class="pf-type-name">SELL</div>
+                                                <div class="pf-type-count">2 transactions</div>
+                                            </div>
+                                            <div class="pf-type-value">
+                                                <div class="pf-type-amount">AUD$7,150.00</div>
+                                                <div class="pf-type-avg">Avg: AUD$3,575.00</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="feature-comparison">
+        <h4>📊 新功能特点</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <h5>✅ 新增功能:</h5>
+                <ul>
+                    <li><strong>交易分析概览</strong>: 4个统计卡片显示关键指标</li>
+                    <li><strong>按日期分组</strong>: 智能日期显示(Today/Yesterday/具体日期)</li>
+                    <li><strong>按类型分组</strong>: Buy/Sell分类显示</li>
+                    <li><strong>按项目分组</strong>: 每个类型下按项目细分</li>
+                    <li><strong>时间范围筛选</strong>: 5种时间范围选择</li>
+                    <li><strong>详细统计</strong>: 交易数量、总金额、平均金额</li>
+                </ul>
+            </div>
+            <div>
+                <h5>🔗 关联Transaction Tab:</h5>
+                <ul>
+                    <li><strong>数据同步</strong>: 使用相同的交易数据源</li>
+                    <li><strong>实时更新</strong>: 与Transaction tab数据保持一致</li>
+                    <li><strong>筛选联动</strong>: 支持相同的筛选条件</li>
+                    <li><strong>交互增强</strong>: 点击可跳转到详细交易</li>
+                    <li><strong>分析深度</strong>: 提供Transaction tab没有的分析视角</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="feature-comparison">
+        <h4>🔧 技术实现</h4>
+        <p><strong>主要技术特性:</strong></p>
+        <ul>
+            <li><strong>Computed Properties</strong>: 实时计算交易统计数据</li>
+            <li><strong>数据分组算法</strong>: 按日期→类型→项目的三级分组</li>
+            <li><strong>时间范围过滤</strong>: 支持多种时间范围的动态筛选</li>
+            <li><strong>响应式设计</strong>: 适配不同屏幕尺寸</li>
+            <li><strong>性能优化</strong>: 使用Vue的响应式系统优化渲染</li>
+        </ul>
+    </div>
+
+    <div class="feature-comparison">
+        <h4>🔗 相关页面</h4>
+        <p>查看实际效果：</p>
+        <ul>
+            <li><a href="/portfolio" target="_blank" style="color: #3b82f6;">Portfolio页面</a> - 查看Analysis tab的实际效果</li>
+            <li><a href="/portfolio?tab=Transactions" target="_blank" style="color: #3b82f6;">Transactions Tab</a> - 查看关联的交易数据</li>
+        </ul>
+    </div>
+
+    <script>
+        console.log('📊 Portfolio Analysis Tab演示页面已加载');
+        
+        // 添加一些交互效果
+        document.querySelectorAll('.pf-analysis-stat-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-3px)';
+                this.style.transition = 'transform 0.2s ease';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        document.querySelectorAll('.pf-project-summary').forEach(summary => {
+            summary.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(2px)';
+                this.style.transition = 'transform 0.2s ease';
+            });
+            
+            summary.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0)';
+            });
+        });
+    </script>
+</body>
+</html>

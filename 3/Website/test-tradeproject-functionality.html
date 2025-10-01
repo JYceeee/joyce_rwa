@@ -424,7 +424,7 @@ TradeProjectView应该能够正确处理这些错误情况并显示适当的错�
             const basePrice = 1.00;
             const yieldMultiplier = (parseFloat(project.interest_rate) || 6.0) / 6.0;
             const adjustedPrice = basePrice * yieldMultiplier;
-            return `A$${adjustedPrice.toFixed(2)}`;
+            return `AUD$${adjustedPrice.toFixed(2)}`;
         }
         
         function calculateRentalIncome(project) {
@@ -437,7 +437,7 @@ TradeProjectView应该能够正确处理这些错误情况并显示适当的错�
             const monthlyYield = interestRate / 12 / 100;
             const estimatedRental = propertyValue * monthlyYield;
             
-            return `A$${estimatedRental.toLocaleString('en-AU', { maximumFractionDigits: 0 })} / month`;
+            return `AUD$${estimatedRental.toLocaleString('en-AU', { maximumFractionDigits: 0 })} / month`;
         }
         
         function calculateSubscriptionProgress(project) {
