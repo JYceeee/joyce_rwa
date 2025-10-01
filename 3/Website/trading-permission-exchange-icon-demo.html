@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Permission Exchange Icon演示</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(180deg, #0f1419 0%, #1a1f2e 50%, #2d3748 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        .demo-container {
+            display: flex;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        .demo-section {
+            flex: 1;
+        }
+        .demo-title {
+            color: #e2e8f0;
+            margin-bottom: 15px;
+            font-size: 20px;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        /* 旧图标样式 */
+        .old-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 10px;
+            background: #374151;
+            display: grid;
+            place-items: center;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2), inset 0 0 0 1px #4b5563;
+            opacity: 0.9;
+        }
+
+        /* 新图标样式 */
+        .icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 10px;
+            background: #374151;
+            display: grid;
+            place-items: center;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2), inset 0 0 0 1px #4b5563;
+            opacity: 0.9;
+        }
+
+        .i {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+            color: #ffffff;
+        }
+
+        /* KYC Banner样式 */
+        .kyc-banner {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            height: 40px;
+            border-radius: 8px;
+            padding: 0 12px;
+            border: 1px solid;
+        }
+
+        .kyc-banner.orange {
+            background: #1f2937;
+            color: #f97316;
+            border-color: #374151;
+        }
+
+        .kyc-banner.green {
+            background: #1f2937;
+            color: #16a34a;
+            border-color: #374151;
+        }
+
+        /* 权限徽章样式 */
+        .permission-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .permission-full {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .permission-limited {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .permission-none {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .link {
+            margin-left: auto;
+            color: inherit;
+            background: transparent;
+            border: 0;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .link.danger {
+            color: #dc2626;
+        }
+
+        .comparison-item {
+            background: rgba(45, 55, 72, 0.6);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid rgba(74, 85, 104, 0.3);
+        }
+
+        .comparison-item h4 {
+            margin-top: 0;
+            color: #e2e8f0;
+            font-size: 16px;
+        }
+
+        .icon-demo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(31, 41, 55, 0.8);
+            border-radius: 6px;
+        }
+
+        .icon-label {
+            color: #cbd5e1;
+            min-width: 100px;
+        }
+
+        .comparison-note {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #93c5fd;
+        }
+
+        .comparison-note h4 {
+            margin-top: 0;
+            color: #3b82f6;
+        }
+
+        .icon-explanation {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #6ee7b7;
+        }
+
+        .icon-explanation h4 {
+            margin-top: 0;
+            color: #10b981;
+        }
+
+        .svg-code {
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔄 Trading Permission Exchange Icon演示</h1>
+    
+    <div class="icon-explanation">
+        <h4>🎯 图标更换说明</h4>
+        <p>将Trading Permission部分的图标从垃圾桶图标更换为exchange（交换）图标，更符合交易权限的语义：</p>
+        <ul>
+            <li><strong>语义更准确</strong>: Exchange图标更好地表示交易和交换功能</li>
+            <li><strong>视觉更直观</strong>: 双向箭头直观地表示交易的双向性质</li>
+            <li><strong>用户体验更好</strong>: 用户更容易理解这是交易相关的功能</li>
+        </ul>
+    </div>
+
+    <div class="demo-container">
+        <!-- 旧图标 -->
+        <div class="demo-section">
+            <h3 class="demo-title">❌ 旧图标 (Before)</h3>
+            
+            <div class="comparison-item">
+                <h4>垃圾桶图标</h4>
+                <div class="icon-demo">
+                    <span class="icon-label">旧图标:</span>
+                    <div class="old-icon">
+                        <svg viewBox="0 0 24 24" class="i">
+                            <path d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V19H17V6H7Z"/>
+                        </svg>
+                    </div>
+                    <span style="color: #ef4444;">垃圾桶图标</span>
+                </div>
+            </div>
+
+            <div class="comparison-item">
+                <h4>Trading Permission Banner (旧图标)</h4>
+                <div class="kyc-banner green">
+                    <div class="old-icon">
+                        <svg viewBox="0 0 24 24" class="i">
+                            <path d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V19H17V6H7Z"/>
+                        </svg>
+                    </div>
+                    <span class="permission-badge permission-full">Full Access</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 新图标 -->
+        <div class="demo-section">
+            <h3 class="demo-title">✅ 新图标 (After)</h3>
+            
+            <div class="comparison-item">
+                <h4>Exchange交换图标</h4>
+                <div class="icon-demo">
+                    <span class="icon-label">新图标:</span>
+                    <div class="icon">
+                        <svg viewBox="0 0 24 24" class="i">
+                            <path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/>
+                        </svg>
+                    </div>
+                    <span style="color: #10b981;">Exchange交换图标</span>
+                </div>
+            </div>
+
+            <div class="comparison-item">
+                <h4>Trading Permission Banner (新图标)</h4>
+                <div class="kyc-banner green">
+                    <div class="icon">
+                        <svg viewBox="0 0 24 24" class="i">
+                            <path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/>
+                        </svg>
+                    </div>
+                    <span class="permission-badge permission-full">Full Access</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="comparison-note">
+        <h4>📊 图标对比分析</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <h5>❌ 垃圾桶图标问题:</h5>
+                <ul>
+                    <li>语义不准确，容易误解为删除功能</li>
+                    <li>与交易权限的概念不符</li>
+                    <li>可能让用户产生负面联想</li>
+                    <li>不符合交易平台的视觉语言</li>
+                </ul>
+            </div>
+            <div>
+                <h5>✅ Exchange图标优势:</h5>
+                <ul>
+                    <li>语义准确，直观表示交易和交换</li>
+                    <li>双向箭头体现交易的双向性质</li>
+                    <li>符合金融交易平台的视觉惯例</li>
+                    <li>用户理解成本更低</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="icon-explanation">
+        <h4>🔧 技术实现</h4>
+        <p><strong>SVG路径更换:</strong></p>
+        <div class="svg-code">
+<!-- 旧图标路径 -->
+&lt;path d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V19H17V6H7Z"/&gt;
+
+<!-- 新图标路径 -->
+&lt;path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/&gt;
+        </div>
+        <p><strong>图标特点:</strong></p>
+        <ul>
+            <li><strong>双向箭头</strong>: 上下两个方向的箭头表示交换</li>
+            <li><strong>简洁设计</strong>: 线条简洁，适合小尺寸显示</li>
+            <li><strong>语义清晰</strong>: 直观地表达交易和交换的概念</li>
+            <li><strong>视觉平衡</strong>: 图标结构平衡，视觉效果良好</li>
+        </ul>
+    </div>
+
+    <div class="comparison-note">
+        <h4>🎨 设计理念</h4>
+        <p><strong>为什么选择Exchange图标:</strong></p>
+        <ul>
+            <li><strong>语义匹配</strong>: 完美匹配"Trading Permission"的功能语义</li>
+            <li><strong>行业惯例</strong>: 在金融和交易平台中广泛使用</li>
+            <li><strong>用户认知</strong>: 用户普遍理解exchange图标的含义</li>
+            <li><strong>视觉一致性</strong>: 与整体交易平台的视觉语言保持一致</li>
+        </ul>
+    </div>
+
+    <div class="icon-explanation">
+        <h4>🔗 相关页面</h4>
+        <p>查看实际效果：</p>
+        <ul>
+            <li><a href="/profile" target="_blank" style="color: #10b981;">Profile页面</a> - 查看Trading Permission中的新图标</li>
+            <li><a href="/kyc-level-badge-size-demo.html" target="_blank" style="color: #10b981;">KYC徽章演示</a> - 查看相关的徽章优化效果</li>
+        </ul>
+    </div>
+
+    <script>
+        console.log('🔄 Trading Permission Exchange Icon演示页面已加载');
+        
+        // 添加一些交互效果
+        document.querySelectorAll('.icon').forEach(icon => {
+            icon.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.1)';
+                this.style.transition = 'transform 0.2s ease';
+            });
+            
+            icon.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

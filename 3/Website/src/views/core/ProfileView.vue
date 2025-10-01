@@ -27,17 +27,14 @@
     <div class="user-contact-info">
       <!--email and phone-->
       <div>
-        <label class="label">Personal Information <span class="req">*</span></label>
+        <label class="label">Personal Information <span class="req"></span></label>
         <div class="contact-item">
           <!-- <span class="contact-icon">📧</span> -->
           <span class="contact-label">Email:</span>
           <span class="contact-value">
             {{ userEmail || 'Not provided' }}
-            <span class="contact-value email-status" :class="emailVerificationClass">{{ emailVerificationText }}</span>
+            <span class="email-status" :class="emailVerificationClass"> &nbsp; {{ emailVerificationText }}</span>
           </span>
-        </div>
-        <!-- Email Verification Status -->
-        <div class="contact-item" style="margin-left: 60px;">
           <button v-if="!emailVerified" class="btn-small" type="button" @click="sendEmailVerification">
             Verify Email
           </button>
@@ -48,10 +45,11 @@
           <span class="contact-value">
             {{ userPhone || 'Not provided' }}
           </span>
+          <button class="btn-small" type="button" >Change my phone number</button>
         </div>
         <div class="contact-item">
           <span class="contact-label">Password:</span>
-          <button class="btn-small" type="button" >change my password</button>
+          <button class="btn-small" type="button" >Change my password</button>
         </div>
         <div v-if="userLoading" class="contact-item loading-item">
           <span class="contact-icon">🔄</span>
@@ -88,14 +86,13 @@
           </div>
         </div>
       </div> 
-
-
     </div>
-      <!-- KYC & Whitelist Status Section -->
-      <div class="status-section">
-        <h3 class="status-title">Account Status</h3>
-       <!-- KYC -->
-       <div class="field">
+    
+    <!-- KYC & Whitelist Status Section -->
+    <div class="status-section">
+      <h3 class="status-title">Account Status</h3>
+      <!-- KYC -->
+      <div class="field">
         <label class="label">KYC verification <span class="req">*</span></label>
         <div class="kyc-banner" :class="isVerified ? 'green' : 'orange'" role="status">
           <span class="icon">
@@ -103,12 +100,11 @@
               <path d="M12 2 2 7l10 5 10-5-10-5Zm0 7L2 4v13l10 5 10-5V4L12 9Zm0 9.5-7-3.5V9l7 3.5V20.5Z"/>
             </svg>
           </span>
-          <!-- 文案：未验证=Verify now；已验证=Verified(+对勾) -->
           <span v-if="!isVerified">Verify now</span>
           <span v-else class="verified">
             <svg viewBox="0 0 24 24" class="i"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
-            Verified
-            <span class="level-badge" :class="kycLevelClass">{{ kycLevelText }}</span>
+            <!-- Verified -->{{ kycLevelText }}
+            <!-- <span class="level-badge" :class="kycLevelClass"> {{ kycLevelText }}</span> -->
           </span>
           <!-- 右侧按钮：未验证=Start；已验证=Cancel -->
           <button v-if="!isVerified" class="link" type="button" @click="verifyKYC">Start</button>
@@ -125,43 +121,37 @@
         @error="handleWhitelistError"
         @info="handleWhitelistInfo"
       />
- 
 
-        <!-- Trading Permission Display -->
-        <div class="status-item">
-          <div class="status-label">
-            <span class="status-icon trading-icon">
-              <svg viewBox="0 0 24 24" class="i">
-                <path d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V19H17V6H7Z"/>
-              </svg>
-            </span>
-            Trading Permission
-          </div>
-          <div class="status-value trading-permission">
-            <span class="permission-badge" :class="tradingPermissionClass">{{ tradingPermissionText }}</span>
-            <div class="permission-details">
-              <span class="permission-description">{{ tradingPermissionDescription }}</span>
-              <div v-if="tradingPermissionRequirements.length > 0" class="permission-requirements">
-                <span class="requirements-label">Requirements:</span>
-                <ul class="requirements-list">
-                  <li v-for="requirement in tradingPermissionRequirements" :key="requirement" 
+      <!-- Trading Permission -->
+      <div class="field">
+        <label class="label">Trading Permission <span class="req"></span></label>
+        <div class="kyc-banner" :class="isVerified ? 'green' : 'orange'" role="status">
+          <span class="icon">
+            <svg viewBox="0 0 24 24" class="i">
+              <path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/>
+            </svg>
+          </span>
+          <span class="permission-text">                
+            <li v-for="requirement in tradingPermissionRequirements" :key="requirement" 
                       :class="{ 'requirement-met': isRequirementMet(requirement) }">
-                    <span class="requirement-icon">{{ isRequirementMet(requirement) ? '✅' : '❌' }}</span>
+                    <span class="requirement-icon">{{ isRequirementMet(requirement) ? '' : '' }}</span>
                     {{ requirement }}
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
+                  </li></span>
+          <span class="permission-badge" :class="tradingPermissionClass">{{ tradingPermissionText }}</span>
+          <!-- 右侧按钮：未验证=Start；已验证=Cancel -->
+          <button v-if="!isVerified" class="link" type="button" @click="verifyKYC">Start</button>
+          <button v-else class="link danger" type="button" @click="cancelKYC">Cancel verification</button>
         </div>
       </div>
-      <!-- 底部按钮 -->
-      <div class="actions bottom">
-        <button class="btn light" type="button" @click="onCancel">Cancel</button>
-        <button class="btn orange" type="submit">Save</button>
-        <!-- 新增：安全退出 -->
-        <button class="btn light" type="button" @click="logout" style="margin-left:auto;">Log out</button>
-      </div>
+    </div>
+  
+    <!-- 底部按钮 -->
+    <div class="actions bottom">
+      <button class="btn light" type="button" @click="onCancel">Cancel</button>
+      <button class="btn orange" type="submit">Save</button>
+      <!-- 新增：安全退出 -->
+      <button class="btn light" type="button" @click="logout" style="margin-left:auto;">Log out</button>
+    </div>
     </form>
 
   </section>
@@ -1037,28 +1027,41 @@ export default {
   cursor: not-allowed;
 }
 
-/* 用户联系信息样式 */
+/* 用户联系信息样式 - 与Account Status section风格一致 */
 .user-contact-info {
-  margin: 12px 0;
-  padding: 12px;
-  background: #141426;;
-  border-radius: 6px;
-  border: 1px solid #404243;
+  max-width: 1000px;
+  margin: 20px 0;
+  margin-left: 50px;
+  padding: 20px;
+  background: rgba(45, 55, 72, 0.6);
+  border-radius: 12px;
+  border: 1px solid rgba(74, 85, 104, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.user-contact-info .label {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #f4f7f9;
+  display: block;
 }
 
 .contact-item {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  margin: 6px 0;
-  padding: 4px 0;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(74, 85, 104, 0.3);
 }
 
 .contact-item:first-child {
-  margin-top: 0;
+  padding-top: 0;
 }
 
 .contact-item:last-child {
-  margin-bottom: 0;
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .contact-icon {
@@ -1069,11 +1072,12 @@ export default {
 }
 
 .contact-label {
-  font-weight: 600;
-  font-size: 12px;
-  color: #cbd5e1;
-  margin-right: 8px;
-  min-width: 60px;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  color: #e2e8f0;
+  min-width: 80px;
+  flex-shrink: 0;
 }
 
 .contact-value {
@@ -1085,6 +1089,10 @@ export default {
   flex: 1;
   max-width: 300px;
   word-break: break-all;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-start;
 }
 
 /* Email验证状态样式 */
@@ -1116,7 +1124,7 @@ export default {
   border: 1px solid #4b5563;
   padding: 4px 8px;
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 12px;
   cursor: pointer;
   margin-left: 8px;
   transition: all 0.2s ease;
@@ -1124,6 +1132,12 @@ export default {
 
 .btn-small:hover {
   background: #4b5563;
+}
+
+/* 确保按钮贴着右侧 */
+.contact-item .btn-small {
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 /* 加载状态样式 */
@@ -1154,8 +1168,9 @@ export default {
 }
 /* 状态显示区域样式 */
 .status-section {
-  max-width: 500px;
-  margin-left: 200px;
+  max-width: 1000px;
+  margin: 20px 0;
+  margin-left: 50px;
   padding: 20px;
   background: rgba(45, 55, 72, 0.6);
   border-radius: 12px;
@@ -1223,12 +1238,12 @@ export default {
 
 /* KYC等级徽章样式 */
 .level-badge {
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 14px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
 .level-0 {
@@ -1293,12 +1308,12 @@ export default {
 
 /* 交易权限徽章样式 */
 .permission-badge {
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 14px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
 .permission-full {
