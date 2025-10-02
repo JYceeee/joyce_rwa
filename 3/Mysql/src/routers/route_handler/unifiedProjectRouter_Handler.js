@@ -1,4 +1,6 @@
 const mysql = require('../../database/index');
+const { spawn } = require('child_process');
+const path = require('path');
 
 // 获取项目图片的辅助函数
 const getProductImage = (projectCode) => {
@@ -337,11 +339,8 @@ const deploySmartContracts = async (req, res) => {
       userAddress
     });
 
-    // 这里应该调用实际的智能合约部署逻辑
-    // 基于 scripts/rwa_deploy.js 和 scripts/interact.js 的逻辑
-    
-    // 模拟智能合约部署过程
-    const deploymentResult = await simulateSmartContractDeployment({
+    // 调用实际的智能合约部署
+    const deploymentResult = await deploySmartContractsToTestnet({
       projectCode,
       tradeType,
       amount: parseFloat(amount),
@@ -365,22 +364,194 @@ const deploySmartContracts = async (req, res) => {
   }
 };
 
-// 模拟智能合约部署过程
-const simulateSmartContractDeployment = async (params) => {
-  return new Promise((resolve) => {
-    // 模拟部署时间
+// 实际部署智能合约到测试网
+const deploySmartContractsToTestnet = async (params) => {
+  return new Promise((resolve, reject) => {
+    const { projectCode, tradeType, amount, userAddress } = params;
+    
+    console.log('🚀 开始实际部署智能合约到测试网...');
+    console.log('参数:', { projectCode, tradeType, amount, userAddress });
+    
+    // 构建hardhat命令
+    const contractDir = path.join(__dirname, '../../../my-contract');
+    const hardhatCommand = 'npx';
+    const hardhatArgs = [
+      'hardhat',
+      'run',
+      'scripts/api-deploy.js',
+      '--network',
+      'sepolia'
+    ];
+    
+    console.log('执行命令:', hardhatCommand, hardhatArgs.join(' '));
+    console.log('工作目录:', contractDir);
+    
+    // 设置环境变量
+    const env = {
+      ...process.env,
+      PROJECT_CODE: projectCode,
+      TRADE_TYPE: tradeType,
+      AMOUNT: amount.toString(),
+      USER_ADDRESS: userAddress
+    };
+    
+    // 启动hardhat进程
+    const hardhatProcess = spawn(hardhatCommand, hardhatArgs, {
+      cwd: contractDir,
+      env: env,
+      stdio: ['pipe', 'pipe', 'pipe']
+    });
+    
+    let stdout = '';
+    let stderr = '';
+    
+    hardhatProcess.stdout.on('data', (data) => {
+      const output = data.toString();
+      stdout += output;
+      console.log('Hardhat输出:', output.trim());
+    });
+    
+    hardhatProcess.stderr.on('data', (data) => {
+      const output = data.toString();
+      stderr += output;
+      console.error('Hardhat错误:', output.trim());
+    });
+    
+    hardhatProcess.on('close', (code) => {
+      console.log(`Hardhat进程退出，代码: ${code}`);
+      
+      if (code === 0) {
+        try {
+          // 尝试从输出中提取JSON结果
+          const lines = stdout.split('\n');
+          let result = null;
+          
+          // 查找JSON结果标记
+          let jsonStart = false;
+          let jsonLines = [];
+          
+          for (const line of lines) {
+            if (line.includes('🎯 JSON_START')) {
+              jsonStart = true;
+              continue;
+            }
+            if (line.includes('🎯 JSON_END')) {
+              break;
+            }
+            if (jsonStart) {
+              jsonLines.push(line);
+            }
+          }
+          
+          // 解析JSON
+          if (jsonLines.length > 0) {
+            try {
+              const jsonStr = jsonLines.join('');
+              result = JSON.parse(jsonStr);
+              console.log('✅ 成功解析JSON结果');
+            } catch (e) {
+              console.warn('解析JSON失败:', e.message);
+              console.warn('JSON内容:', jsonStr);
+            }
+          }
+          
+          // 如果没找到标记的JSON，尝试查找其他格式
+          if (!result) {
+            for (const line of lines) {
+              if (line.includes('📊 部署结果:')) {
+                try {
+                  const jsonStart = line.indexOf('{');
+                  if (jsonStart !== -1) {
+                    const jsonStr = line.substring(jsonStart);
+                    result = JSON.parse(jsonStr);
+                    break;
+                  }
+                } catch (e) {
+                  console.warn('解析JSON失败:', e.message);
+                }
+              }
+            }
+          }
+          
+          if (result) {
+            console.log('✅ 合约部署成功，解析结果:', result);
+            resolve(result);
+          } else {
+            // 如果无法解析JSON，返回详细错误信息
+            console.error('❌ 无法解析部署结果');
+            console.error('Hardhat标准输出:', stdout);
+            console.error('Hardhat错误输出:', stderr);
+            
+            let errorMsg = '无法解析合约部署结果。\n';
+            errorMsg += '可能的原因:\n';
+            errorMsg += '1. 合约部署失败\n';
+            errorMsg += '2. 环境变量配置错误\n';
+            errorMsg += '3. 网络连接问题\n';
+            errorMsg += '4. 私钥余额不足\n\n';
+            errorMsg += 'Hardhat输出:\n';
+            errorMsg += stdout || '(无输出)\n';
+            errorMsg += '\n错误输出:\n';
+            errorMsg += stderr || '(无错误输出)';
+            
+            reject(new Error(errorMsg));
+          }
+        } catch (error) {
+          console.error('❌ 解析部署结果失败:', error);
+          reject(new Error('解析部署结果失败: ' + error.message));
+        }
+      } else {
+        console.error('❌ 合约部署失败，退出代码:', code);
+        console.error('标准输出:', stdout);
+        console.error('错误输出:', stderr);
+        
+        let errorMsg = `合约部署失败，退出代码: ${code}\n\n`;
+        errorMsg += '可能的原因:\n';
+        errorMsg += '1. 环境变量配置错误 (SEPOLIA_RPC_URL, PRIVATE_KEY)\n';
+        errorMsg += '2. 私钥对应的地址余额不足\n';
+        errorMsg += '3. 网络连接问题\n';
+        errorMsg += '4. 合约编译错误\n';
+        errorMsg += '5. 权限问题\n\n';
+        errorMsg += '标准输出:\n';
+        errorMsg += stdout || '(无输出)\n';
+        errorMsg += '\n错误输出:\n';
+        errorMsg += stderr || '(无错误输出)';
+        
+        reject(new Error(errorMsg));
+      }
+    });
+    
+    hardhatProcess.on('error', (error) => {
+      console.error('❌ 启动hardhat进程失败:', error);
+      
+      let errorMsg = '启动hardhat进程失败\n\n';
+      errorMsg += '可能的原因:\n';
+      errorMsg += '1. Node.js未安装或版本过低\n';
+      errorMsg += '2. npm/npx未安装\n';
+      errorMsg += '3. hardhat未安装或配置错误\n';
+      errorMsg += '4. 权限问题\n';
+      errorMsg += '5. 路径问题\n\n';
+      errorMsg += '错误详情: ' + error.message;
+      
+      reject(new Error(errorMsg));
+    });
+    
+    // 设置超时（5分钟）
     setTimeout(() => {
-      resolve({
-        transactionHash: '0x' + Math.random().toString(16).substr(2, 64),
-        blockNumber: Math.floor(Math.random() * 1000000) + 18000000,
-        contractAddress: '0x' + Math.random().toString(16).substr(2, 40),
-        // 基于实际合约部署的地址
-        kycRegistryAddress: process.env.VITE_KYC_REGISTRY_ADDRESS || '0x4533f47BE0ce8b80F7bbdF02939f81F4A15b7A45',
-        loanIssuerAddress: process.env.VITE_LOAN_ISSUER_ADDRESS || '0x13159e6417D98528C220b12Ec4950D5A343E5eAA',
-        principalTokenAddress: process.env.VITE_PRINCIPAL_TOKEN_ADDRESS || '0x45b1eCb3D9af651244eC656ed15B86404924c354',
-        interestTokenAddress: process.env.VITE_INTEREST_TOKEN_ADDRESS || '0xE6aeE4a898c6d99033ee5380Df407C5DD470fb17'
-      });
-    }, 2000);
+      hardhatProcess.kill();
+      let errorMsg = '合约部署超时（5分钟）\n\n';
+      errorMsg += '可能的原因:\n';
+      errorMsg += '1. 网络连接缓慢\n';
+      errorMsg += '2. 合约部署需要更多时间\n';
+      errorMsg += '3. 区块链网络拥堵\n';
+      errorMsg += '4. 私钥余额不足导致交易卡住\n\n';
+      errorMsg += '建议:\n';
+      errorMsg += '1. 检查网络连接\n';
+      errorMsg += '2. 确认私钥余额充足\n';
+      errorMsg += '3. 稍后重试\n';
+      errorMsg += '4. 检查区块链网络状态';
+      
+      reject(new Error(errorMsg));
+    }, 300000);
   });
 };
 

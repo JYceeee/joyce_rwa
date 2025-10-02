@@ -284,6 +284,7 @@
 <script>
 import { productAPI, transactionAPI, userAPI } from '@/service/api'
 import { useWallet } from '@/composables/useWallet'
+import { ethers } from 'ethers'
 
 export default {
   name: 'TradeProjectView',
@@ -570,22 +571,28 @@ export default {
         this.loadingStatus = '部署智能合约...'
         const contractResult = await this.deploySmartContracts()
         
-        // 2. 提取交易信息
-        this.loadingStatus = '提取交易信息...'
-        const transactionInfo = await this.extractTransactionInfo(contractResult)
+        // 2. 执行MetaMask交易
+        this.loadingStatus = '执行MetaMask交易...'
+        const metamaskTxResult = await this.executeMetaMaskTransaction(contractResult)
         
-        // 3. 保存交易信息到数据库
+        // 3. 提取交易信息
+        this.loadingStatus = '提取交易信息...'
+        const transactionInfo = await this.extractTransactionInfo(contractResult, metamaskTxResult)
+        
+        // 4. 保存交易信息到数据库
         this.loadingStatus = '保存交易记录...'
         await this.saveTransactionToDatabase(transactionInfo)
         
-        // 4. 显示成功结果
+        // 5. 显示成功结果
         this.loadingStatus = '交易完成!'
-          this.showSuccessModal = true
-          this.successData = {
-            tradeType: this.tradeType,
+        this.showSuccessModal = true
+        this.successData = {
+          tradeType: this.tradeType,
           amount: this.tradeAmount,
           transactionHash: transactionInfo.transaction_hash,
-          blockNumber: transactionInfo.block_number
+          blockNumber: transactionInfo.block_number,
+          loanIssuerAddress: transactionInfo.loan_issuer_wallet_address,
+          contractAddress: transactionInfo.trade_contract_abi
         }
         
         console.log('✅ TradeProjectView: 合约部署和认购处理完成')
@@ -630,9 +637,135 @@ export default {
       }
     },
     
+    // 执行MetaMask交易
+    async executeMetaMaskTransaction(contractResult) {
+      try {
+        console.log('💳 TradeProjectView: 开始执行MetaMask交易')
+        
+        const { address, connected } = useWallet()
+        
+        if (!connected.value) {
+          throw new Error('钱包未连接，请先连接MetaMask')
+        }
+        
+        if (!window.ethereum) {
+          throw new Error('MetaMask未安装，请安装MetaMask扩展')
+        }
+        
+        // 检查网络
+        const chainId = await window.ethereum.request({ method: 'eth_chainId' })
+        const expectedChainId = '0xaa36a7' // Sepolia testnet
+        if (chainId !== expectedChainId) {
+          // 尝试切换到Sepolia网络
+          try {
+            await window.ethereum.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: expectedChainId }],
+            })
+          } catch (switchError) {
+            // 如果网络不存在，添加Sepolia网络
+            await window.ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [{
+                chainId: expectedChainId,
+                chainName: 'Sepolia Test Network',
+                rpcUrls: ['https://sepolia.infura.io/v3/'],
+                nativeCurrency: {
+                  name: 'SepoliaETH',
+                  symbol: 'SepoliaETH',
+                  decimals: 18
+                },
+                blockExplorerUrls: ['https://sepolia.etherscan.io']
+              }]
+            })
+          }
+        }
+        
+        // 获取loan issuer地址
+        const loanIssuerAddress = contractResult.loanIssuerAddress
+        if (!loanIssuerAddress) {
+          throw new Error('无法获取Loan Issuer地址')
+        }
+        
+        // 计算交易金额（ETH）
+        const amountInETH = parseFloat(this.tradeAmount) // 假设1 AUD = 1 ETH for testing
+        const amountInWei = ethers.parseEther(amountInETH.toString())
+        
+        console.log('📊 交易详情:', {
+          from: address.value,
+          to: loanIssuerAddress,
+          amount: amountInETH,
+          amountInWei: amountInWei.toString()
+        })
+        
+        // 构建交易参数
+        const transactionParams = {
+          from: address.value,
+          to: loanIssuerAddress,
+          value: '0x' + amountInWei.toString(16),
+          gas: '0x5208', // 21000 gas limit for simple transfer
+        }
+        
+        console.log('🚀 发送交易到MetaMask...')
+        
+        // 发送交易到MetaMask
+        const txHash = await window.ethereum.request({
+          method: 'eth_sendTransaction',
+          params: [transactionParams],
+        })
+        
+        console.log('✅ MetaMask交易已发送，交易哈希:', txHash)
+        
+        // 等待交易确认
+        console.log('⏳ 等待交易确认...')
+        const receipt = await this.waitForTransactionConfirmation(txHash)
+        
+        console.log('✅ MetaMask交易已确认:', receipt)
+        
+        return {
+          transactionHash: txHash,
+          blockNumber: receipt.blockNumber,
+          gasUsed: receipt.gasUsed,
+          status: receipt.status
+        }
+        
+      } catch (error) {
+        console.error('❌ MetaMask交易失败:', error)
+        throw new Error(`MetaMask交易失败: ${error.message}`)
+      }
+    },
+    
+    // 等待交易确认
+    async waitForTransactionConfirmation(txHash, maxAttempts = 30) {
+      if (!window.ethereum) {
+        throw new Error('MetaMask未安装')
+      }
+      
+      const provider = new ethers.BrowserProvider(window.ethereum)
+      
+      for (let i = 0; i < maxAttempts; i++) {
+        try {
+          const receipt = await provider.getTransactionReceipt(txHash)
+          if (receipt && receipt.blockNumber) {
+            return receipt
+          }
+        } catch (error) {
+          console.warn(`等待交易确认 ${i + 1}/${maxAttempts}:`, error.message)
+        }
+        
+        // 等待5秒后重试
+        await new Promise(resolve => setTimeout(resolve, 5000))
+      }
+      
+      throw new Error('交易确认超时')
+    },
+    
     // 提取交易信息
-    async extractTransactionInfo(contractResult) {
+    async extractTransactionInfo(contractResult, metamaskTxResult) {
       const { address } = useWallet()
+      
+      console.log('🔍 TradeProjectView: 提取合约信息:', contractResult)
+      console.log('🔍 TradeProjectView: 提取MetaMask交易信息:', metamaskTxResult)
       
       return {
         user_id: null, // 需要从用户认证系统获取
@@ -641,12 +774,12 @@ export default {
         project_code: this.projectCode,
         purchase_amount: parseFloat(this.tradeAmount),
         trade_type: this.tradeType,
-        transaction_hash: contractResult.transactionHash,
-        block_number: contractResult.blockNumber,
+        transaction_hash: metamaskTxResult?.transactionHash || contractResult.transactionHash,
+        block_number: metamaskTxResult?.blockNumber || contractResult.blockNumber,
         trade_timestamp: new Date().toISOString(),
         // 从智能合约部署结果中获取
-        trade_contract_abi: null,
-        compliant_erc20_abi: null,
+        trade_contract_abi: contractResult.trade_contract_abi || contractResult.contractAddress || null,
+        compliant_erc20_abi: contractResult.compliant_erc20_abi || null,
         token_address_native: contractResult.principalTokenAddress || null,
         token_address_interest: contractResult.interestTokenAddress || null,
         loan_issuer_wallet_address: contractResult.loanIssuerAddress || null
@@ -682,7 +815,13 @@ export default {
           userAddress: transactionInfo.user_wallet_address,
           transactionHash: transactionInfo.transaction_hash,
           blockNumber: transactionInfo.block_number,
-          userId: userId // 添加用户ID字段
+          userId: userId, // 添加用户ID字段
+          // 添加合约信息字段
+          tradeContractABI: transactionInfo.trade_contract_abi,
+          compliantERC20ABI: transactionInfo.compliant_erc20_abi,
+          tokenAddressNative: transactionInfo.token_address_native,
+          tokenAddressInterest: transactionInfo.token_address_interest,
+          loanIssuerWalletAddress: transactionInfo.loan_issuer_wallet_address
         }
         
         console.log('📤 TradeProjectView: 发送交易数据:', transactionData)

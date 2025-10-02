@@ -93,7 +93,13 @@ async function saveTransactionHistory(req, res) {
       userAddress,
       transactionHash,
       blockNumber,
-      userId
+      userId,
+      // 添加合约信息字段
+      tradeContractABI,
+      compliantERC20ABI,
+      tokenAddressNative,
+      tokenAddressInterest,
+      loanIssuerWalletAddress
     } = req.body;
 
     // 验证必需参数
@@ -113,7 +119,12 @@ async function saveTransactionHistory(req, res) {
       userAddress,
       transactionHash,
       blockNumber,
-      userId
+      userId,
+      tradeContractABI: tradeContractABI ? 'provided' : 'not provided',
+      compliantERC20ABI: compliantERC20ABI ? 'provided' : 'not provided',
+      tokenAddressNative: tokenAddressNative || 'not provided',
+      tokenAddressInterest: tokenAddressInterest || 'not provided',
+      loanIssuerWalletAddress: loanIssuerWalletAddress || 'not provided'
     });
 
     // 准备插入数据
@@ -127,11 +138,11 @@ async function saveTransactionHistory(req, res) {
       transaction_hash: transactionHash,
       block_number: blockNumber || 0,
       trade_timestamp: Math.floor(Date.now() / 1000), // 使用Unix时间戳
-      trade_contract_abi: '', // 空字符串而不是null
-      compliant_erc20_abi: '', // 空字符串而不是null
-      token_address_native: '', // 空字符串而不是null
-      token_address_interest: '', // 空字符串而不是null
-      loan_issuer_wallet_address: '', // 空字符串而不是null
+      trade_contract_abi: tradeContractABI || '', // 使用传入的合约ABI
+      compliant_erc20_abi: compliantERC20ABI || '', // 使用传入的ERC20 ABI
+      token_address_native: tokenAddressNative || '', // 使用传入的原生代币地址
+      token_address_interest: tokenAddressInterest || '', // 使用传入的利息代币地址
+      loan_issuer_wallet_address: loanIssuerWalletAddress || '', // 使用传入的贷款发行者地址
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
