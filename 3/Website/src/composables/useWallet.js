@@ -185,10 +185,32 @@ async function connect() {
     }
   }
 }
-function disconnect() {
+async function disconnect() {
   const wasConnected = connected.value
   const oldAddress = address.value
   
+  try {
+    // 尝试从MetaMask断开连接
+    if (window.ethereum && window.ethereum.disconnect) {
+      console.log('🔌 Attempting to disconnect from MetaMask...')
+      await window.ethereum.disconnect()
+    }
+    
+    // 清除本地存储的钱包信息
+    localStorage.removeItem('walletConnected')
+    localStorage.removeItem('walletAddress')
+    localStorage.removeItem('primaryWallet')
+    
+    // 清除当前连接的钱包地址（从linkedWallets中移除）
+    const linkedWallets = JSON.parse(localStorage.getItem('linkedWallets') || '[]')
+    const updatedWallets = linkedWallets.filter(wallet => wallet !== oldAddress)
+    localStorage.setItem('linkedWallets', JSON.stringify(updatedWallets))
+    
+  } catch (error) {
+    console.warn('MetaMask disconnect failed, continuing with local disconnect:', error)
+  }
+  
+  // 本地状态清理
   connected.value = false
   address.value = ''
   chainId.value = null

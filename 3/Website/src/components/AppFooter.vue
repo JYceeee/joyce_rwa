@@ -3,7 +3,7 @@
   <footer class="footer">
     <div class="container footer-top">
       <div class="footer-brand">
-        <img src="/icons/RWA.png" alt="Mortgage RWA Logo" class="footer-logo" />
+        <img src="/icons/RWA-logo.svg" alt="Mortgage RWA Logo" class="footer-logo" />
         <p class="footer-tagline">Design amazing digital experiences that create more happy in the world.</p>
       </div>
 

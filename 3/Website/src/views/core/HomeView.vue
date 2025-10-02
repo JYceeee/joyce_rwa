@@ -31,15 +31,6 @@
           <p class="loading-text">正在加载视频...</p>
         </div>
         
-        <!-- 跳过按钮 -->
-        <!-- <button 
-          v-if="showIntroSkipButton" 
-          class="skip-button"
-          @click="skipIntroVideo"
-        >
-          跳过视频
-        </button> -->
-        
         <!-- 错误提示 -->
         <div v-if="introVideoError" class="error-message">
           <p>视频加载失败</p>
@@ -92,209 +83,174 @@
 
   </section>
 
-  <!--New Listing-->
+  <!-- Contact Us Section -->
   <section 
-    class="section" 
+    class="contact-section" 
     :class="{ 'fade-in': !showIntroVideo && !isTransitioning }"
   >
-    <div class="cards" aria-label="Highlights">
-      <div class="new-listings-section">
-        <h1>New Listing</h1></div>
-      <div class="container">
-        <!-- 加载状态 -->
-        <div v-if="loading" class="loading-state">
-          <div class="loading-spinner"></div>
-          <p class="loading-text">Loading project data...</p>
-        </div>
-        <!-- 错误状态 -->
-        <div v-else-if="error" class="error-state">
-            <div class="error-icon">⚠️</div>
-            <h4 class="error-title">Loading failed</h4>
-            <p class="error-description">{{ error }}</p>
-            <button class="btn-primary" @click="loadProducts">
-              Reload
-            </button>
-        </div>
-        <!-- 项目卡片容器 -->
-        <div v-else-if="upcomingProjects.length > 0" class="projects-grid" :class="{ 'fade-in': !loading }">
-          <article 
-            v-for="(project, index) in upcomingProjects" 
-            :key="project.code" 
-            class="listing-card"
-            :class="{ 'card-fade-in': !loading }"
-            :style="{ 'animation-delay': `${index * 0.2}s` }"
-            :aria-labelledby="`listing-title-${index}`"
-          >
-          <!-- 卡片头部 -->
-          <div class="card-header">
-            <h4 class="project-name">{{ project.code }} • {{ project.name }}</h4>
-            <!-- <h3 :id="`listing-title-${index}`" class="card-title">New Listing</h3> -->
-            <div class="status-badge" :class="getStatusClass(project.status)">{{ getStatusText(project.status) }}</div>
-          </div>
-          
-          <!-- 卡片内容 -->
-          <div class="card-content">
-            <!-- 项目详情 -->
-            <div class="project-details">
-              <div class="detail-item">
-                <span class="detail-label">LOAN SIZE</span>
-                <span class="detail-value">{{ project.loanAmount }}</span></div>
-              <div class="detail-item">
-                <span class="detail-label">EST. YIELD (IRR)</span>
-                <span class="detail-value highlight">{{ project.targetYield }}%</span></div>
-              <div class="detail-item">
-                <span class="detail-label">TERM</span>
-                <span class="detail-value">{{ project.loanTerm }}</span></div>
-              <div class="detail-item">
-                <span class="detail-label">STATUS</span>
-                <span class="detail-value status">{{ getStatusText(project.status) }}</span></div>
-            </div>
-            <!-- 卡片操作按钮 -->
-            <div class="card-actions">
-              <button class="btn-primary" @click="viewProjectDetails(project.code)">
-                VIEW DETAILS
-              </button>
-              <button class="btn-secondary" @click="addToWatchlist(project.code)">
-                ADD TO WATCHLIST
-              </button>
-            </div>
-          </div>
-          </article>
-        </div>
-        <!-- 空状态 -->
-        <div v-if="!loading && !error && upcomingProjects.length === 0" class="empty-state">
-          <!-- <div class="empty-icon">📋</div> -->
-          <h4 class="empty-title">No upcoming projects at the moment</h4>
-          <p class="empty-description">Check back soon for new opportunities</p>
-          <button class="btn-primary" @click="refreshListings">
-            REFRESH LISTINGS
-          </button>
-        </div>
-      </div>
-      <!-- 查看所有项目按钮 -->
-      <div v-if="!loading && !error && upcomingProjects.length > 0" class="view-all-section">
-        <button class="view-all-projects btn-outline" @click.prevent="goToProjects">
-          VIEW ALL PROJECTS
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- Contact Us -->
-  <div 
-    class="container" 
-    :class="{ 'fade-in': !showIntroVideo && !isTransitioning }"
-  >
-    <div class="page-header">
-      <h1>Contact Us</h1>
-      <p class="page-subtitle">We are happy to help you</p>
+    <!-- Background Decorations -->
+    <div class="contact-bg-decoration">
+      <div class="blockchain-token token-1"></div>
+      <div class="blockchain-token token-2"></div>
+      <div class="blockchain-token token-3"></div>
+      <div class="real-estate-icon building-1"></div>
+      <div class="real-estate-icon building-2"></div>
     </div>
 
-    <div class="contact-content">
-      <div class="contact-grid">
+    <!-- Main Contact Container -->
+    <div class="contact-container">
+      <!-- Bold Header -->
+      <header class="contact-header">
+        <h2 class="headline">Contact Us</h2>
+      </header>
 
-        <!-- Contact Information -->
-        <div class="contact-info">
-          <h2>Contact Information</h2>
-          <div class="contact-methods">
-            <div class="contact-method">
-              <div class="method-icon">📧</div>
-              <div class="method-details">
-                <h4>Email</h4>
-                <p>support@mortgagerwa.com</p>
-                <p>business@mortgagerwa.com</p>
+      <!-- Two Column Layout -->
+      <div class="contact-layout">
+        <!-- Left Column: Contact Information -->
+        <div class="contact-info-column">
+          <div class="contact-info-card">
+            <!-- Company Address -->
+            <div class="contact-item">
+              <div class="contact-icon location-icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor"/>
+                </svg>
+              </div>
+              <div class="contact-details">
+                <h4>Office Address</h4>
+                <p>Level 15, 123 George Street<br>Sydney NSW 2000, Australia</p>
               </div>
             </div>
 
-            <div class="contact-method">
-              <div class="method-icon">📞</div>
-              <div class="method-details">
-                <h4>Phone</h4>
-                <p>+61 2 1234 5678</p>
-                <p>Monday to Friday 9:00-18:00</p>
+            <!-- Email Address -->
+            <div class="contact-item">
+              <div class="contact-icon email-icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" fill="currentColor"/>
+                </svg>
+              </div>
+              <div class="contact-details">
+                <h4>Email Address</h4>
+                <p>support@mortgagerwa.com<br>business@mortgagerwa.com</p>
               </div>
             </div>
 
-            <div class="contact-method">
-              <div class="method-icon">📍</div>
-              <div class="method-details">
-                <h4>Address</h4>
-                <p>123 George Street</p>
-                <p>Sydney NSW 2000, Australia</p>
+            <!-- Phone Number -->
+            <div class="contact-item">
+              <div class="contact-icon phone-icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="currentColor"/>
+                </svg>
+              </div>
+              <div class="contact-details">
+                <h4>Phone Number</h4>
+                <p>+61 2 1234 5678<br>Monday to Friday 9:00-18:00</p>
               </div>
             </div>
 
-            <div class="contact-method">
-              <div class="method-icon">💬</div>
-              <div class="method-details">
-                <h4>Online Customer Service</h4>
-                <p>24/7 Online Support</p>
-                <p>Average Response Time < 5 minutes</p>
+            <!-- Business Hours -->
+            <div class="contact-item">
+              <div class="contact-icon hours-icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" fill="currentColor"/>
+                  <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z" fill="currentColor"/>
+                </svg>
               </div>
-            </div>
-          </div>
-
-          <div class="social-links">
-            <h3>Follow Us</h3>
-            <div class="social-icons">
-              <a href="#" class="social-icon">🐦</a>
-              <a href="#" class="social-icon">💼</a>
-              <a href="#" class="social-icon">📘</a>
-              <a href="#" class="social-icon">🐙</a>
+              <div class="contact-details">
+                <h4>Business Hours</h4>
+                <p>Monday - Friday: 9:00 AM - 6:00 PM<br>Saturday: 10:00 AM - 2:00 PM</p>
+              </div>
             </div>
           </div>
         </div>
-        
-        <!-- Send Message -->
-        <div class="contact-form">
-          <h2>Send Message</h2>
-          <form @submit.prevent="submitForm" class="form-container">
-            <div class="form-fields">
+
+        <!-- Right Column: Contact Form -->
+        <div class="contact-form-column">
+          <div class="contact-form-card">
+            <form @submit.prevent="submitForm" class="modern-form">
               <div class="form-group">
-                <label for="name">Your Name *</label>
-                <input type="text" id="name" v-model="form.name" required>
+                <label for="contact-name">Full Name *</label>
+                <input 
+                  type="text" 
+                  id="contact-name" 
+                  v-model="form.name" 
+                  required
+                  placeholder="Enter your full name"
+                >
               </div>
 
               <div class="form-group">
-                <label for="email">Your Email *</label>
-                <input type="email" id="email" v-model="form.email" required>
+                <label for="contact-email">Email *</label>
+                <input 
+                  type="email" 
+                  id="contact-email" 
+                  v-model="form.email" 
+                  required
+                  placeholder="Enter your email address"
+                >
               </div>
 
               <div class="form-group">
-                <label for="subject">Subject *</label>
-                <select id="subject" v-model="form.subject" required>
-                  <option value="">Please select a subject</option>
-                  <option value="investor">I am an Investor/I am interested in investing</option>
-                  <option value="asset_holder">I am an Asset Holder/I am interested in holding assets</option>
-                  <option value="general">I need General Consultation</option>
-                  <option value="technical">I need Technical Support</option>
-                  <option value="business">I would like to have a Business Cooperation</option>
-                  <option value="other">Others</option>
+                <label for="contact-subject">Subject *</label>
+                <select id="contact-subject" v-model="form.subject" required>
+                  <option value="">Select a subject</option>
+                  <option value="investor">Investment Inquiry</option>
+                  <option value="asset_holder">Asset Listing</option>
+                  <option value="general">General Question</option>
+                  <option value="technical">Technical Support</option>
+                  <option value="business">Business Partnership</option>
+                  <option value="other">Other</option>
                 </select>
               </div>
 
               <div class="form-group">
-                <label for="message">Message Content *</label>
-                <textarea id="message" v-model="form.message" rows="5" required></textarea>
+                <label for="contact-message">Message *</label>
+                <textarea 
+                  id="contact-message" 
+                  v-model="form.message" 
+                  rows="5" 
+                  required
+                  placeholder="Tell us how we can help you..."
+                ></textarea>
               </div>
-            </div>
 
-            <div class="form-submit">
-              <button type="submit" class="btn primary" :disabled="isSubmitting">
+              <button type="submit" class="send-message-btn" :disabled="isSubmitting">
                 {{ isSubmitting ? 'Sending...' : 'Send Message' }}
               </button>
-            </div>
-          </form>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Social Media Section -->
+      <div class="social-media-section">
+        <h3>Follow Us</h3>
+        <div class="social-links">
+          <a href="#" class="social-link" title="LinkedIn">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" fill="currentColor"/>
+            </svg>
+          </a>
+          <a href="#" class="social-link" title="Instagram">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" fill="currentColor"/>
+            </svg>
+          </a>
+          <a href="#" class="social-link" title="X (Twitter)">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" fill="currentColor"/>
+            </svg>
+          </a>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
 </template>
 
 <script>
 import { productAPI } from '@/service/api.ts'
-import { useDatabaseSync } from '@/service/databaseSyncService.js'
+import { useDatabaseSync } from '@/service/dataSyncService.js'
 
 export default {
   name: 'HomeView',
@@ -485,7 +441,7 @@ export default {
     
     // 跳转到项目页面
     goToProjects() {
-      this.$router.push('/projects')
+      this.$router.push('/listedprojects')
     },
     
     // 跳转到联系我们页面
@@ -2168,248 +2124,513 @@ export default {
   }
 }
 
-/* Contact Us section */
-.page-header {
-  margin-top: 60px;
-  margin-left: 50px;
-  margin-bottom: 60px;
-  font-family: Georgia, 'Times New Roman', Times, serif;
-  text-align: left;
+/* Contact Us Section - Modern Minimalist Design */
+.contact-section {
+  position: relative;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(51, 204, 255, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(0, 153, 204, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(25, 25, 112, 0.1) 0%, transparent 50%),
+    linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  padding: 80px 0;
+  overflow: hidden;
 }
 
-.page-header h1 {
-  font-size: 32px;
+/* Background Decorations */
+.contact-bg-decoration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.blockchain-token {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(45deg, #141426, #2a2a4a);
+  border-radius: 50%;
+  opacity: 0.1;
+  animation: float 6s ease-in-out infinite;
+}
+
+.blockchain-token.token-1 {
+  top: 10%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.blockchain-token.token-2 {
+  top: 20%;
+  right: 15%;
+  animation-delay: 2s;
+}
+
+.blockchain-token.token-3 {
+  bottom: 30%;
+  left: 20%;
+  animation-delay: 4s;
+}
+
+.real-estate-icon {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(45deg, #141426, #2a2a4a);
+  opacity: 0.08;
+  animation: float 8s ease-in-out infinite;
+}
+
+.real-estate-icon.building-1 {
+  top: 15%;
+  right: 25%;
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  animation-delay: 1s;
+}
+
+.real-estate-icon.building-2 {
+  bottom: 20%;
+  right: 10%;
+  clip-path: polygon(0% 0%, 100% 0%, 100% 70%, 50% 100%, 0% 70%);
+  animation-delay: 3s;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+/* Main Contact Container */
+.contact-container {
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+/* Bold Header */
+.contact-header {
+  text-align: center;
+  margin-bottom: 80px;
+}
+
+.contact-title {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 3.5rem;
   font-weight: 700;
-  margin-bottom: 16px;
   color: #ffffff;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.page-subtitle {
-  font-size: 1.25rem;
-  color: #94a3b8;
   margin: 0;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.contact-content {
-  display: flex;
-  flex-direction: column;
-  gap: 80px;
-  height: 850px;
-}
-
-.contact-grid {
+/* Two Column Layout */
+.contact-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 60px;
-  align-items: stretch;
+  gap: 80px;
+  margin-bottom: 80px;
+  align-items: start;
 }
 
-.contact-info {
+/* Left Column: Contact Information */
+.contact-info-column {
   display: flex;
   flex-direction: column;
-  height: 500px;
-  width:500px;
-  margin-left: 50px;
-  margin-top: -50px;
 }
 
-.contact-info h2,
-.contact-form h2 {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 30px;
-  color: #ffffff;
-  width: 700px;
+.contact-info-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 40px;
+  backdrop-filter: blur(10px);
 }
 
-.contact-methods {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  margin-bottom: 40px;
-  flex: 1;
-}
-
-.contact-method {
+.contact-item {
   display: flex;
   align-items: flex-start;
-  gap: 16px;
-  background: #1d1d36;
-  border: 1px solid #2a2a4a;
-  border-radius: 12px;
-  padding: 20px;
+  gap: 20px;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 16px;
+  transition: all 0.3s ease;
 }
 
-.method-icon {
-  font-size: 1.5rem;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #141426;
-  border-radius: 8px;
-  flex-shrink: 0;
-}
-
-.method-details h4 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-bottom: 4px;
-  color: #ffffff;
-}
-
-.method-details p {
-  color: #94a3b8;
-  margin: 0;
-  font-size: 0.875rem;
-}
-
-.social-links h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 16px;
-  color: #ffffff;
-}
-
-.social-icons {
-  display: flex;
-  gap: 12px;
-}
-
-.social-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: #1d1d36;
-  border: 1px solid #2a2a4a;
-  border-radius: 8px;
-  text-decoration: none;
-  font-size: 1.25rem;
-  transition: all 0.2s ease;
-}
-
-.social-icon:hover {
-  background: #2a2a4a;
+.contact-item:hover {
+  background: rgba(255, 255, 255, 0.05);
   transform: translateY(-2px);
 }
 
-.contact-form {
-  background: #1d1d36;
-  border: 1px solid #2a2a4a;
+.contact-icon {
+  width: 56px;
+  height: 56px;
+  background: #141426;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.contact-icon svg {
+  width: 24px;
+  height: 24px;
+  color: #667eea;
+}
+
+.contact-details h4 {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 8px 0;
+}
+
+.contact-details p {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* Right Column: Contact Form */
+.contact-form-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-form-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
   padding: 40px;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+  backdrop-filter: blur(10px);
 }
 
-.form-container {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  gap: 24px;
-}
-
-.form-fields {
+.modern-form {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  flex: 1;
-}
-
-.form-submit {
-  margin-top: 5px;
-  padding-top: 24px;
 }
 
 .form-group {
-  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .form-group label {
-  display: block;
-  margin-bottom: 8px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 0.95rem;
   font-weight: 500;
   color: #ffffff;
+  margin-bottom: 8px;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid #2a2a4a;
-  border-radius: 8px;
-  background: #141426;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
   color: #ffffff;
   font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #64748b;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #f97316;
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+  border-color: #141426;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(20, 20, 38, 0.3);
 }
 
-.btn {
-  padding: 12px 24px;
-  border-radius: 8px;
+.form-group textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.send-message-btn {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 16px 32px;
+  background: #141426;
+  border: 1px solid #141426;
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 1rem;
   font-weight: 600;
-  transition: all 0.2s ease;
   cursor: pointer;
-  border: none;
+  transition: all 0.3s ease;
+  margin-top: 8px;
 }
 
-.btn.primary {
-  background: #f97316;
-  color: white;
-  border: 1px solid #f97316;
+.send-message-btn:hover:not(:disabled) {
+  background: #1a1a2e;
+  border-color: #1a1a2e;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(20, 20, 38, 0.4);
 }
 
-.btn.primary:hover:not(:disabled) {
-  background: #ea580c;
-  border-color: #ea580c;
-}
-
-.btn.primary:disabled {
-  opacity: 0.5;
+.send-message-btn:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
+/* Map Section */
+.map-section {
+  margin-bottom: 80px;
+}
+
+.map-container {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 60px 40px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+.map-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.map-icon {
+  width: 80px;
+  height: 80px;
+  background: #141426;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-icon svg {
+  width: 40px;
+  height: 40px;
+  color: #667eea;
+}
+
+.map-placeholder h3 {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.map-placeholder p {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #94a3b8;
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* Social Media Section */
+.social-media-section {
+  text-align: center;
+}
+
+.social-media-section h3 {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 32px;
+}
+
+.social-links {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.social-link svg {
+  width: 24px;
+  height: 24px;
+  color: #94a3b8;
+  transition: all 0.3s ease;
+}
+
+.social-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.social-link:hover svg {
+  color: #667eea;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
-  .page-header {
-    margin-left: 0;
-    text-align: center;
-    padding: 40px 0;
+  .contact-container {
+    padding: 0 20px;
   }
   
-  .page-header h1 {
-    font-size: 28px;
-    position: static;
-    margin-bottom: 20px;
+  .contact-title {
+    font-size: 2.5rem;
   }
   
-  .contact-grid {
+  .contact-layout {
     grid-template-columns: 1fr;
     gap: 40px;
   }
   
-  .contact-method {
-    flex-direction: column;
-    text-align: center;
+  .contact-info-card,
+  .contact-form-card {
+    padding: 24px;
+  }
+  
+  .contact-item {
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .contact-icon {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .contact-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .map-container {
+    padding: 40px 24px;
+  }
+  
+  .map-icon {
+    width: 64px;
+    height: 64px;
+  }
+  
+  .map-icon svg {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .social-links {
+    gap: 16px;
+  }
+  
+  .social-link {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .social-link svg {
+    width: 20px;
+    height: 20px;
   }
 }
 
 @media (max-width: 480px) {
-  .page-header h1 {
-    font-size: 24px;
-    margin-bottom: 16px;
+  .contact-section {
+    padding: 40px 0;
+  }
+  
+  .contact-container {
+    padding: 0 16px;
+  }
+  
+  .contact-title {
+    font-size: 2rem;
+  }
+  
+  .contact-header {
+    margin-bottom: 40px;
+  }
+  
+  .contact-layout {
+    gap: 32px;
+    margin-bottom: 40px;
+  }
+  
+  .contact-info-card,
+  .contact-form-card {
+    padding: 20px;
+  }
+  
+  .contact-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+  
+  .contact-icon {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 12px 16px;
+  }
+  
+  .send-message-btn {
+    padding: 14px 24px;
+  }
+  
+  .map-section {
+    margin-bottom: 40px;
+  }
+  
+  .map-container {
+    padding: 32px 20px;
+  }
+  
+  .map-placeholder h3 {
+    font-size: 1.25rem;
+  }
+  
+  .map-placeholder p {
+    font-size: 0.9rem;
+  }
+  
+  .social-media-section h3 {
+    font-size: 1.25rem;
+    margin-bottom: 24px;
   }
 }
 

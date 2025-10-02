@@ -8,17 +8,17 @@ const transporter = nodemailer.createTransport({
   port: 465,
   secure: true,
   auth: {
-    user: 'joyce_yang2020@163.com',
-    pass: 'wangyidafahao1_'
+    user: '##',
+    pass: '#'
   }
 });
 
 // MySQL数据库配置
 const dbConfig = {
-  host: 'localhost',
-  user: 'root',
-  password: 'your_db_password',
-  database: 'your_db_name'
+  host: import.meta.env.VITE_DB_HOST || 'localhost',
+  user: import.meta.env.VITE_DB_USER || 'root',
+  password: import.meta.env.VITE_DB_PASSWORD || '123456',
+  database: import.meta.env.VITE_DB_NAME || 'rwa'
 };
 
 // 发送验证码邮件并保存到数据库
@@ -26,7 +26,7 @@ async function sendVerificationCode(email) {
   const code = Math.floor(100000 + Math.random() * 900000).toString();
   // 发送邮件
   await transporter.sendMail({
-    from: 'your@email.com',
+    from: '##',
     to: email,
     subject: 'Your Verification Code',
     text: `Your verification code is: ${code}`

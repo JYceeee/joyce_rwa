@@ -2,7 +2,7 @@
   <section class="kyc-page container">
     <!-- 顶部 -->
     <header class="topbar">
-      <button class="back" @click="goProfile">← Back</button>
+      <button class="back" @click="goProfile">&larr; Back</button>
       <h1 class="title">KYC Verification</h1>
       <button class="btn light danger" @click="cancelKYC">Cancel Verification</button>
     </header>
@@ -396,7 +396,7 @@ export default {
     // 导航到项目页面
     goToProjects() {
       this.showWhitelistSuccess = false
-      this.$router.push('/projects')
+      this.$router.push('/listedprojects')
     }
   }
 }

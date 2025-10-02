@@ -108,23 +108,19 @@
     <div class="container nav">
       <div class="left">
         <a class="brand" href="#" @click.prevent="go('/')">
-          <img src="/icons/RWA-logo.png" alt="Mortgage RWA" class="brand-logo" />
+          <img src="/icons/RWA-logo.svg" alt="Mortgage RWA" class="brand-logo" />
         </a>
         <nav class="menu" aria-label="Primary">
           <a href="#" @click.prevent="go('/home')" class="menu-item">Home</a>
-          <a href="#" @click.prevent="go('/projects')" class="menu-item">Projects</a>
+          <a href="#" @click.prevent="go('/listedprojects')" class="menu-item">Listed Projects</a>
+          <a href="#" @click.prevent="go('/to-be-listed')" class="menu-item">To be listed</a>
+          <!-- <a href="#" @click.prevent="go('/admin-projects')" class="menu-item">Admin Projects</a> -->
           <a href="#" @click.prevent="go('/portfolio')" class="menu-item">Portfolio</a>
           <div class="dropdown-container">
             <a href="#" class="menu-item more-link" @click.prevent="toggleMoreDropdown">More ▾</a>
             <div v-if="moreDropdownOpen" class="dropdown-menu">
               <a href="#" @click.prevent="go('/overview')" class="dropdown-item">Overview</a>
               <a href="#" @click.prevent="go('/about')" class="dropdown-item">About Us</a>
-              <!-- <a href="#" @click.prevent="go('/contact')" class="dropdown-item">Contact</a> -->
-              <!-- <div class="dropdown-divider"></div>
-              <a href="#" @click.prevent="go('/test/contract-deployment-verification')" class="dropdown-item test-link">
-                <span class="dropdown-icon">🔍</span>
-                合约部署验证
-              </a> -->
             </div>
           </div>
         </nav>
@@ -207,27 +203,39 @@
     <div v-if="mobileMenuOpen" class="mobile-menu">
       <div class="mobile-menu-content">
         <a href="#" @click.prevent="go('/home')" class="mobile-menu-item">
-          <span class="mobile-menu-icon">🏠</span>
+          <!-- <span class="mobile-menu-icon">🏠</span> -->
           <span>Home</span>
         </a>
-        <a href="#" @click.prevent="go('/projects')" class="mobile-menu-item">
-          <span class="mobile-menu-icon">📊</span>
-          <span>Projects</span>
+        <a href="#" @click.prevent="go('/listedprojects')" class="mobile-menu-item">
+          <!-- <span class="mobile-menu-icon">📊</span> -->
+          <span>Listed Projects</span>
         </a>
+        <a href="#" @click.prevent="go('/to-be-listed')" class="mobile-menu-item">
+          <!-- <span class="mobile-menu-icon">⏳</span> -->
+          <span>To be listed</span>
+        </a>
+        <!-- <a href="#" @click.prevent="go('/admin-projects')" class="mobile-menu-item">
+          <span class="mobile-menu-icon">⚙️</span>
+          <span>Admin Projects</span>
+        </a> -->
         <a href="#" @click.prevent="go('/portfolio')" class="mobile-menu-item">
-          <span class="mobile-menu-icon">💼</span>
+          <!-- <span class="mobile-menu-icon">💼</span> -->
           <span>Portfolio</span>
         </a>
         <div class="mobile-menu-divider"></div>
         <a href="#" @click.prevent="go('/overview')" class="mobile-menu-item">
-          <span class="mobile-menu-icon">📋</span>
+          <!-- <span class="mobile-menu-icon">📋</span> -->
           <span>Overview</span>
         </a>
         <a href="#" @click.prevent="go('/about')" class="mobile-menu-item">
-          <span class="mobile-menu-icon">🏢</span>
+          <!-- <span class="mobile-menu-icon">🏢</span> -->
           <span>About Us</span>
         </a>
-        <a href="#" @click.prevent="go('/solutions')" class="mobile-menu-item">
+        <a href="#" @click.prevent="go('/contact')" class="mobile-menu-item">
+          <!-- <span class="mobile-menu-icon">📞</span> -->
+          <span>Contact Us</span>
+        </a>
+        <!-- <a href="#" @click.prevent="go('/solutions')" class="mobile-menu-item">
           <span class="mobile-menu-icon">🔧</span>
           <span>Solutions</span>
         </a>
@@ -251,7 +259,7 @@
         <a href="#" @click.prevent="go('/test/contract-deployment-verification')" class="mobile-menu-item test-link">
           <span class="mobile-menu-icon">🔍</span>
           <span>合约部署验证</span>
-        </a>
+        </a> -->
       </div>
     </div>
     
@@ -627,13 +635,15 @@ export default {
     // 确认断开连接
     async confirmDisconnect() {
       try {
-        this.disconnect();
+        await this.disconnect();
         this.showDisconnectModal = false;
         this.showDisconnectSuccess = true;
         this.disconnectSuccessMsg = "Wallet has been disconnected successfully.";
         console.log("Wallet disconnected successfully");
       } catch (error) {
         console.error("Wallet disconnection failed:", error);
+        this.showDisconnectModal = false;
+        alert("Failed to disconnect wallet. Please try again.");
       }
     },
     disconnectWalletConnection(walletAddress) {
@@ -1083,10 +1093,17 @@ export default {
     padding: 4px 8px;
   }
   
-  /* Profile按钮样式 */
+  /* Profile按钮样式 - 正方形 */
   .btn.light.pill {
-    padding: 6px 10px;
+    padding: 8px;
     font-size: 12px;
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
   }
   
   /* Settings按钮样式 */
@@ -1238,10 +1255,17 @@ export default {
     font-size: 14px;
   }
   
-  /* Profile按钮样式 */
+  /* Profile按钮样式 - 正方形 */
   .btn.light.pill {
-    padding: 4px 8px;
+    padding: 6px;
     font-size: 11px;
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
   }
   
   /* Settings按钮样式 */
@@ -1344,10 +1368,17 @@ export default {
     padding: 2px 4px;
   }
   
-  /* Profile按钮样式 */
+  /* Profile按钮样式 - 正方形 */
   .btn.light.pill {
-    padding: 3px 6px;
+    padding: 4px;
     font-size: 10px;
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
   }
   
   /* Settings按钮样式 */

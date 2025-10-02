@@ -135,12 +135,12 @@
         <div class="project-header">
           <img :src="projectData.image" :alt="projectCode" class="project-image" />
           <div class="project-details">
-            <h1 class="project-title">{{ projectData.code }} • {{ projectData.name }}</h1>
-            <p class="project-subtitle">{{ projectData.subtitle }}</p>
+            <h1 class="project-title"> {{ currentProduct.code }} •  {{ currentProduct.name }} </h1>
+            <p class="project-subtitle">{{ currentProduct.subtitle }}</p>
             <div class="project-meta">
-              <span class="meta-item">{{ projectData.propertyType || projectData.type }}</span>
-              <span class="meta-item">{{ projectData.propertyLocation || projectData.region }}</span>
-              <span class="meta-item">{{ projectData.loanProduct || 'Loan Product' }}</span>
+              <span class="meta-item">{{ currentProduct.type }}</span>
+              <span class="meta-item">{{ currentProduct.region }}</span>
+              <span class="meta-item">{{ currentProduct.loanProduct || 'Loan Product' }}</span>
             </div>
           </div>
         </div>
@@ -149,39 +149,39 @@
           <div class="project-metrics">
             <div class="metric-item">
               <span class="metric-label">LOAN SIZE</span>
-              <span class="metric-value">{{ projectData.loanAmount || 'AUD$0' }}</span>
+              <span class="metric-value">{{ currentProduct.loanAmount || 'AUD$0' }}</span>
             </div>
             <div class="metric-item">
               <span class="metric-label">EST. YIELD (IRR)</span>
-              <span class="metric-value" style="color: #16a34a;">{{ projectData.metrics.targetLoanYield }}</span>
+              <span class="metric-value" style="color: #16a34a;">{{ currentProduct.metrics.targetLoanYield }}</span>
             </div>
             <div class="metric-item">
               <span class="metric-label">TERM</span>
-              <span class="metric-value">{{ projectData.loanTerm || '12 months' }}</span>
+              <span class="metric-value">{{ currentProduct.loanTerm || '12 months' }}</span>
             </div>
             <div class="metric-item">
               <span class="metric-label">PROPERTY VALUE</span>
-              <span class="metric-value">{{ projectData.metrics.collateralPropertyValue }}</span>
+              <span class="metric-value">{{ currentProduct.metrics.collateralPropertyValue }}</span>
             </div>
             <div class="metric-item">
               <span class="metric-label">LTV</span>
-              <span class="metric-value">{{ projectData.metrics.loanToValue }}</span>
+              <span class="metric-value">{{ currentProduct.metrics.loanToValue }}</span>
             </div>
             <div class="metric-item">
               <span class="metric-label">SUBSCRIPTION PROGRESS</span>
-              <span class="metric-value" style="color: #3b82f6;">{{ projectData.subscriptionProgress }}</span>
+              <span class="metric-value" style="color: #3b82f6;">{{ currentProduct.subscriptionProgress }}</span>
             </div>
             <div class="metric-item">
               <span class="metric-label">TOTAL OFFERING</span>
-              <span class="metric-value">{{ projectData.totalOffering }}</span>
+              <span class="metric-value">{{ currentProduct.totalOffering }}</span>
             </div>
             <div class="metric-item">
               <span class="metric-label">SUBSCRIBED</span>
-              <span class="metric-value">{{ projectData.subscribed }}</span>
+              <span class="metric-value">{{ currentProduct.subscribed }}</span>
             </div>
             <div class="metric-item">
               <span class="metric-label">DEFAULT RATE</span>
-              <span class="metric-value">{{ projectData.metrics.defaultRate }}</span>
+              <span class="metric-value">{{ currentProduct.metrics.defaultRate }}</span>
             </div>
           </div>
       </div>
@@ -189,7 +189,7 @@
       <!-- 认购表单 -->
       <div class="trade-form-card">
         <div class="form-header">
-          <h2 class="form-title">认购 {{ projectCode }}</h2>
+          <h2 class="form-title">认购 {{ currentProduct.code }}</h2>
           <!-- 钱包状态 - 整合成一行显示 -->
           <div class="wallet-status-inline">
             <div class="wallet-status-item">
@@ -265,8 +265,8 @@
         <div class="subscription-summary" v-if="subscriptionAmount && subscriptionAmount > 0 && amountValid">
           <h3>Purchase Summary</h3>
           <div class="summary-item">
-            <span class="summary-label">Project Code:</span>
-            <span class="summary-value">{{ projectCode }}</span>
+            <span class="summary-label">Project:</span>
+            <span class="summary-value">{{ p.code }} • {{ p.name }}</span>
           </div>
           <div class="summary-item">
             <span class="summary-label">Purchase Amount:</span>
@@ -274,20 +274,20 @@
           </div>
           <div class="summary-item">
             <span class="summary-label">Annual Rate:</span>
-            <span class="summary-value">9.5% p.a. (标准利率)</span>
+            <span class="summary-value">{{ p.metrics.targetLoanYield }} (标准利率)</span>
           </div>
           <div class="summary-item">
             <span class="summary-label">Loan Term:</span>
-            <span class="summary-value">12 months (标准期限)</span>
+            <span class="summary-value">{{ p.loanTerm }}(标准期限)</span>
           </div>
           <div class="summary-item">
             <span class="summary-label">Estimated Interest:</span>
             <span class="summary-value">{{ calculateInterest() }} LIT</span>
           </div>
-          <div class="summary-item">
+          <!-- <div class="summary-item">
             <span class="summary-label">Current Price:</span>
             <span class="summary-value">$1.00</span>
-          </div>
+          </div> -->
           <div class="summary-item">
             <span class="summary-label">Total Token Needed:</span>
             <span class="summary-value">{{ formatNumber(subscriptionAmount) }} LPT</span>
@@ -493,6 +493,7 @@ import { useWallet } from '@/composables/useWallet.js'
 import { isLoggedIn } from '@/utils/auth.js'
 import contractTestService from '@/services/contractTestService'
 import { ethers } from 'ethers'
+import { dataSyncService, getCachedData, syncAllData, useDatabaseSync } from '@/service/dataSyncService.js'
 
 const { nativeBalanceDisplay,nativeSymbol,nativeToAudDisplay,bigAudDisplay } = useWallet()
 
@@ -1506,25 +1507,45 @@ export default {
       try {
         this.projectLoading = true
         this.projectError = null
-        console.log('🔄 TradeProjectView: 从数据库加载项目数据...', this.projectCode)
+        console.log('🔄 TradeProjectView: 从dataSyncService加载项目数据...', this.projectCode)
         
-        const response = await productAPI.getProductByCode(this.projectCode)
+        // 首先尝试从dataSyncService缓存获取数据
+        let cachedProjectData = getCachedData('projectData')
+        console.log('📊 TradeProjectView: 从缓存获取项目数据:', cachedProjectData)
         
-        if (response.status === 0) {
-          // 基于call-mysql-project-table.js的SQL查询结构进行数据映射
-          const project = response.data
+        // 如果缓存中没有数据或数据过期，则从API获取
+        if (!cachedProjectData || !Array.isArray(cachedProjectData) || cachedProjectData.length === 0) {
+          console.log('🔄 TradeProjectView: 缓存中没有项目数据，从API获取...')
+          const response = await productAPI.getProductByCode(this.projectCode)
+          
+          if (response.status === 0) {
+            cachedProjectData = [response.data]
+            // 更新缓存
+            dataSyncService.setCachedData('projectData', cachedProjectData)
+          } else {
+            throw new Error(response.message || 'Failed to load project data')
+          }
+        }
+        
+        // 从缓存数据中查找当前项目
+        const project = cachedProjectData.find(p => 
+          p.project_code === this.projectCode || p.code === this.projectCode
+        )
+        
+        if (project) {
+          console.log('✅ TradeProjectView: 找到项目数据:', project)
           
           // 计算认购进度
-          const totalOfferingRaw = parseFloat(project.total_offering_token) || 0
-          const subscribedRaw = parseFloat(project.subscribe_token) || 0
+          const totalOfferingRaw = parseFloat(project.total_offering_token || project.total_token) || 0
+          const subscribedRaw = parseFloat(project.subscribe_token || project.current_subscribed_token) || 0
           const subscriptionProgress = totalOfferingRaw > 0 ? (subscribedRaw / totalOfferingRaw * 100).toFixed(2) : 0
           
           const mappedProduct = {
             // 基础信息 - 完全基于数据库字段
             id: project.id,
-            code: project.project_code,
-            name: project.project_name,
-            status: project.loan_status,
+            code: project.project_code || project.code,
+            name: project.project_name || project.name,
+            status: project.loan_status || project.status,
             created_at: project.created_at,
             
             // 认购信息 - 基于数据库字段
@@ -2835,6 +2856,18 @@ export default {
     }
   },
   async mounted() {
+    // 初始化dataSyncService
+    try {
+      console.log('🔄 TradeProjectView: 初始化dataSyncService...')
+      await dataSyncService.startDataSync({
+        projectData: { interval: 30000, enabled: true },
+        walletData: { interval: 15000, enabled: true }
+      })
+      console.log('✅ TradeProjectView: dataSyncService初始化成功')
+    } catch (error) {
+      console.warn('⚠️ TradeProjectView: dataSyncService初始化失败，继续使用API:', error)
+    }
+    
     // 检查路由参数，设置交易类型
     this.initializeTradeType()
     
@@ -2874,9 +2907,37 @@ export default {
   beforeUnmount() {
     // 移除事件监听器
     window.removeEventListener('walletActivityUpdated', this.handleWalletActivityUpdate)
-  },
-  
-  // 计算项目的interest received amount（已收取利息币）
+    
+    // 清理dataSyncService
+    try {
+      console.log('🔄 TradeProjectView: 清理dataSyncService...')
+      dataSyncService.stopDataSync()
+      console.log('✅ TradeProjectView: dataSyncService已清理')
+    } catch (error) {
+      console.warn('⚠️ TradeProjectView: 清理dataSyncService时出错:', error)
+    }
+    },
+    
+    // 手动刷新项目数据
+    async refreshProjectData() {
+      try {
+        console.log('🔄 TradeProjectView: 手动刷新项目数据...')
+        
+        // 使用dataSyncService同步所有数据
+        const result = await syncAllData()
+        console.log('📊 TradeProjectView: 数据同步结果:', result)
+        
+        // 重新加载项目数据
+        await this.loadProjectData()
+        
+        console.log('✅ TradeProjectView: 项目数据刷新完成')
+      } catch (error) {
+        console.error('❌ TradeProjectView: 刷新项目数据失败:', error)
+        this.projectError = 'Failed to refresh project data'
+      }
+    },
+    
+    // 计算项目的interest received amount（已收取利息币）
   calculateInterestReceived(projectCode) {
     // 获取用户在该项目中的持有信息
     const userAddress = this.getUserAddress()

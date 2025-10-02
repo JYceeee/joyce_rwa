@@ -33,8 +33,8 @@
           <span class="contact-label">Email:</span>
           <span class="contact-value">
             {{ userEmail || 'Not provided' }}
-            <span class="email-status" :class="emailVerificationClass"> &nbsp; {{ emailVerificationText }}</span>
           </span>
+          <span class="email-status" :class="emailVerificationClass"> &nbsp; {{ emailVerificationText }}</span>
           <button v-if="!emailVerified" class="btn-small" type="button" @click="sendEmailVerification">
             Verify Email
           </button>
@@ -1102,7 +1102,7 @@ export default {
   border-radius: 6px;
   border: 1px solid rgba(74, 85, 104, 0.3);
   flex: 1;
-  max-width: 300px;
+  max-width: 200px;
   word-break: break-all;
   display: flex;
   align-items: center;

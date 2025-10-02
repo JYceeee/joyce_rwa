@@ -714,7 +714,7 @@ import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useWallet } from '/src/composables/useWallet'
 import { useRouter } from 'vue-router'
 import { productAPI } from '@/service/api'
-import { useDatabaseSync } from '@/service/databaseSyncService'
+import { useDatabaseSync } from '@/service/dataSyncService.js'
 
 const router = useRouter()
 const { fullAddress, shortAddress, connected, nativeBalanceDisplay, nativeSymbol } = useWallet()
@@ -1814,7 +1814,7 @@ const handleAction = (action) => {
   switch (action) {
     case 'Buy':
     case 'Sell':
-      router.push('/projects')
+      router.push('/listedprojects')
       break
     case 'Swap':
       router.push('/swap')

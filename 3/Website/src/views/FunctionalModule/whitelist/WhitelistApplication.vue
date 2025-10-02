@@ -403,7 +403,7 @@ export default {
 
     // 跳转到项目页面
     goToProjects() {
-      this.$router.push('/projects')
+      this.$router.push('/listedprojects')
     },
 
     // 显示成功结果
