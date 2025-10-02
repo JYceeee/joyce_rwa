@@ -317,6 +317,61 @@ exports.saveTransactionHistory = (req, res) => {
   });
 }
 
+//获取用户信息处理函数
+exports.getUserInfo = (req, res) => {
+  try {
+    // 从请求头获取token
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.cc('未提供有效的认证token', 1);
+    }
+
+    const token = authHeader.substring(7); // 移除 'Bearer ' 前缀
+
+    // 验证token并解码用户信息
+    jwt.verify(token, process.env.jwt_SecretKey || 'default_secret_key', (err, decoded) => {
+      if (err) {
+        console.error('Token验证失败:', err);
+        return res.cc('Token无效或已过期', 1);
+      }
+
+      // 从token中获取用户ID
+      const userId = decoded.user_id;
+      console.log('🔍 JWT token解码结果:', decoded);
+      console.log('🔍 从token中提取的user_id:', userId);
+      
+      if (!userId) {
+        console.error('❌ Token中未包含用户ID');
+        return res.cc('Token中未包含用户ID', 1);
+      }
+
+      // 根据用户ID查询完整的用户信息
+      const sql = 'SELECT user_id, user_name, user_email, user_phone, created_at FROM user WHERE user_id = ?';
+      db.query(sql, [userId], (err, results) => {
+        if (err) {
+          console.error('查询用户信息失败:', err);
+          return res.cc('查询用户信息失败', 1);
+        }
+
+        if (results.length === 0) {
+          return res.cc('用户不存在', 1);
+        }
+
+        const userInfo = results[0];
+        console.log('✅ 获取用户信息成功:', userInfo);
+        console.log('🔍 数据库返回的user_id:', userInfo.user_id);
+        console.log('🔍 数据库返回的user_name:', userInfo.user_name);
+        console.log('🔍 数据库返回的user_email:', userInfo.user_email);
+
+        res.cc('获取用户信息成功', 0, userInfo);
+      });
+    });
+  } catch (error) {
+    console.error('获取用户信息异常:', error);
+    res.cc('获取用户信息失败', 1);
+  }
+};
+
 //获取交易历史处理函数 - 适配你的表结构
 exports.getTransactionHistory = (req, res) => {
   const { projectCode, userAddress, limit = 50, offset = 0 } = req.query;

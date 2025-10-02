@@ -10,7 +10,7 @@ import ContactUsView from '../views/core/ContactUsView.vue'
 import DetailPage from '../views/core/DetailPage.vue'
 import ProfileView from '../views/core/ProfileView.vue'
 import TradeProjectView from '../views/core/TradeProjectView.vue'
-import TradeProjectViewTest from '../views/core/TradeProjectViewTest.vue'
+// import TradeProjectViewTest from '../views/core/TradeProjectViewTest.vue'
 // import ContractView from '../views/core/contract.vue'
 import TokenDetailView from '../views/core/TokenDetailView.vue'
 // Auth pages
@@ -43,9 +43,9 @@ const router = createRouter({
     { path: '/to-be-listed', name: 'toBeListed', component: ToBeListedView },
     { path: '/to-be-listed/:code', name: 'toBeListedDetail', component: ToBeListedView, props: true },
     { path: '/admin-projects', name: 'adminProjects', component: AdminProjectsView },
-    { path: '/admin-projects/:code', name: 'adminProjectDetail', component: AdminProjectsView, props: true },
+    // { path: '/admin-projects/:code', name: 'adminProjectDetail', component: AdminProjectsView, props: true },
     { path: '/contact', name: 'contact', component: ContactUsView },
-    { path: '/detail/:id?', name: 'detail', component: DetailPage, props: true },
+    { path: '/detail/:code?', name: 'detail', component: DetailPage, props: true },
     { path: '/token/:address', name: 'tokenDetail', component: TokenDetailView, props: true },
     { path: '/profile', name: 'profile', component: ProfileView },
     { path: '/login', name: 'login', component: LoginView },

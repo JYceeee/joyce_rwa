@@ -19,6 +19,7 @@
       <div>
         <h1 class="title">{{ userName }}</h1>
       </div>
+      <p class="title">{{ userid }}</p>
      
     </div>
     <form class="container form" @submit.prevent="onSave">
@@ -175,6 +176,7 @@ import {
   setUserInfo,
   USER_INFO_EVENT
 } from '@/service/userService'
+import { userAPI } from '@/service/api'
 import { unifiedContractService as contractService } from '@/service/unifiedContractService'
 
 export default {
@@ -214,7 +216,29 @@ export default {
     isVerified(){ return this.kycStatus === KYC_STATUS.VERIFIED },
     isPending(){ return this.kycStatus === KYC_STATUS.PENDING },
     // 用户信息计算属性
-    userName(){ 
+    userid(){
+      // 多重fallback策略
+      if (this.apiUserData?.user_id) {
+        return this.apiUserData.user_id
+      }
+      
+      if (this.apiUserData?.id) {
+        return this.apiUserData.id
+      }
+      
+      // 从localStorage获取用户ID
+      const localUserInfo = getUserInfo()
+      if (localUserInfo.user_id) {
+        return localUserInfo.user_id
+      }
+      
+      if (localUserInfo.id) {
+        return localUserInfo.id
+      }
+      
+      return 'User ID'
+    },
+    userName(){   
       // 多重fallback策略
       if (this.apiUserData?.name) {
         return this.apiUserData.name
@@ -553,7 +577,9 @@ export default {
           email: localUserInfo.email || rememberEmail || '',
           phone: localUserInfo.phone || '',
           firstName: localUserInfo.firstName || '',
-          lastName: localUserInfo.lastName || ''
+          lastName: localUserInfo.lastName || '',
+          user_id: localUserInfo.user_id || localUserInfo.id || '',
+          id: localUserInfo.user_id || localUserInfo.id || ''
         }
         console.log('✅ ProfileView: 立即显示本地用户信息:', this.apiUserData)
       }
@@ -585,7 +611,9 @@ export default {
               email: localUserInfo.email,
               phone: localUserInfo.phone,
               firstName: localUserInfo.firstName,
-              lastName: localUserInfo.lastName
+              lastName: localUserInfo.lastName,
+              user_id: localUserInfo.user_id || localUserInfo.id || '',
+              id: localUserInfo.user_id || localUserInfo.id || ''
             }
             console.log('✅ ProfileView: 使用本地存储用户信息:', this.apiUserData)
             return
@@ -605,70 +633,25 @@ export default {
           return
         }
         
-        // 构建请求头
-        const headers = {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
+        console.log('🔑 ProfileView: 使用userAPI获取用户信息')
         
-        console.log('🔑 ProfileView: 使用token进行API请求')
-        
-        // 尝试多个可能的API端点
-        const apiEndpoints = [
-          'http://localhost:3000/user/login',
-          'http://localhost:3000/user/userinfo',
-          'http://localhost:3000/api/user',
-          'http://localhost:3000/user'
-        ]
+        // 使用userAPI获取用户信息
+        const response = await userAPI.getUserInfoFromServer()
         
         let userData = null
         let lastError = null
         
-        // 尝试每个端点
-        for (const endpoint of apiEndpoints) {
-          try {
-            console.log(`🔍 ProfileView: 尝试API端点: ${endpoint}`)
-            
-            const response = await fetch(endpoint, {
-              method: 'GET',
-              headers: headers,
-            })
-            
-            console.log(`📡 ProfileView: ${endpoint} 响应状态:`, response.status)
-            
-            if (response.ok) {
-              const data = await response.json()
-              console.log(`✅ ProfileView: ${endpoint} 返回数据:`, data)
-              
-              // 处理不同的响应格式
-              if (data.status === 0 && data.data) {
-                userData = data.data
-              } else if (data.user_email || data.name || data.email) {
-                userData = data
-              }
-              
-              if (userData) {
-                console.log(`✅ ProfileView: 从 ${endpoint} 成功获取用户数据`)
-                break
-              }
-            } else if (response.status === 401) {
-              console.warn(`⚠️ ProfileView: ${endpoint} 认证失败`)
-              lastError = '认证失败，token可能已过期'
-            } else {
-              console.warn(`⚠️ ProfileView: ${endpoint} 返回错误:`, response.status)
-              lastError = `API请求失败: ${response.status} ${response.statusText}`
-            }
-          } catch (error) {
-            console.warn(`❌ ProfileView: ${endpoint} 请求失败:`, error.message)
-            lastError = error.message
-          }
+        if (response.status === 0 && response.data) {
+          userData = response.data
+          console.log('✅ ProfileView: 成功获取用户数据:', userData)
+          console.log('🔍 ProfileView: user_id字段:', userData.user_id)
+          console.log('🔍 ProfileView: id字段:', userData.id)
+        } else {
+          lastError = response.message || '获取用户信息失败'
+          console.warn('⚠️ ProfileView: 获取用户信息失败:', lastError)
         }
         
         if (userData) {
-          console.log('✅ ProfileView: 成功获取用户数据:', userData)
-          
-          // 保存API获取的用户数据
-          this.apiUserData = userData
           
           // 处理并更新用户信息
           const processedUserData = {
@@ -681,7 +664,14 @@ export default {
             // 处理其他字段
             firstName: userData.firstName || userData.first_name,
             lastName: userData.lastName || userData.last_name,
+            user_id: userData.user_id || userData.id || userData.userId,
             id: userData.user_id || userData.id || userData.userId
+          }
+          
+          // 保存API获取的用户数据（包含处理后的数据）
+          this.apiUserData = {
+            ...userData,
+            ...processedUserData
           }
           
           // 过滤掉空值
@@ -710,7 +700,9 @@ export default {
             this.apiUserData = {
               name: localUserInfo.name,
               email: localUserInfo.email,
-              phone: localUserInfo.phone
+              phone: localUserInfo.phone,
+              user_id: localUserInfo.user_id || localUserInfo.id || '',
+              id: localUserInfo.user_id || localUserInfo.id || ''
             }
             console.log('✅ ProfileView: 使用本地存储作为fallback:', this.apiUserData)
           } else {
@@ -731,7 +723,9 @@ export default {
             this.apiUserData = {
               name: localUserInfo.name,
               email: localUserInfo.email,
-              phone: localUserInfo.phone
+              phone: localUserInfo.phone,
+              user_id: localUserInfo.user_id || localUserInfo.id || '',
+              id: localUserInfo.user_id || localUserInfo.id || ''
             }
             console.log('✅ ProfileView: 网络失败，使用本地存储:', this.apiUserData)
           }

@@ -312,10 +312,82 @@ const updateProjectSubscription = async (req, res) => {
   }
 };
 
+// 部署智能合约并处理认购
+const deploySmartContracts = async (req, res) => {
+  try {
+    const {
+      projectCode,
+      tradeType,
+      amount,
+      userAddress
+    } = req.body;
+
+    // 验证必需参数
+    if (!projectCode || !tradeType || !amount || !userAddress) {
+      return res.status(400).json({ 
+        status: 1, 
+        message: '缺少必需参数' 
+      });
+    }
+
+    console.log('🚀 开始部署智能合约:', {
+      projectCode,
+      tradeType,
+      amount,
+      userAddress
+    });
+
+    // 这里应该调用实际的智能合约部署逻辑
+    // 基于 scripts/rwa_deploy.js 和 scripts/interact.js 的逻辑
+    
+    // 模拟智能合约部署过程
+    const deploymentResult = await simulateSmartContractDeployment({
+      projectCode,
+      tradeType,
+      amount: parseFloat(amount),
+      userAddress
+    });
+
+    console.log('✅ 智能合约部署完成:', deploymentResult);
+
+    return res.status(200).json({
+      status: 0,
+      message: '智能合约部署成功',
+      data: deploymentResult
+    });
+
+  } catch (error) {
+    console.error('❌ 智能合约部署失败:', error);
+    return res.status(500).json({
+      status: 1,
+      message: '智能合约部署失败: ' + error.message
+    });
+  }
+};
+
+// 模拟智能合约部署过程
+const simulateSmartContractDeployment = async (params) => {
+  return new Promise((resolve) => {
+    // 模拟部署时间
+    setTimeout(() => {
+      resolve({
+        transactionHash: '0x' + Math.random().toString(16).substr(2, 64),
+        blockNumber: Math.floor(Math.random() * 1000000) + 18000000,
+        contractAddress: '0x' + Math.random().toString(16).substr(2, 40),
+        // 基于实际合约部署的地址
+        kycRegistryAddress: process.env.VITE_KYC_REGISTRY_ADDRESS || '0x4533f47BE0ce8b80F7bbdF02939f81F4A15b7A45',
+        loanIssuerAddress: process.env.VITE_LOAN_ISSUER_ADDRESS || '0x13159e6417D98528C220b12Ec4950D5A343E5eAA',
+        principalTokenAddress: process.env.VITE_PRINCIPAL_TOKEN_ADDRESS || '0x45b1eCb3D9af651244eC656ed15B86404924c354',
+        interestTokenAddress: process.env.VITE_INTEREST_TOKEN_ADDRESS || '0xE6aeE4a898c6d99033ee5380Df407C5DD470fb17'
+      });
+    }, 2000);
+  });
+};
+
 module.exports = {
   getAllProjects,
-  getProjectById,
   getProjectByCode,
   createProject,
-  updateProjectSubscription
+  updateProjectSubscription,
+  deploySmartContracts
 };

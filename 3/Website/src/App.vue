@@ -22,6 +22,7 @@ import WalletView from './views/core/WalletView.vue'
 import kycService from './components/kycService.vue'
 import AppFooter from './components/AppFooter.vue'
 import DetailPage from './views/core/DetailPage.vue'
+import DeployContract from './components/DeployContract.vue'
 
 export default {
   name: 'App',
@@ -36,7 +37,8 @@ export default {
     WalletView, 
     PortfolioView, 
     kycService, 
-    DetailPage 
+    DetailPage,
+    DeployContract
   },
   data(){
     return { 

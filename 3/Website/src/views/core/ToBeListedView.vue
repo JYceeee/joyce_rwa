@@ -331,11 +331,12 @@
       this.cleanupDatabaseSync()
     },
     watch: {
-      // 监听路由参数变化
+      // 监听路由变化
       '$route'(to, from) {
+        console.log('🔄 ToBeListedView: 路由变化', { to: to.params, from: from.params })
+        // 当路由参数变化时，重新加载数据
         if (to.params.code !== from.params.code) {
-          this.code = to.params.code
-          this.isDetailView = !!this.code
+          this.isDetailView = !!to.params.code
           if (this.isDetailView) {
             this.loadSingleProduct()
           } else {
@@ -344,9 +345,10 @@
         }
       },
       
-      // 监听props变化
+      // 监听props变化（当使用props: true时，路由参数会自动作为props传递）
       code: {
-        handler(newCode) {
+        handler(newCode, oldCode) {
+          console.log('🔄 ToBeListedView: Props代码变化', { newCode, oldCode })
           this.isDetailView = !!newCode
           if (this.isDetailView) {
             this.loadSingleProduct()
@@ -651,8 +653,7 @@
       openDetail(code){
         const product = this.products.find(x => x.code === code)
         try { sessionStorage.setItem('lastProduct', JSON.stringify(product)) } catch(e) {}
-        const projectId = product.project_id || code
-        this.$router.push({ name: 'detail', params: { id: projectId } })
+        this.$router.push({ name: 'detail', params: { code: code } })
       },
       openTrade(code){
         const product = this.products.find(x => x.code === code)

@@ -263,7 +263,7 @@ export const projectAPI = {
 // 用户API接口
 export const userAPI = {
   /**
-   * 获取用户信息
+   * 获取用户信息（从localStorage）
    * @returns {Promise<ApiResponse>} 用户信息
    */
   async getUserInfo(): Promise<ApiResponse> {
@@ -290,6 +290,48 @@ export const userAPI = {
         data: null
       }
     }
+  },
+
+  /**
+   * 从服务器获取用户信息（包含user_id）
+   * @returns {Promise<ApiResponse>} 用户信息
+   */
+  async getUserInfoFromServer(): Promise<ApiResponse> {
+    try {
+      console.log('📊 API: 从服务器获取用户信息')
+      
+      // 获取认证token
+      const token = localStorage.getItem('authToken')
+      if (!token) {
+        throw new Error('未找到认证token')
+      }
+
+      const response = await fetch(getApiUrl('VITE_API_USER_URL', 'http://localhost:3000/user'), {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token
+        }
+      })
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const result = await response.json()
+      console.log('📊 API: 服务器返回用户信息:', result)
+      console.log('🔍 API: user_id字段:', result.data?.user_id)
+      console.log('🔍 API: id字段:', result.data?.id)
+      
+      return result
+    } catch (error) {
+      console.error('❌ API: 从服务器获取用户信息失败:', error)
+      return {
+        status: 1,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        data: null
+      }
+    }
   }
 }
 
@@ -298,7 +340,7 @@ export const login = async (email: string, password: string): Promise<ApiRespons
   try {
     console.log('🔐 API: 用户登录:', email)
     
-    const response = await fetch(getApiUrl('VITE_API_LOGIN_URL', 'http://localhost:3000/api/user/login'), {
+    const response = await fetch(getApiUrl('VITE_API_LOGIN_URL', 'http://localhost:3000/user/login'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -315,7 +357,7 @@ export const login = async (email: string, password: string): Promise<ApiRespons
     
     if (result.status === 0 && result.data) {
       // 存储到localStorage
-      localStorage.setItem('userInfo', JSON.stringify(result.data))
+      localStorage.setItem('userInfo', JSON.stringify(result.data.user))
       localStorage.setItem('authToken', result.data.token)
     }
     
@@ -334,7 +376,7 @@ export const signup = async (userData: any): Promise<ApiResponse> => {
   try {
     console.log('📝 API: 用户注册:', userData)
     
-    const response = await fetch(getApiUrl('VITE_API_REGISTER_URL', 'http://localhost:3000/api/user/reguser'), {
+    const response = await fetch(getApiUrl('VITE_API_REGISTER_URL', 'http://localhost:3000/user/reguser'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -375,9 +417,126 @@ export const productAPI = {
   updateProductSubscription: projectAPI.updateProjectSubscription
 }
 
+// 交易API接口
+export const transactionAPI = {
+  /**
+   * 保存交易历史
+   * @param {Object} transactionData 交易数据
+   * @returns {Promise<ApiResponse>} 保存结果
+   */
+  async saveTransactionHistory(transactionData: any): Promise<ApiResponse> {
+    try {
+      console.log('💾 TransactionAPI: 保存交易历史', transactionData)
+      
+      const response = await fetch(getApiUrl('VITE_API_TRANSACTION_URL', 'http://localhost:3000/api/transaction'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(transactionData)
+      })
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const result = await response.json()
+      console.log('TransactionAPI: 保存交易历史成功:', result)
+      
+      return result
+    } catch (error) {
+      console.error('TransactionAPI: 保存交易历史失败:', error)
+      return {
+        status: 1,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        data: null
+      }
+    }
+  },
+
+  /**
+   * 获取交易历史
+   * @param {Object} params 查询参数
+   * @returns {Promise<ApiResponse>} 交易历史列表
+   */
+  async getTransactionHistory(params: any = {}): Promise<ApiResponse> {
+    try {
+      console.log('📊 TransactionAPI: 获取交易历史', params)
+      
+      // 构建查询参数
+      const queryParams = new URLSearchParams()
+      if (params.userAddress) queryParams.append('userAddress', params.userAddress)
+      if (params.projectCode) queryParams.append('projectCode', params.projectCode)
+      if (params.limit) queryParams.append('limit', params.limit.toString())
+      if (params.offset) queryParams.append('offset', params.offset.toString())
+      
+      const url = `${getApiUrl('VITE_API_TRANSACTION_URL', 'http://localhost:3000/api/transaction')}?${queryParams.toString()}`
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const result = await response.json()
+      console.log('TransactionAPI: 获取交易历史成功:', result)
+      
+      return result
+    } catch (error) {
+      console.error('TransactionAPI: 获取交易历史失败:', error)
+      return {
+        status: 1,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        data: []
+      }
+    }
+  },
+
+  /**
+   * 部署智能合约并处理认购
+   * @param {Object} contractData 合约部署数据
+   * @returns {Promise<ApiResponse>} 部署结果
+   */
+  async deploySmartContracts(contractData: any): Promise<ApiResponse> {
+    try {
+      console.log('TransactionAPI: 部署智能合约', contractData)
+      
+      const response = await fetch(getApiUrl('VITE_API_PROJECT_URL', 'http://localhost:3000/api/project') + '/deploy-contracts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(contractData)
+      })
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const result = await response.json()
+      console.log('TransactionAPI: 部署智能合约成功:', result)
+      
+      return result
+    } catch (error) {
+      console.error('TransactionAPI: 部署智能合约失败:', error)
+      return {
+        status: 1,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        data: null
+      }
+    }
+  }
+}
+
 // 默认导出
 export default {
   projectAPI,
   productAPI, // 向后兼容
-  userAPI
+  userAPI,
+  transactionAPI
 }

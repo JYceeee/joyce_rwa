@@ -651,8 +651,7 @@ export default {
     openDetail(code){
       const product = this.products.find(x => x.code === code)
       try { sessionStorage.setItem('lastProduct', JSON.stringify(product)) } catch(e) {}
-      const projectId = product.project_id || code
-      this.$router.push({ name: 'detail', params: { id: projectId } })
+      this.$router.push({ name: 'detail', params: { code: code } })
     },
     openTrade(code){
       const product = this.products.find(x => x.code === code)

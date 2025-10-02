@@ -104,7 +104,7 @@
       <div v-else-if="projectError" class="error-container"> 
         <div class="error-icon">⚠️</div>
         <h2>Failed to Load Project</h2>
-        <p>{{ projectError }}</p> 
+         <p>{{ projectError }}</p> 
         <button class="btn primary" @click="loadProjectData">Retry</button>
       </div>
       
@@ -123,45 +123,45 @@
           </div>
         </div>
         
-        <!-- 项目指标 -->
-        <div class="project-metrics">
-          <div class="metric-item">
-            <span class="metric-label">LOAN SIZE</span>
+          <!-- 项目指标 -->
+          <div class="project-metrics">
+            <div class="metric-item">
+              <span class="metric-label">LOAN SIZE</span>
             <span class="metric-value">{{ projectData.loanAmount || 'AUD$0' }}</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">EST. YIELD (IRR)</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">EST. YIELD (IRR)</span>
             <span class="metric-value" style="color: #16a34a;">{{ projectData.metrics?.targetLoanYield || 'N/A' }}</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">TERM</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">TERM</span>
             <span class="metric-value">{{ projectData.loanTerm || '12 months' }}</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">PROPERTY VALUE</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">PROPERTY VALUE</span>
             <span class="metric-value">{{ projectData.metrics?.collateralPropertyValue || 'N/A' }}</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">LTV</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">LTV</span>
             <span class="metric-value">{{ projectData.metrics?.loanToValue || 'N/A' }}</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">SUBSCRIPTION PROGRESS</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">SUBSCRIPTION PROGRESS</span>
             <span class="metric-value" style="color: #3b82f6;">{{ projectData.subscriptionProgress || '0%' }}</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">TOTAL OFFERING</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">TOTAL OFFERING</span>
             <span class="metric-value">{{ projectData.totalOffering || 'AUD$0' }}</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">SUBSCRIBED</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">SUBSCRIBED</span>
             <span class="metric-value">{{ projectData.subscribed || 'AUD$0' }}</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">DEFAULT RATE</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">DEFAULT RATE</span>
             <span class="metric-value">{{ projectData.metrics?.defaultRate || 'N/A' }}</span>
+            </div>
           </div>
-        </div>
       </div>
 
       <!-- 认购表单 -->
@@ -184,66 +184,105 @@
               <span class="status-label">网络:</span>
               <span class="status-value">{{ networkLabel }}</span>
             </div>
-          </div>
-        </div>
+            </div>
+            </div>
 
         <!-- 交易表单 -->
         <div class="trade-form">
-          <div class="form-group">
+          <!-- 交易类型显示（不可选择） -->
+          <!-- <div class="form-group">
             <label class="form-label">交易类型</label>
-            <div class="trade-type-selector">
-              <button 
-                :class="['trade-type-btn', { active: tradeType === 'buy' }]"
-                @click="tradeType = 'buy'"
-              >
-                Buy
-              </button>
-              <button 
-                :class="['trade-type-btn', { active: tradeType === 'sell' }]"
-                @click="tradeType = 'sell'"
-              >
-                Sell
-              </button>
-            </div>
+            <div class="trade-type-display">
+              <div :class="['trade-type-indicator', tradeType]">
+                {{ tradeType === 'buy' ? '认购代币' : '赎回利息' }}
           </div>
+        </div>
+          </div> -->
 
           <div class="form-group">
             <label class="form-label">数量 (Tokens)</label>
             <input 
               v-model="tradeAmount"
-              type="number"
+              type="number" 
               class="form-input"
               placeholder="输入交易数量"
               min="0"
               step="0.01"
             />
-          </div>
+        </div>
 
-          <div class="form-group">
-            <label class="form-label">总金额</label>
-            <div class="amount-display">
-              <span class="amount-value">{{ calculateTotalAmount() }}</span>
-              <span class="amount-currency">AUD</span>
-            </div>
-          </div>
-
-          <div class="form-actions">
-            <button 
-              class="btn primary trade-btn"
-              @click="executeTrade"
-              :disabled="!canExecuteTrade"
-            >
-              {{ tradeType === 'buy' ? 'Buy Tokens' : 'Sell Tokens' }}
-            </button>
+          <!-- 交易摘要 -->
+          <div v-if="tradeAmount && parseFloat(tradeAmount) > 0" class="subscription-summary">
+            <div class="summary-header">
+              <h3 class="summary-title">{{ tradeType === 'buy' ? '认购摘要' : '赎回摘要' }}</h3>
+              <div class="summary-badge" :class="tradeType">
+                {{ tradeType === 'buy' ? '认购' : '赎回利息' }}
           </div>
         </div>
+
+            <div class="summary-content">
+              <div class="summary-row">
+                <span class="summary-label">项目代码:</span>
+                <span class="summary-value">{{ projectData?.code || 'N/A' }}</span>
+      </div>
+
+              <div class="summary-row">
+                <span class="summary-label">交易类型:</span>
+                <span class="summary-value">{{ tradeType === 'buy' ? '认购代币' : '赎回利息' }}</span>
+        </div> 
+
+              <div class="summary-row">
+                <span class="summary-label">代币数量:</span>
+                <span class="summary-value">{{ formatNumber(tradeAmount) }} Tokens</span>
+      </div>
+
+              <div class="summary-row">
+                <span class="summary-label">年化收益率:</span>
+                <span class="summary-value">{{ projectData?.interestRate || 'N/A' }}%</span>
+      </div>
+
+              <div class="summary-row">
+                <span class="summary-label">预期收益:</span>
+                <span class="summary-value">{{ calculateExpectedReturn() }}</span>
+      </div>
+          
+              <div class="summary-row">
+                <span class="summary-label">贷款期限:</span>
+                <span class="summary-value">{{ projectData?.loanTerm || 'N/A' }}</span>
+        </div>
+        </div>
+
+            <div class="summary-footer">
+              <div class="risk-warning">
+                <div class="warning-icon">⚠️</div>
+                <div class="warning-text">
+                  <p>投资有风险，请仔细阅读项目详情并评估风险承受能力。</p>
+        </div>
+          </div>
+          </div>
+              </div>
+
+         <!-- 认购按钮 -->
+        <div class="form-actions">
+            <button 
+            class="btn primary trade-btn"
+            @click="deployContractsWithSubscription"
+            :disabled="!connected || !isFormValid || loading"
+            >
+            <span class="btn-text">
+                {{ loading ? 'Processing...' : (tradeType === 'buy' ? '确认认购' : '确认赎回') }}
+                  </span>
+            </button>
+                </div>
+          
+                </div>
+                </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script>
-import { productAPI } from '@/service/api'
+import { productAPI, transactionAPI, userAPI } from '@/service/api'
 import { useWallet } from '@/composables/useWallet'
 
 export default {
@@ -304,10 +343,23 @@ export default {
     // 是否可以执行交易
     canExecuteTrade() {
       return this.connected && this.tradeAmount && parseFloat(this.tradeAmount) > 0 && !this.loading
+    },
+    
+    // 表单是否有效
+    isFormValid() {
+      return this.connected && 
+             this.tradeAmount && 
+             parseFloat(this.tradeAmount) > 0 && 
+             this.projectData &&
+             this.projectCode
     }
   },
   async mounted() {
     console.log('🚀 TradeProjectView: 组件挂载，开始初始化...')
+    
+    // 根据query参数初始化交易类型
+    this.initializeTradeType()
+    
     await this.loadProjectData()
     console.log('✅ TradeProjectView: 组件初始化完成')
   },
@@ -332,6 +384,22 @@ export default {
     }
   },
   methods: {
+    // 初始化交易类型
+    initializeTradeType() {
+      const queryType = this.$route.query.type
+      const isInterest = this.$route.query.interest === 'true'
+      
+      console.log('🔍 TradeProjectView: 初始化交易类型', { queryType, isInterest })
+      
+      if (queryType === 'sell' || isInterest) {
+        this.tradeType = 'sell'
+        console.log('📉 TradeProjectView: 设置为赎回利息模式')
+        } else {
+        this.tradeType = 'buy'
+        console.log('📈 TradeProjectView: 设置为认购代币模式')
+      }
+    },
+
     async loadProjectData() {
       try {
         this.projectLoading = true
@@ -432,9 +500,206 @@ export default {
       if (isNaN(amount)) return '0.00'
       
       // 这里可以根据实际需求计算价格
-      const pricePerToken = 1.00 // 假设每个代币1澳元
-      const total = amount * pricePerToken
+    //   const pricePerToken = 1.00 // 假设每个代币1澳元
+      const total = amount 
       return total.toFixed(2)
+    },
+    
+    // 格式化数字显示
+    formatNumber(value) {
+      if (!value) return '0'
+      const num = parseFloat(value)
+      if (isNaN(num)) return '0'
+      return num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+    },
+    
+    // 获取代币价格
+    getTokenPrice() {
+      // 这里可以根据实际需求获取代币价格
+      return 'AUD$1.00'
+    },
+    
+    // 计算预期收益
+    calculateExpectedReturn() {
+      if (!this.tradeAmount || !this.projectData?.interestRate) return 'AUD$0.00'
+      
+      const amount = parseFloat(this.tradeAmount)
+      const interestRate = parseFloat(this.projectData.interestRate)
+      
+      if (isNaN(amount) || isNaN(interestRate)) return 'AUD$0.00'
+      
+      // 计算年化收益
+      const annualReturn = amount * (interestRate / 100)
+      
+      // 根据贷款期限计算实际收益
+      const loanTermMonths = this.extractLoanTermMonths()
+      const actualReturn = annualReturn * (loanTermMonths / 12)
+      
+      return `AUD$${actualReturn.toFixed(2)}`
+    },
+    
+    // 提取贷款期限（月数）
+    extractLoanTermMonths() {
+      if (!this.projectData?.loanTerm) return 12
+      
+      const termStr = this.projectData.loanTerm.toString()
+      const match = termStr.match(/(\d+)/)
+      return match ? parseInt(match[1]) : 12
+    },
+    
+    // 部署合约并处理认购
+    async deployContractsWithSubscription() {
+      if (!this.isFormValid) {
+        console.warn('⚠️ TradeProjectView: 表单验证失败，无法执行交易')
+        return
+      }
+      
+      try {
+        this.loading = true
+        this.showLoadingModal = true
+        this.loadingStatus = '准备交易...'
+        
+        console.log('🚀 TradeProjectView: 开始部署合约和处理认购', {
+        projectCode: this.projectCode,
+          tradeType: this.tradeType,
+            amount: this.tradeAmount,
+          userAddress: this.address
+        })
+        
+        // 1. 部署智能合约
+        this.loadingStatus = '部署智能合约...'
+        const contractResult = await this.deploySmartContracts()
+        
+        // 2. 提取交易信息
+        this.loadingStatus = '提取交易信息...'
+        const transactionInfo = await this.extractTransactionInfo(contractResult)
+        
+        // 3. 保存交易信息到数据库
+        this.loadingStatus = '保存交易记录...'
+        await this.saveTransactionToDatabase(transactionInfo)
+        
+        // 4. 显示成功结果
+        this.loadingStatus = '交易完成!'
+          this.showSuccessModal = true
+          this.successData = {
+            tradeType: this.tradeType,
+          amount: this.tradeAmount,
+          transactionHash: transactionInfo.transaction_hash,
+          blockNumber: transactionInfo.block_number
+        }
+        
+        console.log('✅ TradeProjectView: 合约部署和认购处理完成')
+        
+      } catch (error) {
+        console.error('❌ TradeProjectView: 合约部署失败:', error)
+        this.error = error.message || '交易失败，请重试'
+        alert(`交易失败: ${this.error}`)
+      } finally {
+        this.loading = false
+        this.showLoadingModal = false
+      }
+    },
+    
+    // 部署智能合约
+    async deploySmartContracts() {
+      try {
+        console.log('🚀 TradeProjectView: 调用后端部署智能合约API')
+        
+        const contractData = {
+          projectCode: this.projectCode,
+          tradeType: this.tradeType,
+          amount: parseFloat(this.tradeAmount),
+          userAddress: this.address
+        }
+        
+        console.log('📤 TradeProjectView: 发送合约部署数据:', contractData)
+        
+        // 调用后端API部署智能合约
+        const response = await transactionAPI.deploySmartContracts(contractData)
+        
+        if (response.status === 0) {
+          console.log('✅ TradeProjectView: 智能合约部署成功:', response.data)
+          return response.data
+        } else {
+          throw new Error(response.message || '智能合约部署失败')
+        }
+        
+      } catch (error) {
+        console.error('❌ TradeProjectView: 智能合约部署失败:', error)
+        throw new Error('智能合约部署失败: ' + error.message)
+      }
+    },
+    
+    // 提取交易信息
+    async extractTransactionInfo(contractResult) {
+      const { address } = useWallet()
+      
+      return {
+        user_id: null, // 需要从用户认证系统获取
+        network_type: 'ethereum',
+        user_wallet_address: address.value,
+        project_code: this.projectCode,
+        purchase_amount: parseFloat(this.tradeAmount),
+        trade_type: this.tradeType,
+        transaction_hash: contractResult.transactionHash,
+        block_number: contractResult.blockNumber,
+        trade_timestamp: new Date().toISOString(),
+        // 从智能合约部署结果中获取
+        trade_contract_abi: null,
+        compliant_erc20_abi: null,
+        token_address_native: contractResult.principalTokenAddress || null,
+        token_address_interest: contractResult.interestTokenAddress || null,
+        loan_issuer_wallet_address: contractResult.loanIssuerAddress || null
+      }
+    },
+    
+    // 保存交易信息到数据库
+    async saveTransactionToDatabase(transactionInfo) {
+      try {
+        console.log('💾 TradeProjectView: 保存交易信息到数据库:', transactionInfo)
+        
+        // 获取用户ID
+        let userId = null
+        try {
+          const userResponse = await userAPI.getUserInfoFromServer()
+          if (userResponse.status === 0 && userResponse.data) {
+            userId = userResponse.data.user_id
+            console.log('✅ TradeProjectView: 获取到用户ID:', userId)
+          } else {
+            console.warn('⚠️ TradeProjectView: 无法获取用户ID，将使用null')
+          }
+        } catch (error) {
+          console.warn('⚠️ TradeProjectView: 获取用户ID失败:', error.message)
+        }
+        
+        // 准备发送给后端的数据格式
+        const transactionData = {
+          projectCode: transactionInfo.project_code,
+          tradeType: transactionInfo.trade_type,
+          amount: transactionInfo.purchase_amount,
+          price: 1.0, // 假设每个代币1澳元
+          total: transactionInfo.purchase_amount * 1.0,
+          userAddress: transactionInfo.user_wallet_address,
+          transactionHash: transactionInfo.transaction_hash,
+          blockNumber: transactionInfo.block_number,
+          userId: userId // 添加用户ID字段
+        }
+        
+        console.log('📤 TradeProjectView: 发送交易数据:', transactionData)
+        
+        // 调用后端API保存交易历史
+        const response = await transactionAPI.saveTransactionHistory(transactionData)
+        
+        if (response.status === 0) {
+          console.log('✅ TradeProjectView: 交易信息保存成功:', response.data)
+        } else {
+          throw new Error(response.message || '保存交易信息失败')
+        }
+        
+      } catch (error) {
+        console.error('❌ TradeProjectView: 保存交易信息失败:', error)
+        throw new Error('保存交易信息失败: ' + error.message)
+      }
     },
     
     // 执行交易
@@ -450,15 +715,15 @@ export default {
         await new Promise(resolve => setTimeout(resolve, 2000))
         
         // 模拟成功交易
-        this.successData = {
+          this.successData = {
           tradeType: this.tradeType,
-          amount: this.tradeAmount,
+            amount: this.tradeAmount,
           transactionHash: '0x' + Math.random().toString(16).substr(2, 64),
           blockNumber: Math.floor(Math.random() * 1000000) + 1000000
         }
         
         this.showLoadingModal = false
-        this.showSuccessModal = true
+          this.showSuccessModal = true
         
         console.log('✅ TradeProjectView: 交易执行成功:', this.successData)
       } catch (error) {
@@ -485,7 +750,7 @@ export default {
       navigator.clipboard.writeText(this.successData.transactionHash)
       // 可以添加提示
     },
-    
+
     // 格式化哈希值
     formatHash(hash) {
       if (!hash) return ''
@@ -757,12 +1022,117 @@ export default {
   gap: 20px;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+/* 认购摘要样式 */
+.subscription-summary {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 1px solid #374151;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #374151;
+}
+
+.summary-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.summary-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-badge.buy {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+}
+
+.summary-badge.sell {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #ffffff;
+}
+
+.summary-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.summary-label {
+  font-size: 14px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.summary-value {
+  font-size: 14px;
+  color: #ffffff;
+  font-weight: 600;
+  text-align: right;
+}
+
+.summary-value.amount {
+  color: #10b981;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.summary-footer {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #374151;
+}
+
+.risk-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.warning-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.warning-text p {
+  margin: 0;
+  font-size: 13px;
+  color: #fbbf24;
+  line-height: 1.4;
+}
+
+.form-group {
+  display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
 .form-label {
   font-size: 14px;
   font-weight: 600;
@@ -799,6 +1169,36 @@ export default {
 
 .trade-type-btn.active:hover {
   background: #2563eb;
+}
+
+/* 交易类型显示 */
+.trade-type-display {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.trade-type-indicator {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 120px;
+}
+
+.trade-type-indicator.buy {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.trade-type-indicator.sell {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
 /* 输入框 */
@@ -886,9 +1286,9 @@ export default {
 .trade-btn {
   width: 100%;
   padding: 16px;
-  font-size: 16px;
-}
-
+    font-size: 16px;
+  }
+  
 /* 弹窗样式 */
 .modal-overlay {
   position: fixed;
@@ -1092,24 +1492,24 @@ export default {
   
   .project-header {
     flex-direction: column;
-    text-align: center;
-  }
-  
+  text-align: center;
+}
+
   .project-metrics {
     grid-template-columns: 1fr;
   }
   
   .form-header {
-    flex-direction: column;
+  flex-direction: column;
     align-items: stretch;
   }
   
   .wallet-status-inline {
-    justify-content: center;
+  justify-content: center;
   }
   
   .success-actions {
-    flex-direction: column;
+  flex-direction: column;
   }
 }
 </style>

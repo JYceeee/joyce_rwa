@@ -112,17 +112,18 @@
         </a>
         <nav class="menu" aria-label="Primary">
           <a href="#" @click.prevent="go('/home')" class="menu-item">Home</a>
-          <a href="#" @click.prevent="go('/listedprojects')" class="menu-item">Listed Projects</a>
-          <a href="#" @click.prevent="go('/to-be-listed')" class="menu-item">To be listed</a>
+          <a href="#" @click.prevent="go('/about')" class="menu-item">About Us</a>
+          <a href="#" @click.prevent="go('/listedprojects')" class="menu-item">Listed RWA</a>
+          <a href="#" @click.prevent="go('/to-be-listed')" class="menu-item">To be listed RWA</a>
           <!-- <a href="#" @click.prevent="go('/admin-projects')" class="menu-item">Admin Projects</a> -->
-          <a href="#" @click.prevent="go('/portfolio')" class="menu-item">Portfolio</a>
-          <div class="dropdown-container">
+          <!-- <a href="#" @click.prevent="go('/portfolio')" class="menu-item">My Portfolio</a> -->
+          <!-- <div class="dropdown-container">
             <a href="#" class="menu-item more-link" @click.prevent="toggleMoreDropdown">More ▾</a>
             <div v-if="moreDropdownOpen" class="dropdown-menu">
               <a href="#" @click.prevent="go('/overview')" class="dropdown-item">Overview</a>
               <a href="#" @click.prevent="go('/about')" class="dropdown-item">About Us</a>
             </div>
-          </div>
+          </div> -->
         </nav>
         
         <!-- 移动端汉堡菜单按钮 -->
@@ -206,60 +207,30 @@
           <!-- <span class="mobile-menu-icon">🏠</span> -->
           <span>Home</span>
         </a>
+        <a href="#" @click.prevent="go('/about')" class="mobile-menu-item">
+          <!-- <span class="mobile-menu-icon">🏢</span> -->
+          <span>About Us</span>
+        </a>
         <a href="#" @click.prevent="go('/listedprojects')" class="mobile-menu-item">
           <!-- <span class="mobile-menu-icon">📊</span> -->
-          <span>Listed Projects</span>
+          <span>Listed RWA</span>
         </a>
         <a href="#" @click.prevent="go('/to-be-listed')" class="mobile-menu-item">
           <!-- <span class="mobile-menu-icon">⏳</span> -->
-          <span>To be listed</span>
+          <span>To be listed RWA</span>
         </a>
         <!-- <a href="#" @click.prevent="go('/admin-projects')" class="mobile-menu-item">
           <span class="mobile-menu-icon">⚙️</span>
           <span>Admin Projects</span>
         </a> -->
-        <a href="#" @click.prevent="go('/portfolio')" class="mobile-menu-item">
+        <!-- <a href="#" @click.prevent="go('/portfolio')" class="mobile-menu-item"> -->
           <!-- <span class="mobile-menu-icon">💼</span> -->
-          <span>Portfolio</span>
-        </a>
-        <div class="mobile-menu-divider"></div>
-        <a href="#" @click.prevent="go('/overview')" class="mobile-menu-item">
-          <!-- <span class="mobile-menu-icon">📋</span> -->
+          <!-- <span>My Portfolio</span> -->
+        <!-- </a> -->
+        <!-- <a href="#" @click.prevent="go('/overview')" class="mobile-menu-item"> 
+          <span class="mobile-menu-icon">📋</span> 
           <span>Overview</span>
-        </a>
-        <a href="#" @click.prevent="go('/about')" class="mobile-menu-item">
-          <!-- <span class="mobile-menu-icon">🏢</span> -->
-          <span>About Us</span>
-        </a>
-        <a href="#" @click.prevent="go('/contact')" class="mobile-menu-item">
-          <!-- <span class="mobile-menu-icon">📞</span> -->
-          <span>Contact Us</span>
-        </a>
-        <!-- <a href="#" @click.prevent="go('/solutions')" class="mobile-menu-item">
-          <span class="mobile-menu-icon">🔧</span>
-          <span>Solutions</span>
-        </a>
-        <a href="#" @click.prevent="go('/tutorials')" class="mobile-menu-item">
-          <span class="mobile-menu-icon">📚</span>
-          <span>Tutorials</span>
-        </a>
-        <a href="#" @click.prevent="go('/pricing')" class="mobile-menu-item">
-          <span class="mobile-menu-icon">💰</span>
-          <span>Pricing</span>
-        </a>
-        <a href="#" @click.prevent="go('/contact')" class="mobile-menu-item">
-          <span class="mobile-menu-icon">📞</span>
-          <span>Contact</span>
-        </a>
-        <a href="#" @click.prevent="go('/faq')" class="mobile-menu-item">
-          <span class="mobile-menu-icon">❓</span>
-          <span>FAQ</span>
-        </a>
-        <div class="mobile-menu-divider"></div>
-        <a href="#" @click.prevent="go('/test/contract-deployment-verification')" class="mobile-menu-item test-link">
-          <span class="mobile-menu-icon">🔍</span>
-          <span>合约部署验证</span>
-        </a> -->
+        </a>-->
       </div>
     </div>
     

@@ -21,6 +21,9 @@ userRouter.post('/send-email-code', expressJoi(email_verification_schema), userR
 //验证邮箱验证码
 userRouter.post('/verify-email-code', expressJoi(email_verification_schema), userRouterHandler.verifyEmailCode)
 
+//获取用户信息
+userRouter.get('/', userRouterHandler.getUserInfo)
+
 //交易历史相关路由
 userRouter.post('/transactionhistory', userRouterHandler.saveTransactionHistory)
 userRouter.get('/transactionhistory', userRouterHandler.getTransactionHistory)

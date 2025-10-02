@@ -220,7 +220,7 @@ import { useDatabaseSync } from '@/service/dataSyncService.js'
 export default {
   name: 'DetailPage',
   props: {
-    id: {
+    code: {
       type: String,
       default: null
     }
@@ -249,16 +249,17 @@ export default {
   watch: {
     // 监听路由参数变化
     '$route'(to, from) {
-      if (to.params.id !== from.params.id) {
-        this.id = to.params.id
+      console.log('🔄 DetailPage: 路由变化', { to: to.params, from: from.params })
+      if (to.params.code !== from.params.code) {
         this.loadProjectData()
       }
     },
     
     // 监听props变化
-    id: {
-      handler(newId) {
-        if (newId) {
+    code: {
+      handler(newCode, oldCode) {
+        console.log('🔄 DetailPage: Props代码变化', { newCode, oldCode })
+        if (newCode) {
           this.loadProjectData()
         }
       },
@@ -272,39 +273,31 @@ export default {
         this.loading = true
         this.error = null
         
-        // 从路由参数获取项目ID
-        const projectId = this.id || this.$route.params.id || this.$route.query.id
+        // 从路由参数获取项目代码
+        const projectCode = this.code || this.$route.params.code || this.$route.query.code
         
-        if (!projectId) {
-          this.error = 'No project ID provided'
+        if (!projectCode) {
+          this.error = 'No project code provided'
           return
         }
 
-        console.log('🔄 DetailPage: Loading project data for ID:', projectId)
+        console.log('🔄 DetailPage: Loading project data for code:', projectCode)
         
         // 尝试通过不同的方式获取项目数据
         let response = null
         
-        // 方法1: 尝试通过code获取
-        if (projectId && typeof projectId === 'string' && projectId.length > 0) {
+        // 通过代码获取项目数据
+        if (projectCode && typeof projectCode === 'string' && projectCode.length > 0) {
           try {
-            response = await productAPI.getProductByCode(projectId)
+            response = await productAPI.getProductByCode(projectCode)
             console.log('📡 DetailPage: API response via code:', response)
           } catch (error) {
-            console.warn('⚠️ DetailPage: Failed to get by code, trying other methods:', error)
+            console.error('❌ DetailPage: Failed to get project by code:', error)
+            this.error = 'Failed to load project data'
+            return
           }
         }
         
-        // 方法2: 如果通过code失败，尝试通过ID获取
-        if (!response || response.status !== 0) {
-          try {
-            response = await productAPI.getProductById(projectId)
-            console.log('📡 DetailPage: API response via ID:', response)
-          } catch (error) {
-            console.warn('⚠️ DetailPage: Failed to get by ID:', error)
-          }
-        }
-
         if (response && response.status === 0) {
           // 映射数据库字段到前端期望的字段名
           const rawData = response.data

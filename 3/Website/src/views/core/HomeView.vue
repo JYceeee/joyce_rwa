@@ -107,10 +107,10 @@
       <!-- Two Column Layout -->
       <div class="contact-layout">
         <!-- Left Column: Contact Information -->
-        <div class="contact-info-column">
+        <!-- <div class="contact-info-column">
           <div class="contact-info-card">
             <!-- Company Address -->
-            <div class="contact-item">
+            <!-- <div class="contact-item">
               <div class="contact-icon location-icon">
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor"/>
@@ -120,10 +120,10 @@
                 <h4>Office Address</h4>
                 <p>Level 15, 123 George Street<br>Sydney NSW 2000, Australia</p>
               </div>
-            </div>
+            </div> -->
 
             <!-- Email Address -->
-            <div class="contact-item">
+            <!-- <div class="contact-item">
               <div class="contact-icon email-icon">
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" fill="currentColor"/>
@@ -133,10 +133,10 @@
                 <h4>Email Address</h4>
                 <p>support@mortgagerwa.com<br>business@mortgagerwa.com</p>
               </div>
-            </div>
+            </div> -->
 
             <!-- Phone Number -->
-            <div class="contact-item">
+            <!-- <div class="contact-item">
               <div class="contact-icon phone-icon">
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="currentColor"/>
@@ -146,10 +146,10 @@
                 <h4>Phone Number</h4>
                 <p>+61 2 1234 5678<br>Monday to Friday 9:00-18:00</p>
               </div>
-            </div>
+            </div> -->
 
             <!-- Business Hours -->
-            <div class="contact-item">
+            <!-- <div class="contact-item">
               <div class="contact-icon hours-icon">
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" fill="currentColor"/>
@@ -161,8 +161,8 @@
                 <p>Monday - Friday: 9:00 AM - 6:00 PM<br>Saturday: 10:00 AM - 2:00 PM</p>
               </div>
             </div>
-          </div>
-        </div>
+          </div> 
+        </div> -->
 
         <!-- Right Column: Contact Form -->
         <div class="contact-form-column">
@@ -2309,6 +2309,9 @@ export default {
 .contact-form-column {
   display: flex;
   flex-direction: column;
+  width: 1000px;
+  margin-left: 60px;
+  margin-right: 100px;
 }
 
 .contact-form-card {
@@ -2363,6 +2366,22 @@ export default {
   border-color: #141426;
   background: rgba(255, 255, 255, 0.08);
   box-shadow: 0 0 0 3px rgba(20, 20, 38, 0.3);
+}
+
+/* 下拉菜单选项样式 - 深色主题 */
+.form-group select option {
+  background: #1a1a2e !important;
+  color: #ffffff !important;
+  padding: 12px 16px;
+  border: none;
+}
+
+.form-group select option:hover {
+  background: #16213e !important;
+}
+
+.form-group select option:checked {
+  background: #141426 !important;
 }
 
 .form-group textarea {

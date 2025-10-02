@@ -682,7 +682,7 @@
                 <p class="pf-empty-hint">Complete some trades in the Trade page to see your transaction history</p>
               </div>
                 <div v-else>
-                 <div v-for="transaction in filteredTransactions" :key="transaction.id" class="pf-transaction-item" @click="viewContract(transaction)">
+                 <div v-for="transaction in filteredTransactions" :key="transaction.id" class="pf-transaction-item">
                     <div class="pf-transaction-icon" :class="transaction.type">
                       {{ transaction.type === 'buy' ? '📈' : '📉' }}
                   </div>
@@ -691,12 +691,12 @@
                       {{ transaction.type.toUpperCase() }} {{ transaction.amount }} {{ transaction.projectCode }}
                     </div>
                     <div class="pf-transaction-subtitle">
-                      {{ transaction.projectName }}
+                      Project: {{ transaction.projectCode }}
                     </div>
                   </div>
                   <div class="pf-transaction-value">
                     <div class="pf-transaction-time">{{ formatTime(transaction.timestamp) }}</div>
-                    <div class="pf-transaction-price">AUD${{ transaction.amount}}</div>
+                    <div class="pf-transaction-price">Amount: {{ transaction.amount }}</div>
                   </div>
                 </div>
               </div>
@@ -713,7 +713,7 @@
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useWallet } from '/src/composables/useWallet'
 import { useRouter } from 'vue-router'
-import { productAPI } from '@/service/api'
+import { productAPI, transactionAPI } from '@/service/api'
 import { useDatabaseSync } from '@/service/dataSyncService.js'
 
 const router = useRouter()
@@ -774,6 +774,9 @@ const filterType = ref('')
 const filterProject = ref('')
 const accGroupOpen = ref(true)
 const selectedAccount = ref('')
+
+// API交易数据
+const apiTransactions = ref([]) // 从API获取的交易数据
 
 // 移动端状态管理
 const mobileSidebarOpen = ref(false)
@@ -969,7 +972,7 @@ function getStatusText(status) {
 
 // 导航到项目详情
 function goToProjectDetail(code) {
-  router.push({ name: 'detail', params: { id: code } })
+  router.push({ name: 'detail', params: { code: code } })
 }
 
 // 导航到交易页面
@@ -1128,30 +1131,25 @@ const projectsError = ref(null)
 
 // 计算属性
 const filteredTransactions = computed(() => {
-  // 从WalletView获取交易活动数据
-  const walletActivity = getWalletActivityData()
-  
-  // 筛选出transaction activity（buy/sell类型）
-  let filtered = walletActivity.filter(activity => 
-    activity.type === 'buy' || activity.type === 'sell'
-  )
+  // 使用从API获取的交易数据
+  let filtered = [...apiTransactions.value]
   
   // 如果没有交易数据，返回空数组
   if (filtered.length === 0) {
-    console.log('📊 PortfolioView: 没有找到交易活动数据')
+    console.log('📊 PortfolioView: 没有找到API交易数据')
     return []
   }
   
   // 转换数据格式以匹配模板需求
-  filtered = filtered.map(activity => ({
-    id: activity.id || Date.now() + Math.random(),
-    type: activity.type,
-    projectCode: activity.project_code || activity.projectCode,
-    projectName: activity.project_name || 'Unknown Project',
-    amount: activity.amount || 0,
-    price: activity.price || 1.00,
-    timestamp: activity.timestamp || Date.now(),
-    userAddress: activity.user_address || selectedAccount.value
+  filtered = filtered.map(transaction => ({
+    id: transaction.id || Date.now() + Math.random(),
+    type: transaction.trade_type === 'BUY_TOKEN' ? 'buy' : 'sell',
+    projectCode: transaction.project_code,
+    projectName: 'Unknown Project', // API只返回project_code，不返回项目名称
+    amount: transaction.purchase_amount,
+    price: 1.00, // API不返回价格信息
+    timestamp: new Date(transaction.created_at).getTime(),
+    userAddress: selectedAccount.value
   }))
   
   // 应用筛选器
@@ -1980,22 +1978,43 @@ const refreshPortfolio = async () => {
   // })
 }
 
+// 从API获取交易数据
+const loadTransactionsFromAPI = async () => {
+  try {
+    console.log('📊 PortfolioView: 从API获取交易数据...')
+    
+    const params = {
+      userAddress: selectedAccount.value,
+      limit: 100,
+      offset: 0
+    }
+    
+    const response = await transactionAPI.getTransactionHistory(params)
+    
+    if (response.status === 0) {
+      apiTransactions.value = response.data || []
+      console.log('✅ PortfolioView: 成功获取', apiTransactions.value.length, '条交易记录')
+    } else {
+      console.error('❌ PortfolioView: 获取交易数据失败:', response.message)
+      apiTransactions.value = []
+    }
+    
+  } catch (error) {
+    console.error('❌ PortfolioView: 获取交易数据异常:', error)
+    apiTransactions.value = []
+  }
+}
+
 // 刷新交易数据
 const refreshTransactions = async () => {
   loadingTransactions.value = true
   try {
     console.log('🔄 PortfolioView: 刷新交易数据...')
     
-    // 从WalletView重新获取交易数据
-    const walletActivity = getWalletActivityData()
-    const transactionActivities = walletActivity.filter(activity => 
-      activity.type === 'buy' || activity.type === 'sell'
-    )
+    // 从API获取交易数据
+    await loadTransactionsFromAPI()
     
-    console.log('📊 PortfolioView: 获取到', transactionActivities.length, '条交易记录')
-    
-    // 触发响应式更新
-    // Vue的响应式系统会自动更新filteredTransactions计算属性
+    console.log('📊 PortfolioView: 获取到', apiTransactions.value.length, '条交易记录')
     
   } catch (error) {
     console.error('❌ PortfolioView: 刷新交易数据失败:', error)
@@ -2486,6 +2505,9 @@ onMounted(async () => {
   if (accounts.value.length > 0) {
     selectedAccount.value = accounts.value[0].address
   }
+  
+  // 加载交易数据
+  await loadTransactionsFromAPI()
   refreshTransactionData()
   
   // 每30秒更新一次价格
