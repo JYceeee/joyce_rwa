@@ -634,12 +634,14 @@ export default {
         console.log('⏹️ 停止自动刷新')
       }
     },
+
     formatCurrency(value) {
       if (!value) return null
       const num = parseFloat(value)
       if (isNaN(num)) return value
       return `AUD$${num.toLocaleString()}`
     },
+
     resetFilters(){ this.filters = { q: '', type: '', risk: '', status: '', minYield: 0, maxYield: 20 } },
     
     // 监听筛选器变化
@@ -648,14 +650,17 @@ export default {
       // 强制重新计算筛选结果
       this.$forceUpdate()
     },
+
     openDetail(code){
       const product = this.products.find(x => x.code === code)
       try { sessionStorage.setItem('lastProduct', JSON.stringify(product)) } catch(e) {}
       const projectId = product.project_id || code
       this.$router.push({ name: 'detail', params: { id: projectId } })
     },
+
     openTrade(code){
-      const product = this.products.find(x => x.code === code)
+      // 在列表视图中从products数组查找，在详情视图中使用currentProduct
+      const product = this.isDetailView ? this.currentProduct : this.products.find(x => x.code === code)
       try { sessionStorage.setItem('lastProduct', JSON.stringify(product)) } catch(e) {}
       this.$router.push({ name: 'tradeProject', params: { code } })
     },
