@@ -70,7 +70,7 @@
           
           <div class="success-actions">
             <button class="btn secondary" @click="closeSuccessModal">Close</button>
-            <button class="btn primary" @click="viewPortfolio">View Portfolio</button>
+            <!-- <button class="btn primary" @click="viewPortfolio">View Portfolio</button> -->
           </div>
         </div>
       </div>
