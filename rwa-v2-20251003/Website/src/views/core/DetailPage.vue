@@ -237,6 +237,7 @@ export default {
       unsubscribeNewProjects: null
     }
   },
+  
   async mounted() {
     await this.loadProjectData()
     this.setupDatabaseSync()
