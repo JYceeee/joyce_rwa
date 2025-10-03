@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据加载测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .project-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f9f9f9;
+        }
+        .project-header {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .project-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .detail-item {
+            background: white;
+            padding: 8px;
+            border-radius: 4px;
+            border-left: 3px solid #007bff;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        .detail-value {
+            color: #333;
+            margin-top: 4px;
+        }
+        .active { border-left-color: #28a745; }
+        .incoming { border-left-color: #ffc107; }
+        .completed { border-left-color: #6c757d; }
+        .performing { border-left-color: #17a2b8; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>RWA项目数据加载测试</h1>
+        
+        <div class="status info">
+            <strong>测试说明：</strong> 此页面用于测试前端是否能正确从后端API获取和显示项目数据。
+        </div>
+        
+        <div>
+            <button onclick="loadData()" id="loadBtn">加载数据</button>
+            <button onclick="clearData()" id="clearBtn">清除数据</button>
+        </div>
+        
+        <div id="status"></div>
+        <div id="data"></div>
+    </div>
+
+    <script>
+        let projects = [];
+        
+        async function loadData() {
+            const statusDiv = document.getElementById('status');
+            const dataDiv = document.getElementById('data');
+            const loadBtn = document.getElementById('loadBtn');
+            
+            loadBtn.disabled = true;
+            loadBtn.textContent = '加载中...';
+            
+            statusDiv.innerHTML = '<div class="status info">正在从后端API加载数据...</div>';
+            dataDiv.innerHTML = '';
+            
+            try {
+                console.log('开始加载项目数据...');
+                
+                const response = await fetch('http://localhost:3000/api/project', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                
+                console.log('API响应状态:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('API返回数据:', result);
+                
+                if (result.status === 0 && result.data) {
+                    projects = result.data;
+                    
+                    statusDiv.innerHTML = `<div class="status success">
+                        <strong>数据加载成功！</strong><br>
+                        共获取到 ${projects.length} 个项目<br>
+                        ACTIVE状态项目: ${projects.filter(p => p.status === 'ACTIVE').length} 个<br>
+                        INCOMING状态项目: ${projects.filter(p => p.status === 'INCOMING').length} 个
+                    </div>`;
+                    
+                    displayProjects();
+                } else {
+                    throw new Error(result.message || 'API返回错误状态');
+                }
+                
+            } catch (error) {
+                console.error('加载数据失败:', error);
+                statusDiv.innerHTML = `<div class="status error">
+                    <strong>数据加载失败！</strong><br>
+                    错误信息: ${error.message}
+                </div>`;
+            } finally {
+                loadBtn.disabled = false;
+                loadBtn.textContent = '加载数据';
+            }
+        }
+        
+        function displayProjects() {
+            const dataDiv = document.getElementById('data');
+            
+            if (projects.length === 0) {
+                dataDiv.innerHTML = '<div class="status info">没有项目数据</div>';
+                return;
+            }
+            
+            let html = '<h2>项目列表</h2>';
+            
+            projects.forEach(project => {
+                const statusClass = project.status.toLowerCase();
+                
+                html += `
+                    <div class="project-card">
+                        <div class="project-header">
+                            ${project.code} - ${project.name}
+                            <span style="float: right; padding: 4px 8px; border-radius: 12px; font-size: 12px; background: ${getStatusColor(project.status)}; color: white;">
+                                ${project.status}
+                            </span>
+                        </div>
+                        
+                        <div class="project-details">
+                            <div class="detail-item ${statusClass}">
+                                <div class="detail-label">项目类型</div>
+                                <div class="detail-value">${project.propertyType || 'N/A'}</div>
+                            </div>
+                            <div class="detail-item ${statusClass}">
+                                <div class="detail-label">物业位置</div>
+                                <div class="detail-value">${project.propertyLocation || 'N/A'}</div>
+                            </div>
+                            <div class="detail-item ${statusClass}">
+                                <div class="detail-label">贷款金额</div>
+                                <div class="detail-value">AUD$${parseFloat(project.loanAmount || 0).toLocaleString()}</div>
+                            </div>
+                            <div class="detail-item ${statusClass}">
+                                <div class="detail-label">利率</div>
+                                <div class="detail-value">${project.interestRate || 'N/A'}%</div>
+                            </div>
+                            <div class="detail-item ${statusClass}">
+                                <div class="detail-label">总发行量</div>
+                                <div class="detail-value">AUD$${parseFloat(project.total_offering_token || 0).toLocaleString()}</div>
+                            </div>
+                            <div class="detail-item ${statusClass}">
+                                <div class="detail-label">已认购</div>
+                                <div class="detail-value">AUD$${parseFloat(project.subscribe_token || 0).toLocaleString()}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            dataDiv.innerHTML = html;
+        }
+        
+        function getStatusColor(status) {
+            switch(status) {
+                case 'ACTIVE': return '#28a745';
+                case 'INCOMING': return '#ffc107';
+                case 'PERFORMING': return '#17a2b8';
+                case 'COMPLETED': return '#6c757d';
+                default: return '#6c757d';
+            }
+        }
+        
+        function clearData() {
+            projects = [];
+            document.getElementById('status').innerHTML = '';
+            document.getElementById('data').innerHTML = '';
+        }
+        
+        // 页面加载时自动加载数据
+        window.addEventListener('load', () => {
+            setTimeout(loadData, 1000);
+        });
+    </script>
+</body>
+</html>
