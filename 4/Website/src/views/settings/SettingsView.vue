@@ -1,8 +1,8 @@
 <template>
   <div class="settings-page">
     <div class="settings-container">
-      <!-- 左侧边栏 -->
-      <div class="settings-sidebar">
+      <!-- 左侧边栏 - 桌面端显示 -->
+      <div class="settings-sidebar desktop-only">
         <div class="sidebar-header">
           <h1 class="sidebar-title">设置</h1>
         </div>
@@ -22,14 +22,22 @@
 
       <!-- 右侧主内容区 -->
       <div class="settings-main">
-        <div class="main-header">
+        <div class="main-header desktop-only">
           <h2 class="main-title">{{ getActiveSectionTitle() }}</h2>
           <p class="main-subtitle">{{ getActiveSectionDescription() }}</p>
         </div>
         
+        <!-- 移动端标题 -->
+        <div class="main-header mobile-only">
+          <h2 class="main-title">设置</h2>
+          <p class="main-subtitle">管理您的应用程序设置</p>
+        </div>
+        
         <div class="main-content">
-          <!-- General Settings -->
-          <div v-if="activeSection === 'general'" class="settings-section">
+          <!-- 桌面端：显示当前激活的section -->
+          <div class="desktop-only">
+            <!-- General Settings -->
+            <div v-if="activeSection === 'general'" class="settings-section">
             <div class="settings-items">
             <div class="settings-item">
               <div class="settings-info">
@@ -40,8 +48,6 @@
                 <select class="settings-select">
                   <option value="en">英语</option>
                   <option value="zh">中文</option>
-                  <option value="ja">日本語</option>
-                  <option value="ko">한국어</option>
                 </select>
               </div>
             </div>
@@ -436,12 +442,188 @@
             </div>
             </div>
           </div>
+          </div>
+
+          <!-- 移动端：显示所有section -->
+          <div class="mobile-only">
+            <!-- General Settings -->
+            <div class="settings-section mobile-section">
+              <div class="section-header">
+                <h3 class="section-title">常规设置</h3>
+                <p class="section-description">基本应用程序设置和偏好</p>
+              </div>
+              <div class="settings-items">
+                <div class="settings-item">
+                  <div class="settings-info">
+                    <h3 class="settings-name">语言</h3>
+                    <p class="settings-description">选择您偏好的语言</p>
+                  </div>
+                  <div class="settings-control">
+                    <select class="settings-select">
+                      <option value="en">英语</option>
+                      <option value="zh">中文</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="settings-item">
+                  <div class="settings-info">
+                    <h3 class="settings-name">主题</h3>
+                    <p class="settings-description">选择您偏好的主题</p>
+                  </div>
+                  <div class="settings-control">
+                    <select class="settings-select">
+                      <option value="dark">深色</option>
+                      <option value="light">浅色</option>
+                      <option value="auto">自动</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="settings-item">
+                  <div class="settings-info">
+                    <h3 class="settings-name">时区</h3>
+                    <p class="settings-description">设置您的本地时区</p>
+                  </div>
+                  <div class="settings-control">
+                    <select class="settings-select">
+                      <option value="UTC">UTC</option>
+                      <option value="EST">东部时间</option>
+                      <option value="PST">太平洋时间</option>
+                      <option value="CST">中国标准时间</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="settings-item">
+                  <div class="settings-info">
+                    <h3 class="settings-name">开场视频</h3>
+                    <p class="settings-description">重新观看网站开场视频</p>
+                  </div>
+                  <div class="settings-control">
+                    <button class="btn btn-secondary" @click="watchIntroVideo">观看开场视频</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Security Settings -->
+            <div class="settings-section mobile-section">
+              <div class="section-header">
+                <h3 class="section-title">安全设置</h3>
+                <p class="section-description">保护您的账户安全</p>
+              </div>
+              <div class="settings-items">
+                <div class="settings-item">
+                  <div class="settings-info">
+                    <h3 class="settings-name">密码</h3>
+                    <p class="settings-description">更改您的账户密码</p>
+                  </div>
+                  <div class="settings-control">
+                    <button class="btn btn-secondary">更改密码</button>
+                  </div>
+                </div>
+
+                <div class="settings-item">
+                  <div class="settings-info">
+                    <h3 class="settings-name">会话超时</h3>
+                    <p class="settings-description">设置自动登出时间</p>
+                  </div>
+                  <div class="settings-control">
+                    <select class="settings-select">
+                      <option value="15">15分钟</option>
+                      <option value="30">30分钟</option>
+                      <option value="60">1小时</option>
+                      <option value="480">8小时</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="settings-item">
+                  <div class="settings-info">
+                    <h3 class="settings-name">登录提醒</h3>
+                    <p class="settings-description">接收新登录尝试的通知</p>
+                  </div>
+                  <div class="settings-control">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Wallet Settings -->
+            <div class="settings-section mobile-section">
+              <div class="section-header">
+                <h3 class="section-title">钱包设置</h3>
+                <p class="section-description">管理您的钱包连接</p>
+              </div>
+              <div class="settings-items">
+                <div class="settings-item">
+                  <div class="settings-info">
+                    <h3 class="settings-name">连接钱包</h3>
+                    <p class="settings-description">连接或断开您的钱包</p>
+                  </div>
+                  <div class="settings-control">
+                    <button class="btn btn-primary">连接钱包</button>
+                  </div>
+                </div>
+
+                <div class="settings-item">
+                  <div class="settings-info">
+                    <h3 class="settings-name">钱包地址</h3>
+                    <p class="settings-description">查看您的钱包地址</p>
+                  </div>
+                  <div class="settings-control">
+                    <button class="btn btn-secondary">查看地址</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Notification Settings -->
+            <div class="settings-section mobile-section">
+              <div class="section-header">
+                <h3 class="section-title">通知设置</h3>
+                <p class="section-description">管理您的通知偏好</p>
+              </div>
+              <div class="settings-items">
+                <div class="settings-item">
+                  <div class="settings-info">
+                    <h3 class="settings-name">邮件通知</h3>
+                    <p class="settings-description">接收邮件通知</p>
+                  </div>
+                  <div class="settings-control">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="settings-item">
+                  <div class="settings-info">
+                    <h3 class="settings-name">推送通知</h3>
+                    <p class="settings-description">接收浏览器推送通知</p>
+                  </div>
+                  <div class="settings-control">
+                    <label class="toggle-switch">
+                      <input type="checkbox">
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- 页面操作按钮 -->
         <div class="page-actions">
-          <button class="btn btn-primary" @click="saveSettings">Save Settings</button>
-          <button class="btn btn-secondary" @click="resetSettings">Reset to Default</button>
+          <button class="btn btn-primary" @click="saveSettings">保存设置</button>
+          <button class="btn btn-secondary" @click="resetSettings">重置</button>
         </div>
       </div>
     </div>
@@ -862,7 +1044,26 @@ input:checked + .toggle-slider:before {
   }
 }
 
+/* 桌面端和移动端显示控制 */
+.desktop-only {
+  display: block;
+}
+
+.mobile-only {
+  display: none;
+}
+
 @media (max-width: 768px) {
+  /* 移动端隐藏桌面端内容 */
+  .desktop-only {
+    display: none;
+  }
+  
+  /* 移动端显示移动端内容 */
+  .mobile-only {
+    display: block;
+  }
+
   .settings-container {
     padding: 0 16px;
   }
@@ -902,6 +1103,34 @@ input:checked + .toggle-slider:before {
   .page-actions {
     flex-direction: column;
     gap: 12px;
+  }
+
+  /* 移动端section样式 */
+  .mobile-section {
+    margin-bottom: 32px;
+    padding: 20px;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+
+  .section-header {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0 0 8px 0;
+  }
+
+  .section-description {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
   }
 }
 

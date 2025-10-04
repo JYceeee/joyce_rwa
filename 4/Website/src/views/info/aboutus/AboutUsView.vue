@@ -62,7 +62,7 @@
 
   <div class="container" :class="{ 'fade-in': !showIntroVideo && !isTransitioning }">
     <div class="page-header">
-      <h1>About Us</h1>
+      <h1>关于我们</h1>
       <!-- <p class="page-subtitle">Innovative technology company dedicated to revolutionizing real estate investment</p> -->
     </div>
 

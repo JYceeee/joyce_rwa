@@ -92,7 +92,7 @@
 
       <!-- Social Media Section -->
       <div class="social-media-section">
-        <h3>Follow Us</h3>
+        <h3>关注我们</h3>
         <div class="social-links">
           <a href="#" class="social-link" title="LinkedIn">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -7,7 +7,7 @@
           <svg viewBox="0 0 24 24" class="i"><path d="M10 19a1 1 0 0 1-.7-.3l-7-7a1 1 0 0 1 0-1.4l7-7a1 1 0 1 1 1.4 1.4L4.41 11H21a1 1 0 1 1 0 2H4.41l6.3 6.3A1 1 0 0 1 10 19z"/></svg>
         </button>
         <span class="sep">/</span>
-        <span class="crumb-current">Profile</span>
+        <span class="crumb-current">个人中心</span>
       </nav>
     </header>
       
@@ -28,38 +28,38 @@
     <div class="user-contact-info">
       <!--email and phone-->
       <div>
-        <label class="label">Personal Information <span class="req"></span></label>
+        <label class="label">个人信息 <span class="req"></span></label>
         <div class="contact-item">
           <!-- <span class="contact-icon">📧</span> -->
-          <span class="contact-label">Email:</span>
+          <span class="contact-label">邮箱:</span>
           <span class="contact-value">
             {{ userEmail || 'Not provided' }}
           </span>
           <span class="email-status" :class="emailVerificationClass"> &nbsp; {{ emailVerificationText }}</span>
           <button v-if="!emailVerified" class="btn-small" type="button" @click="sendEmailVerification">
-            Verify Email
+            验证邮箱
           </button>
         </div>
         <div class="contact-item">
           <!-- <span class="contact-icon">📱</span> -->
-          <span class="contact-label">Phone:</span>
+          <span class="contact-label">手机号:</span>
           <span class="contact-value">
             {{ userPhone || 'Not provided' }}
           </span>
-          <button class="btn-small" type="button" >Change my phone number</button>
+          <button class="btn-small" type="button" >修改手机号</button>
         </div>
         <div class="contact-item">
-          <span class="contact-label">Password:</span>
-          <button class="btn-small" type="button" >Change my password</button>
+          <span class="contact-label">密码:</span>
+          <button class="btn-small" type="button" >修改密码</button>
         </div>
         <div v-if="userLoading" class="contact-item loading-item">
           <span class="contact-icon">🔄</span>
-          <span class="contact-label">Status:</span>
-          <span class="contact-value">Loading user information...</span>
+          <span class="contact-label">状态:</span>
+          <span class="contact-value">加载用户信息...</span>
         </div>
         <div v-if="userError && !userLoading" class="contact-item error-item">
           <span class="contact-icon">⚠️</span>
-          <span class="contact-label">Status:</span>
+          <span class="contact-label">状态:</span>
           <span class="contact-value">{{ userError }}</span>
         </div>
       </div>
@@ -68,21 +68,21 @@
       <div v-if="showEmailModal" class="modal-mask">
         <div class="modal-wrapper">
           <div class="modal-container">
-            <h2 style="margin-bottom:8px;">Check Your Email</h2>
+            <h2 style="margin-bottom:8px;">检查您的邮箱</h2>
             <p>Verify your email address to use your account.<br>
-            We sent an email with a button to verify your email address.<br>
-            Did you receive the email? If not, check your spam folder or request a new verification email for up to 3 days.<br>
-            If you do not verify your email address within 3 days, you will need to create a new account.<br>
-            If you are having trouble, see Account Help.</p>
+            我们发送了一封带有验证按钮的邮件到您的邮箱。<br>
+            您收到了邮件吗？如果没有，请检查您的垃圾邮件文件夹或请求新的验证邮件，有效期为3天。<br>
+            如果您在3天内未验证您的邮箱地址，您将需要创建一个新账户。<br>
+            如果您遇到问题，请参阅账户帮助。</p>
             <div style="margin-top:12px; display:flex; flex-wrap:wrap; gap:10px;">
-              <a href="#" style="color:#ea7a2e; text-decoration:underline;">Account Help</a>
-              <a href="#" style="color:#ea7a2e; text-decoration:underline;">Subscriptions</a>
-              <a href="#" style="color:#ea7a2e; text-decoration:underline;">Unsubscribe</a>
-              <a href="#" style="color:#ea7a2e; text-decoration:underline;">Privacy / Do Not Sell My Info</a>
-              <a href="#" style="color:#ea7a2e; text-decoration:underline;">Cookie Preferences</a>
+              <a href="#" style="color:#ea7a2e; text-decoration:underline;">账户帮助</a>
+              <a href="#" style="color:#ea7a2e; text-decoration:underline;">订阅</a>
+              <a href="#" style="color:#ea7a2e; text-decoration:underline;">取消订阅</a>
+              <a href="#" style="color:#ea7a2e; text-decoration:underline;">隐私 / 不卖我的信息</a>
+              <a href="#" style="color:#ea7a2e; text-decoration:underline;">Cookie 偏好</a>
             </div>
             <div style="margin-top:18px; text-align:right;">
-              <button class="btn orange" @click="showEmailModal=false">OK</button>
+              <button class="btn orange" @click="showEmailModal=false">确定</button>
             </div>
           </div>
         </div>
@@ -91,25 +91,25 @@
     
     <!-- KYC & Whitelist Status Section -->
     <div class="status-section">
-      <h3 class="status-title">Account Status</h3>
+      <h3 class="status-title">账户状态</h3>
       <!-- KYC -->
       <div class="field">
-        <label class="label">KYC verification <span class="req">*</span></label>
+        <label class="label">KYC 验证 <span class="req">*</span></label>
         <div class="kyc-banner" :class="isVerified ? 'green' : 'orange'" role="status">
           <span class="icon">
             <svg viewBox="0 0 24 24" class="i">
               <path d="M12 2 2 7l10 5 10-5-10-5Zm0 7L2 4v13l10 5 10-5V4L12 9Zm0 9.5-7-3.5V9l7 3.5V20.5Z"/>
             </svg>
           </span>
-          <span v-if="!isVerified">Verify now</span>
+          <span v-if="!isVerified">立即验证</span>
           <span v-else class="verified">
             <svg viewBox="0 0 24 24" class="i"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
             <!-- Verified -->{{ kycLevelText }}
             <!-- <span class="level-badge" :class="kycLevelClass"> {{ kycLevelText }}</span> -->
           </span>
           <!-- 右侧按钮：未验证=Start；已验证=Cancel -->
-          <button v-if="!isVerified" class="link" type="button" @click="verifyKYC">Start</button>
-          <button v-else class="link danger" type="button" @click="cancelKYC">Cancel verification</button>
+          <button v-if="!isVerified" class="link" type="button" @click="verifyKYC">开始</button>
+          <button v-else class="link danger" type="button" @click="cancelKYC">取消验证</button>
         </div>
       </div>
 
@@ -125,7 +125,7 @@
 
       <!-- Trading Permission -->
       <div class="field">
-        <label class="label">Trading Permission <span class="req"></span></label>
+        <label class="label">交易权限 <span class="req"></span></label>
         <div class="kyc-banner" :class="isVerified ? 'green' : 'orange'" role="status">
           <span class="icon">
             <svg viewBox="0 0 24 24" class="i">
@@ -140,18 +140,18 @@
                   </li></span>
           <span class="permission-badge" :class="tradingPermissionClass">{{ tradingPermissionText }}</span>
           <!-- 右侧按钮：未验证=Start；已验证=Cancel -->
-          <button v-if="!isVerified" class="link" type="button" @click="verifyKYC">Start</button>
-          <button v-else class="link danger" type="button" @click="cancelKYC">Cancel verification</button>
+          <button v-if="!isVerified" class="link" type="button" @click="verifyKYC">开始</button>
+          <button v-else class="link danger" type="button" @click="cancelKYC">取消验证</button>
         </div>
       </div>
     </div>
   
     <!-- 底部按钮 -->
     <div class="actions bottom">
-      <button class="btn light" type="button" @click="onCancel">Cancel</button>
-      <button class="btn orange" type="submit">Save</button>
+      <button class="btn light" type="button" @click="onCancel">取消</button>
+      <button class="btn orange" type="submit">保存</button>
       <!-- 新增：安全退出 -->
-      <button class="btn light" type="button" @click="logout" style="margin-left:auto;">Log out</button>
+      <button class="btn light" type="button" @click="logout" style="margin-left:auto;">安全退出</button>
     </div>
     </form>
 
@@ -316,42 +316,42 @@ export default {
     // Email验证状态
     emailVerificationText() {
       if (this.emailVerified) {
-        return 'Verified'
+        return '已验证'
       } else if (this.emailCodeSent) {
-        return 'Verification Sent'
+        return '验证已发送'
       } else {
-        return 'Not Verified'
+        return '未验证'
       }
     },
     
     emailVerificationIcon() {
       if (this.emailVerified) {
-        return '✅'
+        return '已验证'
       } else if (this.emailCodeSent) {
-        return '📧'
+        return '验证已发送'
       } else {
-        return '❌'
+        return '未验证'
       }
     },
     
     emailVerificationClass() {
       if (this.emailVerified) {
-        return 'email-verified'
+        return '邮箱已验证'
       } else if (this.emailCodeSent) {
-        return 'email-pending'
+        return '邮箱验证已发送'
       } else {
-        return 'email-unverified'
+        return '邮箱未验证'
       }
     },
     
     // KYC等级显示
     kycLevelText() {
       switch(this.kycLevel) {
-        case KYC_LEVELS.LEVEL_0: return 'Level 0 (Unverified)'
-        case KYC_LEVELS.LEVEL_1: return 'Level 1 (Basic)'
-        case KYC_LEVELS.LEVEL_2: return 'Level 2 (Advanced)'
-        case KYC_LEVELS.LEVEL_3: return 'Level 3 (Premium)'
-        default: return 'Unknown'
+        case KYC_LEVELS.LEVEL_0: return 'Level 0 (未验证)'
+        case KYC_LEVELS.LEVEL_1: return 'Level 1 (基础)'
+        case KYC_LEVELS.LEVEL_2: return 'Level 2 (高级)'
+        case KYC_LEVELS.LEVEL_3: return 'Level 3 (高级)'
+        default: return '未知'
       }
     },
     
@@ -368,53 +368,53 @@ export default {
     // 白名单状态显示
     whitelistStatusText() {
       switch(this.whitelistStatus) {
-        case 'approved': return 'Approved'
-        case 'pending': return 'Pending Review'
-        case 'rejected': return 'Not Qualified for Transaction'
-        case 'none': return 'Not Applied'
-        default: return 'Unknown'
+        case 'approved': return '同意'
+        case 'pending': return '待审核'
+        case 'rejected': return '不符合交易资格'
+        case 'none': return '未申请'
+        default: return '未知'
       }
     },
     
     whitelistStatusClass() {
       switch(this.whitelistStatus) {
-        case 'approved': return 'status-approved'
-        case 'pending': return 'status-pending'
-        case 'rejected': return 'status-rejected'
-        case 'none': return 'status-none'
-        default: return 'status-unknown'
+        case 'approved': return '同意'
+        case 'pending': return '待审核'
+        case 'rejected': return '不符合交易资格'
+        case 'none': return '未申请'
+        default: return '未知'
       }
     },
     
     // 交易权限显示
     tradingPermissionText() {
       if (this.kycLevel >= KYC_LEVELS.LEVEL_2 && this.whitelistStatus === 'approved') {
-        return 'Full Access'
+        return '全访问'
       } else if (this.kycLevel >= KYC_LEVELS.LEVEL_2) {
-        return 'Limited Access'
+        return '有限访问'
       } else {
-        return 'No Access'
+        return '无访问'
       }
     },
     
     tradingPermissionClass() {
       if (this.kycLevel >= KYC_LEVELS.LEVEL_2 && this.whitelistStatus === 'approved') {
-        return 'permission-full'
+        return '全访问'
       } else if (this.kycLevel >= KYC_LEVELS.LEVEL_2) {
-        return 'permission-limited'
+        return '有限访问'
       } else {
-        return 'permission-none'
+        return '无访问'
       }
     },
     
     // 交易权限详细描述
     tradingPermissionDescription() {
       if (this.kycLevel >= KYC_LEVELS.LEVEL_2 && this.whitelistStatus === 'approved') {
-        return 'Complete trading access to all RWA products and features'
+        return '完全交易访问所有RWA产品和功能'
       } else if (this.kycLevel >= KYC_LEVELS.LEVEL_2) {
-        return 'Limited trading access - whitelist approval required for full access'
+        return '有限交易访问 - 白名单批准要求完全访问'
       } else {
-        return 'Trading access requires KYC verification and whitelist approval'
+        return '交易访问需要KYC验证和白名单批准'
       }
     },
     
@@ -424,23 +424,23 @@ export default {
       
       // KYC要求
       if (this.kycLevel < KYC_LEVELS.LEVEL_2) {
-        requirements.push('Complete KYC verification (Level 2+)')
+        // requirements.push('完全KYC验证 (Level 2+)')
       }
       
       // 白名单要求
       if (this.whitelistStatus !== 'approved') {
         if (this.whitelistStatus === 'none') {
-          requirements.push('Apply for whitelist approval')
+          requirements.push('申请白名单批准')
         } else if (this.whitelistStatus === 'pending') {
-          requirements.push('Wait for whitelist approval')
+          requirements.push('待审核')
         } else if (this.whitelistStatus === 'rejected') {
-          requirements.push('Reapply for whitelist approval')
+          requirements.push('重新申请白名单批准')
         }
       }
       
       // 其他要求（如果有的话）
       if (this.kycLevel >= KYC_LEVELS.LEVEL_2 && this.whitelistStatus === 'approved') {
-        requirements.push('All requirements met')
+        requirements.push('所有要求满足')
       }
       
       return requirements

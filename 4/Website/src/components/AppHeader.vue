@@ -3,8 +3,8 @@
   <div v-if="showLinkWalletModal" class="modal-mask">
     <div class="modal-wrapper">
       <div class="modal-container">
-        <h2 style="margin-bottom:8px;color:#ffffff;">Link New Wallet</h2>
-        <p style="color:#ffffff;">Select a MetaMask account to link to your profile:</p>
+        <h2 style="margin-bottom:8px;color:#ffffff;">连接钱包</h2>
+        <p style="color:#ffffff;">选择一个MetaMask账户来连接到您的个人资料:</p>
         
         <!-- 账户选择列表 - 图片样式 -->
         <div v-if="availableAccounts.length > 0" class="account-grid">
@@ -29,7 +29,7 @@
             
             <!-- 账户信息 -->
             <div class="account-details">
-              <div class="account-name">Account {{ index + 1 }}</div>
+              <div class="account-name">账户 {{ index + 1 }}</div>
               <div class="account-address">{{ formatAddress(account) }}</div>
               <div class="account-balance" v-if="accountBalances[account]">
                 {{ accountBalances[account] }} ETH
@@ -49,17 +49,17 @@
         <!-- 加载状态 -->
         <div v-if="loadingAccounts" class="loading-accounts">
           <div class="loading-spinner"></div>
-          <span>Loading accounts...</span>
+          <span>加载账户...</span>
         </div>
         
         <!-- 无账户状态 -->
         <div v-if="!loadingAccounts && availableAccounts.length === 0" class="no-accounts">
-          <p>No additional accounts found in MetaMask.</p>
-          <p>Please add more accounts in MetaMask and try again.</p>
+          <p>没有找到MetaMask中的其他账户。</p>
+          <p>请在MetaMask中添加更多账户并重试。</p>
         </div>
         
         <div style="text-align:right;margin-top:20px;">
-          <button class="mm-btn mm-outline" @click="showLinkWalletModal=false">Cancel</button>
+          <button class="mm-btn mm-outline" @click="showLinkWalletModal=false">取消</button>
           <button 
             v-if="availableAccounts.length > 0" 
             class="mm-btn mm-primary" 
@@ -67,7 +67,7 @@
             @click="linkSelectedAccount"
             :disabled="selectedAccountIndex === -1"
           >
-            Link Selected Account
+            连接选定的账户
           </button>
         </div>
       </div>
@@ -78,14 +78,14 @@
   <div v-if="showDisconnectModal" class="modal-mask">
     <div class="modal-wrapper">
       <div class="modal-container">
-        <h2 style="margin-bottom:8px;color:#ffffff;">Disconnect Wallet</h2>
-        <p style="color:#ffffff;">Are you sure you want to disconnect this wallet?</p>
+        <h2 style="margin-bottom:8px;color:#ffffff;">断开钱包</h2>
+        <p style="color:#ffffff;">您确定要断开这个钱包吗？</p>
         <div>
           <span style="display:block;font-size:15px;padding:8px 0;color:#ffffff;background:#2a2a4a;border-radius:8px;">{{ fullAddress }}</span>
         </div>
         <div style="text-align:right;">
-          <button class="mm-btn mm-outline" @click="showDisconnectModal=false">Cancel</button>
-          <button class="mm-btn mm-outline" style="margin-left:8px;" @click="confirmDisconnect">Confirm</button>
+          <button class="mm-btn mm-outline" @click="showDisconnectModal=false">取消</button>
+          <button class="mm-btn mm-outline" style="margin-left:8px;" @click="confirmDisconnect">确认</button>
         </div>
       </div>
     </div>
@@ -95,10 +95,10 @@
   <div v-if="showDisconnectSuccess" class="modal-mask">
     <div class="modal-wrapper">
       <div class="modal-container">
-        <h2 style="margin-bottom:8px;color:#ffffff;">Wallet Disconnected</h2>
+        <h2 style="margin-bottom:8px;color:#ffffff;">钱包已断开</h2>
         <p style="color:#ffffff;">{{ disconnectSuccessMsg }}</p>
         <div style="text-align:right;">
-          <button class="mm-btn mm-outline" @click="showDisconnectSuccess=false">Confirm</button>
+          <button class="mm-btn mm-outline" @click="showDisconnectSuccess=false">确认</button>
         </div>
       </div>
     </div>
@@ -181,25 +181,25 @@
     <!-- 移动端菜单 -->
     <div v-if="mobileMenuOpen" class="mobile-menu">
       <div class="mobile-menu-content">
-        <a href="#" @click.prevent="go('/home')" class="mobile-menu-item">
-          <!-- <span class="mobile-menu-icon">🏠</span> -->
+        <!-- <a href="#" @click.prevent="go('/home')" class="mobile-menu-item">
+          <span class="mobile-menu-icon">🏠</span> 
           <span>Home</span>
-        </a>
+        </a> -->
         <a href="#" @click.prevent="go('/about')" class="mobile-menu-item">
           <!-- <span class="mobile-menu-icon">🏢</span> -->
-          <span>About Us</span>
+          <span>关于我们</span>
         </a>
         <a href="#" @click.prevent="go('/listedprojects')" class="mobile-menu-item">
           <!-- <span class="mobile-menu-icon">📊</span> -->
-          <span>Listed RWA</span>
+          <span>已上链RWA</span>
         </a>
         <a href="#" @click.prevent="go('/to-be-listed')" class="mobile-menu-item">
           <!-- <span class="mobile-menu-icon">⏳</span> -->
-          <span>To be listed RWA</span>
+          <span>待上链RWA</span>
         </a>
         <a href="#" @click.prevent="goToContactUs" class="mobile-menu-item">
           <!-- <span class="mobile-menu-icon">📞</span> -->
-          <span>Contact Us</span>
+          <span>联系我们</span>
         </a>
         <!-- <a href="#" @click.prevent="go('/portfolio')" class="mobile-menu-item">
           <span>My Portfolio</span>
