@@ -354,12 +354,12 @@
           </div> -->
 
           <div class="form-group">
-            <label class="form-label">数量 (Tokens)</label>
+            <label class="form-label">Amount (Tokens)</label>
             <input 
               v-model="tradeAmount"
               type="number" 
               class="form-input"
-              placeholder="输入交易数量"
+              placeholder="Enter amount"
               min="0"
               step="0.01"
             />
@@ -376,32 +376,32 @@
 
             <div class="summary-content">
               <div class="summary-row">
-                <span class="summary-label">项目代码:</span>
+                <span class="summary-label">Project Code:</span>
                 <span class="summary-value">{{ projectData?.code || 'N/A' }}</span>
       </div>
 
               <div class="summary-row">
-                <span class="summary-label">交易类型:</span>
+                <span class="summary-label">Trade Type:</span>
                 <span class="summary-value">{{ tradeType === 'buy' ? '认购代币' : '赎回利息' }}</span>
         </div> 
 
               <div class="summary-row">
-                <span class="summary-label">代币数量:</span>
+                <span class="summary-label">Token Amount:</span>
                 <span class="summary-value">{{ formatNumber(tradeAmount) }} Tokens</span>
       </div>
 
               <div class="summary-row">
-                <span class="summary-label">年化收益率:</span>
+                <span class="summary-label">Annualized Yield:</span>
                 <span class="summary-value">{{ projectData?.interestRate || 'N/A' }}%</span>
       </div>
 
               <div class="summary-row">
-                <span class="summary-label">预期收益:</span>
+                <span class="summary-label">Expected Return:</span>
                 <span class="summary-value">{{ calculateExpectedReturn() }}</span>
       </div>
           
               <div class="summary-row">
-                <span class="summary-label">贷款期限:</span>
+                <span class="summary-label">Loan Term:</span>
                 <span class="summary-value">{{ projectData?.loanTerm || 'N/A' }}</span>
         </div>
         </div>
@@ -410,7 +410,7 @@
               <div class="risk-warning">
                 <div class="warning-icon">⚠️</div>
                 <div class="warning-text">
-                  <p>投资有风险，请仔细阅读项目详情并评估风险承受能力。</p>
+                  <p>Investment is at your own risk. Please read the project details carefully and assess your risk tolerance.</p>
         </div>
           </div>
           </div>
@@ -434,7 +434,7 @@
         </div>
         
         <!-- DETAILS入口：项目最新动态 -->
-        <div v-else-if="projectData.status === 'INCOMING'" class="project-news-card">
+        <div v-else-if="projectData.status === 'ACTIVE' && !isBuyEntry" class="project-news-card">
           <div class="news-header">
             <h2 class="news-title">PROJECT UPDATES</h2>
           </div>
@@ -461,7 +461,7 @@
         </div>
         
         <!-- 非ACTIVE状态提示 (仅BUY入口显示) -->
-        <div v-else class="project-status-card">
+        <!-- <div v-else class="project-status-card">
           <div class="status-header">
             <h2 class="status-title">PROJECT STATUS</h2>
           </div>
@@ -478,7 +478,7 @@
               <button class="btn secondary" @click="openDetail(projectData.code)">VIEW DETAILS</button>
             </div>
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
 </template>
@@ -923,15 +923,7 @@ export default {
         this.loadingStatus = '获取合约地址...'
         const contractAddresses = await this.getExistingContractAddresses()
         
-        // 步骤4: 提取交易信息
-        this.loadingStatus = '提取交易信息...'
-        const transactionInfo = this.extractTransactionInfo(metamaskResult, contractAddresses)
-        
-        // 步骤5: 保存到数据库
-        this.loadingStatus = '保存交易记录...'
-        await this.saveTransactionToDatabase(transactionInfo)
-        
-        // 步骤6: 显示成功结果
+        // 步骤4: 显示成功结果
         this.loadingStatus = '交易完成!'
         this.showSuccessModal = true
         this.successData = {
@@ -1110,79 +1102,6 @@ export default {
       }
     },
     
-    // 提取交易信息
-    extractTransactionInfo(metamaskResult, contractAddresses) {
-      console.log('🔍 TradeProjectView: 提取交易信息:', { metamaskResult, contractAddresses })
-      
-      return {
-        user_wallet_address: this.address,
-        project_code: this.projectCode,
-        purchase_amount: parseFloat(this.tradeAmount),
-        trade_type: this.tradeType,
-        transaction_hash: metamaskResult.transactionHash,
-        block_number: metamaskResult.blockNumber,
-        trade_timestamp: new Date().toISOString(),
-        // 合约信息
-        principal_token_address: contractAddresses.principalTokenAddress,
-        interest_token_address: contractAddresses.interestTokenAddress,
-        kyc_registry_address: contractAddresses.kycRegistryAddress,
-        loan_issuer_address: contractAddresses.loanIssuerAddress
-      }
-    },
-    
-    // 保存交易信息到数据库
-    async saveTransactionToDatabase(transactionInfo) {
-      try {
-        console.log('💾 TradeProjectView: 保存交易信息到数据库:', transactionInfo)
-        
-        // 获取用户ID
-        let userId = null
-        try {
-          const userResponse = await userAPI.getUserInfoFromServer()
-          if (userResponse.status === 0 && userResponse.data) {
-            userId = userResponse.data.user_id
-            console.log('✅ TradeProjectView: 获取到用户ID:', userId)
-          } else {
-            console.warn('⚠️ TradeProjectView: 无法获取用户ID，将使用null')
-          }
-        } catch (error) {
-          console.warn('⚠️ TradeProjectView: 获取用户ID失败:', error.message)
-        }
-        
-        // 准备发送给后端的数据格式
-        const transactionData = {
-          projectCode: transactionInfo.project_code,
-          tradeType: transactionInfo.trade_type,
-          amount: transactionInfo.purchase_amount,
-          price: 1.0, // 假设每个代币1澳元
-          total: transactionInfo.purchase_amount * 1.0,
-          userAddress: transactionInfo.user_wallet_address,
-          transactionHash: transactionInfo.transaction_hash,
-          blockNumber: transactionInfo.block_number,
-          userId: userId,
-          // 合约信息字段
-          principalTokenAddress: transactionInfo.principal_token_address,
-          interestTokenAddress: transactionInfo.interest_token_address,
-          kycRegistryAddress: transactionInfo.kyc_registry_address,
-          loanIssuerAddress: transactionInfo.loan_issuer_address
-        }
-        
-        console.log('📤 TradeProjectView: 发送交易数据:', transactionData)
-        
-        // 调用后端API保存交易历史
-        const response = await transactionAPI.saveTransactionHistory(transactionData)
-        
-        if (response.status === 0) {
-          console.log('✅ TradeProjectView: 交易信息保存成功:', response.data)
-        } else {
-          throw new Error(response.message || '保存交易信息失败')
-        }
-        
-      } catch (error) {
-        console.error('❌ TradeProjectView: 保存交易信息失败:', error)
-        throw new Error('保存交易信息失败: ' + error.message)
-      }
-    },
     
     // 复制到剪贴板
     async copyToClipboard(text) {
