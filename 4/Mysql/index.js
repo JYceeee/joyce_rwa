@@ -1,0 +1,71 @@
+require('dotenv').config()
+const express = require('express')
+const mysql2 = require('mysql2')
+const dbconfig = require('./src/database/dbConfig')
+
+// 引入自定义响应处理模块---res.cc
+const responseHandler = require('./src/middleware/responseHandler')
+
+// 创建数据库连接,应该传入dbconfig的mysql属性
+const mysql = mysql2.createPool(dbconfig.mysql)
+
+// 创建express服务器实例
+const cors = require('cors')
+const app = express()
+
+// 引入joi模块
+const joi = require('joi')
+
+//在路由之前封装res.cc函数(中间件)
+app.use(responseHandler())
+
+// 导入并配置cors中间件
+app.use(cors())
+
+//配置解析表单数据的中间件，注意：这个中间件，只能解析json格式的表单数据(可改为urlencoded形式)
+app.use(express.json())
+app.use(express.urlencoded({ extended: false }))
+
+//在路由解析之前配置解析token的中间件
+const { expressjwt: expressJWT } = require('express-jwt')
+//未启用令牌
+//app.use(expressJWT({ secret: process.env.jwt_SecretKey, algorithms: ['HS256'] }).unless({ path: [/^\/api\/login$/, /^\/api\/reguser$/] }))
+
+//导入路由模块
+const userRouter = require('./src/routers/userRouter')
+const transactionRouter = require('./src/routers/transactionRouter')
+const unifiedProjectRouter = require('./src/routers/unifiedProjectRouter')
+
+// 使用路由模块
+app.use('/user', userRouter)
+app.use('/transaction', transactionRouter)
+app.use('/api', unifiedProjectRouter)
+app.use('/project', unifiedProjectRouter)  // 独立的project路由
+
+// 定义全局错误级别中间件
+app.use((err, req, res, next) => {
+  // 验证失败导致的错误
+  if (err instanceof joi.ValidationError) { console.log('错误信息:' + err); return res.cc(err) }
+  // 捕获身份认证失败的错误
+  if (err.name === 'UnauthorizedError') { console.log('错误信息:' + err); return res.cc('身份认证失败！') }
+  //未知错误
+  res.cc(err + "未知错误")
+})
+
+
+//启动服务器
+const PORT = process.env.VITE_BACKEND_PORT || 3000
+app.listen(PORT, () => { console.log(`服务器${PORT}端口已启动成功`) })
+
+// 测试数据库连接，执行sql语句
+const sqlStr = 'select * from user'
+mysql.query(sqlStr, (err, results) => {
+  if (err) {
+    console.log('数据库连接错误:' + err.message);
+  } else {
+    console.log('数据库连接成功!');
+  }
+});
+
+
+
