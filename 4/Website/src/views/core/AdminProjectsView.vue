@@ -485,8 +485,8 @@ export default {
               status: project.status,
               
               // 认购信息
-              totalOffering: project.total_offering_token ? `AUD$${project.total_offering_token.toLocaleString()}` : 'AUD$0',
-              subscribed: project.subscribe_token ? `AUD$${project.subscribe_token.toLocaleString()}` : 'AUD$0',
+              totalOffering: project.total_offering_token ? `AUD${project.total_offering_token.toLocaleString()}` : 'AUD0',
+              subscribed: project.subscribe_token ? `AUD${project.subscribe_token.toLocaleString()}` : 'AUD0',
               
               // 原始数值用于计算
               totalOfferingRaw: project.total_offering_token || 0,
@@ -518,7 +518,7 @@ export default {
               
               // 前端显示字段
               subtitle: `${project.loanProduct} - ${project.propertyType}`,
-              loanAmount: project.loanAmount ? `AUD$${project.loanAmount.toLocaleString()}` : 'AUD$0',
+              loanAmount: project.loanAmount ? `AUD${project.loanAmount.toLocaleString()}` : 'AUD0',
               loanTerm: `${project.loanTermMonths} months`,
               targetYield: project.interestRate,
               image: project.image || this.getProductImage(project.code)
@@ -527,7 +527,7 @@ export default {
             // 添加计算指标
             mappedProduct.metrics = {
               currentElaraPrice: this.calculateTokenPrice(mappedProduct),
-              collateralPropertyValue: project.propertyValue ? `AUD$${project.propertyValue.toLocaleString()}` : 'TBA',
+              collateralPropertyValue: project.propertyValue ? `AUD${project.propertyValue.toLocaleString()}` : 'TBA',
               rentalIncome: this.calculateRentalIncome(mappedProduct),
               targetLoanYield: `${project.interestRate}% p.a.`
             }
@@ -638,7 +638,7 @@ export default {
       if (!value) return null
       const num = parseFloat(value)
       if (isNaN(num)) return value
-      return `AUD$${num.toLocaleString()}`
+      return `AUD${num.toLocaleString()}`
     },
     resetFilters(){ this.filters = { q: '', type: '', risk: '', status: '', minYield: 0, maxYield: 20 } },
     
@@ -751,7 +751,7 @@ export default {
       const basePrice = 1.00
       const yieldMultiplier = (product.targetYield || 6.0) / 6.0
       const adjustedPrice = basePrice * yieldMultiplier
-      return `AUD$${adjustedPrice.toFixed(2)}`
+      return `AUD${adjustedPrice.toFixed(2)}`
     },
     
     // 计算租金收入
@@ -759,12 +759,12 @@ export default {
       // 基于房产价值和收益率估算租金收入
       if (!product.valuation) return 'TBA'
       
-      const valuationStr = product.valuation.replace(/[AUD$,]/g, '')
+      const valuationStr = product.valuation.replace(/[AUD,]/g, '')
       const valuation = parseFloat(valuationStr)
       const monthlyYield = (product.targetYield || 6.0) / 12 / 100
       const estimatedRental = valuation * monthlyYield
       
-      return `AUD$${estimatedRental.toLocaleString('en-AU', { maximumFractionDigits: 0 })} / month`
+      return `AUD${estimatedRental.toLocaleString('en-AU', { maximumFractionDigits: 0 })} / month`
     },
 
     // 计算认购进度

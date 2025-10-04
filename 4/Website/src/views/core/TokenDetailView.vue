@@ -22,11 +22,6 @@
         <div class="kv"><span class="k">Token import date</span><span class="v">{{ importDate || '-' }}</span></div>
         <div class="kv"><span class="k">Token import source</span><span class="v">{{ importSource || 'metamask' }}</span></div>
       </article>
-
-      <article class="card">
-        <h3>Your activity</h3>
-        <p class="muted">Activity list placeholder.</p>
-      </article>
     </div>
   </section>
 </template>

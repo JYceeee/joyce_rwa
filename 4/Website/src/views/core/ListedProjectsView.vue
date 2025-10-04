@@ -8,7 +8,7 @@
           {{ currentProduct.name }} - {{ currentProduct.code }}
         </template>
         <template v-else>
-          Active Property Loans
+          Property Loans
         </template>
       </h1>
       <p class="subline">
@@ -20,80 +20,6 @@
         </template> -->
       </p>
     </header>
-
-    <!-- 筛选栏 -->
-    <div v-if="!isDetailView" class="filters" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0 6px;">
-      <input v-model="filters.q" class="input" placeholder="Search code/name/subtitle" style="max-width:240px;height:38px" />
-      <select v-model="filters.type" class="input" style="max-width:160px;height:38px">
-        <option value="">All Types</option>
-        <option value="Single House">Single House</option>
-        <option value="Commercial Building">Commercial Building</option>
-        <option value="Unit Development">Unit Development</option>
-        <option value="Residential Land">Residential Land</option>
-        <option value="Mixed Use">Mixed Use</option>
-        <option value="Retail">Retail</option>
-        <option value="Office">Office</option>
-        <option value="Industrial">Industrial</option>
-        <option value="Student Accommodation">Student Accommodation</option>
-      </select>
-      <select v-model="filters.status" class="input" style="max-width:160px;height:38px">
-        <option value="">All Status</option>
-        <option value="ACTIVE">Active</option>
-        <option value="PERFORMING">Performing</option>
-        <option value="COMPLETED">Completed</option>
-        <option value="COMPLETE">Completed</option>
-        <option value="DEFAULT">Default</option>
-      </select>
-      <div class="yield-range-filter">
-        <label class="yield-range-label">EST. YIELD (IRR) Range:</label>
-        <div class="yield-range-container">
-          <div class="yield-range-slider">
-            <input 
-              type="range" 
-              v-model.number="filters.minYield" 
-              :min="0" 
-              :max="filters.maxYield - 0.5" 
-              :step="0.5"
-              @input="onFilterChange"
-              class="yield-slider yield-slider-min"
-            />
-            <input 
-              type="range" 
-              v-model.number="filters.maxYield" 
-              :min="filters.minYield + 0.5" 
-              :max="20" 
-              :step="0.5"
-              @input="onFilterChange"
-              class="yield-slider yield-slider-max"
-            />
-          </div>
-          <div class="yield-range-display">
-            {{ filters.minYield }}% - {{ filters.maxYield }}%
-          </div>
-        </div>
-      </div>
-      <button class="btn" @click="resetFilters">Reset</button>
-    </div>
-    
-    <!-- 筛选结果统计和刷新控制 -->
-    <div v-if="!isDetailView" class="filter-stats" style="margin: 8px 0; color: var(--muted); font-size: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-      <div>
-        Showing {{ filteredProducts.length }} of {{ products.length }} projects
-        <span v-if="hasActiveFilters" style="margin-left: 12px;">
-          <button @click="resetFilters" style="background: none; border: none; color: #3b82f6; text-decoration: underline; cursor: pointer;">
-            Clear filters
-          </button>
-        </span>
-      </div>
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <span v-if="lastRefreshTime" style="font-size: 12px; color: #6b7280;">
-          Last Updated: {{ formatTime(lastRefreshTime) }}
-        </span>
-        <button @click="refreshProducts" :disabled="loading" class="refresh-btn" style="background: #374151; border: 1px solid #4b5563; color: #ffffff; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease;" :style="{ opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer' }">
-          {{ loading ? 'Refreshing...' : 'Refresh Data' }}
-        </button>
-      </div>
-    </div>
 
     <!-- 加载状态 -->
     <div v-if="loading" class="loading-container">
@@ -123,9 +49,6 @@
                   <span class="doc-code">{{ currentProduct.code }}</span>
                   <span class="doc-name">{{ currentProduct.name }}</span>
                 </h2>
-                <div class="status-badge" :class="'status-' + currentProduct.status">
-                  {{ getStatusText(currentProduct.status) }}
-                </div>
               </div>
               <p class="doc-subtitle">{{ currentProduct.subtitle }}</p>
               
@@ -150,42 +73,9 @@
             <span class="progress-text">{{ getProgressPercentage(currentProduct) }}%</span>
           </div>
           <div class="doc-actions">
-            <!-- ACTIVE状态: Buy and Detail -->
-            <template v-if="currentProduct.status === 'ACTIVE'">
-              <a href="#" class="btn small orange" @click.prevent="openTrade(currentProduct.code)">Buy</a>
-              <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">Detail</a>
-            </template>
-            
-            <!-- INCOMING状态: Preview and Join Waitlist -->
-            <template v-else-if="currentProduct.status === 'INCOMING'">
-              <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">Preview</a>
-              <a href="#" class="btn small" @click.prevent="joinWaitlist(currentProduct.code)">Join Waitlist</a>
-            </template>
-            
-            <!-- PERFORMING状态: View Details -->
-            <template v-else-if="currentProduct.status === 'PERFORMING'">
-              <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">View Details</a>
-            </template>
-            
-            <!-- COMPLETED状态: View Details -->
-            <template v-else-if="currentProduct.status === 'COMPLETED'">
-              <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">View Details</a>
-            </template>
-            
-            <!-- COMPLETE状态: View Details -->
-            <template v-else-if="currentProduct.status === 'COMPLETE'">
-              <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">View Details</a>
-            </template>
-            
-            <!-- DEFAULT状态: View Details -->
-            <template v-else-if="currentProduct.status === 'DEFAULT'">
-              <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">View Details</a>
-            </template>
-            
-            <!-- 默认状态: Learn More -->
-            <template v-else>
-              <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">Learn More</a>
-            </template>
+            <!-- 统一显示Buy和Detail按钮 -->
+            <a href="#" class="btn small orange" @click.prevent="openTrade(currentProduct.code)">Learn More & Buy</a>
+            <!-- <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">Detail</a> -->
           </div>
         </div>
       </article>
@@ -203,17 +93,16 @@
          <div class="pf-project-header">
            <img :src="p.image" class="pf-project-image" :alt="p.code" />
            <div class="pf-project-info">
-            
-             <h4 :id="'title-' + p.code">{{ p.code }} • {{ p.name }}</h4>
+             <div class="pf-title-row">
+               <h4 :id="'title-' + p.code">{{ p.code }} • {{ p.name }}</h4>
+               <button class="pf-project-btn pf-project-btn-secondary pf-title-btn" @click="openTrade(p.code)">BUY</button>
+             </div>
              <p>{{ p.subtitle }}</p>
-           </div>
-           <div class="status-badge" :class="'status-' + p.status">
-             {{ getStatusText(p.status) }}
            </div>
          </div>
 
          <!-- 项目指标 -->
-         <div class="pf-project-metrics">
+         <!-- <div class="pf-project-metrics">
            <div class="pf-project-metric">
              <span class="pf-metric-label">LOAN SIZE</span>
              <span class="pf-metric-value">{{ p.loanAmount}}</span>
@@ -226,13 +115,13 @@
              <span class="pf-metric-label">TERM</span>
              <span class="pf-metric-value">{{ p.loanTerm }}</span>
            </div>
-         </div>
+         </div> -->
 
          <!-- 投资进度信息 -->
          <div class="pf-investment-progress">
            <div class="pf-progress-metrics">
              <div class="pf-progress-metric">
-               <span class="pf-progress-label">SUBSCRIBED</span>
+               <span class="pf-progress-label">CURRENT SUBSCRIBED</span>
                <span class="pf-progress-value">{{ formatNumber(p.subscribed || 0) }}</span>
              </div>
              <div class="pf-progress-metric">
@@ -248,44 +137,18 @@
              <div class="pf-progress-text">{{ getSubscriptionProgress(p) }}% Subscribed</div>
            </div>
          </div>
-         <!-- 操作按钮 -->
-         <div class="pf-project-actions">
-           <!-- ACTIVE状态: Buy and Detail -->
-           <template v-if="p.status === 'ACTIVE'">
-             <button class="pf-project-btn pf-project-btn-secondary" @click="openTrade(p.code)">BUY</button>
-             <button class="pf-project-btn" @click="openDetail(p.code)">DETAILS</button>
-           </template>
-           
-           <!-- INCOMING状态: Preview and Join Waitlist -->
-           <template v-else-if="p.status === 'INCOMING'">
-             <button class="pf-project-btn" @click="openDetail(p.code)">DETAILS</button>
-             <button class="pf-project-btn" @click="joinWaitlist(p.code)">ADD TO WATCHLIST</button>
-           </template>
-           
-           <!-- PERFORMING状态: View Details -->
-           <template v-else-if="p.status === 'PERFORMING'">
-             <button class="pf-project-btn" @click="openDetail(p.code)">DETAILS</button>
-           </template>
-           
-           <!-- COMPLETED状态: View Details -->
-           <template v-else-if="p.status === 'COMPLETED'">
-             <button class="pf-project-btn" @click="openDetail(p.code)">DETAILS</button>
-           </template>
-           
-           <!-- COMPLETE状态: View Details -->
-           <template v-else-if="p.status === 'COMPLETE'">
-             <button class="pf-project-btn" @click="openDetail(p.code)">DETAILS</button>
-           </template>
-           
-           <!-- DEFAULT状态: View Details -->
-           <template v-else-if="p.status === 'DEFAULT'">
-             <button class="pf-project-btn" @click="openDetail(p.code)">DETAILS</button>
-           </template>
-           
-           <!-- 默认状态: Learn More -->
-           <template v-else>
-             <button class="pf-project-btn" @click="openDetail(p.code)">DETAILS</button>
-           </template>
+
+         <!-- Etherscan链接 -->
+         <div class="pf-etherscan-link">
+           <a 
+             href="https://etherscan.io/address/0xA41b4F0417d588a08F914Ca17b07c99783D5c3FC" 
+             target="_blank" 
+             rel="noopener noreferrer"
+             class="etherscan-link"
+           >
+             <span class="etherscan-icon">🔗</span>
+             <span class="etherscan-text">View on Etherscan</span>
+           </a>
          </div>
       </article>
     </section>
@@ -487,8 +350,8 @@ export default {
               status: project.loan_status || project.status || 'UNKNOWN',
               
               // 认购信息
-              totalOffering: project.total_offering_token ? `AUD$${project.total_offering_token.toLocaleString()}` : 'AUD$0',
-              subscribed: project.subscribe_token ? `AUD$${project.subscribe_token.toLocaleString()}` : 'AUD$0',
+              totalOffering: project.total_offering_token ? `AUD${project.total_offering_token.toLocaleString()}` : 'AUD0',
+              subscribed: project.subscribe_token ? `AUD${project.subscribe_token.toLocaleString()}` : 'AUD0',
               
               // 原始数值用于计算
               totalOfferingRaw: project.total_offering_token || 0,
@@ -520,7 +383,7 @@ export default {
               
               // 前端显示字段
               subtitle: `${project.loan_product || project.loanProduct} - ${project.property_type || project.propertyType}`,
-              loanAmount: (project.loan_amount || project.loanAmount) ? `AUD$${(project.loan_amount || project.loanAmount).toLocaleString()}` : 'AUD$0',
+              loanAmount: (project.loan_amount || project.loanAmount) ? `AUD${(project.loan_amount || project.loanAmount).toLocaleString()}` : 'AUD0',
               loanTerm: `${project.loan_term_months || project.loanTermMonths} months`,
               targetYield: project.interest_rate || project.interestRate,
               image: project.image || this.getProductImage(project.project_code || project.code)
@@ -529,7 +392,7 @@ export default {
             // 添加计算指标
             mappedProduct.metrics = {
               currentElaraPrice: this.calculateTokenPrice(mappedProduct),
-              collateralPropertyValue: (project.property_value || project.propertyValue) ? `AUD$${(project.property_value || project.propertyValue).toLocaleString()}` : 'TBA',
+              collateralPropertyValue: (project.property_value || project.propertyValue) ? `AUD${(project.property_value || project.propertyValue).toLocaleString()}` : 'TBA',
               rentalIncome: this.calculateRentalIncome(mappedProduct),
               targetLoanYield: `${(project.interest_rate || project.interestRate)}% p.a.`
             }
@@ -645,7 +508,7 @@ export default {
       if (!value) return null
       const num = parseFloat(value)
       if (isNaN(num)) return value
-      return `AUD$${num.toLocaleString()}`
+      return `AUD${num.toLocaleString()}`
     },
 
     resetFilters(){ this.filters = { q: '', type: '', risk: '', status: '', minYield: 0, maxYield: 20 } },
@@ -657,11 +520,6 @@ export default {
       this.$forceUpdate()
     },
 
-    openDetail(code){
-      const product = this.products.find(x => x.code === code)
-      try { sessionStorage.setItem('lastProduct', JSON.stringify(product)) } catch(e) {}
-      this.$router.push({ name: 'detail', params: { code: code } })
-    },
 
     openTrade(code){
       // 在列表视图中从products数组查找，在详情视图中使用currentProduct
@@ -685,16 +543,16 @@ export default {
       const percentage = (subscribed / total) * 100
       return Math.min(Math.round(percentage), 100)
     },
-    getStatusText(status) {
-      const statusMap = {
-        'INCOMING': 'Incoming',
-        'ACTIVE': 'Active',
-        'PERFORMING': 'Performing',
-        'DEFAULT': 'Default',
-        'COMPLETED': 'Completed',
-      }
-      return statusMap[status] || 'Unknown'
-    },
+    // getStatusText(status) {
+    //   const statusMap = {
+    //     'INCOMING': 'Incoming',
+    //     'ACTIVE': 'Active',
+    //     'PERFORMING': 'Performing',
+    //     'DEFAULT': 'Default',
+    //     'COMPLETED': 'Completed',
+    //   }
+    //   return statusMap[status] || 'Unknown'
+    // },
     joinWaitlist(code) {
       this.addToWatchlist(code)
     },
@@ -766,7 +624,7 @@ export default {
       const basePrice = 1.00
       const yieldMultiplier = (product.targetYield || 6.0) / 6.0
       const adjustedPrice = basePrice * yieldMultiplier
-      return `AUD$${adjustedPrice.toFixed(2)}`
+      return `AUD${adjustedPrice.toFixed(2)}`
     },
     
     // 计算租金收入
@@ -774,12 +632,12 @@ export default {
       // 基于房产价值和收益率估算租金收入
       if (!product.valuation) return 'TBA'
       
-      const valuationStr = product.valuation.replace(/[AUD$,]/g, '')
+      const valuationStr = product.valuation.replace(/[AUD,]/g, '')
       const valuation = parseFloat(valuationStr)
       const monthlyYield = (product.targetYield || 6.0) / 12 / 100
       const estimatedRental = valuation * monthlyYield
       
-      return `AUD$${estimatedRental.toLocaleString('en-AU', { maximumFractionDigits: 0 })} / month`
+      return `AUD${estimatedRental.toLocaleString('en-AU', { maximumFractionDigits: 0 })} / month`
     },
 
     // 计算认购进度
@@ -1208,8 +1066,10 @@ export default {
 .pf-project-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
 .pf-project-image{width:40px;height:40px;border-radius:8px;}
 .pf-project-info{flex:1;}
-.pf-project-info h4{margin:0 0 4px 0;font-size:16px;font-weight:700;color:#ffffff;}
-.pf-project-info p{margin:0;font-size:12px;color:#9ca3af;}
+.pf-title-row{display:flex;justify-content:space-between;align-items:center;gap:12px;}
+.pf-project-info h4{margin:0;font-size:16px;font-weight:700;color:#ffffff;flex:1;}
+.pf-project-info p{margin:4px 0 0 0;font-size:12px;color:#9ca3af;}
+.pf-title-btn{padding:6px 12px;font-size:12px;white-space:nowrap;}
 
 .pf-project-metrics{margin-bottom:16px;}
 .pf-project-metric{display:flex;justify-content:space-between;align-items:center;padding:4px 0;}
@@ -1252,7 +1112,7 @@ export default {
   text-transform:uppercase;
   letter-spacing:0.5px;
   margin-bottom:4px;
-  margin-left:15px;
+  margin-left:10px;
 }
 
 .pf-progress-value{
@@ -1288,7 +1148,7 @@ export default {
   color:#10b981;
 }
 
-.pf-project-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.pf-project-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
 .pf-project-btn{padding:8px 16px;border-radius:8px;border:1px solid #374151;background:#1f2937;color:#ffffff;cursor:pointer;font-size:14px;font-weight:600;transition:all 0.2s ease;}
 .pf-project-btn:hover{background:#d97706;}
 .pf-project-btn-secondary{background:var(--primary);color:#fff;border-color:var(--primary);}
@@ -1374,51 +1234,6 @@ export default {
   flex: 1;
 }
 
-.status-badge {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-}
-
-.status-ACTIVE {
-  background: rgba(16, 185, 129, 0.2);
-  color: #10b981;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-}
-
-.status-INCOMING {
-  background: rgba(59, 130, 246, 0.2);
-  color: #3b82f6;
-  border: 1px solid rgba(59, 130, 246, 0.3);
-}
-
-.status-PERFORMING {
-  background: rgba(245, 158, 11, 0.2);
-  color: #f59e0b;
-  border: 1px solid rgba(245, 158, 11, 0.3);
-}
-
-.status-COMPLETED {
-  background: rgba(107, 128, 107, 0.2);
-  color: #6b7280;
-  border: 1px solid rgba(107, 114, 128, 0.3);
-}
-
-.status-COMPLETE {
-  background: rgba(107, 128, 107, 0.2);
-  color: #6b7280;
-  border: 1px solid rgba(107, 114, 128, 0.3);
-}
-
-.status-DEFAULT {
-  background: rgba(139, 92, 246, 0.2);
-  color: #8b5cf6;
-  border: 1px solid rgba(139, 92, 246, 0.3);
-}
 
 .doc-code {
   display: inline-block;
@@ -1625,6 +1440,17 @@ export default {
     gap: 12px;
   }
   
+  .pf-title-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .pf-title-btn {
+    width: 100%;
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+  
   .pf-project-image {
     width: 80px;
     height: 80px;
@@ -1769,6 +1595,80 @@ export default {
   
   .doc-subtitle {
     font-size: 13px;
+  }
+}
+
+/* Etherscan链接样式 */
+.pf-etherscan-link {
+  margin-top: 16px;
+  padding-top: 0px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.etherscan-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 8px;
+  color: #60a5fa;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.etherscan-link:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.5);
+  color: #93c5fd;
+  text-decoration: none;
+}
+
+.etherscan-icon {
+  font-size: 16px;
+}
+
+.etherscan-text {
+  font-size: 14px;
+}
+
+/* 移动端响应式样式 */
+@media (max-width: 768px) {
+  .pf-etherscan-link {
+    margin-top: 12px;
+    padding-top: 0px;
+  }
+  
+  .etherscan-link {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+  
+  .etherscan-icon {
+    font-size: 14px;
+  }
+  
+  .etherscan-text {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .etherscan-link {
+    padding: 5px 8px;
+    font-size: 12px;
+  }
+  
+  .etherscan-icon {
+    font-size: 12px;
+  }
+  
+  .etherscan-text {
+    font-size: 12px;
   }
 }
 </style>

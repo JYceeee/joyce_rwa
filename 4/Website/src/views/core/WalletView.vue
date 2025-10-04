@@ -72,7 +72,7 @@
         <!-- 资产标题区 -->
         <div class="mm-balance">{{ nativeBalanceDisplay }} {{ nativeSymbol }}</div>
         <div class="mm-subline">
-          <span>AUD${{ nativeToAudDisplay || 0 }}</span> 
+          <span>AUD{{ nativeToAudDisplay || 0 }}</span> 
           <a href="#" @click.prevent="$router.push('/portfolio')" class="mm-link">Portfolio ↗</a>
         </div>
       </div>
@@ -112,37 +112,8 @@
           :class="{ 'is-active': activeTab==='tokens' }"
           @click="activeTab='tokens'"
         >Tokens</button>
-        <button
-          class="mm-tab"
-          :class="{ 'is-active': activeTab==='activity' }"
-          @click="switchToActivityTab"
-        >Activity</button>
       </nav>
-      <!-- 网络栏 -->
-      <!-- <div class="mm-networkbar">
-        <div class="mm-net-left">
-          <select 
-            v-model="selectedNetwork" 
-            @change="switchNetwork(selectedNetwork)"
-            class="mm-network-select"
-          >
-            <option 
-              v-for="network in availableNetworks" 
-              :key="network.value" 
-              :value="network.value"
-            >
-              {{ network.label }}
-            </option>
-          </select>
-        </div>
-        <div class="mm-net-right" style="position:relative;">
-          <button class="mm-btn mm-outline" @click="toggleSortMenu" style="height:28px;padding:2px 10px;">Sort</button>
-          <div v-if="sortOpen" class="mm-sort-menu">
-            <button class="mm-sort-item" :class="{active: sortOrder==='desc'}" @click="setSort('desc')">Descending by balance</button>
-            <button class="mm-sort-item" :class="{active: sortOrder==='asc'}" @click="setSort('asc')">Ascending by balance</button>
-          </div>
-        </div>
-      </div> -->
+    
 
       <!-- Tokens 列表 -->
       <div v-if="activeTab==='tokens'" class="mm-tokenlist" style="background:#1d1d36;">
@@ -158,7 +129,7 @@
           </div>
           <div class="mm-token-right">
             <div class="mm-token-sub">{{ nativeBalanceDisplay }} {{ nativeSymbol }}</div>
-            <div class="mm-token-amount">AUD${{ nativeToAudDisplay || 0 }}</div>
+            <div class="mm-token-amount">AUD{{ nativeToAudDisplay || 0 }}</div>
           </div>
         </div>
 
@@ -168,7 +139,6 @@
             <div>
               <!-- <div class="mm-token-title">{{ t.symbol || 'Token' }}</div> -->
               <div class="mm-token-sub">{{ t.name }}</div>
-              <div style="font-size:10px;color:#FFFFFF;">此处添加产品名称</div>
               <div style="font-size:10px;color:#FFFFFF;">点击可查看详情</div>
 
             </div>
@@ -179,376 +149,6 @@
         </div>
       </div>
     </section>
-
-    <!-- Activity 页签  -->
-    <div v-if="activeTab==='activity'" class="mm-activity-section">
-      <div class="mm-activity-header">
-        <h3>Wallet Activity Log</h3>
-        <div class="mm-activity-actions">
-          <button class="mm-btn mm-outline" @click="toggleFilters" :class="{ active: showFilters }">
-            Filter
-          </button>
-          
-          <button class="mm-btn mm-outline" @click="refreshActivity" :disabled="loadingActivity">
-            <span v-if="loadingActivity">🔄</span>
-            <span v-else>Refresh</span>
-          </button>
-        </div>
-      </div>
-      
-      <!-- 筛选器面板 -->
-      <div v-if="showFilters" class="mm-activity-filters">
-        <div class="mm-filter-row">
-          <div class="mm-filter-group">
-            <label class="mm-filter-label">Type</label>
-            <select v-model="activityFilters.type" class="mm-filter-select">
-              <option value="">All Types</option>
-              <option value="buy">Buy</option>
-              <option value="sell">Sell</option>
-            </select>
-          </div>
-          
-          <div class="mm-filter-group">
-            <label class="mm-filter-label">Project Code</label>
-            <select v-model="activityFilters.projectCode" class="mm-filter-select">
-              <option value="">All Projects</option>
-              <option v-for="project in uniqueProjectCodes" :key="project" :value="project">
-                {{ project }}
-              </option>
-            </select>
-          </div>
-          
-          
-          <div class="mm-filter-actions">
-            <button class="mm-btn mm-outline" @click="clearFilters">
-              Clear
-            </button>
-            <!-- <button class="mm-btn mm-primary" @click="applyFilters">
-              Apply
-            </button> -->
-          </div>
-        </div>
-      </div>
-      
-      <div v-if="loadingActivity" class="mm-loading">
-        <div class="mm-spinner"></div>
-        <span>Loading activity...</span>
-      </div>
-      
-      <div v-else-if="walletActivity.length === 0" class="mm-no-activity">
-        <div class="mm-no-activity-icon"></div>
-        <p>No transaction activity found</p>
-        <p class="mm-no-activity-sub">Your recent transactions will appear here</p>
-      </div>
-      
-      <div v-else class="mm-activity-list">
-        <!-- 筛选结果统计 -->
-        <div v-if="showFilters" class="mm-filter-results">
-          <span class="mm-results-count">
-            Showing {{ filteredActivity.length }} of {{ walletActivity.length }} activities
-          </span>
-          <button v-if="hasActiveFilters" class="mm-clear-filters-btn" @click="clearFilters">
-            Clear all filters
-          </button>
-        </div>
-        
-        <!-- 左右分栏布局  -->
-        <div class="mm-activity-columns">
-          <div class="mm-activity-left">
-              <div class="mm-activity-section-header">
-                <h4 class="mm-activity-section-title">Transaction Activity</h4>
-              </div>
-            <div v-for="activity in paginatedTransactionActivities" :key="activity.id" class="mm-activity-item">
-              <div class="mm-activity-header-item">
-                <div class="mm-activity-type" :class="activity.type">
-                  <span class="mm-activity-icon">{{ getActivityIcon(activity.type) }}</span>
-                  <span class="mm-activity-title">{{ getActivityTitle(activity.type) }}</span>
-                </div>
-                <div class="mm-activity-time">{{ formatTime(activity.timestamp) }}</div>
-              </div>
-          
-              <div class="mm-activity-details">
-                <!-- 交易类型活动 -->
-                <div v-if="activity.type === 'buy' || activity.type === 'sell'" class="mm-activity-project">
-                  <span class="mm-activity-label">Project Code:</span>
-                  <span class="mm-activity-value">{{ activity.project_code }}</span>
-                </div>
-                <div v-if="activity.type === 'buy' || activity.type === 'sell'" class="mm-activity-project-name">
-                  <span class="mm-activity-label">Project Name:</span>
-                  <span class="mm-activity-value">{{ activity.project_name }}</span>
-                </div>
-                <div v-if="activity.type === 'buy' || activity.type === 'sell'" class="mm-activity-amount">
-                  <span class="mm-activity-label">Token Amount:</span>
-                  <span class="mm-activity-value">{{ activity.amount }} tokens</span>
-                </div>
-                <div v-if="activity.type === 'buy' || activity.type === 'sell'" class="mm-activity-trade-type">
-                  <span class="mm-activity-label">Trade Type:</span>
-                  <span class="mm-activity-value" :class="activity.type === 'buy' ? 'mm-trade-buy' : 'mm-trade-sell'">
-                    {{ activity.type.toUpperCase() }}
-                  </span>
-                </div>
-                <div v-if="activity.type === 'buy' || activity.type === 'sell'" class="mm-activity-timestamp">
-                  <span class="mm-activity-label">Trade Time:</span>
-                  <span class="mm-activity-value">{{ formatDateTime(activity.timestamp) }}</span>
-                </div>
-                
-                <!-- 钱包连接/断开活动 -->
-                <div v-if="activity.type === 'wallet_connect' || activity.type === 'wallet_disconnect'" class="mm-activity-wallet">
-                  <span class="mm-activity-label">Wallet Address:</span>
-                  <span class="mm-activity-value">{{ formatAddress(activity.wallet_address) }}</span>
-                </div>
-                
-                <!-- 网络变化活动 -->
-                <div v-if="activity.type === 'network_change'" class="mm-activity-network">
-                  <span class="mm-activity-label">Network:</span>
-                  <span class="mm-activity-value">{{ activity.network_name }}</span>
-                </div>
-                <div v-if="activity.type === 'network_change'" class="mm-activity-network-id">
-                  <span class="mm-activity-label">Chain ID:</span>
-                  <span class="mm-activity-value">{{ activity.network_id }}</span>
-                </div>
-                
-                <!-- MetaMask连接活动 -->
-                <div v-if="activity.type === 'metamask_connect' || activity.type === 'metamask_disconnect'" class="mm-activity-metamask">
-                  <span class="mm-activity-label">Extension:</span>
-                  <span class="mm-activity-value">MetaMask</span>
-                </div>
-                <div v-if="activity.type === 'metamask_connect' && activity.chain_id" class="mm-activity-chain">
-                  <span class="mm-activity-label">Chain ID:</span>
-                  <span class="mm-activity-value">{{ activity.chain_id }}</span>
-                </div>
-                <div v-if="activity.type === 'metamask_disconnect' && activity.error" class="mm-activity-error">
-                  <span class="mm-activity-label">Error:</span>
-                  <span class="mm-activity-value">{{ activity.error }}</span>
-                </div>
-                
-                <!-- MetaMask交易活动 -->
-                <div v-if="activity.type === 'metamask_transaction'" class="mm-activity-transaction">
-                  <div class="mm-activity-transaction-hash">
-                    <span class="mm-activity-label">Transaction Hash:</span>
-                    <span class="mm-activity-value">{{ activity.etherscan?.hash || activity.transactionHash || 'N/A' }}</span>
-                  </div>
-                  <div class="mm-activity-transaction-status">
-                    <span class="mm-activity-label">Status:</span>
-                    <span class="mm-activity-value" :class="{ 'mm-status-success': activity.etherscan?.status === '0x1', 'mm-status-failed': activity.etherscan?.status === '0x0' }">
-                      {{ activity.etherscan?.status === '0x1' ? 'Success' : activity.etherscan?.status === '0x0' ? 'Failed' : 'Pending' }}
-                    </span>
-                  </div>
-                  <div class="mm-activity-transaction-from">
-                    <span class="mm-activity-label">From:</span>
-                    <span class="mm-activity-value">{{ formatAddress(activity.etherscan?.from) }}</span>
-                  </div>
-                  <div class="mm-activity-transaction-to">
-                    <span class="mm-activity-label">To:</span>
-                    <span class="mm-activity-value">{{ formatAddress(activity.etherscan?.to) }}</span>
-                  </div>
-                  <div class="mm-activity-transaction-nonce">
-                    <span class="mm-activity-label">Nonce:</span>
-                    <span class="mm-activity-value">{{ activity.etherscan?.nonce ? parseInt(activity.etherscan.nonce, 16) : 'N/A' }}</span>
-                  </div>
-                  <div class="mm-activity-transaction-token-amount">
-                    <span class="mm-activity-label">Token Amount:</span>
-                    <span class="mm-activity-value">{{ activity.amount || 'N/A' }} {{ activity.project_code || 'tokens' }}</span>
-                  </div>
-                  <div class="mm-activity-transaction-value">
-                    <span class="mm-activity-label">Value:</span>
-                    <span class="mm-activity-value">{{ formatEtherValue(activity.etherscan?.value) }} ETH</span>
-                  </div>
-                  <div class="mm-activity-transaction-block">
-                    <span class="mm-activity-label">Block:</span>
-                    <span class="mm-activity-value">{{ activity.etherscan?.blockNumber ? parseInt(activity.etherscan.blockNumber, 16).toLocaleString() : 'N/A' }}</span>
-                  </div>
-                  <div class="mm-activity-transaction-fee">
-                    <span class="mm-activity-label">Transaction Fee:</span>
-                    <span class="mm-activity-value">{{ activity.etherscan?.transactionFee ? activity.etherscan.transactionFee.toFixed(6) : 'N/A' }} ETH</span>
-                  </div>
-                  <div class="mm-activity-transaction-gas">
-                    <span class="mm-activity-label">Gas Price:</span>
-                    <span class="mm-activity-value">{{ activity.etherscan?.gasPrice ? parseInt(activity.etherscan.gasPrice, 16).toLocaleString() : 'N/A' }} Gwei</span>
-                  </div>
-                </div>
-                
-                <!-- 状态检查活动 -->
-                <div v-if="activity.type === 'wallet_status_check' || activity.type === 'wallet_focus_check'" class="mm-activity-status">
-                  <span class="mm-activity-label">Status:</span>
-                  <span class="mm-activity-value">Checked</span>
-                </div>
-                <div v-if="activity.type === 'wallet_status_check' || activity.type === 'wallet_focus_check'" class="mm-activity-wallet">
-                  <span class="mm-activity-label">Wallet:</span>
-                  <span class="mm-activity-value">{{ formatAddress(activity.wallet_address) }}</span>
-                </div>
-                
-                <!-- 消息活动 -->
-                <div v-if="activity.type === 'metamask_message'" class="mm-activity-message">
-                  <span class="mm-activity-label">Message Type:</span>
-                  <span class="mm-activity-value">{{ activity.message_type }}</span>
-                </div>
-                
-                <!-- 通用消息显示 -->
-                <div v-if="activity.message" class="mm-activity-message-text">
-                  <span class="mm-activity-label">Message:</span>
-                  <span class="mm-activity-value">{{ activity.message }}</span>
-                </div>
-                
-                <!-- Etherscan详情 -->
-                <div v-if="activity.etherscan" class="mm-activity-etherscan">
-                  <div class="mm-activity-etherscan-info">
-                    <span class="mm-activity-label">Transaction Hash:</span>
-                    <span class="mm-activity-value">{{ activity.etherscan.hash || activity.transactionHash || 'N/A' }}</span>
-                  </div>
-                  <div class="mm-activity-etherscan-info">
-                    <span class="mm-activity-label">Status:</span>
-                    <span class="mm-activity-value" :class="{ 'mm-status-success': activity.etherscan.status === '0x1', 'mm-status-failed': activity.etherscan.status === '0x0' }">
-                      {{ activity.etherscan.status === '0x1' ? 'Success' : activity.etherscan.status === '0x0' ? 'Failed' : 'Pending' }}
-                    </span>
-                  </div>
-                  <div class="mm-activity-etherscan-info">
-                    <span class="mm-activity-label">From:</span>
-                    <span class="mm-activity-value">{{ formatAddress(activity.etherscan.from) }}</span>
-                  </div>
-                  <div class="mm-activity-etherscan-info">
-                    <span class="mm-activity-label">To:</span>
-                    <span class="mm-activity-value">{{ formatAddress(activity.etherscan.to) }}</span>
-                  </div>
-                  <div class="mm-activity-etherscan-info">
-                    <span class="mm-activity-label">Nonce:</span>
-                    <span class="mm-activity-value">{{ activity.etherscan.nonce ? parseInt(activity.etherscan.nonce, 16) : 'N/A' }}</span>
-                  </div>
-                  <div class="mm-activity-etherscan-info">
-                    <span class="mm-activity-label">Token Amount:</span>
-                    <span class="mm-activity-value">{{ activity.amount || 'N/A' }} {{ activity.project_code || 'tokens' }}</span>
-                  </div>
-                  <div class="mm-activity-etherscan-info">
-                    <span class="mm-activity-label">Value:</span>
-                    <span class="mm-activity-value">{{ formatEtherValue(activity.etherscan.value) }} ETH</span>
-                  </div>
-                  <div class="mm-activity-etherscan-info">
-                    <span class="mm-activity-label">Gas Used:</span>
-                    <span class="mm-activity-value">{{ activity.etherscan.gasUsed ? parseInt(activity.etherscan.gasUsed, 16).toLocaleString() : 'N/A' }}</span>
-                  </div>
-                  <div class="mm-activity-etherscan-info">
-                    <span class="mm-activity-label">Block:</span>
-                    <span class="mm-activity-value">{{ activity.etherscan.blockNumber ? parseInt(activity.etherscan.blockNumber, 16).toLocaleString() : 'N/A' }}</span>
-                  </div>
-                  <div class="mm-activity-etherscan-info">
-                    <span class="mm-activity-label">Transaction Fee:</span>
-                    <span class="mm-activity-value">{{ activity.etherscan.transactionFee ? activity.etherscan.transactionFee.toFixed(6) : 'N/A' }} ETH</span>
-                  </div>
-                </div>
-              </div>
-          
-              <!-- Etherscan链接 -->
-              <div v-if="activity.etherscan && activity.etherscan.etherscanUrl" class="mm-activity-footer">
-                <a :href="activity.etherscan.etherscanUrl" 
-                  target="_blank" 
-                  class="mm-etherscan-link">
-                  🔗 View on Etherscan
-                </a>
-              </div>
-            </div>
-            
-            <!-- 交易活动分页控件 -->
-            <div v-if="transactionTotalPages > 1" class="mm-transaction-pagination">
-              <div class="mm-pagination-info">
-                <span class="mm-pagination-text">
-                  Transaction Page {{ transactionPage }} of {{ transactionTotalPages }}
-                </span>
-                <span class="mm-pagination-count">
-                  ({{ leftColumnActivities.length }} records)
-                </span>
-              </div>
-              
-              <div class="mm-pagination-controls">
-                <button 
-                  class="mm-pagination-btn" 
-                  @click="prevTransactionPage"
-                  :disabled="transactionPage <= 1"
-                >
-                  ← 
-                </button>
-                
-                <div class="mm-pagination-pages">
-                  <button 
-                    v-for="page in transactionTotalPages" 
-                    :key="page"
-                    class="mm-pagination-page"
-                    :class="{ active: page === transactionPage }"
-                    @click="goToTransactionPage(page)"
-                  >
-                    {{ page }}
-                  </button>
-                </div>
-                
-                <button 
-                  class="mm-pagination-btn" 
-                  @click="nextTransactionPage"
-                  :disabled="transactionPage >= transactionTotalPages"
-                >
-                  →
-                </button>
-              </div>
-            </div>
-          </div>
-          
-          
-        <!-- 右侧：状态检查活动 (wallet_status_check/wallet_focus_check) - 始终在右侧 -->
-        <!-- <div class="mm-activity-right">
-          <div class="mm-activity-section-header">
-            <h4 class="mm-activity-section-title">Status Check</h4>
-            <div class="mm-button-group">
-              <button class="mm-btn mm-outline mm-log-status-btn" @click="logCurrentWalletStatus" :disabled="!connected">
-                Log Status
-              </button>
-              <button class="mm-btn mm-outline mm-clear-status-btn" @click="clearStatusActivities">
-                Clear Status
-              </button>
-            </div>
-          </div>
-          
-          <div v-for="activity in paginatedStatusActivities" :key="activity.id" class="mm-activity-item">
-            <div class="mm-activity-header-item">
-              <div class="mm-activity-type" :class="activity.type">
-                <span class="mm-activity-icon">
-                  {{ getActivityIcon(activity.type) }}
-                </span>
-                <span class="mm-activity-title">{{ getActivityTitle(activity.type) }}</span>
-              </div>
-              <div class="mm-activity-time">{{ formatTime(activity.timestamp) }}</div>
-            </div> -->
-            
-            <!-- 状态检查活动 -->
-            <!-- <div class="mm-activity-details"> -->
-              <!-- 钱包状态检查 -->
-              <!-- <div v-if="activity.type === 'wallet_status_check' || activity.type === 'wallet_focus_check'" class="mm-activity-status">
-                <span class="mm-activity-label">Status:</span>
-                <span class="mm-activity-value">Checked</span>
-              </div>
-              <div v-if="activity.type === 'wallet_status_check' || activity.type === 'wallet_focus_check'" class="mm-activity-wallet">
-                <span class="mm-activity-label">Wallet:</span>
-                <span class="mm-activity-value">{{ formatAddress(activity.wallet_address) }}</span>
-              </div> -->
-              
-              <!-- 网络变化信息 -->
-              <!-- <div v-if="activity.type === 'network_change'" class="mm-activity-network">
-                <span class="mm-activity-label">Network:</span>
-                <span class="mm-activity-value">{{ activity.network_name }}</span>
-              </div>
-              <div v-if="activity.type === 'network_change'" class="mm-activity-network-id">
-                <span class="mm-activity-label">Chain ID:</span>
-                <span class="mm-activity-value">{{ activity.network_id }}</span>
-              </div> -->
-              
-              <!-- 通用消息显示 -->
-              <!-- <div v-if="activity.message" class="mm-activity-message-text">
-                <span class="mm-activity-label">Message:</span>
-                <span class="mm-activity-value">{{ activity.message }}</span>
-              </div> -->
-            <!-- </div> -->
-        <!-- </div> -->
-          
-          </div>
-        </div>
-      </div>
   </div>
 
   <!-- 提示/错误 -->
@@ -588,26 +188,7 @@ const accounts = ref([fullAddress.value])
 const selectedAccount = ref(fullAddress.value)
 const walletAction = ref('')
 
-// Activity 相关
-const walletActivity = ref([])
-const loadingActivity = ref(false)
 
-// Activity 筛选相关
-const showFilters = ref(false)
-const activityFilters = ref({
-  type: '',
-  projectCode: '',
-  startDate: '',
-  endDate: ''
-})
-
-// 状态检查分页相关
-const statusCheckPage = ref(1)
-const statusCheckPageSize = 3
-
-// 交易活动分页相关
-const transactionPage = ref(1)
-const transactionPageSize = 5
 
 
 // 网络选择相关
@@ -617,84 +198,6 @@ const availableNetworks = ref([
   { value: 'Ethereum', label: 'Ethereum', chainId: 1 }
 ])
 
-// 筛选后的活动数据
-const filteredActivity = computed(() => {
-  let filtered = walletActivity.value
-
-  // 按类型筛选
-  if (activityFilters.value.type) {
-    filtered = filtered.filter(activity => activity.type === activityFilters.value.type)
-  }
-
-  // 按项目代码筛选
-  if (activityFilters.value.projectCode) {
-    filtered = filtered.filter(activity => 
-      activity.project_code === activityFilters.value.projectCode
-    )
-  }
-
-  // 按日期范围筛选
-  if (activityFilters.value.startDate) {
-    const startDate = new Date(activityFilters.value.startDate)
-    filtered = filtered.filter(activity => {
-      const activityDate = new Date(activity.timestamp)
-      return activityDate >= startDate
-    })
-  }
-
-  if (activityFilters.value.endDate) {
-    const endDate = new Date(activityFilters.value.endDate)
-    endDate.setHours(23, 59, 59, 999) // 包含结束日期的整天
-    filtered = filtered.filter(activity => {
-      const activityDate = new Date(activity.timestamp)
-      return activityDate <= endDate
-    })
-  }
-
-  return filtered
-})
-
-// 获取唯一的项目代码列表
-const uniqueProjectCodes = computed(() => {
-  const codes = new Set()
-  walletActivity.value.forEach(activity => {
-    if (activity.project_code) {
-      codes.add(activity.project_code)
-    }
-  })
-  return Array.from(codes).sort()
-})
-
-// 检查是否有激活的筛选条件
-const hasActiveFilters = computed(() => {
-  return activityFilters.value.type !== '' || 
-         activityFilters.value.projectCode !== '' || 
-         activityFilters.value.startDate !== '' || 
-         activityFilters.value.endDate !== ''
-})
-
-// 左侧活动（交易相关）
-const leftColumnActivities = computed(() => {
-  return filteredActivity.value.filter(activity => 
-    activity.type === 'buy' || 
-    activity.type === 'sell' || 
-    activity.type === 'wallet_disconnect' || 
-    activity.type === 'metamask_connect' || 
-    activity.type === 'metamask_disconnect' || 
-    activity.type === 'metamask_message' ||
-    activity.type === 'metamask_transaction'
-  )
-})
-
-// 右侧活动（状态检查相关）
-const rightColumnActivities = computed(() => {
-  return filteredActivity.value.filter(activity => 
-    activity.type === 'wallet_connect' || 
-    activity.type === 'wallet_status_check' || 
-    activity.type === 'wallet_focus_check' ||
-    activity.type === 'network_change'
-  )
-})
 
 // 状态检查分页后的活动
 const paginatedStatusActivities = computed(() => {
@@ -1639,7 +1142,7 @@ function addNetwork(network) {
     'Ethereum': {
       chainId: '0x1',
       chainName: 'Ethereum Mainnet',
-      rpcUrls: ['https://mainnet.infura.io/v3/YOUR_PROJECT_ID'],
+      rpcUrls: [CONTRACT_CONFIG.NETWORK.rpcUrl || 'https://mainnet.infura.io/v3/YOUR_PROJECT_ID'], // 🔴 需要提供主网RPC URL
       blockExplorerUrls: ['https://etherscan.io'],
       nativeCurrency: {
         name: 'ETH',

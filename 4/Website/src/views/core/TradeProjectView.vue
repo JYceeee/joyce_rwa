@@ -36,7 +36,7 @@
                 <div class="contract-address-label">Principal Token Address:</div>
                 <div class="contract-address-value" @click="copyToClipboard(contractAddressModal.principalTokenAddress)">
                   {{ formatAddress(contractAddressModal.principalTokenAddress) }}
-                  <span class="copy-icon">📋</span>
+                  <!-- <span class="copy-icon">📋</span> -->
                 </div>
               </div>
               
@@ -44,7 +44,7 @@
                 <div class="contract-address-label">Interest Token Address:</div>
                 <div class="contract-address-value" @click="copyToClipboard(contractAddressModal.interestTokenAddress)">
                   {{ formatAddress(contractAddressModal.interestTokenAddress) }}
-                  <span class="copy-icon">📋</span>
+                  <!-- <span class="copy-icon">📋</span> -->
                 </div>
               </div>
               
@@ -73,15 +73,6 @@
         </div>
       </div>
     </div>
-
-    <!-- 一键部署弹窗 -->
-    <OneClickDeployModal
-      :show="showOneClickDeployModal"
-      :projectCode="projectCode"
-      :tradeAmount="parseFloat(tradeAmount) || 0"
-      @close="closeOneClickDeployModal"
-      @completed="handleOneClickDeployCompleted"
-    />
 
     <!-- 交易成功弹窗 -->
     <div v-if="showSuccessModal" class="modal-overlay" @click="closeSuccessModal"> 
@@ -188,8 +179,10 @@
         <button class="btn primary" @click="loadProjectData">Retry</button>
       </div>
       
-      <!-- 项目信息卡片 -->
-      <div v-else-if="projectData" class="project-info-card">
+      <!-- 主要内容布局 -->
+      <div v-else-if="projectData" class="main-layout">
+        <!-- 左侧：项目信息卡片 -->
+        <div class="project-info-card">
         <div class="project-header">
           <img :src="projectData.image" :alt="projectCode" class="project-image" />
           <div class="project-details">
@@ -204,68 +197,149 @@
         </div>
         
           <!-- 项目指标 -->
-          <div class="project-metrics">
-            <div class="metric-item">
-              <span class="metric-label">LOAN SIZE</span>
-            <span class="metric-value">{{ projectData.loanAmount || 'AUD$0' }}</span>
+          <div class="project-metrics-container">
+            <!-- 认购信息 -->
+            <div class="metrics-section">
+              <h3 class="metrics-section-title">SUBSCRIPTION INFORMATION</h3>
+              <div class="project-metrics">
+                <div class="metric-item">
+                  <span class="metric-label">SUBSCRIPTION PROGRESS</span>
+                  <span class="metric-value" style="color: #3b82f6;">{{ projectData.subscriptionProgress || '0%' }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">TOTAL OFFERING</span>
+                  <span class="metric-value">{{ projectData.totalOffering || 'AUD0' }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">SUBSCRIBED</span>
+                  <span class="metric-value">{{ projectData.subscribed || 'AUD0' }}</span>
+                </div>
+              </div>
             </div>
-            <div class="metric-item">
-              <span class="metric-label">EST. YIELD (IRR)</span>
-            <span class="metric-value" style="color: #16a34a;">{{ projectData.metrics?.targetLoanYield || 'N/A' }}</span>
+
+            <!-- 贷款信息 -->
+            <div class="metrics-section">
+              <h3 class="metrics-section-title">LOAN INFORMATION</h3>
+              <div class="project-metrics">
+                <div class="metric-item">
+                  <span class="metric-label">LOAN SIZE</span>
+                  <span class="metric-value">{{ projectData.loanAmount || 'AUD0' }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">EST. YIELD (IRR)</span>
+                  <span class="metric-value" style="color: #16a34a;">{{ projectData.metrics?.targetLoanYield || 'N/A' }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">TERM</span>
+                  <span class="metric-value">{{ projectData.loanTerm || '12 months' }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">LTV</span>
+                  <span class="metric-value">{{ projectData.metrics?.loanToValue || 'N/A' }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">DEFAULT RATE</span>
+                  <span class="metric-value">{{ projectData.metrics?.defaultRate || 'N/A' }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">LENDER</span>
+                  <span class="metric-value">{{ projectData.lender || 'N/A' }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">BORROWER</span>
+                  <span class="metric-value">{{ projectData.borrower || 'N/A' }}</span>
+                </div>
+              </div>
             </div>
-            <div class="metric-item">
-              <span class="metric-label">TERM</span>
-            <span class="metric-value">{{ projectData.loanTerm || '12 months' }}</span>
-            </div>
-            <div class="metric-item">
-              <span class="metric-label">PROPERTY VALUE</span>
-            <span class="metric-value">{{ projectData.metrics?.collateralPropertyValue || 'N/A' }}</span>
-            </div>
-            <div class="metric-item">
-              <span class="metric-label">LTV</span>
-            <span class="metric-value">{{ projectData.metrics?.loanToValue || 'N/A' }}</span>
-            </div>
-            <div class="metric-item">
-              <span class="metric-label">SUBSCRIPTION PROGRESS</span>
-            <span class="metric-value" style="color: #3b82f6;">{{ projectData.subscriptionProgress || '0%' }}</span>
-            </div>
-            <div class="metric-item">
-              <span class="metric-label">TOTAL OFFERING</span>
-            <span class="metric-value">{{ projectData.totalOffering || 'AUD$0' }}</span>
-            </div>
-            <div class="metric-item">
-              <span class="metric-label">SUBSCRIBED</span>
-            <span class="metric-value">{{ projectData.subscribed || 'AUD$0' }}</span>
-            </div>
-            <div class="metric-item">
-              <span class="metric-label">DEFAULT RATE</span>
-            <span class="metric-value">{{ projectData.metrics?.defaultRate || 'N/A' }}</span>
+
+            <!-- 抵押物信息 -->
+            <div class="metrics-section">
+              <h3 class="metrics-section-title">COLLATERAL INFORMATION</h3>
+              <div class="project-metrics">
+                <div class="metric-item">
+                  <span class="metric-label">PROPERTY VALUE</span>
+                  <span class="metric-value">{{ projectData.metrics?.collateralPropertyValue || 'N/A' }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">Address of Asset</span>
+                  <span class="metric-value">{{ getAssetAddress() }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">MORTGAGE TYPE</span>
+                  <span class="metric-value">{{ getMortgageType() }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">DEAL MAKER/SPONSOR</span>
+                  <span class="metric-value">{{ projectData.dealMaker || 'N/A' }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">VALUER</span>
+                  <span class="metric-value">{{ projectData.valuer || 'N/A' }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">LAWYER</span>
+                  <span class="metric-value">{{ projectData.lawyer || 'N/A' }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">TRUSTEE</span>
+                  <span class="metric-value">{{ projectData.trustee || 'N/A' }}</span>
+                </div>
+              </div>
             </div>
           </div>
-      </div>
-
-      <!-- 认购表单 -->
-      <div class="trade-form-card">
-        <div class="form-header">
-          <h2 class="form-title">认购 {{ projectData?.code }}</h2>
-          <!-- 钱包状态 -->
-          <div class="wallet-status-inline">
-            <div class="wallet-status-item">
-              <span class="status-label">钱包:</span>
-              <span :class="['status-value', connected ? 'connected' : 'disconnected']">
-                {{ connected ? 'Connected' : 'Disconnected' }}
-              </span>
+        </div>
+        
+        <!-- 右侧：交易表单 (仅当项目状态为ACTIVE且为BUY入口时显示) -->
+        <div v-if="projectData.status === 'ACTIVE' && isBuyEntry" class="trade-form-card">
+          <!-- 合约地址信息 (仅BUY入口显示) -->
+          <div class="contract-addresses-section">
+            <h3 class="contract-addresses-title">SMART CONTRACT ADDRESSES</h3>
+            <div class="contract-addresses-grid">
+              <div class="contract-address-item">
+                <div class="contract-address-label">
+                  PRINCIPAL TOKEN ADDRESS
+                </div>
+                <div class="contract-address-value" @click="copyToClipboard(getPrincipalTokenAddress())">
+                  {{ formatAddress(getPrincipalTokenAddress()) }}
+                </div>
+              </div>
+              
+              <div class="contract-address-item">
+                <div class="contract-address-label">
+                  <!-- <span class="contract-icon">📈</span> -->
+                  INTEREST TOKEN ADDRESS
+                </div>
+                <div class="contract-address-value" @click="copyToClipboard(getInterestTokenAddress())">
+                  {{ formatAddress(getInterestTokenAddress()) }}
+                  <!-- <span class="copy-icon">📋</span> -->
+                </div>
+              </div>
             </div>
-            <div class="wallet-status-item" v-if="connected">
-              <span class="status-label">地址:</span>
-              <span class="status-value">{{ shortAddress }}</span>
+           </div>
+           
+           <!-- 分割线 -->
+           <hr class="section-divider" />
+ 
+           <div class="form-header">
+            <h2 class="form-title">SUBSCRIBE {{ projectData?.code }}</h2>
+            <!-- 钱包状态 -->
+            <div class="wallet-status-inline">
+              <!-- <div class="wallet-status-item">
+                <span class="status-label">WALLET:</span>
+                <span :class="['status-value', connected ? 'connected' : 'disconnected']">
+                  {{ connected ? 'Connected' : 'Disconnected' }}
+                </span>
+              </div> -->
+              <div class="wallet-status-item" v-if="connected">
+                <span class="status-label">WALLETADDRESS:</span>
+                <span class="status-value">{{ shortAddress }}</span>
+              </div>
+              <div class="wallet-status-item" v-if="connected">
+                <span class="status-label">NETWORK:</span>
+                <span class="status-value">{{ networkLabel }}</span>
+              </div>
             </div>
-            <div class="wallet-status-item" v-if="connected">
-              <span class="status-label">网络:</span>
-              <span class="status-value">{{ networkLabel }}</span>
-            </div>
-            </div>
-            </div>
+          </div>
 
         <!-- 交易表单 -->
         <div class="trade-form">
@@ -357,6 +431,54 @@
           
                 </div>
                 </div>
+        </div>
+        
+        <!-- DETAILS入口：项目最新动态 -->
+        <div v-else-if="projectData.status === 'INCOMING'" class="project-news-card">
+          <div class="news-header">
+            <h2 class="news-title">PROJECT UPDATES</h2>
+          </div>
+          <div class="news-content">
+            <div class="news-list">
+              <div class="news-item">
+                <div class="news-date">2024-10-04</div>
+                <div class="news-text">项目正式启动，开始接受投资申请</div>
+              </div>
+              <div class="news-item">
+                <div class="news-date">2024-10-03</div>
+                <div class="news-text">完成项目尽职调查，风险评估报告已发布</div>
+              </div>
+              <div class="news-item">
+                <div class="news-date">2024-10-02</div>
+                <div class="news-text">项目抵押物评估完成，估值确认</div>
+              </div>
+              <div class="news-item">
+                <div class="news-date">2024-10-01</div>
+                <div class="news-text">项目上线，详细信息已更新</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 非ACTIVE状态提示 (仅BUY入口显示) -->
+        <div v-else class="project-status-card">
+          <div class="status-header">
+            <h2 class="status-title">PROJECT STATUS</h2>
+          </div>
+          <div class="status-content">
+            <div class="status-info">
+              <div class="status-badge" :class="getStatusClass(projectData.status)">
+                {{ getStatusText(projectData.status) }}
+              </div>
+              <p class="status-description">
+                {{ getStatusDescription(projectData.status) }}
+              </p>
+            </div>
+            <div class="status-actions">
+              <button class="btn secondary" @click="openDetail(projectData.code)">VIEW DETAILS</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 </template>
@@ -366,13 +488,9 @@ import { projectAPI, transactionAPI, userAPI } from '@/service/api'
 import { useWallet } from '@/composables/useWallet'
 import { ethers } from 'ethers'
 import { CONTRACT_CONFIG } from '@/config/contractConfig'
-import OneClickDeployModal from '@/components/OneClickDeployModal.vue'
 
 export default {
   name: 'TradeProjectView',
-  components: {
-    OneClickDeployModal
-  },
   props: {
     code: {
       type: String,
@@ -388,7 +506,6 @@ export default {
       error: null,
       showSuccessModal: false,
       showLoadingModal: false,
-      showOneClickDeployModal: false,
       loadingStatus: '',
       successData: {
         tradeType: '',
@@ -429,6 +546,14 @@ export default {
       const code = this.code || this.$route.params.code || this.$route.query.code
       console.log('🔍 TradeProjectView: 获取项目代码:', code)
       return code || 'RWA001'
+    },
+    
+    // 检测是否为BUY入口
+    isBuyEntry() {
+      // 检查路由参数或查询参数中的type
+      const type = this.$route.query.type
+      console.log('🔍 TradeProjectView: 检测入口类型:', type)
+      return type === 'buy'
     },
     
     // 钱包状态
@@ -493,6 +618,100 @@ export default {
     }
   },
   methods: {
+    // 获取本金代币合约地址
+    getPrincipalTokenAddress() {
+      // 根据项目代码返回对应的本金代币地址
+      const projectContracts = {
+        'RWA001': '0xA41b4F0417d588a08F914Ca17b07c99783D5c3FC',
+        // 可以添加更多项目的合约地址
+        // 'RWA002': '0x...',
+        // 'RWA003': '0x...',
+      }
+      
+      return projectContracts[this.projectCode] || CONTRACT_CONFIG.PRINCIPAL_TOKEN_ADDRESS
+    },
+    
+    // 获取利息代币合约地址
+    getInterestTokenAddress() {
+      // 根据项目代码返回对应的利息代币地址
+      const projectContracts = {
+        'RWA001': '0x9d3175E3F8c055389e070e058f717D450bB89206',
+        // 可以添加更多项目的合约地址
+        // 'RWA002': '0x...',
+        // 'RWA003': '0x...',
+      }
+      
+      return projectContracts[this.projectCode] || CONTRACT_CONFIG.INTEREST_TOKEN_ADDRESS
+    },
+    
+    // 获取资产地址 (城市/邮编格式)
+    getAssetAddress() {
+      if (this.projectData?.city && this.projectData?.postcode) {
+        return `${this.projectData.city}/${this.projectData.postcode}`
+      }
+      if (this.projectData?.address) {
+        return this.projectData.address
+      }
+      return 'N/A'
+    },
+    
+    // 获取抵押权类型
+    getMortgageType() {
+      if (this.projectData?.mortgageType) {
+        return this.projectData.mortgageType
+      }
+      // 根据项目代码返回默认抵押权类型
+      const mortgageTypes = {
+        // 可以添加更多项目的抵押权类型
+      }
+      
+      return mortgageTypes[this.projectCode] || '第一抵押权人'
+    },
+    
+    // 获取状态样式类
+    getStatusClass(status) {
+      const statusClasses = {
+        'INCOMING': 'status-incoming',
+        'PERFORMING': 'status-performing',
+        'COMPLETED': 'status-completed',
+        'COMPLETE': 'status-complete',
+        'DEFAULT': 'status-default',
+        'CANCELLED': 'status-cancelled'
+      }
+      return statusClasses[status] || 'status-unknown'
+    },
+    
+    // 获取状态文本
+    getStatusText(status) {
+      const statusTexts = {
+        'INCOMING': 'COMING SOON',
+        'PERFORMING': 'IN PROGRESS',
+        'COMPLETED': 'COMPLETED',
+        'COMPLETE': 'COMPLETED',
+        'DEFAULT': 'DEFAULT',
+        'CANCELLED': 'CANCELLED'
+      }
+      return statusTexts[status] || 'UNKNOWN'
+    },
+    
+    // 获取状态描述
+    getStatusDescription(status) {
+      const descriptions = {
+        'INCOMING': 'This project is coming soon. Trading is not yet available.',
+        'PERFORMING': 'This project is currently in progress. Trading is not available.',
+        'COMPLETED': 'This project has been completed. Trading is no longer available.',
+        'COMPLETE': 'This project has been completed. Trading is no longer available.',
+        'DEFAULT': 'This project is in default. Trading is not available.',
+        'CANCELLED': 'This project has been cancelled. Trading is not available.'
+      }
+      return descriptions[status] || 'This project is not available for trading.'
+    },
+    
+    // 打开详情页面
+    openDetail(code) {
+      this.$router.push(`/projects/${code}`)
+    },
+    
     // 初始化交易类型
     initializeTradeType() {
       const queryType = this.$route.query.type
@@ -534,24 +753,36 @@ export default {
             image: rawData.image || this.getProductImage(rawData.project_code || rawData.code),
             
             // 认购信息
-            totalOffering: rawData.total_offering_token ? `AUD$${rawData.total_offering_token.toLocaleString()}` : 'AUD$0',
-            subscribed: rawData.subscribe_token ? `AUD$${rawData.subscribe_token.toLocaleString()}` : 'AUD$0',
+            totalOffering: rawData.total_offering_token ? `AUD${rawData.total_offering_token.toLocaleString()}` : 'AUD0',
+            subscribed: rawData.subscribe_token ? `AUD${rawData.subscribe_token.toLocaleString()}` : 'AUD0',
             subscriptionProgress: this.calculateSubscriptionProgress(rawData),
             
             // 贷款信息
-            loanAmount: rawData.loan_amount ? `AUD$${rawData.loan_amount.toLocaleString()}` : 'AUD$0',
+            loanAmount: rawData.loan_amount ? `AUD${rawData.loan_amount.toLocaleString()}` : 'AUD0',
             loanTerm: rawData.loan_term_months ? `${rawData.loan_term_months} months` : '12 months',
             interestRate: rawData.interest_rate || rawData.target_yield || '6.0',
             
             // 物业信息
             propertyType: rawData.property_type,
             propertyLocation: rawData.property_location,
-            propertyValue: rawData.property_value ? `AUD$${rawData.property_value.toLocaleString()}` : 'TBA',
+            propertyValue: rawData.property_value ? `AUD${rawData.property_value.toLocaleString()}` : 'TBA',
+            
+            // 新增字段
+            city: rawData.city,
+            postcode: rawData.postcode,
+            address: rawData.address,
+            lender: rawData.lender,
+            borrower: rawData.borrower,
+            mortgageType: rawData.mortgage_type || rawData.mortgageType,
+            dealMaker: rawData.deal_maker || rawData.dealMaker,
+            valuer: rawData.valuer,
+            lawyer: rawData.lawyer,
+            trustee: rawData.trustee,
             
             // 计算指标
             metrics: {
               targetLoanYield: `${rawData.interest_rate || rawData.target_yield || '6.0'}% p.a.`,
-              collateralPropertyValue: rawData.property_value ? `AUD$${rawData.property_value.toLocaleString()}` : 'TBA',
+              collateralPropertyValue: rawData.property_value ? `AUD${rawData.property_value.toLocaleString()}` : 'TBA',
               loanToValue: rawData.lvr ? `${rawData.lvr}%` : 'N/A',
               defaultRate: rawData.default_rate ? `${rawData.default_rate}%` : 'N/A'
             },
@@ -625,17 +856,17 @@ export default {
     // 获取代币价格
     getTokenPrice() {
       // 这里可以根据实际需求获取代币价格
-      return 'AUD$1.00'
+      return 'AUD1.00'
     },
     
     // 计算预期收益
     calculateExpectedReturn() {
-      if (!this.tradeAmount || !this.projectData?.interestRate) return 'AUD$0.00'
+      if (!this.tradeAmount || !this.projectData?.interestRate) return 'AUD0.00'
       
       const amount = parseFloat(this.tradeAmount)
       const interestRate = parseFloat(this.projectData.interestRate)
       
-      if (isNaN(amount) || isNaN(interestRate)) return 'AUD$0.00'
+      if (isNaN(amount) || isNaN(interestRate)) return 'AUD0.00'
       
       // 计算年化收益
       const annualReturn = amount * (interestRate / 100)
@@ -644,7 +875,7 @@ export default {
       const loanTermMonths = this.extractLoanTermMonths()
       const actualReturn = annualReturn * (loanTermMonths / 12)
       
-      return `AUD$${actualReturn.toFixed(2)}`
+      return `AUD${actualReturn.toFixed(2)}`
     },
     
     // 提取贷款期限（月数）
@@ -658,44 +889,6 @@ export default {
     
     // 一键交易流程
     async executeOneClickTrade() {
-      if (!this.isFormValid) {
-        console.warn('⚠️ TradeProjectView: 表单验证失败，无法执行交易')
-        return
-      }
-      
-      // 显示一键部署弹窗
-      this.showOneClickDeployModal = true
-    },
-    
-    // 关闭一键部署弹窗
-    closeOneClickDeployModal() {
-      this.showOneClickDeployModal = false
-    },
-    
-    // 处理一键部署完成
-    async handleOneClickDeployCompleted(deployData) {
-      console.log('✅ TradeProjectView: 一键部署完成:', deployData)
-      
-      // 保存交易信息到数据库
-      await this.saveTransactionToDatabase(deployData)
-      
-      // 显示成功弹窗
-      this.showSuccessModal = true
-      this.successData = {
-        tradeType: this.tradeType,
-        amount: this.tradeAmount,
-        transactionHash: deployData.transactionHash,
-        blockNumber: deployData.blockNumber,
-        principalTokenAddress: deployData.principalTokenAddress,
-        interestTokenAddress: deployData.interestTokenAddress
-      }
-      
-      // 关闭部署弹窗
-      this.showOneClickDeployModal = false
-    },
-    
-    // 原始的一键交易流程（保留作为备用）
-    async executeOneClickTradeOriginal() {
       if (!this.isFormValid) {
         console.warn('⚠️ TradeProjectView: 表单验证失败，无法执行交易')
         return
@@ -1137,6 +1330,14 @@ export default {
   gap: 40px;
 }
 
+/* 主布局 - 左右分栏 */
+.main-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
 /* 加载状态 */
 .loading-container {
   display: flex;
@@ -1238,6 +1439,30 @@ export default {
   font-weight: 600;
 }
 
+/* 项目指标容器 */
+.project-metrics-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* 指标分组 */
+.metrics-section {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.metrics-section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+}
+
 /* 项目指标 */
 .project-metrics {
   display: grid;
@@ -1269,6 +1494,100 @@ export default {
   color: #ffffff;
 }
 
+/* 合约地址区域 */
+.contract-addresses-section {
+  margin-top: -24px;
+  padding-top: 0px;
+}
+
+.contract-addresses-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.contract-addresses-title::before {
+  content: "🔗";
+  font-size: 20px;
+}
+
+.contract-addresses-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.contract-address-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.contract-address-item:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.contract-address-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #3b82f6;
+}
+
+.contract-icon {
+  font-size: 16px;
+}
+
+.contract-address-value {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 13px;
+  color: #e5e7eb;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  word-break: break-all;
+}
+
+.contract-address-value:hover {
+  background: rgba(0, 0, 0, 0.5);
+  color: #ffffff;
+}
+
+.copy-icon {
+  font-size: 14px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.contract-address-value:hover .copy-icon {
+  opacity: 1;
+}
+
+/* 分割线样式 */
+.section-divider {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 24px 0;
+  width: 100%;
+}
+
 /* 交易表单 */
 .trade-form-card {
   background: #141426;
@@ -1276,6 +1595,165 @@ export default {
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0 6px 18px rgba(0,0,0,.25);
+}
+
+/* 项目状态卡片 */
+.project-status-card {
+  background: #141426;
+  border: 1px solid #374151;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.25);
+}
+
+.status-header {
+  margin-bottom: 20px;
+}
+
+.status-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.status-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.status-info {
+  text-align: center;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.status-incoming {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: #ffffff;
+}
+
+.status-performing {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+}
+
+.status-completed {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+}
+
+.status-complete {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+}
+
+.status-default {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #ffffff;
+}
+
+.status-cancelled {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: #ffffff;
+}
+
+.status-unknown {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: #ffffff;
+}
+
+.status-description {
+  font-size: 14px;
+  color: #9ca3af;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.status-actions {
+  display: flex;
+  justify-content: center;
+}
+
+/* 项目最新动态卡片 */
+.project-news-card {
+  background: #141426;
+  border: 1px solid #374151;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.25);
+}
+
+.news-header {
+  margin-bottom: 20px;
+}
+
+.news-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.news-title::before {
+  content: "📰";
+  font-size: 18px;
+}
+
+.news-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.news-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.news-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.news-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.news-date {
+  font-size: 12px;
+  font-weight: 600;
+  color: #3b82f6;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.news-text {
+  font-size: 14px;
+  color: #e5e7eb;
+  line-height: 1.5;
+  margin: 0;
 }
 
 .form-header {
@@ -1921,13 +2399,39 @@ export default {
     gap: 20px;
   }
   
+  .main-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  
   .project-header {
     flex-direction: column;
   text-align: center;
 }
 
+  .project-metrics-container {
+    gap: 16px;
+  }
+  
+  .metrics-section {
+    padding: 16px;
+  }
+  
+  .metrics-section-title {
+    font-size: 16px;
+  }
+  
   .project-metrics {
     grid-template-columns: 1fr;
+  }
+  
+  .contract-addresses-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .contract-address-value {
+    font-size: 12px;
+    padding: 6px 10px;
   }
   
   .form-header {
@@ -1944,3 +2448,5 @@ export default {
   }
 }
 </style>
+
+

@@ -77,8 +77,8 @@
         <p class="foot">By continuing, you agree to our Terms and acknowledge our 
           <a href="/src/components/privacypolicy.vue" >Privacy Policy.</a></p>
         <div style="margin-top: 40px;margin-left: 100px;display: flex;gap: 20px;width: 500px;">
-          <button class="btn-primary" @click="goToProjects">Invest Now</button>
-          <button class="btn-secondary" @click="goToContact">Contact Us</button>
+          <!-- <button class="btn-primary" @click="goToProjects">Invest Now</button>
+          <button class="btn-secondary" @click="goToContact">Contact Us</button> -->
         </div>
       </div>
         <!-- Blockchain Smart Contract Trading Dynamic Pattern -->

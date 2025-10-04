@@ -62,8 +62,7 @@
       </div>
     </div>
 
-
-    <!-- Step 3：活体检测（占位，接第三方时替换） -->
+    <!-- Step 2：活体检测（占位，接第三方时替换） -->
      <div v-if="step===3" class="modal">
       <div class="card">
         <h2>Liveness detection</h2>
@@ -89,7 +88,7 @@
       </div>
     </div> 
 
-    <!-- Step 4：完成 -->
+    <!-- Step 3：完成 -->
     <div v-if="step===4" class="modal">
       <div class="card success">
         <div class="bigcheck">✓</div>

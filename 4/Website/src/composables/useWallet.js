@@ -27,9 +27,8 @@ let initialized = false
 // ===== Your token config & ABI =====
 const TOKENS_BY_CHAIN = {
   1: [
-    { address: '0x7b21325dcB87A8167A7eFF504ec876C0F520dc17', label: 'PWL-P' },
-    { address: '#', label: 'PWL-P' }, //需要替换为实际的PWL-P地址
-    { address: '#', label: 'PWL-I' }, //需要替换为实际的PWL-I地址
+    { address: '0xA41b4F0417d588a08F914Ca17b07c99783D5c3FC', label: 'PWL-P' }, // 本金代币 (LPrincipalFixed)
+    { address: '0x9d3175E3F8c055389e070e058f717D450bB89206', label: 'PWL-I' }, // 利息代币 (LInterest)
   ],
   11155111: [
     { address: '0xYOUR_PWLP_SEPOLIA', label: 'PWL-P' }, //需要替换为实际的PWL-P地址
@@ -58,7 +57,7 @@ const nativeToAudDisplay = computed(() => {
   const aud = eth * audPrice.value
   return aud.toLocaleString(undefined, { maximumFractionDigits: 2 })
 })
-const bigAudDisplay = computed(() => `AUD$${(nativeToAudDisplay.value || '0')} AUD`)
+const bigAudDisplay = computed(() => `AUD${(nativeToAudDisplay.value || '0')} AUD`)
 
 // ===== Helpers =====
 function formatUnitsSafe(raw, decimals) {

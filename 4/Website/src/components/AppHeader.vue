@@ -113,9 +113,10 @@
         <nav class="menu" aria-label="Primary">
           <a href="#" @click.prevent="go('/home')" class="menu-item">Home</a>
           <a href="#" @click.prevent="go('/about')" class="menu-item">About Us</a>
-          <a href="#" @click.prevent="go('/listedprojects')" class="menu-item">Listed RWA</a>
-          <a href="#" @click.prevent="go('/to-be-listed')" class="menu-item">To be listed RWA</a>
-          <a href="#" @click.prevent="go('/portfolio')" class="menu-item">My Portfolio</a>
+          <a href="#" @click.prevent="go('/listedprojects')" class="menu-item">Tokenised RWA</a>
+          <a href="#" @click.prevent="go('/to-be-listed')" class="menu-item">To be tokenised RWA</a>
+          <a href="#" @click.prevent="goToContactUs" class="menu-item">Contact Us</a>
+          <!-- <a href="#" @click.prevent="go('/portfolio')" class="menu-item">My Portfolio</a> -->
         </nav>
         
         <!-- 移动端汉堡菜单按钮 -->
@@ -132,22 +133,6 @@
       </div>
 
       <div class="right">
-        <!-- Search -->
-        <div class="search-wrapper">
-          <form class="search-form" @submit.prevent="submitSearch">
-            <input
-              ref="searchInput"
-              type="text"
-              class="search-input"
-              :class="{ expanded: searchOpen }"
-              placeholder="Search..."
-              v-model="searchText"
-            />
-            <button type="button" class="search-toggle" @click="toggleSearch">
-              <img src="/icons/search-icon.png" alt="Search" />
-            </button>
-          </form>
-        </div>
       
       <!-- User Auth Buttons -->
         <div v-if="isLoggedIn">
@@ -212,10 +197,13 @@
           <!-- <span class="mobile-menu-icon">⏳</span> -->
           <span>To be listed RWA</span>
         </a>
-        <a href="#" @click.prevent="go('/portfolio')" class="mobile-menu-item">
-          <!-- <span class="mobile-menu-icon">💼</span> -->
-          <span>My Portfolio</span>
+        <a href="#" @click.prevent="goToContactUs" class="mobile-menu-item">
+          <!-- <span class="mobile-menu-icon">📞</span> -->
+          <span>Contact Us</span>
         </a>
+        <!-- <a href="#" @click.prevent="go('/portfolio')" class="mobile-menu-item">
+          <span>My Portfolio</span>
+        </a> -->
       </div>
     </div>
     
@@ -242,8 +230,6 @@ export default {
   },
   data(){
     return { 
-      searchOpen: false, 
-      searchText: '', 
       isLoggedIn: false,
       moreDropdownOpen: false,
       mobileMenuOpen: false,
@@ -263,13 +249,11 @@ export default {
     noop(){},
     go(path){
       this.$router.push(path);
-      this.closeSearch();
       this.closeMoreDropdown();
       this.closeMobileMenu();
     },
     toggleMoreDropdown(){
       this.moreDropdownOpen = !this.moreDropdownOpen;
-      this.closeSearch();
       this.closeMobileMenu();
     },
     closeMoreDropdown(){
@@ -293,7 +277,6 @@ export default {
     },
     toggleMobileMenu(){
       this.mobileMenuOpen = !this.mobileMenuOpen;
-      this.closeSearch();
       this.closeMoreDropdown();
     },
     closeMobileMenu(){
@@ -318,29 +301,11 @@ export default {
       this.$router.push('/login');
     },
 
-    toggleSearch(){
-      this.searchOpen = !this.searchOpen
-      this.$nextTick(()=>{ if(this.searchOpen && this.$refs.searchInput) this.$refs.searchInput.focus() })
-    },
-    closeSearch(){
-      this.searchOpen = false
-      this.searchText = ''
-    },
-    submitSearch(){
-      this.$emit('search', this.searchText)
-    },
     onDocClick(e){
-      const input = this.$refs.searchInput
-      const btn = this.$el.querySelector('.search-toggle')
       const dropdown = this.$el.querySelector('.dropdown-container')
       const mobileMenuBtn = this.$el.querySelector('.mobile-menu-btn')
       const mobileMenu = this.$el.querySelector('.mobile-menu')
       const walletDropdown = this.$el.querySelector('.wallet-dropdown-container')
-      
-      // 处理搜索框点击外部关闭
-      if(input && this.searchOpen && !input.contains(e.target) && !btn.contains(e.target)){
-        this.closeSearch()
-      }
       
       // 处理dropdown点击外部关闭
       if(dropdown && this.moreDropdownOpen && !dropdown.contains(e.target)){
@@ -375,6 +340,22 @@ export default {
     goToProfile() {
       // alert('跳转到个人资料页面');
       this.go('/profile');
+    },
+    goToContactUs() {
+      // 跳转到主页的contact us部分
+      this.go('/');
+      // 使用nextTick确保页面加载完成后再滚动
+      this.$nextTick(() => {
+        setTimeout(() => {
+          const contactSection = document.querySelector('.contact-section');
+          if (contactSection) {
+            contactSection.scrollIntoView({ 
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        }, 100);
+      });
     },
     linkNewWallet() {
       this.hideWalletDropdown();
@@ -701,9 +682,10 @@ export default {
 
 .wallet-divider {
   width: 1px;
-  height: 20px;
+  height: 16px;
   background: white;
   opacity: 0.3;
+  flex-shrink: 0;
 }
 
 .wallet-dropdown-btn {
@@ -1017,10 +999,12 @@ export default {
   }
   
   .right {
-    gap: 2px;
+    gap: 1px;
     margin-right: 0; /* 重置桌面端边距 */
     flex-wrap: nowrap; /* 防止换行 */
     align-items: center;
+    justify-content: flex-end; /* 右对齐 */
+    min-width: 0; /* 允许收缩 */
   }
   
   .brand-logo {
@@ -1037,18 +1021,6 @@ export default {
     height: 32px;
   }
   
-  .search-input.expanded {
-    width: 60px; /* 移动端搜索框更窄，为按钮留空间 */
-  }
-  
-  .search-toggle {
-    padding: 4px;
-  }
-  
-  .search-toggle img {
-    width: 16px;
-    height: 16px;
-  }
   
   .btn {
     padding: 4px 6px;
@@ -1094,13 +1066,16 @@ export default {
   .wallet-btn-wrapper {
     flex-direction: row; /* 保持水平布局 */
     min-width: auto;
-    flex-shrink: 0; /* 防止收缩 */
+    flex-shrink: 1; /* 允许收缩 */
+    gap: 1px; /* 减少间距 */
   }
   
   .wallet-main-btn {
-    padding: 4px 6px;
-    font-size: 10px;
+    padding: 3px 5px;
+    font-size: 9px;
     white-space: nowrap; /* 防止文字换行 */
+    flex-shrink: 1; /* 允许收缩 */
+    min-width: auto;
   }
   
   /* 移动端钱包按钮只显示图标 */
@@ -1114,14 +1089,16 @@ export default {
   }
   
   .wallet-dropdown-btn {
-    padding: 4px 4px;
-    flex-shrink: 0; /* 防止收缩 */
+    padding: 3px 3px;
+    flex-shrink: 0; /* 保持固定大小 */
+    min-width: auto;
   }
   
   .wallet-divider {
     width: 1px;
-    height: 16px;
-    margin: 0 1px;
+    height: 14px;
+    margin: 0 0px;
+    flex-shrink: 0;
   }
   
   .dropdown-menu {
@@ -1170,9 +1147,6 @@ export default {
     gap: 16px;
   }
   
-  .search-input.expanded {
-    width: 150px;
-  }
   
   .btn {
     padding: 9px 14px;
@@ -1200,9 +1174,11 @@ export default {
   }
   
   .right {
-    gap: 1px;
+    gap: 0px;
     flex-wrap: nowrap;
     align-items: center;
+    justify-content: flex-end;
+    min-width: 0;
   }
   
   .brand-logo {
@@ -1214,18 +1190,6 @@ export default {
     height: 28px;
   }
   
-  .search-input.expanded {
-    width: 50px; /* 更窄的搜索框，为按钮留更多空间 */
-  }
-  
-  .search-toggle {
-    padding: 3px;
-  }
-  
-  .search-toggle img {
-    width: 14px;
-    height: 14px;
-  }
   
   .btn {
     padding: 3px 4px;
@@ -1283,12 +1247,15 @@ export default {
   }
   
   .wallet-dropdown-btn {
-    padding: 3px 3px;
+    padding: 2px 2px;
+    flex-shrink: 0;
+    min-width: auto;
   }
   
   .wallet-divider {
-    height: 14px;
-    margin: 0 1px;
+    height: 12px;
+    margin: 0 0px;
+    flex-shrink: 0;
   }
   
   .dropdown-menu {
@@ -1339,6 +1306,8 @@ export default {
     gap: 0px;
     flex-wrap: nowrap;
     align-items: center;
+    justify-content: flex-end;
+    min-width: 0;
   }
   
   .brand-logo {
@@ -1350,18 +1319,6 @@ export default {
     height: 24px;
   }
   
-  .search-input.expanded {
-    width: 40px; /* 最窄搜索框，为按钮留最大空间 */
-  }
-  
-  .search-toggle {
-    padding: 2px;
-  }
-  
-  .search-toggle img {
-    width: 12px;
-    height: 12px;
-  }
   
   .btn {
     padding: 2px 3px;
@@ -1415,12 +1372,15 @@ export default {
   }
   
   .wallet-dropdown-btn {
-    padding: 2px 2px;
+    padding: 1px 1px;
+    flex-shrink: 0;
+    min-width: auto;
   }
   
   .wallet-divider {
-    height: 12px;
-    margin: 0 1px;
+    height: 10px;
+    margin: 0 0px;
+    flex-shrink: 0;
   }
   
   .dropdown-menu {

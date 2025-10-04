@@ -455,15 +455,15 @@ export default {
     return {
       activeSection: 'general', // 默认显示General Settings
       settingsSections: [
-        { id: 'general', title: 'General', icon: '⚙️', description: 'Basic application settings and preferences' },
-        { id: 'security', title: 'Security', icon: '🔐', description: 'Password, authentication, and security settings' },
-        { id: 'wallet', title: 'Wallet', icon: '💼', description: 'Wallet connection and transaction settings' },
-        { id: 'notifications', title: 'Notifications', icon: '🔔', description: 'Notification preferences and alerts' },
-        { id: 'performance', title: 'Performance', icon: '⚡', description: 'Performance optimization and caching settings' },
-        { id: 'account', title: 'Account', icon: '👤', description: 'Account options and profile settings' },
-        { id: 'trading', title: 'Trading', icon: '📊', description: 'Trading preferences and options' },
-        { id: 'privacy', title: 'Privacy', icon: '🔒', description: 'Privacy controls and data settings' },
-        { id: 'advanced', title: 'Advanced', icon: '🔧', description: 'Advanced settings and developer options' }
+        { id: 'general', title: 'General', icon: '', description: 'Basic application settings and preferences' },
+        { id: 'security', title: 'Security', icon: '', description: 'Password, authentication, and security settings' },
+        { id: 'wallet', title: 'Wallet', icon: '', description: 'Wallet connection and transaction settings' },
+        { id: 'notifications', title: 'Notifications', icon: '', description: 'Notification preferences and alerts' },
+        { id: 'performance', title: 'Performance', icon: '', description: 'Performance optimization and caching settings' },
+        { id: 'account', title: 'Account', icon: '', description: 'Account options and profile settings' },
+        { id: 'trading', title: 'Trading', icon: '', description: 'Trading preferences and options' },
+        { id: 'privacy', title: 'Privacy', icon: '', description: 'Privacy controls and data settings' },
+        { id: 'advanced', title: 'Advanced', icon: '', description: 'Advanced settings and developer options' }
       ],
       settings: {
         language: 'en',

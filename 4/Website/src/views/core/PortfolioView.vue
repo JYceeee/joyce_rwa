@@ -65,12 +65,12 @@
             <div class="pf-stats">
               <div class="pf-stat-card">
                 <div class="pf-stat-label">Total Investment</div>
-                <div class="pf-stat-value">AUD${{ getAccountTotalInvestment(selectedAccount).toFixed(2) }}</div>
+                <div class="pf-stat-value">AUD{{ getAccountTotalInvestment(selectedAccount).toFixed(2) }}</div>
               </div>
               <div class="pf-stat-card">
                 <div class="pf-stat-label">Interest Income</div>
                 <div class="pf-stat-value" :class="{ positive: getAccountTotalGain(selectedAccount) >= 0, negative: getAccountTotalGain(selectedAccount) < 0 }">
-                  {{ getAccountTotalGain(selectedAccount) >= 0 ? '+' : '' }}AUD${{ getAccountTotalGain(selectedAccount).toFixed(2) }}
+                  {{ getAccountTotalGain(selectedAccount) >= 0 ? '+' : '' }}AUD{{ getAccountTotalGain(selectedAccount).toFixed(2) }}
                 </div>
               </div>
               <div class="pf-stat-card">
@@ -142,7 +142,7 @@
                     </g>
                   </svg>
                   <div class="pf-pie-center">
-                    <div class="pf-pie-total">AUD${{ currentValue.toFixed(2) }}</div>
+                    <div class="pf-pie-total">AUD{{ currentValue.toFixed(2) }}</div>
                     <div class="pf-pie-label">Total Value</div>
                   </div>
                 </div>
@@ -155,7 +155,7 @@
                       <div class="pf-legend-code">{{ holding.code }}</div>
                     </div>
                     <div class="pf-legend-right">
-                      <div class="pf-legend-value">AUD${{ (holding.amount * holding.currentPrice).toFixed(2) }}</div>
+                      <div class="pf-legend-value">AUD{{ (holding.amount * holding.currentPrice).toFixed(2) }}</div>
                       <!-- <div class="pf-legend-percentage">{{ getAssetPercentage(holding).toFixed(2) }}%</div> -->
                     </div>
                   </div>
@@ -170,13 +170,13 @@
           <!-- 投资概览 -->
           <div class="pf-hero">
             <div class="pf-balance">
-              AUD${{ getAccountTotalInvestment(selectedAccount).toFixed(2) }}
+              AUD{{ getAccountTotalInvestment(selectedAccount).toFixed(2) }}
             </div>
             <!-- <div class="pf-change">
-                AUD${{ currentValue.toFixed(2) }}
+                AUD{{ currentValue.toFixed(2) }}
             </div> -->
             <!-- <div class="pf-change" :class="{ positive: totalGain >= 0, negative: totalGain < 0 }">
-              {{ totalGain >= 0 ? '+' : '' }}AUD${{ totalGain.toFixed(2) }} ({{ roi >= 0 ? '+' : '' }}{{ roi.toFixed(2) }}%)
+              {{ totalGain >= 0 ? '+' : '' }}AUD{{ totalGain.toFixed(2) }} ({{ roi >= 0 ? '+' : '' }}{{ roi.toFixed(2) }}%)
             </div> -->
           </div>
 
@@ -277,7 +277,7 @@
                 <div class="pf-watchlist-metrics">
                   <div class="pf-watchlist-metric">
                     <span class="pf-watchlist-label">LOAN SIZE</span>
-                    <span class="pf-watchlist-value">AUD${{ formatNumber(project.loan_amount || 0) }}</span>
+                    <span class="pf-watchlist-value">AUD{{ formatNumber(project.loan_amount || 0) }}</span>
                   </div>
                   <div class="pf-watchlist-metric">
                     <span class="pf-watchlist-label">EST. YIELD</span>
@@ -341,7 +341,7 @@
                   </div>
                   <div class="pf-analysis-stat-card">
                     <div class="pf-stat-content">
-                      <div class="pf-stat-label-inline">Total Value: <span class="pf-stat-number">AUD${{ totalTransactionValue.toFixed(2) }}</span></div>
+                      <div class="pf-stat-label-inline">Total Value: <span class="pf-stat-number">AUD{{ totalTransactionValue.toFixed(2) }}</span></div>
                     </div>
                   </div>
               </div>
@@ -378,7 +378,7 @@
                       <div class="pf-day-date">{{ formatAnalysisDate(dayGroup.date) }}</div>
                       <div class="pf-day-summary">
                         <span class="pf-day-total">{{ dayGroup.totalTransactions }} transactions</span>
-                        <span class="pf-day-value">AUD${{ dayGroup.totalValue.toFixed(2) }}</span>
+                        <span class="pf-day-value">AUD{{ dayGroup.totalValue.toFixed(2) }}</span>
                       </div>
                     </div>
                     <div class="pf-day-transactions">
@@ -392,8 +392,8 @@
                             <div class="pf-type-count">{{ typeGroup.count }} transactions</div>
                           </div>
                           <div class="pf-type-value">
-                            <div class="pf-type-amount">AUD${{ typeGroup.totalAmount.toFixed(2) }}</div>
-                            <div class="pf-type-avg">Avg: AUD${{ typeGroup.averageAmount.toFixed(2) }}</div>
+                            <div class="pf-type-amount">AUD{{ typeGroup.totalAmount.toFixed(2) }}</div>
+                            <div class="pf-type-avg">Avg: AUD{{ typeGroup.averageAmount.toFixed(2) }}</div>
                           </div>
                         </div>
                         <div class="pf-type-projects">
@@ -404,7 +404,7 @@
                             </div>
                             <div class="pf-project-stats">
                               <div class="pf-project-count">{{ project.count }} txns</div>
-                              <div class="pf-project-value">AUD${{ project.totalAmount.toFixed(2) }}</div>
+                              <div class="pf-project-value">AUD{{ project.totalAmount.toFixed(2) }}</div>
                             </div>
                           </div>
                         </div>
@@ -425,7 +425,7 @@
                     <span class="pf-stat-label">Assets</span>
                   </div>
                   <div class="pf-summary-stat">
-                    <span class="pf-stat-number">AUD${{ currentValue.toFixed(2) }}</span>
+                    <span class="pf-stat-number">AUD{{ currentValue.toFixed(2) }}</span>
                     <span class="pf-stat-label">Total Value</span>
                   </div>
                 </div>
@@ -456,7 +456,7 @@
                     <div class="pf-summary-label">Total</div>
                     <div class="pf-summary-value">
                       {{ todayTransactionStats.totalTransactions.toFixed(2) }} 
-                      <!-- (AUD${{ (todayTransactionStats.totalBuy + todayTransactionStats.totalSell).toFixed(2) }}) 
+                      <!-- (AUD{{ (todayTransactionStats.totalBuy + todayTransactionStats.totalSell).toFixed(2) }}) 
                     </div>
                   </div>
                   <div class="pf-summary-item">
@@ -499,9 +499,9 @@
                         </div>
                         <div class="pf-bar-label">{{ item.date }}</div>
                         <div class="pf-bar-tooltip">
-                          <div class="pf-tooltip-buy">Cumulative Buy: AUD${{ item.cumulativeBuyValue.toFixed(2) }}</div>
-                          <div class="pf-tooltip-sell">Cumulative Sell: AUD${{ item.cumulativeSellValue.toFixed(2) }}</div>
-                          <div class="pf-tooltip-net">Net Value: AUD${{ item.netValue.toFixed(2) }}</div>
+                          <div class="pf-tooltip-buy">Cumulative Buy: AUD{{ item.cumulativeBuyValue.toFixed(2) }}</div>
+                          <div class="pf-tooltip-sell">Cumulative Sell: AUD{{ item.cumulativeSellValue.toFixed(2) }}</div>
+                          <div class="pf-tooltip-net">Net Value: AUD{{ item.netValue.toFixed(2) }}</div>
                         </div>
                       </div>
                     </div>
@@ -592,11 +592,11 @@
                   <!-- <div class="pf-unified-legend">
                     <div class="pf-legend-item">
                       <div class="pf-legend-color pf-buy-color"></div>
-                      <span>Buy Value (AUD$)</span>
+                      <span>Buy Value (AUD)</span>
                     </div>
                     <div class="pf-legend-item">
                       <div class="pf-legend-color pf-sell-color"></div>
-                      <span>Sell Value (AUD$)</span>
+                      <span>Sell Value (AUD)</span>
                     </div>
                   </div> -->
                 <!-- </div>
@@ -876,8 +876,8 @@ function updateWatchlistProjects(allProjects) {
     totalOfferingRaw: project.total_offering_token || 0,
     subscribedRaw: project.subscribe_token || 0,
     // 格式化显示字段
-    totalOffering: project.total_offering_token ? `AUD$${project.total_offering_token.toLocaleString()}` : 'AUD$0',
-    subscribed: project.subscribe_token ? `AUD$${project.subscribe_token.toLocaleString()}` : 'AUD$0'
+    totalOffering: project.total_offering_token ? `AUD${project.total_offering_token.toLocaleString()}` : 'AUD0',
+    subscribed: project.subscribe_token ? `AUD${project.subscribe_token.toLocaleString()}` : 'AUD0'
   }))
   
   console.log('✅ Portfolio: watchlist 项目更新成功，共', watchlistProjects.value.length, '个项目')
@@ -2272,7 +2272,7 @@ const showTooltip = (event, point, type) => {
     visible: true,
     x: rect.left - containerRect.left + rect.width / 2,
     y: rect.top - containerRect.top - 50,
-    content: `${type === 'buy' ? 'Buy' : 'Sell'}: ${point.count} (AUD$${point.value.toFixed(2)})`,
+    content: `${type === 'buy' ? 'Buy' : 'Sell'}: ${point.count} (AUD${point.value.toFixed(2)})`,
     type: type,
     date: point.date
   }

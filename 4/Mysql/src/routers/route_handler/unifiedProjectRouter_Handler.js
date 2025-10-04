@@ -211,19 +211,12 @@ const getProjectByCode = async (req, res) => {
     
     const project = rows[0];
     const formattedProject = {
-      // 基础信息 - 同时提供下划线和驼峰命名，确保前端兼容性
+      // 基础信息
       id: project.id,
       project_code: project.project_code,
       project_name: project.project_name,
       loan_status: project.loan_status,
       created_at: project.created_at,
-      
-      // 前端期望的字段名（驼峰命名）
-      code: project.project_code,
-      name: project.project_name,
-      status: project.loan_status,
-      subtitle: project.property_summary,
-      type: project.property_type,
       
       // 认购信息
       subscribe_token: project.subscribe_token,
@@ -249,7 +242,6 @@ const getProjectByCode = async (req, res) => {
       lvr: project.lvr,
       interest_rate: project.interest_rate,
       default_rate: project.default_rate,
-      target_yield: project.interest_rate, // 添加前端期望的字段
       
       // 贷款周期
       commencement_date: project.commencement_date,

@@ -1,7 +1,7 @@
 <!-- src/components/AppFooter.vue -->
 <template>
   <footer class="footer">
-    <div class="container footer-top">
+    <!-- <div class="container footer-top">
       <div class="footer-brand">
         <img src="/icons/RWA-logo.svg" alt="Mortgage RWA Logo" class="footer-logo" />
         <p class="footer-tagline">Design amazing digital experiences that create more happy in the world.</p>
@@ -44,7 +44,7 @@
           <li><router-link to="/settings">Settings</router-link></li>
           <li><router-link to="/contact">Contact</router-link></li></ul></div>
       </div>
-    </div>
+    </div> -->
 
     <div class="container footer-bottom">
       <p>© 2025 Mortgage RWA. All rights reserved.</p>
