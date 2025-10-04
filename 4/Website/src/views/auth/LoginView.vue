@@ -1,8 +1,9 @@
 <template>
-  <div class="auth-card">
-    <div class="auth-logo"><img src="/icons/signup-icon1.png" alt="Mortgage RWA" /></div>
-    <h1 class="auth-title">Login Your Account</h1>
-    <p class="auth-sub">Welcome to Mortgage RWA</p> 
+  <div class="login-container">
+    <div class="auth-card">
+    <!-- <div class="auth-logo"><img src="/icons/signup-icon1.png" alt="Mortgage RWA" /></div> -->
+    <h1 class="auth-title">登录您的账户</h1>
+    <p class="auth-sub">欢迎来到RWADealmaker</p> 
 
     <!-- Login Status Display -->
     <div v-if="loginStatus" class="status" :class="loginStatusClass">
@@ -10,22 +11,22 @@
     </div>
 
     <form class="auth-form" @submit.prevent="submitLogin">
-      <label for="lemail" class="auth-label">Email</label>
+      <label for="lemail" class="auth-label">邮箱</label>
       <input
         id="lemail"
         type="email"
         class="input auth-input"
-        placeholder="Enter your email"
+        placeholder="输入您的邮箱"
         v-model.trim="user_email"
         required
       />
 
-      <label for="lpass" class="auth-label">Password</label>
+      <label for="lpass" class="auth-label">密码</label>
       <input
         id="lpass"
         type="password"
         class="input auth-input"
-        placeholder="••••••••"
+        placeholder="输入您的密码"
         v-model="user_password"
         required
       />
@@ -33,20 +34,21 @@
       <div class="auth-row">
         <label class="auth-check">
           <input type="checkbox" v-model="remember" />
-          <span>Remember for 30 days</span>
+          <span>记住30天</span>
         </label>
-        <a href="#" class="auth-link" @click.prevent="$emit('navigate','forgot')">Forgot password</a>
+        <a href="#" class="auth-link" @click.prevent="$emit('navigate','forgot')">忘记密码</a>
       </div>
 
       <button class="btn orange auth-submit" type="submit" :disabled="loading">
-        {{ loading ? 'Logging in...' : 'Login' }}
+        {{ loading ? '登录中...' : '登录' }}
       </button>
 
       <p class="auth-alt">
-        Don't have an account?
-        <a href="#" class="auth-link" @click.prevent="$emit('navigate','signup')">Sign up</a>
+        没有账户？
+        <a href="#" class="auth-link" @click.prevent="$emit('navigate','signup')">注册</a>
       </p>
     </form>
+    </div>
   </div>
 </template>
 
@@ -123,9 +125,9 @@ export default {
           // this.$emit('notify', 'Login successful! Now you can see Wallet and Profile buttons.');
           this.$emit('notify', 'Login successful!');
           
-          // Redirect to home page
+          // Redirect to aboutus page
           setTimeout(() => {
-            this.$router.push('/home');
+            this.$router.push('/about');
           }, 1000);
         } else {
           this.loginStatusClass = 'status error';
@@ -163,22 +165,28 @@ export default {
 </script>
 
 <style scoped>
+.login-container {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .auth-card {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 2px 8px #eee;
   padding: 32px;
   min-width: 340px;
   max-width: 400px;
+  width: 100%;
 }
 .auth-title { color: #000; }
 
 .status {
-  margin-top: 20px;
+  margin:auto;
   padding: 15px;
   border-radius: 6px;
   font-weight: 500;
@@ -199,13 +207,13 @@ export default {
 
 /* 手机端响应式设计 */
 @media (max-width: 768px) {
+  .login-container {
+    padding: 20px;
+  }
+  
   .auth-card {
-    position: relative;
-    top: auto;
-    left: auto;
-    transform: none;
-    margin: 30px 30px;
-    width: calc(100% - 60px);
+    margin: 0;
+    width: 100%;
     padding: 24px;
   }
   
@@ -225,9 +233,13 @@ export default {
 }
 
 @media (max-width: 480px) {
+  .login-container {
+    padding: 16px;
+  }
+  
   .auth-card {
-    margin: 16px 30px;
-    width: calc(100% - 60px);
+    margin: 0;
+    width: 100%;
     padding: 20px;
   }
   

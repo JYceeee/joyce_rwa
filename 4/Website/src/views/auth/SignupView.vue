@@ -1,5 +1,6 @@
 <template>
-  <div class="auth-card">
+  <div class="signup-container">
+    <div class="auth-card">
     <!-- Simple Modal -->
     <div v-if="showModal" class="modal-mask">
       <div class="modal-wrapper">
@@ -11,9 +12,9 @@
       </div>
     </div>
 
-    <div class="auth-logo"><img src="/icons/RWA-logo.png" alt="Mortgage RWA" /></div>
-    <h1 class="auth-title">Create an account</h1>
-    <!-- <p class="auth-sub">test new user registration function</p> -->
+    <!-- <div class="auth-logo"><img src="/icons/RWA-logo.png" alt="Mortgage RWA" /></div> -->
+    <h1 class="auth-title">注册您的账户</h1>
+    <!-- <p class="auth-sub">欢迎来到RWADealmaker</p> -->
 
     <!-- Registration Status Display -->
     <div v-if="signupStatus" class="status" :class="signupStatusClass">
@@ -21,53 +22,53 @@
     </div>
 
     <form class="auth-form" @submit.prevent="submitSignup">
-      <label for="semail" class="auth-label">Email</label>
+      <label for="semail" class="auth-label">邮箱</label>
       <input
         id="semail"
         v-model.trim="user_email"
         type="email"
         class="input auth-input"
-        placeholder="Enter your email"
+        placeholder="输入您的邮箱"
         required
       />
       
-      <label for="spass" class="auth-label">Password</label>
+      <label for="spass" class="auth-label">密码</label>
       <input
         id="spass"
         v-model="user_password"
         type="password"
         class="input auth-input"
-        placeholder="Enter your password"
+        placeholder="输入您的密码"
         required
       />
       
-      <label for="scpass" class="auth-label">Confirm Password</label>
+      <!-- <label for="scpass" class="auth-label">确认密码</label> -->
       <input
         id="scpass"
         v-model="confirm_password"
         type="password"
         class="input auth-input"
         :class="{ 'password-match': passwordMatches && confirm_password, 'password-mismatch': !passwordMatches && confirm_password }"
-        placeholder="Confirm your password"
+        placeholder="确认您的密码"
         @input="checkPasswordMatch"
         required
       />
       
       <!-- Password Match Status Indicator -->
       <div v-if="confirm_password" class="password-status" :class="passwordMatches ? 'match' : 'mismatch'">
-        {{ passwordMatches ? '✓ Passwords match' : '✗ Passwords do not match' }}
+        {{ passwordMatches ? '✓ 密码匹配' : '✗ 密码不匹配' }}
       </div>
       
-      <label for="sname" class="auth-label">Full Name</label>
+      <label for="sname" class="auth-label">姓名</label>
       <input
         id="sname"
         v-model.trim="user_name"
         type="text"
         class="input auth-input"
-        placeholder="Enter your name"
+        placeholder="输入您的姓名"
       />
 
-      <label for="sphone" class="auth-label">Phone number</label>
+      <label for="sphone" class="auth-label">电话号码</label>
       <div class="phone-input-container">
         <select 
           v-model="country_code" 
@@ -90,7 +91,7 @@
           v-model.trim="phone_number"
           type="tel"
           class="input auth-input phone-number-input"
-          placeholder="Enter your phone number"
+          placeholder="输入您的电话号码"
           @input="updatePhoneNumber"
           required
         />
@@ -99,7 +100,7 @@
       <div class="auth-row">
           <label class="auth-check">
             <input type="checkbox" v-model="agreeTerms" />
-            <span>I agree to the 
+            <span>我同意 
               <a href="#" @click.prevent="goToTerms">Terms</a> and 
               <a href="#" @click.prevent="goToPrivacy">Privacy Policy.</a>
             </span>
@@ -108,20 +109,20 @@
       <div class="auth-row">
         <label class="auth-check">
           <input type="checkbox" v-model="agreeEmailUpdates" />
-          <span>I want to receive e-mail updates from RWA. </span>
+          <span>我想要接收来自RWA的电子邮件更新。 </span>
         </label>
       </div>
 
       <button class="btn orange auth-submit" type="submit" :disabled="loading || !agreeTerms" >
-        {{ loading ? 'registering...' : 'Sign up' }}
+        {{ loading ? '注册中...' : '注册' }}
       </button>
-      
 
       <p class="auth-alt">
-        Already have an account?
-        <a href="#" class="auth-link" @click.prevent="go('/login')">Log in</a>
+        已经有账户？
+        <a href="#" class="auth-link" @click.prevent="go('/login')">登录</a>
       </p>
     </form>
+    </div>
   </div>
 </template>
 
@@ -385,17 +386,25 @@ export default {
 </script>
 
 <style scoped>
+.signup-container {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+}
+
 .auth-card {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 2px 8px #eee;
   padding: 32px;
   min-width: 340px;
   max-width: 400px;
+  width: 100%;
 }
 .modal-mask {
   position: fixed; z-index: 9999; inset: 0; background: rgba(0,0,0,0.3);
@@ -459,10 +468,14 @@ export default {
 
 /* 手机端响应式设计 */
 @media (max-width: 768px) {
-  .auth-container {
-    padding: 20px 30px;
-    margin: 20px 30px;
-    width: calc(100% - 60px);
+  .signup-container {
+    padding: 20px;
+  }
+  
+  .auth-card {
+    margin: 0;
+    width: 100%;
+    padding: 24px;
   }
   
   .auth-title {
@@ -499,10 +512,14 @@ export default {
 }
 
 @media (max-width: 480px) {
-  .auth-container {
-    padding: 16px 30px;
-    margin: 16px 30px;
-    width: calc(100% - 60px);
+  .signup-container {
+    padding: 16px;
+  }
+  
+  .auth-card {
+    margin: 0;
+    width: 100%;
+    padding: 20px;
   }
   
   .auth-title {

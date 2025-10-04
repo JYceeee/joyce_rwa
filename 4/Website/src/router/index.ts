@@ -12,13 +12,14 @@ import LoginView from '../views/auth/LoginView.vue'
 import SignupView from '../views/auth/SignupView.vue'
 import AboutUsView from '../views/info/aboutus/AboutUsView.vue'
 import SettingsView from '../views/settings/SettingsView.vue'
+import ContactUs from '../components/ContactUs.vue'
 import kycService from '../components/kycService.vue'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', redirect: '/home'},
-    { path: '/home', name: 'home', component: HomeView },
+    { path: '/', redirect: '/about'},
+    // { path: '/home', name: 'home', component: HomeView },
     { path: '/wallet', name: 'wallet', component: WalletView },
     { path: '/portfolio', name: 'portfolio', component: PortfolioView },
     { path: '/listedprojects', name: 'listedprojects', component: ListedProjectsView },
@@ -32,6 +33,7 @@ const router = createRouter({
     { path: '/trade/:code', name: 'tradeProject', component: TradeProjectView, props: true },
     { path: '/kycService', component: kycService },
     { path: '/about', name: 'about', component: AboutUsView },
+    { path: '/contact', name: 'contact', component: ContactUs },
     {path:'/settings',name:'settings',component:SettingsView},
   ]
 })

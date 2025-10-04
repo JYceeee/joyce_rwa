@@ -4,7 +4,7 @@
       <!-- 左侧边栏 -->
       <div class="settings-sidebar">
         <div class="sidebar-header">
-          <h1 class="sidebar-title">Settings</h1>
+          <h1 class="sidebar-title">设置</h1>
         </div>
         <nav class="sidebar-nav">
           <button 
@@ -33,12 +33,12 @@
             <div class="settings-items">
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Language</h3>
-                <p class="settings-description">Choose your preferred language</p>
+                <h3 class="settings-name">语言</h3>
+                <p class="settings-description">选择您偏好的语言</p>
               </div>
               <div class="settings-control">
                 <select class="settings-select">
-                  <option value="en">English</option>
+                  <option value="en">英语</option>
                   <option value="zh">中文</option>
                   <option value="ja">日本語</option>
                   <option value="ko">한국어</option>
@@ -48,29 +48,29 @@
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Theme</h3>
-                <p class="settings-description">Select your preferred theme</p>
+                <h3 class="settings-name">主题</h3>
+                <p class="settings-description">选择您偏好的主题</p>
               </div>
               <div class="settings-control">
                 <select class="settings-select">
-                  <option value="dark">Dark</option>
-                  <option value="light">Light</option>
-                  <option value="auto">Auto</option>
+                  <option value="dark">深色</option>
+                  <option value="light">浅色</option>
+                  <option value="auto">自动</option>
                 </select>
               </div>
             </div>
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Timezone</h3>
-                <p class="settings-description">Set your local timezone</p>
+                <h3 class="settings-name">时区</h3>
+                <p class="settings-description">设置您的本地时区</p>
               </div>
               <div class="settings-control">
                 <select class="settings-select">
                   <option value="UTC">UTC</option>
-                  <option value="EST">Eastern Time</option>
-                  <option value="PST">Pacific Time</option>
-                  <option value="CST">China Standard Time</option>
+                  <option value="EST">东部时间</option>
+                  <option value="PST">太平洋时间</option>
+                  <option value="CST">中国标准时间</option>
                 </select>
               </div>
             </div>
@@ -92,33 +92,33 @@
             <div class="settings-items">
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Password</h3>
-                <p class="settings-description">Change your account password</p>
+                <h3 class="settings-name">密码</h3>
+                <p class="settings-description">更改您的账户密码</p>
               </div>
               <div class="settings-control">
-                <button class="btn btn-secondary">Change Password</button>
+                <button class="btn btn-secondary">更改密码</button>
               </div>
             </div>
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Session Timeout</h3>
-                <p class="settings-description">Set automatic logout time</p>
+                <h3 class="settings-name">会话超时</h3>
+                <p class="settings-description">设置自动登出时间</p>
               </div>
               <div class="settings-control">
                 <select class="settings-select">
-                  <option value="15">15 minutes</option>
-                  <option value="30">30 minutes</option>
-                  <option value="60">1 hour</option>
-                  <option value="480">8 hours</option>
+                  <option value="15">15分钟</option>
+                  <option value="30">30分钟</option>
+                  <option value="60">1小时</option>
+                  <option value="480">8小时</option>
                 </select>
               </div>
             </div>
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Login Alerts</h3>
-                <p class="settings-description">Get notified of new login attempts</p>
+                <h3 class="settings-name">登录提醒</h3>
+                <p class="settings-description">接收新登录尝试的通知</p>
               </div>
               <div class="settings-control">
                 <label class="toggle-switch">
@@ -455,15 +455,15 @@ export default {
     return {
       activeSection: 'general', // 默认显示General Settings
       settingsSections: [
-        { id: 'general', title: 'General', icon: '', description: 'Basic application settings and preferences' },
-        { id: 'security', title: 'Security', icon: '', description: 'Password, authentication, and security settings' },
-        { id: 'wallet', title: 'Wallet', icon: '', description: 'Wallet connection and transaction settings' },
-        { id: 'notifications', title: 'Notifications', icon: '', description: 'Notification preferences and alerts' },
-        { id: 'performance', title: 'Performance', icon: '', description: 'Performance optimization and caching settings' },
-        { id: 'account', title: 'Account', icon: '', description: 'Account options and profile settings' },
-        { id: 'trading', title: 'Trading', icon: '', description: 'Trading preferences and options' },
-        { id: 'privacy', title: 'Privacy', icon: '', description: 'Privacy controls and data settings' },
-        { id: 'advanced', title: 'Advanced', icon: '', description: 'Advanced settings and developer options' }
+        { id: 'general', title: '常规', icon: '', description: '基本应用程序设置和偏好' },
+        { id: 'security', title: '安全', icon: '', description: '密码、身份验证和安全设置' },
+        { id: 'wallet', title: '钱包', icon: '', description: '钱包连接和交易设置' },
+        { id: 'notifications', title: '通知', icon: '', description: '通知偏好和提醒设置' },
+        { id: 'performance', title: '性能', icon: '', description: '性能优化和缓存设置' },
+        { id: 'account', title: '账户', icon: '', description: '账户选项和个人资料设置' },
+        { id: 'trading', title: '交易', icon: '', description: '交易偏好和选项设置' },
+        { id: 'privacy', title: '隐私', icon: '', description: '隐私控制和数据设置' },
+        { id: 'advanced', title: '高级', icon: '', description: '高级设置和开发者选项' }
       ],
       settings: {
         language: 'en',

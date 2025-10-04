@@ -64,7 +64,7 @@
       <div class="mm-hero">
         <!-- 当前网络 -->
         <div class="mm-card">
-          <div class="mm-card-label">Current Network</div>
+          <div class="mm-card-label">当前网络</div>
           <div class="mm-card-title">{{ networkLabel }}</div>
           <div class="mm-card-sub">Chain ID: {{ chainId }}</div>
         </div>
@@ -79,12 +79,12 @@
 
       <!-- 自定义代币输入 -->
       <div class="mm-custom">
-        <span class="mm-net-left">Insert your contract address here:</span>
+        <span class="mm-net-left">在此插入您的合约地址：</span>
         <form class="mm-custom-form" @submit.prevent="addToken">
-          <input v-model="customAddress" class="mm-input" placeholder="Paste ERC20 contract address" />
-          <input v-model="customLabel" class="mm-input" placeholder="Label (optional)" />
-          <button class="mm-btn mm-outline" type="submit" :disabled="!customAddress">Add Token</button>
-          <button class="mm-btn mm-outline" type="button" @click="refreshTokens">Refresh</button>
+          <input v-model="customAddress" class="mm-input" placeholder="粘贴ERC20合约地址" />
+          <input v-model="customLabel" class="mm-input" placeholder="标签（可选）" />
+          <button class="mm-btn mm-outline" type="submit" :disabled="!customAddress">添加代币</button>
+          <button class="mm-btn mm-outline" type="button" @click="refreshTokens">刷新</button>
         </form>
         <!-- 警告信息显示 -->
         <div v-if="warning" class="mm-warning">
@@ -95,7 +95,7 @@
       <!-- 信息条：网络 / 原生余额 -->
       <!-- <div class="mm-info">
         <div class="mm-card">
-          <div class="mm-card-label">Current Network</div>
+          <div class="mm-card-label">当前网络</div>
           <div class="mm-card-title">{{ networkLabel }}</div>
           <div class="mm-card-sub">Chain ID: {{ chainId }}</div>
         </div>
@@ -111,7 +111,7 @@
           class="mm-tab"
           :class="{ 'is-active': activeTab==='tokens' }"
           @click="activeTab='tokens'"
-        >Tokens</button>
+        >代币</button>
       </nav>
     
 
@@ -155,7 +155,7 @@
   <p v-if="warning" class="mm-warn">{{ warning }}</p>
   <p v-if="error" class="mm-error">{{ error }}</p>
   <transition name="fade">
-    <div v-if="copied" class="mm-toast">Copied</div>
+    <div v-if="copied" class="mm-toast">已复制</div>
   </transition>
 </template>
 
@@ -602,17 +602,17 @@ function getActivityIcon(type) {
 // 获取活动标题
 function getActivityTitle(type) {
   const titles = {
-    'buy': 'BUY TOKEN',
-    'sell': 'SELL TOKEN',
-    'wallet_connect': 'WALLET CONNECTED',
-    'wallet_disconnect': 'WALLET DISCONNECTED',
-    'network_change': 'NETWORK CHANGED',
-    'metamask_connect': 'METAMASK CONNECTED',
-    'metamask_disconnect': 'METAMASK DISCONNECTED',
-    'wallet_status_check': 'STATUS CHECKED',
-    'wallet_focus_check': 'FOCUS CHECKED',
-    'metamask_message': 'METAMASK MESSAGE',
-    'metamask_transaction': 'METAMASK TRANSACTION'
+    'buy': '购买代币',
+    'sell': '出售代币',
+    'wallet_connect': '钱包已连接',
+    'wallet_disconnect': '钱包已断开',
+    'network_change': '网络已切换',
+    'metamask_connect': 'MetaMask已连接',
+    'metamask_disconnect': 'MetaMask已断开',
+    'wallet_status_check': '状态已检查',
+    'wallet_focus_check': '焦点已检查',
+    'metamask_message': 'MetaMask消息',
+    'metamask_transaction': 'MetaMask交易'
   }
   return titles[type] || type.toUpperCase()
 }

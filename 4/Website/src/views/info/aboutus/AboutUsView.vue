@@ -1,5 +1,66 @@
 <template>
-  <div class="container">
+  <!-- Intro Video Overlay -->
+  <div 
+    v-if="showIntroVideo || isTransitioning" 
+    class="intro-video-overlay"
+    :class="{ 'fade-out': isTransitioning }"
+  >
+    <div 
+      class="intro-video-container"
+      :class="{ 'fade-out': isTransitioning }"
+    >
+      <video 
+        ref="introVideo"
+        class="intro-video"
+        autoplay 
+        muted 
+        playsinline
+        @ended="handleIntroVideoEnd"
+        @canplaythrough="handleIntroVideoReady"
+        @error="handleIntroVideoError"
+      >
+        <source src="/videos/Introvideo.mp4" type="video/mp4">
+        你的浏览器不支持视频播放
+      </video>
+      
+      <!-- Skip Button (右上角) -->
+      <button 
+        v-if="showIntroSkipButton" 
+        class="skip-button" 
+        @click="skipIntroVideo"
+        title="Skip Video"
+      >
+    -> 跳过视频
+      </button>
+      
+      <!-- Video Overlay -->
+      <div class="video-overlay">
+        <!-- Loading Indicator -->
+        <div v-if="introVideoLoading" class="loading-indicator">
+          <div class="loading-spinner"></div>
+          <p class="loading-text">加载视频...</p>
+        </div>
+        
+        <!-- Error Message -->
+        <div v-if="introVideoError" class="error-message">
+          <p>视频加载失败</p>
+          <button class="btn btn-secondary" @click="closeIntroVideo">关闭</button>
+        </div>
+      </div>
+      
+      <!-- Brand Information Display -->
+      <div class="brand-info">
+        <div class="logo-container">
+          <!-- <img src="/icons/RWA-logo.png" alt="RWA Logo" class="brand-logo"> -->
+        </div>
+        <h1 class="headline">我们是专注于把房地产资产包装成<br>投资人喜欢的RWA底层资产的<br>RWA Dealmaker</br>
+        </h1>
+        <p class="brand-subtitle">本平台以保护RWA投资人的投资安全为出发点，组织合法合规，风险低，回报高的优质资产</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" :class="{ 'fade-in': !showIntroVideo && !isTransitioning }">
     <div class="page-header">
       <h1>About Us</h1>
       <!-- <p class="page-subtitle">Innovative technology company dedicated to revolutionizing real estate investment</p> -->
@@ -12,33 +73,24 @@
         <!-- <div class="vision-content"> -->
           <div class="vision-text">
             <p class="vision-intro">
-              <strong>RWAT dealmaker</strong>
-              (stand for Real World Assets Tokenization deal maker) 
-              is the creator of the real world assets tokenization project, 
-              meaning that this platform is committed to protecting the investment safety of RWAT investors, 
-              organizing legally compliant, low-risk, high-return and high-quality asset. 
-              For example, residential mortgage loans with a mortgage rate of less than 70% and a rate of approximately 9% in Australia. 
-              This platform aims to promote the transaction between investors and asset holders.
+              <!-- <strong>RWAT dealmaker</strong> -->
+              我们是专注于把房地产资产包装成投资人喜欢的RWA底层资产的RWA Dealmaker，
+              即本平台以保护RWA投资人的投资安全为出发点，组织合法合规，风险低，回报高的优质资产
+              （比如澳大利亚抵押率不超过70%，利率大约为9%的第一抵押权人的住宅抵押贷款资产），
+              促成投资人和资产持有人交易的dealmaker。
             </p>
             
             <p class="vision-intro">
-              The underlying assets displayed on this platform are protected by the laws of the country where they are located, 
-              and the funds can freely enter and exit that country. 
-              If investors require, 
-              the project transaction structure can be isolated and entrusted by a third-party institution to hold the underlying assets and funds.
+            本平台上展示的底层资产受资产所在国家的法律保护，且资金可以自由进出该国家。
+            如果投资人有要求，项目交易结构可以让底层资产和资金独立隔离和托管给合格的第三方机构。
             </p>
             
             <p class="vision-intro">
-              In addition to facilitating transactions between investors and RWAT underlying asset holders, 
-              this platform can also integrate the cooperation of all institutions in the RWA tokenization chain, 
-              including professional RWA tokenization technology service companies and licensed issuers and exchanges of RWAT in various countries, 
-              to achieve the successful issuance of RWA tokenization legally, efficiently, at low cost, and publicly or privately.
+              本平台除了促成投资人和RWA底层资产持有人达成交易以外，还可以额外整合RWA代币化全链条各机构的合作，
+              包括专业的RWA代币化的技术服务公司以及各国RWAT的持牌发行商和交易所等，
+              实现RWA代币化合法的，高效的，低成本的的公开或非公开发行的成功。
             </p>
           </div>
-          <!-- <div class="vision-image">
-            <div class="image-placeholder">🚀</div>
-          </div> -->
-        <!-- </div> -->
       </div>
 
       <!-- <div class="mission-section">
@@ -121,16 +173,340 @@
 
 <script>
 export default {
-  name: 'AboutUsView'
+  name: 'AboutUsView',
+  data() {
+    return {
+      // Intro video related states
+      showIntroVideo: false,
+      introVideoLoading: true,
+      showIntroSkipButton: false,
+      introVideoError: false,
+      introVideoTimer: null,
+      // Transition effect states
+      isTransitioning: false,
+      transitionTimer: null
+    }
+  },
+  mounted() {
+    // 页面加载时自动播放intro video
+    this.playIntroVideo()
+  },
+  beforeUnmount() {
+    // 清理定时器
+    if (this.introVideoTimer) {
+      clearTimeout(this.introVideoTimer)
+    }
+    if (this.transitionTimer) {
+      clearTimeout(this.transitionTimer)
+    }
+  },
+  methods: {
+    // 播放开场视频
+    playIntroVideo() {
+      this.showIntroVideo = true
+      this.introVideoLoading = true
+      this.introVideoError = false
+      this.showIntroSkipButton = true // 立即显示跳过按钮
+      
+      // 清除之前的定时器
+      if (this.introVideoTimer) {
+        clearTimeout(this.introVideoTimer)
+        this.introVideoTimer = null
+      }
+    },
+    
+    // 视频准备就绪
+    handleIntroVideoReady() {
+      this.introVideoLoading = false
+      console.log('开场视频加载完成')
+    },
+    
+    // 视频播放结束
+    handleIntroVideoEnd() {
+      console.log('开场视频播放完成')
+      this.startTransition()
+    },
+    
+    // 视频加载错误
+    handleIntroVideoError() {
+      console.error('开场视频加载失败')
+      this.introVideoLoading = false
+      this.introVideoError = true
+    },
+    
+    // 跳过视频
+    skipIntroVideo() {
+      console.log('用户跳过开场视频')
+      this.startTransition()
+    },
+    
+    // 开始过渡效果
+    startTransition() {
+      this.isTransitioning = true
+      
+      // 停止视频播放
+      const video = this.$refs.introVideo
+      if (video) {
+        video.pause()
+      }
+      
+      // 1秒后开始淡出视频，再1秒后完全关闭
+      this.transitionTimer = setTimeout(() => {
+        this.showIntroVideo = false
+        
+        // 再延迟一点时间确保过渡完成
+        setTimeout(() => {
+          this.isTransitioning = false
+          this.resetVideoState()
+        }, 10)
+      }, 10)
+    },
+    
+    // 关闭视频覆盖层
+    closeIntroVideo() {
+      this.showIntroVideo = false
+      this.introVideoLoading = false
+      this.introVideoError = false
+      this.showIntroSkipButton = false
+      this.isTransitioning = false
+      
+      // 清除定时器
+      if (this.introVideoTimer) {
+        clearTimeout(this.introVideoTimer)
+        this.introVideoTimer = null
+      }
+      
+      if (this.transitionTimer) {
+        clearTimeout(this.transitionTimer)
+        this.transitionTimer = null
+      }
+      
+      this.resetVideoState()
+    },
+    
+    // 重置视频状态
+    resetVideoState() {
+      // 停止视频播放并重置
+      const video = this.$refs.introVideo
+      if (video) {
+        video.pause()
+        video.currentTime = 0
+      }
+      
+      // 重置所有状态
+      this.introVideoLoading = false
+      this.introVideoError = false
+      this.showIntroSkipButton = false
+      this.isTransitioning = false
+    }
+  }
 }
 </script>
 
 <style scoped>
+/* Intro Video Styles */
+.intro-video-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.5s ease;
+}
+
+.intro-video-overlay.fade-out {
+  opacity: 0;
+}
+
+/* 主页内容淡入效果 */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 20px;
   color: var(--dark-text);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.container.fade-in {
+  opacity: 1;
+}
+
+.intro-video-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.intro-video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+  transition: opacity 0.5s ease;
+}
+
+.intro-video-container.fade-out .intro-video {
+  opacity: 0.3;
+}
+
+.video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 1;
+}
+
+.loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  color: #ffffff;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.error-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  color: #ffffff;
+}
+
+.error-message p {
+  font-size: 16px;
+  margin: 0;
+}
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary {
+  background: #6b7280;
+  color: #ffffff;
+}
+
+.btn-secondary:hover {
+  background: #4b5563;
+}
+
+.skip-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.skip-button:hover {
+  background: rgba(0, 0, 0, 0.9);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.brand-info {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  color: #ffffff;
+  z-index: 2;
+  max-width: 800px;
+  padding: 0 40px;
+  transition: opacity 0.5s ease;
+}
+
+.intro-video-container.fade-out .brand-info {
+  opacity: 0.5;
+}
+
+.logo-container {
+  position: fixed;
+  top: 100px;
+  left: 100px;
+}
+
+.headline {
+  font-size: 38px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0 0 20px 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.brand-subtitle {
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 0;
+  opacity: 0.9;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+@media (max-width: 768px) {
+  .headline {
+    font-size: 1.8rem;
+  }
+  
+  .brand-subtitle {
+    font-size: 1rem;
+  }
+  
+  .brand-info {
+    padding: 0 20px;
+    bottom: 20px;
+  }
 }
 
 .page-header {

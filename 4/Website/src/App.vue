@@ -12,7 +12,7 @@
 
 <script>
 import AppHeader from './components/AppHeader.vue'
-import HomeView from './views/core/HomeView.vue'
+// import HomeView from './views/core/HomeView.vue'
 import ListedProjectsView from './views/core/ListedProjectsView.vue'
 import PortfolioView from './views/core/PortfolioView.vue'
 import LoginView from './views/auth/LoginView.vue'
@@ -27,7 +27,7 @@ export default {
   components: { 
     AppHeader, 
     AppFooter, 
-    HomeView, 
+    // HomeView, 
     ListedProjectsView, 
     LoginView, 
     SignupView, 

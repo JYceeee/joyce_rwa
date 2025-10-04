@@ -111,12 +111,12 @@
           <img src="/icons/RWA-logo.svg" alt="Mortgage RWA" class="brand-logo" />
         </a>
         <nav class="menu" aria-label="Primary">
-          <a href="#" @click.prevent="go('/home')" class="menu-item">Home</a>
-          <a href="#" @click.prevent="go('/about')" class="menu-item">About Us</a>
-          <a href="#" @click.prevent="go('/listedprojects')" class="menu-item">Tokenised RWA</a>
-          <a href="#" @click.prevent="go('/to-be-listed')" class="menu-item">To be tokenised RWA</a>
-          <a href="#" @click.prevent="goToContactUs" class="menu-item">Contact Us</a>
-          <!-- <a href="#" @click.prevent="go('/portfolio')" class="menu-item">My Portfolio</a> -->
+          <!-- <a href="#" @click.prevent="go('/home')" class="menu-item">首页</a> -->
+          <a href="#" @click.prevent="go('/about')" class="menu-item">关于我们</a>
+          <a href="#" @click.prevent="go('/listedprojects')" class="menu-item">已上链RWA</a>
+          <a href="#" @click.prevent="go('/to-be-listed')" class="menu-item">待上链RWA</a>
+          <a href="#" @click.prevent="goToContactUs" class="menu-item">联系我们</a>
+          <!-- <a href="#" @click.prevent="go('/portfolio')" class="menu-item">我的投资组合</a> -->
         </nav>
         
         <!-- 移动端汉堡菜单按钮 -->
@@ -139,13 +139,13 @@
           <!-- 钱包连接状态显示 -->
           <div v-if="!connected" class="wallet-connect-section">
             <button class="btn orange pill" @click.prevent="connectWallet">
-              <span>Connect Wallet</span>
+              <span>连接钱包</span>
             </button>
           </div>
           
           <!-- 已连接钱包显示 -->
           <div v-else class="wallet-dropdown-container">
-             <div class="wallet-btn-wrapper">
+            <div class="wallet-btn-wrapper">
                <button class="btn orange pill wallet-main-btn" @click.prevent="goToWallet()">
                  <span class="wallet-address-text">{{ shortAddress }}</span>
                  <!-- <span class="wallet-icon-text">💳</span> -->
@@ -155,14 +155,14 @@
                 @click.prevent="toggleWalletDropdown">
                  <span class="dropdown-arrow">▾</span>
                </button>
-             </div>
+            </div>
             <div v-if="walletDropdownOpen" class="wallet-dropdown-menu">
-              <div class="wallet-dropdown-header">Wallet Management</div>
+              <div class="wallet-dropdown-header">钱包管理</div>
               <a href="#" @click.prevent="showLinkWalletModal = true; walletDropdownOpen = false" class="wallet-dropdown-item">
-                <span>Link new wallet</span>
+                <span>连接新钱包</span>
               </a>
               <a href="#" @click.prevent="showDisconnectModal = true; walletDropdownOpen = false" class="wallet-dropdown-item">
-                <span>Disconnect wallet</span>
+                <span>断开钱包</span>
               </a>
             </div>
           </div>
@@ -172,8 +172,8 @@
           <button class="btn ghost pill settings-btn" @click.prevent="go('/settings')">⚙️</button>
         </div>
         <div v-else>
-          <a class="btn ghost" href="#" @click.prevent="go('/login')">Log in</a>
-          <a class="btn orange" href="#" @click.prevent="go('/signup')">Sign up</a>
+          <a class="btn ghost" href="#" @click.prevent="go('/login')">登录</a>
+          <a class="btn orange" href="#" @click.prevent="go('/signup')">注册</a>
         </div>
       </div>
     </div>
@@ -342,20 +342,8 @@ export default {
       this.go('/profile');
     },
     goToContactUs() {
-      // 跳转到主页的contact us部分
-      this.go('/');
-      // 使用nextTick确保页面加载完成后再滚动
-      this.$nextTick(() => {
-        setTimeout(() => {
-          const contactSection = document.querySelector('.contact-section');
-          if (contactSection) {
-            contactSection.scrollIntoView({ 
-              behavior: 'smooth',
-              block: 'start'
-            });
-          }
-        }, 100);
-      });
+      // 跳转到ContactUs组件页面
+      this.go('/contact');
     },
     linkNewWallet() {
       this.hideWalletDropdown();
@@ -644,8 +632,6 @@ export default {
 .wallet-dropdown-container {
   position: relative;
   display: inline-block;
-  margin-left:15px;
-  margin-right: 15px;
 }
 
 .wallet-btn-wrapper {
@@ -864,6 +850,8 @@ export default {
 /* Header右侧按钮样式 */
 .header .btn {
   font-size: 15px;
+  gap: 2px;
+
 }
 
 /* 深色主题适配 - 已直接应用深色样式 */
@@ -1003,8 +991,38 @@ export default {
     margin-right: 0; /* 重置桌面端边距 */
     flex-wrap: nowrap; /* 防止换行 */
     align-items: center;
-    justify-content: flex-end; /* 右对齐 */
+    justify-content: space-between; /* 改为space-between实现左中右分布 */
     min-width: 0; /* 允许收缩 */
+    width: 100%;
+    max-width: 180px;
+  }
+  
+  /* 移动端按钮布局 - 左中右分布 */
+  .right > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 2px;
+  }
+  
+  /* Wallet按钮 - 左侧 */
+  .wallet-connect-section,
+  .wallet-dropdown-container {
+    flex: 1;
+    display: flex;
+    justify-content: flex-start;
+  }
+  
+  /* Profile按钮 - 中间 */
+  .btn.light.pill {
+    flex: 0 0 auto;
+    margin: 0 2px;
+  }
+  
+  /* Settings按钮 - 右侧 */
+  .settings-btn {
+    flex: 0 0 auto;
   }
   
   .brand-logo {
@@ -1177,8 +1195,38 @@ export default {
     gap: 0px;
     flex-wrap: nowrap;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between; /* 改为space-between实现左中右分布 */
     min-width: 0;
+    width: 100%;
+    max-width: 160px;
+  }
+  
+  /* 小屏幕按钮布局 - 左中右分布 */
+  .right > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 1px;
+  }
+  
+  /* Wallet按钮 - 左侧 */
+  .wallet-connect-section,
+  .wallet-dropdown-container {
+    flex: 1;
+    display: flex;
+    justify-content: flex-start;
+  }
+  
+  /* Profile按钮 - 中间 */
+  .btn.light.pill {
+    flex: 0 0 auto;
+    margin: 0 1px;
+  }
+  
+  /* Settings按钮 - 右侧 */
+  .settings-btn {
+    flex: 0 0 auto;
   }
   
   .brand-logo {
@@ -1306,8 +1354,38 @@ export default {
     gap: 0px;
     flex-wrap: nowrap;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between; /* 改为space-between实现左中右分布 */
     min-width: 0;
+    width: 100%;
+    max-width: 140px;
+  }
+  
+  /* 超小屏幕按钮布局 - 左中右分布 */
+  .right > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 0px;
+  }
+  
+  /* Wallet按钮 - 左侧 */
+  .wallet-connect-section,
+  .wallet-dropdown-container {
+    flex: 1;
+    display: flex;
+    justify-content: flex-start;
+  }
+  
+  /* Profile按钮 - 中间 */
+  .btn.light.pill {
+    flex: 0 0 auto;
+    margin: 0 1px;
+  }
+  
+  /* Settings按钮 - 右侧 */
+  .settings-btn {
+    flex: 0 0 auto;
   }
   
   .brand-logo {

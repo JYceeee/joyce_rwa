@@ -2,51 +2,51 @@
   <div class="container">
     <div class="project-container">
         <!-- 项目头部 -->
-        <header class="doc-header">
+        <!-- <header class="doc-header">
           <div class="header-content">
             <div class="header-text">
               <h1 class="headline">
                 <template v-if="isDetailView && currentProduct">
                   {{ currentProduct.name }} - {{ currentProduct.code }}
                 </template>
-                <template v-else>
+                 <template v-else>
                   To Be Listed Property Loan
-                </template>
+                </template> 
               </h1>
               <p class="subline">
                 <template v-if="isDetailView && currentProduct">
                   {{ currentProduct.subtitle }}
                 </template>
-                <!-- <template v-else>
+                <template v-else>
                   First-lien mortgages · LTV control · Monthly interest
-                </template> -->
+                </template>
               </p>
             </div>
           </div>
-        </header>
+        </header> -->
     
         <!-- 加载状态 -->
         <div v-if="loading" class="loading-container">
           <div class="loading-spinner"></div>
-          <p>Loading product data...</p>
+          <p>加载产品数据...</p>
         </div>
     
         <!-- 错误状态 -->
         <div v-else-if="error" class="error-container">
           <div class="error-message">
-            <h3>Load Failed</h3>
+            <h3>加载失败</h3>
             <!-- <p>{{ error }}</p> -->
-            <button @click="loadProducts" class="btn retry-btn">Retry</button>
+            <button @click="loadProducts" class="btn retry-btn">刷新</button>
           </div>
         </div>
     
         <!-- 单个产品详情视图 -->
-        <section v-else-if="isDetailView && currentProduct" class="doc-list">
+        <!-- <section v-else-if="isDetailView && currentProduct" class="doc-list">
           <article class="doc-card" aria-labelledby="'title-' + currentProduct.code">
-            <!-- 主要内容区域 -->
+            主要内容区域 
             <div class="main-content">
               <div class="left-content">
-                <!-- 项目标题信息 -->
+                项目标题信息 
                 <section class="title-section">
                   <div class="title-header">
                     <h2 :id="'title-' + currentProduct.code">
@@ -58,7 +58,7 @@
                   
                   <div class="project-basic-info">
                     <div class="info-item">
-                      <span class="info-label">Type:</span>
+                      <span class="info-label">类型:</span>
                       <span class="info-value">{{ currentProduct.type }}</span>
                     </div>
                   </div>
@@ -67,7 +67,7 @@
               </div>
             </div> 
     
-            <!-- 按钮与进度条-->
+            按钮与进度条
             <div class="progress-actions-row">
               <div class="progress-container">
                 <div class="progress-bar">
@@ -77,46 +77,46 @@
                 <span class="progress-text">{{ getProgressPercentage(currentProduct) }}%</span>
               </div>
               <div class="doc-actions">
-                <!-- ACTIVE状态: Buy and Detail -->
+                 ACTIVE状态: Buy and Detail 
                 <template v-if="currentProduct.status === 'ACTIVE'">
-                  <a href="#" class="btn small orange" @click.prevent="openTrade(currentProduct.code)">Buy</a>
-                  <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">Detail</a>
+                  <a href="#" class="btn small orange" @click.prevent="openTrade(currentProduct.code)">购买</a>
+                  <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">详情</a>
                 </template>
                 
-                <!-- INCOMING状态: Preview and Join Waitlist -->
+                INCOMING状态: Preview and Join Waitlist
                 <template v-else-if="currentProduct.status === 'INCOMING'">
-                  <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">Preview</a>
-                  <a href="#" class="btn small" @click.prevent="joinWaitlist(currentProduct.code)">Join Waitlist</a>
+                  <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">预览</a>
+                  <a href="#" class="btn small" @click.prevent="joinWaitlist(currentProduct.code)">加入等待列表</a>
                 </template>
                 
-                <!-- PERFORMING状态: View Details -->
+                PERFORMING状态: View Details 
                 <template v-else-if="currentProduct.status === 'PERFORMING'">
-                  <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">View Details</a>
+                  <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">查看详情</a>
                 </template>
                 
-                <!-- COMPLETED状态: View Details -->
+                COMPLETED状态: View Details
                 <template v-else-if="currentProduct.status === 'COMPLETED'">
-                  <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">View Details</a>
+                  <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">查看详情</a>
                 </template>
                 
-                <!-- COMPLETE状态: View Details -->
+                 COMPLETE状态: View Details 
                 <template v-else-if="currentProduct.status === 'COMPLETE'">
-                  <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">View Details</a>
+                  <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">查看详情</a>
                 </template>
                 
-                <!-- DEFAULT状态: View Details -->
+                DEFAULT状态: View Details 
                 <template v-else-if="currentProduct.status === 'DEFAULT'">
-                  <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">View Details</a>
+                  <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">查看详情</a>
                 </template>
                 
-                <!-- 默认状态: Learn More -->
+                默认状态: Learn More 
                 <template v-else>
-                  <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">Learn More</a>
+                  <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">了解更多</a>
                 </template>
               </div>
             </div>
           </article>
-        </section>
+        </section> -->
     
         <!-- 产品列表视图 -->
         <section v-else class="doc-list">
@@ -128,14 +128,16 @@
           >
             <!-- 项目头部 -->
             <div class="pf-project-header">
-              <img :src="p.image" class="pf-project-image" :alt="p.code" />
+              <!-- <img :src="p.image" class="pf-project-image" :alt="p.code" /> -->
               <div class="pf-project-info">
                 <div class="pf-title-row">
-                  <h4 :id="'title-' + p.code">{{ p.code }} • {{ p.name }}</h4>
-                  <button class="pf-project-btn pf-project-btn-secondary pf-title-btn" @click="openTrade(p.code)">DETAILS</button>
+                  <h4 :id="'title-' + p.code">{{ p.code }} 
+                    <!-- • {{ p.name }} -->
+                  </h4>
                 </div>
-                <p>{{ p.subtitle }}</p>
+                <p>{{ p.property_summary }}</p>
               </div>
+              <button class="pf-project-btn pf-project-btn-secondary pf-title-btn" @click="openTrade(p.code)">详情</button>
             </div>
     
             <!-- 项目指标 -->
@@ -153,31 +155,58 @@
                 <span class="pf-metric-value">{{ p.loanTerm }}</span>
               </div>
             </div> -->
+
+            <!-- 新增项目指标 -->
+            <div class="pf-project-metrics pf-project-metrics-new">
+              <div class="pf-project-metric">
+                <span class="pf-metric-label">发行主体</span>
+                <span class="pf-metric-value">{{ p.issuer || 'TBA' }}</span>
+              </div>
+              <div class="pf-project-metric">
+                <span class="pf-metric-label">底层资产</span>
+                <span class="pf-metric-value">{{ p.underlyingAsset || 'TBA' }}</span>
+              </div>
+              <div class="pf-project-metric">
+                <span class="pf-metric-label">Sponsor</span>
+                <span class="pf-metric-value">{{ p.sponsor || 'TBA' }}</span>
+              </div>
+              <div class="pf-project-metric">
+                <span class="pf-metric-label">Valuer</span>
+                <span class="pf-metric-value">{{ p.valuer || 'TBA' }}</span>
+              </div>
+              <div class="pf-project-metric">
+                <span class="pf-metric-label">Lawyer</span>
+                <span class="pf-metric-value">{{ p.lawyer || 'TBA' }}</span>
+              </div>
+              <div class="pf-project-metric">
+                <span class="pf-metric-label">Trustee</span>
+                <span class="pf-metric-value">{{ p.trustee || 'TBA' }}</span>
+              </div>
+            </div>
     
             <!-- 投资进度信息 -->
-            <div class="pf-investment-progress">
+            <!-- <div class="pf-investment-progress">
               <div class="pf-progress-metrics">
                 <div class="pf-progress-metric">
-                  <span class="pf-progress-label">SUBSCRIBED</span>
+                  <span class="pf-progress-label">已认购</span>
                   <span class="pf-progress-value">{{ formatNumber(p.subscribed || 0) }}</span>
                 </div>
                 <div class="pf-progress-metric">
-                  <span class="pf-progress-label">TOTAL OFFERING</span>
+                  <span class="pf-progress-label">总发行量</span>
                   <span class="pf-progress-value">{{ formatNumber(p.totalOffering || 0) }}</span>
                 </div>
               </div>
-              <!-- 进度条 -->
               <div class="pf-progress-bar-container">
                 <div class="pf-progress-bar">
                   <div class="pf-progress-fill" :style="{ width: getSubscriptionProgress(p) + '%' }"></div>
                 </div>
-                <div class="pf-progress-text">{{ getSubscriptionProgress(p) }}% Subscribed</div>
+                <div class="pf-progress-text">{{ getSubscriptionProgress(p) }}% 已认购</div>
               </div>
-            </div>
+            </div> -->
           </article>
         </section>
-        </div>
     </div>
+  </div>
   </template>
   
   <script>
@@ -316,6 +345,13 @@
               pwShareholders: product.pwShareholders,
               lender: product.lender,
               borrower: product.borrower,
+              
+              // 新增项目指标字段
+              underlyingAsset: product.underlyingAsset || 'TBA',
+              sponsor: product.sponsor || 'TBA',
+              valuer: product.valuer || 'TBA',
+              lawyer: product.lawyer || 'TBA',
+              trustee: product.trustee || 'TBA',
               guarantor: product.guarantor,
               
               // Disbursement & Interest 放款和利息
@@ -785,6 +821,13 @@
             borrower: product.borrower,
             guarantor: product.guarantor,
             
+            // 新增项目指标字段
+            underlyingAsset: product.underlyingAsset || 'TBA',
+            sponsor: product.sponsor || 'TBA',
+            valuer: product.valuer || 'TBA',
+            lawyer: product.lawyer || 'TBA',
+            trustee: product.trustee || 'TBA',
+            
             // Disbursement & Interest 放款和利息
             disbursementMethod: product.disbursementMethod,
             interest: product.interest,
@@ -1146,6 +1189,24 @@
   .pf-metric-value.risk-low{color:#16a34a;}
   .pf-metric-value.risk-medium{color:#d97706;}
   .pf-metric-value.risk-high{color:#dc2626;}
+
+  /* 新增项目指标样式 */
+  .pf-project-metrics-new{
+    margin-top:12px;
+    padding-top:12px;
+    border-top:1px solid rgba(255,255,255,0.1);
+  }
+  .pf-project-metrics-new .pf-project-metric{
+    padding:6px 0;
+  }
+  .pf-project-metrics-new .pf-metric-label{
+    font-size:11px;
+    color:#6b7280;
+  }
+  .pf-project-metrics-new .pf-metric-value{
+    font-size:13px;
+    color:#d1d5db;
+  }
   
   /* 投资进度信息样式 */
   .pf-investment-progress{
@@ -1566,6 +1627,11 @@
       margin: 16px 0;
     }
     
+    .pf-project-metrics-new {
+      margin-top: 8px;
+      padding-top: 8px;
+    }
+    
     .pf-progress-metrics {
       grid-template-columns: 1fr;
       gap: 8px;
@@ -1630,6 +1696,15 @@
     
     .pf-project-metric {
       padding: 8px;
+    }
+    
+    .pf-project-metrics-new {
+      margin-top: 6px;
+      padding-top: 6px;
+    }
+    
+    .pf-project-metrics-new .pf-project-metric {
+      padding: 4px 0;
     }
     
     .pf-progress-metrics {

@@ -57,7 +57,7 @@
               </div>
               
               <div class="contract-address-item">
-                <div class="contract-address-label">Loan Issuer Address:</div>
+                <div class="contract-address-label">贷款发行方地址：</div>
                 <div class="contract-address-value" @click="copyToClipboard(contractAddressModal.loanIssuerAddress)">
                   {{ formatAddress(contractAddressModal.loanIssuerAddress) }}
                   <span class="copy-icon">📋</span>
@@ -67,8 +67,8 @@
           </div>
           
           <div class="contract-address-actions">
-            <button class="btn secondary" @click="closeContractAddressModal">Close</button>
-            <button class="btn primary" @click="proceedWithTransaction">Proceed with Transaction</button>
+            <button class="btn secondary" @click="closeContractAddressModal">关闭</button>
+            <button class="btn primary" @click="proceedWithTransaction">继续交易</button>
           </div>
         </div>
       </div>
@@ -100,7 +100,7 @@
                   </div>
                   <div class="detail-item">
                     <span class="detail-key">Amount:</span>
-                    <span class="detail-value">{{ successData.amount }} Tokens</span>
+                    <span class="detail-value">{{ formatNumber(successData.amount) }} Tokens</span>
                   </div>
                 </div>
               </div>
@@ -140,7 +140,7 @@
           </div>
           
           <div class="success-actions">
-            <button class="btn secondary" @click="closeSuccessModal">Close</button>
+            <button class="btn secondary" @click="closeSuccessModal">关闭</button>
             <!-- <button class="btn primary" @click="viewPortfolio">View Portfolio</button> -->
           </div>
         </div>
@@ -176,7 +176,7 @@
         <div class="error-icon">⚠️</div>
         <h2>Failed to Load Project</h2>
          <p>{{ projectError }}</p> 
-        <button class="btn primary" @click="loadProjectData">Retry</button>
+        <button class="btn primary" @click="loadProjectData">重试</button>
       </div>
       
       <!-- 主要内容布局 -->
@@ -307,7 +307,7 @@
               <div class="contract-address-item">
                 <div class="contract-address-label">
                   <!-- <span class="contract-icon">📈</span> -->
-                  INTEREST TOKEN ADDRESS
+                  利息代币地址
                 </div>
                 <div class="contract-address-value" @click="copyToClipboard(getInterestTokenAddress())">
                   {{ formatAddress(getInterestTokenAddress()) }}
@@ -321,7 +321,7 @@
            <hr class="section-divider" />
  
            <div class="form-header">
-            <h2 class="form-title">SUBSCRIBE {{ projectData?.code }}</h2>
+            <h2 class="form-title">认购 {{ projectData?.code }}</h2>
             <!-- 钱包状态 -->
             <div class="wallet-status-inline">
               <!-- <div class="wallet-status-item">
@@ -331,11 +331,11 @@
                 </span>
               </div> -->
               <div class="wallet-status-item" v-if="connected">
-                <span class="status-label">WALLETADDRESS:</span>
+                <span class="status-label">钱包地址：</span>
                 <span class="status-value">{{ shortAddress }}</span>
               </div>
               <div class="wallet-status-item" v-if="connected">
-                <span class="status-label">NETWORK:</span>
+                <span class="status-label">网络：</span>
                 <span class="status-value">{{ networkLabel }}</span>
               </div>
             </div>
@@ -354,12 +354,12 @@
           </div> -->
 
           <div class="form-group">
-            <label class="form-label">Amount (Tokens)</label>
+            <label class="form-label">数量（代币）</label>
             <input 
               v-model="tradeAmount"
               type="number" 
               class="form-input"
-              placeholder="Enter amount"
+              placeholder="输入数量"
               min="0"
               step="0.01"
             />
@@ -369,39 +369,39 @@
           <div v-if="tradeAmount && parseFloat(tradeAmount) > 0" class="subscription-summary">
             <div class="summary-header">
               <h3 class="summary-title">{{ tradeType === 'buy' ? '认购摘要' : '赎回摘要' }}</h3>
-              <div class="summary-badge" :class="tradeType">
+              <!-- <div class="summary-badge" :class="tradeType">
                 {{ tradeType === 'buy' ? '认购' : '赎回利息' }}
-          </div>
+              </div> -->
         </div>
 
             <div class="summary-content">
               <div class="summary-row">
-                <span class="summary-label">Project Code:</span>
+                <span class="summary-label">项目代码：</span>
                 <span class="summary-value">{{ projectData?.code || 'N/A' }}</span>
       </div>
 
               <div class="summary-row">
-                <span class="summary-label">Trade Type:</span>
-                <span class="summary-value">{{ tradeType === 'buy' ? '认购代币' : '赎回利息' }}</span>
+                <span class="summary-label">交易类型：</span>
+                <span class="summary-value">{{ tradeType === 'buy' ? '代币认购' : '利息赎回' }}</span>
         </div> 
 
               <div class="summary-row">
-                <span class="summary-label">Token Amount:</span>
-                <span class="summary-value">{{ formatNumber(tradeAmount) }} Tokens</span>
+                <span class="summary-label">代币数量：</span>
+                <span class="summary-value">{{ formatNumber(tradeAmount) }} 代币</span>
       </div>
 
               <div class="summary-row">
-                <span class="summary-label">Annualized Yield:</span>
+                <span class="summary-label">年化收益率：</span>
                 <span class="summary-value">{{ projectData?.interestRate || 'N/A' }}%</span>
       </div>
 
               <div class="summary-row">
-                <span class="summary-label">Expected Return:</span>
+                <span class="summary-label">预期收益：</span>
                 <span class="summary-value">{{ calculateExpectedReturn() }}</span>
       </div>
           
               <div class="summary-row">
-                <span class="summary-label">Loan Term:</span>
+                <span class="summary-label">贷款期限：</span>
                 <span class="summary-value">{{ projectData?.loanTerm || 'N/A' }}</span>
         </div>
         </div>
@@ -424,7 +424,7 @@
             :disabled="!isFormValid || loading"
             >
             <span class="btn-text">
-                {{ loading ? 'Processing...' : (tradeType === 'buy' ? '确认认购' : '确认赎回') }}
+                {{ loading ? 'Processing...' : (tradeType === 'buy' ? 'Confirm Subscription' : 'Confirm Redemption') }}
                   </span>
             </button>
                 </div>
@@ -475,7 +475,7 @@
               </p>
             </div>
             <div class="status-actions">
-              <button class="btn secondary" @click="openDetail(projectData.code)">VIEW DETAILS</button>
+              <button class="btn secondary" @click="openDetail(projectData.code)">查看详情</button>
             </div>
           </div>
         </div> -->
@@ -753,19 +753,19 @@ export default {
             image: rawData.image || this.getProductImage(rawData.project_code || rawData.code),
             
             // 认购信息
-            totalOffering: rawData.total_offering_token ? `AUD${rawData.total_offering_token.toLocaleString()}` : 'AUD0',
-            subscribed: rawData.subscribe_token ? `AUD${rawData.subscribe_token.toLocaleString()}` : 'AUD0',
+            totalOffering: this.formatCurrency(rawData.total_offering_token),
+            subscribed: this.formatCurrency(rawData.subscribe_token),
             subscriptionProgress: this.calculateSubscriptionProgress(rawData),
             
             // 贷款信息
-            loanAmount: rawData.loan_amount ? `AUD${rawData.loan_amount.toLocaleString()}` : 'AUD0',
+            loanAmount: this.formatCurrency(rawData.loan_amount),
             loanTerm: rawData.loan_term_months ? `${rawData.loan_term_months} months` : '12 months',
             interestRate: rawData.interest_rate || rawData.target_yield || '6.0',
             
             // 物业信息
             propertyType: rawData.property_type,
             propertyLocation: rawData.property_location,
-            propertyValue: rawData.property_value ? `AUD${rawData.property_value.toLocaleString()}` : 'TBA',
+            propertyValue: rawData.property_value ? this.formatCurrency(rawData.property_value) : 'TBA',
             
             // 新增字段
             city: rawData.city,
@@ -782,9 +782,9 @@ export default {
             // 计算指标
             metrics: {
               targetLoanYield: `${rawData.interest_rate || rawData.target_yield || '6.0'}% p.a.`,
-              collateralPropertyValue: rawData.property_value ? `AUD${rawData.property_value.toLocaleString()}` : 'TBA',
-              loanToValue: rawData.lvr ? `${rawData.lvr}%` : 'N/A',
-              defaultRate: rawData.default_rate ? `${rawData.default_rate}%` : 'N/A'
+              collateralPropertyValue: rawData.property_value ? this.formatCurrency(rawData.property_value) : 'TBA',
+              loanToValue: rawData.lvr ? this.formatPercentage(rawData.lvr) : 'N/A',
+              defaultRate: rawData.default_rate ? this.formatPercentage(rawData.default_rate) : 'N/A'
             },
             
             // 原始数值用于计算
@@ -853,6 +853,22 @@ export default {
       return num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
     },
     
+    // 格式化货币显示
+    formatCurrency(value, currency = 'AUD') {
+      if (!value) return `${currency}0`
+      const num = parseFloat(value)
+      if (isNaN(num)) return `${currency}0`
+      return `${currency}${num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+    },
+    
+    // 格式化百分比显示
+    formatPercentage(value) {
+      if (!value) return '0%'
+      const num = parseFloat(value)
+      if (isNaN(num)) return '0%'
+      return `${num.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 })}%`
+    },
+    
     // 获取代币价格
     getTokenPrice() {
       // 这里可以根据实际需求获取代币价格
@@ -875,7 +891,7 @@ export default {
       const loanTermMonths = this.extractLoanTermMonths()
       const actualReturn = annualReturn * (loanTermMonths / 12)
       
-      return `AUD${actualReturn.toFixed(2)}`
+      return this.formatCurrency(actualReturn)
     },
     
     // 提取贷款期限（月数）
@@ -1430,7 +1446,7 @@ export default {
 }
 
 .contract-addresses-title::before {
-  content: "🔗";
+  /* content: "🔗"; */
   font-size: 20px;
 }
 

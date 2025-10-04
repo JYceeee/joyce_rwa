@@ -20,7 +20,7 @@
         @error="handleIntroVideoError"
       >
         <source src="/videos/Introvideo.mp4" type="video/mp4">
-        Your browser does not support video playback
+        你的浏览器不支持视频播放
       </video>
       
       <!-- Skip Button (右上角) -->
@@ -30,7 +30,7 @@
         @click="skipIntroVideo"
         title="Skip Video"
       >
-    -> Skip
+    -> 跳过视频
       </button>
       
       <!-- Video Overlay -->
@@ -38,13 +38,13 @@
         <!-- Loading Indicator -->
         <div v-if="introVideoLoading" class="loading-indicator">
           <div class="loading-spinner"></div>
-          <p class="loading-text">Loading video...</p>
+          <p class="loading-text">加载视频...</p>
         </div>
         
         <!-- Error Message -->
         <div v-if="introVideoError" class="error-message">
-          <p>Video loading failed</p>
-          <button class="btn btn-secondary" @click="closeIntroVideo">Close</button>
+          <p>视频加载失败</p>
+          <button class="btn btn-secondary" @click="closeIntroVideo">关闭</button>
         </div>
       </div>
       
@@ -53,214 +53,58 @@
         <div class="logo-container">
           <!-- <img src="/icons/RWA-logo.png" alt="RWA Logo" class="brand-logo"> -->
         </div>
-        <h1 class="headline">We focus on transforming real estate assets into underlying RWA preferred by investors
+        <h1 class="headline">我们是专注于把房地产资产包装成<br>投资人喜欢的RWA底层资产的<br>RWA Dealmaker</br>
         </h1>
-        <p class="brand-subtitle">Australian Real Estate Assets On-Chain · Secure, Low-Risk, High-Return RWA Investment Platform</p>
+        <p class="brand-subtitle">本平台以保护RWA投资人的投资安全为出发点，组织合法合规，风险低，回报高的优质资产</p>
       </div>
     </div>
   </div>
 
   <!--Homepage-->
-  <section 
+  <!-- <section 
     class="container hero" 
     :class="{ 'fade-in': !showIntroVideo && !isTransitioning }"
   >
     <div class="grid">
       <div>
-        <h1 class="headline">We focus on transforming real estate assets into underlying RWA preferred by investors
+        <h1 class="headline">我们是专注于把房地产资产包装成投资人喜欢的RWA底层资产的RWA Dealmaker -->
           <!-- Invest in RWA Property Loans with Monthly Returns -->
-        </h1>
+        <!-- </h1> -->
         <!-- <p class="sub">We specialize in originating real estate assets into RWA underlying assets that investors prefer</p> -->
-        <p class="sub">Australian Real Estate Assets On-Chain · Secure, Low-Risk, High-Return RWA Investment Platform
+        <!-- <p class="sub">本平台以保护RWA投资人的投资安全为出发点，组织合法合规，风险低，回报高的优质资产 -->
           <!-- Australian Real Estate On-Chain · A safe, compliant, and high-return RWA investment platform-->
-          </p>
-        <p class="foot">By continuing, you agree to our Terms and acknowledge our 
-          <a href="/src/components/privacypolicy.vue" >Privacy Policy.</a></p>
-        <div style="margin-top: 40px;margin-left: 100px;display: flex;gap: 20px;width: 500px;">
+          <!-- </p> -->
+        <!-- <p class="foot">继续使用，即表示您同意我们的条款并承认我们的  -->
+          <!-- <a href="/src/components/privacypolicy.vue" >隐私政策.</a></p> -->
+        <!-- <div style="margin-top: 40px;margin-left: 100px;display: flex;gap: 20px;width: 500px;"> -->
           <!-- <button class="btn-primary" @click="goToProjects">Invest Now</button>
           <button class="btn-secondary" @click="goToContact">Contact Us</button> -->
-        </div>
-      </div>
+        <!-- </div> -->
+      <!-- </div> -->
         <!-- Blockchain Smart Contract Trading Dynamic Pattern -->
-         <video autoplay loop muted playsinline class="bg-video">
+         <!-- <video autoplay loop muted playsinline class="bg-video">
            <source src="/videos/Blockchainvideo.mp4" type="video/mp4">
-         </video>
-    </div>
-
-  </section>
+         </video> -->
+    <!-- </div> -->
+  <!-- </section> -->
 
   <!-- Contact Us Section -->
-  <section 
-    class="contact-section" 
-    :class="{ 'fade-in': !showIntroVideo && !isTransitioning }"
-  >
-    <!-- Background Decorations -->
-    <div class="contact-bg-decoration">
-      <div class="blockchain-token token-1"></div>
-      <div class="blockchain-token token-2"></div>
-      <div class="blockchain-token token-3"></div>
-      <div class="real-estate-icon building-1"></div>
-      <div class="real-estate-icon building-2"></div>
-    </div>
-
-    <!-- Main Contact Container -->
-    <div class="contact-container">
-      <!-- Bold Header -->
-      <header class="contact-header">
-        <h2 class="headline">Contact Us</h2>
-      </header>
-
-      <!-- Two Column Layout -->
-      <div class="contact-layout">
-        <!-- Left Column: Contact Information -->
-        <!-- <div class="contact-info-column">
-          <div class="contact-info-card">
-            <!-- Company Address -->
-            <!-- <div class="contact-item">
-              <div class="contact-icon location-icon">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor"/>
-                </svg>
-              </div>
-              <div class="contact-details">
-                <h4>Office Address</h4>
-                <p>Level 15, 123 George Street<br>Sydney NSW 2000, Australia</p>
-              </div>
-            </div> -->
-
-            <!-- Email Address -->
-            <!-- <div class="contact-item">
-              <div class="contact-icon email-icon">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" fill="currentColor"/>
-                </svg>
-              </div>
-              <div class="contact-details">
-                <h4>Email Address</h4>
-                <p>support@mortgagerwa.com<br>business@mortgagerwa.com</p>
-              </div>
-            </div> -->
-
-            <!-- Phone Number -->
-            <!-- <div class="contact-item">
-              <div class="contact-icon phone-icon">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="currentColor"/>
-                </svg>
-              </div>
-              <div class="contact-details">
-                <h4>Phone Number</h4>
-                <p>+61 2 1234 5678<br>Monday to Friday 9:00-18:00</p>
-              </div>
-            </div> -->
-
-            <!-- Business Hours -->
-            <!-- <div class="contact-item">
-              <div class="contact-icon hours-icon">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" fill="currentColor"/>
-                  <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z" fill="currentColor"/>
-                </svg>
-              </div>
-              <div class="contact-details">
-                <h4>Business Hours</h4>
-                <p>Monday - Friday: 9:00 AM - 6:00 PM<br>Saturday: 10:00 AM - 2:00 PM</p>
-              </div>
-            </div>
-          </div> 
-        </div> -->
-
-        <!-- Right Column: Contact Form -->
-        <div class="contact-form-column">
-          <div class="contact-form-card">
-            <form @submit.prevent="submitForm" class="modern-form">
-              <div class="form-group">
-                <label for="contact-name">Full Name *</label>
-                <input 
-                  type="text" 
-                  id="contact-name" 
-                  v-model="form.name" 
-                  required
-                  placeholder="Enter your full name"
-                >
-              </div>
-
-              <div class="form-group">
-                <label for="contact-email">Email *</label>
-                <input 
-                  type="email" 
-                  id="contact-email" 
-                  v-model="form.email" 
-                  required
-                  placeholder="Enter your email address"
-                >
-              </div>
-
-              <div class="form-group">
-                <label for="contact-subject">Subject *</label>
-                <select id="contact-subject" v-model="form.subject" required>
-                  <option value="">Select a subject</option>
-                  <option value="investor">Investment Inquiry</option>
-                  <option value="asset_holder">Asset Listing</option>
-                  <option value="general">General Question</option>
-                  <option value="technical">Technical Support</option>
-                  <option value="business">Business Partnership</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label for="contact-message">Message *</label>
-                <textarea 
-                  id="contact-message" 
-                  v-model="form.message" 
-                  rows="5" 
-                  required
-                  placeholder="Tell us how we can help you..."
-                ></textarea>
-              </div>
-
-              <button type="submit" class="send-message-btn" :disabled="isSubmitting">
-                {{ isSubmitting ? 'Sending...' : 'Send Message' }}
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-
-      <!-- Social Media Section -->
-      <div class="social-media-section">
-        <h3>Follow Us</h3>
-        <div class="social-links">
-          <a href="#" class="social-link" title="LinkedIn">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" fill="currentColor"/>
-            </svg>
-          </a>
-          <a href="#" class="social-link" title="Instagram">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" fill="currentColor"/>
-            </svg>
-          </a>
-          <a href="#" class="social-link" title="X (Twitter)">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" fill="currentColor"/>
-            </svg>
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
+  <!-- <ContactUs 
+    :show-intro-video="showIntroVideo" 
+    :is-transitioning="isTransitioning"
+  /> -->
 
 </template>
 
 <script>
 import { productAPI } from '@/service/api.ts'
 import { useDatabaseSync } from '@/service/dataSyncService.js'
+import ContactUs from '@/components/ContactUs.vue'
 
 export default {
   name: 'HomeView',
   components: {
+    ContactUs
   },
   emits: ['notify'],
   data() {
@@ -268,15 +112,6 @@ export default {
       products: [],
       loading: false,
       error: null,
-      // Contact form data
-      form: {
-        name: '',
-        email: '',
-        phone: '',
-        subject: '',
-        message: ''
-      },
-      isSubmitting: false,
       // Intro video related states
       showIntroVideo: false,
       introVideoLoading: true,
@@ -546,53 +381,6 @@ export default {
       this.introVideoError = false
       this.showIntroSkipButton = false
       this.isTransitioning = false
-    },
-    
-    // 处理联系表单提交
-    async submitForm() {
-      if (this.isSubmitting) return
-      
-      // 验证必填字段
-      if (!this.form.name || !this.form.email || !this.form.subject || !this.form.message) {
-        alert('Please fill in all required fields')
-        return
-      }
-      
-      // 验证邮箱格式
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (!emailRegex.test(this.form.email)) {
-        alert('Please enter a valid email address')
-        return
-      }
-      
-      this.isSubmitting = true
-      
-      try {
-        // 这里可以添加实际的表单提交逻辑
-        // 例如发送到后端API
-        console.log('Submit contact form:', this.form)
-        
-        // 模拟API调用
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        // 显示成功消息
-        alert('Message sent successfully! We will reply to you as soon as possible.')
-        
-        // 重置表单
-        this.form = {
-          name: '',
-          email: '',
-          phone: '',
-          subject: '',
-          message: ''
-        }
-        
-      } catch (error) {
-        console.error('Form submission failed:', error)
-        alert('Message sending failed, please try again later.')
-      } finally {
-        this.isSubmitting = false
-      }
     }
   },
   async mounted() {
@@ -884,13 +672,13 @@ export default {
   .hero .headline {
     margin-left: 30px;
     margin-right: 30px;
-    width: calc(100% - 60px);
+    width: 800px;
   }
   
   .hero .sub {
     margin-left: 30px;
     margin-right: 30px;
-    width: calc(100% - 60px);
+    width: 600px;
   }
   
   .hero .foot {
@@ -2191,533 +1979,5 @@ export default {
   }
 }
 
-/* Contact Us Section - Modern Minimalist Design */
-.contact-section {
-  position: relative;
-  height: 100%;
-  background: 
-    radial-gradient(circle at 20% 80%, rgba(51, 204, 255, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(0, 153, 204, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(25, 25, 112, 0.1) 0%, transparent 50%),
-    linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
-  padding: 80px 0;
-  overflow: hidden;
-}
-
-/* Background Decorations */
-.contact-bg-decoration {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.blockchain-token {
-  position: absolute;
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(45deg, #141426, #2a2a4a);
-  border-radius: 50%;
-  opacity: 0.1;
-  animation: float 6s ease-in-out infinite;
-}
-
-.blockchain-token.token-1 {
-  top: 10%;
-  left: 10%;
-  animation-delay: 0s;
-}
-
-.blockchain-token.token-2 {
-  top: 20%;
-  right: 15%;
-  animation-delay: 2s;
-}
-
-.blockchain-token.token-3 {
-  bottom: 30%;
-  left: 20%;
-  animation-delay: 4s;
-}
-
-.real-estate-icon {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(45deg, #141426, #2a2a4a);
-  opacity: 0.08;
-  animation: float 8s ease-in-out infinite;
-}
-
-.real-estate-icon.building-1 {
-  top: 15%;
-  right: 25%;
-  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-  animation-delay: 1s;
-}
-
-.real-estate-icon.building-2 {
-  bottom: 20%;
-  right: 10%;
-  clip-path: polygon(0% 0%, 100% 0%, 100% 70%, 50% 100%, 0% 70%);
-  animation-delay: 3s;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(180deg); }
-}
-
-/* Main Contact Container */
-.contact-container {
-  position: relative;
-  z-index: 2;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 40px;
-}
-
-/* Bold Header */
-.contact-header {
-  text-align: center;
-  margin-bottom: 80px;
-}
-
-.contact-title {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 3.5rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin: 0;
-  letter-spacing: -0.02em;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Two Column Layout */
-.contact-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 80px;
-  margin-bottom: 80px;
-  align-items: start;
-}
-
-/* Left Column: Contact Information */
-.contact-info-column {
-  display: flex;
-  flex-direction: column;
-}
-
-.contact-info-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
-  padding: 40px;
-  backdrop-filter: blur(10px);
-}
-
-.contact-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 20px;
-  margin-bottom: 32px;
-  padding: 24px;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 16px;
-  transition: all 0.3s ease;
-}
-
-.contact-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  transform: translateY(-2px);
-}
-
-.contact-icon {
-  width: 56px;
-  height: 56px;
-  background: #141426;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.contact-icon svg {
-  width: 24px;
-  height: 24px;
-  color: #667eea;
-}
-
-.contact-details h4 {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #ffffff;
-  margin: 0 0 8px 0;
-}
-
-.contact-details p {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #94a3b8;
-  margin: 0;
-  line-height: 1.6;
-  font-size: 0.95rem;
-}
-
-/* Right Column: Contact Form */
-.contact-form-column {
-  display: flex;
-  flex-direction: column;
-  width: 1000px;
-  margin-left: 60px;
-  margin-right: 100px;
-}
-
-.contact-form-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
-  padding: 40px;
-  backdrop-filter: blur(10px);
-}
-
-.modern-form {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.form-group label {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #ffffff;
-  margin-bottom: 8px;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  padding: 16px 20px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  color: #ffffff;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-}
-
-.form-group input::placeholder,
-.form-group textarea::placeholder {
-  color: #64748b;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: #141426;
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 0 0 3px rgba(20, 20, 38, 0.3);
-}
-
-/* 下拉菜单选项样式 - 深色主题 */
-.form-group select option {
-  background: #1a1a2e !important;
-  color: #ffffff !important;
-  padding: 12px 16px;
-  border: none;
-}
-
-.form-group select option:hover {
-  background: #16213e !important;
-}
-
-.form-group select option:checked {
-  background: #141426 !important;
-}
-
-.form-group textarea {
-  resize: vertical;
-  min-height: 120px;
-}
-
-.send-message-btn {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  padding: 16px 32px;
-  background: #141426;
-  border: 1px solid #141426;
-  border-radius: 12px;
-  color: #ffffff;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 8px;
-}
-
-.send-message-btn:hover:not(:disabled) {
-  background: #1a1a2e;
-  border-color: #1a1a2e;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(20, 20, 38, 0.4);
-}
-
-.send-message-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* Map Section */
-.map-section {
-  margin-bottom: 80px;
-}
-
-.map-container {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
-  padding: 60px 40px;
-  text-align: center;
-  backdrop-filter: blur(10px);
-}
-
-.map-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px;
-}
-
-.map-icon {
-  width: 80px;
-  height: 80px;
-  background: #141426;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.map-icon svg {
-  width: 40px;
-  height: 40px;
-  color: #667eea;
-}
-
-.map-placeholder h3 {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #ffffff;
-  margin: 0;
-}
-
-.map-placeholder p {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #94a3b8;
-  margin: 0;
-  font-size: 1rem;
-}
-
-/* Social Media Section */
-.social-media-section {
-  text-align: center;
-}
-
-.social-media-section h3 {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #ffffff;
-  margin-bottom: 32px;
-}
-
-.social-links {
-  display: flex;
-  justify-content: center;
-  gap: 24px;
-}
-
-.social-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 56px;
-  height: 56px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-
-.social-link svg {
-  width: 24px;
-  height: 24px;
-  color: #94a3b8;
-  transition: all 0.3s ease;
-}
-
-.social-link:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
-}
-
-.social-link:hover svg {
-  color: #667eea;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .contact-container {
-    padding: 0 20px;
-  }
-  
-  .contact-title {
-    font-size: 2.5rem;
-  }
-  
-  .contact-layout {
-    grid-template-columns: 1fr;
-    gap: 40px;
-  }
-  
-  .contact-info-card,
-  .contact-form-card {
-    padding: 24px;
-  }
-  
-  .contact-item {
-    padding: 16px;
-    margin-bottom: 20px;
-  }
-  
-  .contact-icon {
-    width: 48px;
-    height: 48px;
-  }
-  
-  .contact-icon svg {
-    width: 20px;
-    height: 20px;
-  }
-  
-  .map-container {
-    padding: 40px 24px;
-  }
-  
-  .map-icon {
-    width: 64px;
-    height: 64px;
-  }
-  
-  .map-icon svg {
-    width: 32px;
-    height: 32px;
-  }
-  
-  .social-links {
-    gap: 16px;
-  }
-  
-  .social-link {
-    width: 48px;
-    height: 48px;
-  }
-  
-  .social-link svg {
-    width: 20px;
-    height: 20px;
-  }
-}
-
-@media (max-width: 480px) {
-  .contact-section {
-    padding: 40px 0;
-  }
-  
-  .contact-container {
-    padding: 0 16px;
-  }
-  
-  .contact-title {
-    font-size: 2rem;
-  }
-  
-  .contact-header {
-    margin-bottom: 40px;
-  }
-  
-  .contact-layout {
-    gap: 32px;
-    margin-bottom: 40px;
-  }
-  
-  .contact-info-card,
-  .contact-form-card {
-    padding: 20px;
-  }
-  
-  .contact-item {
-    flex-direction: column;
-    text-align: center;
-    gap: 16px;
-  }
-  
-  .contact-icon {
-    width: 40px;
-    height: 40px;
-    margin: 0 auto;
-  }
-  
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    padding: 12px 16px;
-  }
-  
-  .send-message-btn {
-    padding: 14px 24px;
-  }
-  
-  .map-section {
-    margin-bottom: 40px;
-  }
-  
-  .map-container {
-    padding: 32px 20px;
-  }
-  
-  .map-placeholder h3 {
-    font-size: 1.25rem;
-  }
-  
-  .map-placeholder p {
-    font-size: 0.9rem;
-  }
-  
-  .social-media-section h3 {
-    font-size: 1.25rem;
-    margin-bottom: 24px;
-  }
-}
 
 </style>

@@ -2,7 +2,7 @@
   <div class="whitelist-application">
     <!-- 白名单状态横幅 -->
     <div class="field">
-      <label class="label">Whitelist Status</label>
+      <label class="label">白名单状态</label>
       <div class="whitelist-banner" :class="statusClass" role="status">
         <span class="icon">
           <svg viewBox="0 0 24 24" class="i">
@@ -12,16 +12,16 @@
         <!-- 文案：根据状态显示不同信息 -->
         <span v-if="whitelistStatus === 'approved'" class="verified">
           <svg viewBox="0 0 24 24" class="i"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
-          Whitelist Approved
+          白名单已批准
         </span>
-        <span v-else-if="whitelistStatus === 'pending'">Whitelist Application Pending</span>
-        <span v-else-if="whitelistStatus === 'rejected'">Not Qualified for Transaction</span>
-        <span v-else>Apply for Whitelist</span>
+        <span v-else-if="whitelistStatus === 'pending'">白名单申请待审核</span>
+        <span v-else-if="whitelistStatus === 'rejected'">不符合交易资格</span>
+        <span v-else>申请白名单</span>
         <!-- 右侧按钮：根据状态显示不同操作 -->
-        <button v-if="whitelistStatus === 'none'" class="link" type="button" @click="applyWhitelist" :disabled="loading">Apply Now</button>
-        <button v-else-if="whitelistStatus === 'pending'" class="link" type="button" @click="checkWhitelistStatus" :disabled="loading">Check Status</button>
-        <button v-else-if="whitelistStatus === 'approved'" class="link" type="button" @click="goToProjects">Start Trading</button>
-        <button v-else-if="whitelistStatus === 'rejected'" class="link" type="button" @click="reapplyWhitelist" :disabled="loading">Reapply</button>
+        <button v-if="whitelistStatus === 'none'" class="link" type="button" @click="applyWhitelist" :disabled="loading">立即申请</button>
+        <button v-else-if="whitelistStatus === 'pending'" class="link" type="button" @click="checkWhitelistStatus" :disabled="loading">查看状态</button>
+        <button v-else-if="whitelistStatus === 'approved'" class="link" type="button" @click="goToProjects">开始交易</button>
+        <button v-else-if="whitelistStatus === 'rejected'" class="link" type="button" @click="reapplyWhitelist" :disabled="loading">重新申请</button>
       </div>
     </div>
 
@@ -29,19 +29,19 @@
     <div v-if="showApplicationModal" class="modal-mask">
       <div class="modal-wrapper">
         <div class="modal-container">
-          <h2 style="margin-bottom:8px;">Apply for Whitelist</h2>
-          <p>You are about to apply for the whitelist to start trading assets.</p>
-          <p><strong>Requirements:</strong></p>
+          <h2 style="margin-bottom:8px;">申请白名单</h2>
+          <p>您即将申请白名单以开始交易资产。</p>
+          <p><strong>要求：</strong></p>
           <ul style="margin: 8px 0; padding-left: 20px;">
-            <li>KYC verification completed ✅</li>
-            <li>Valid wallet connection</li>
-            <li>Agreement to terms and conditions</li>
+            <li>KYC验证已完成 ✅</li>
+            <li>有效的钱包连接</li>
+            <li>同意条款和条件</li>
           </ul>
           <div style="margin-top:18px; display:flex; gap:12px; justify-content:flex-end;">
-            <button class="btn light" @click="showApplicationModal = false" :disabled="loading">Cancel</button>
+            <button class="btn light" @click="showApplicationModal = false" :disabled="loading">取消</button>
             <button class="btn orange" @click="submitApplication" :disabled="loading">
-              <span v-if="loading">Applying...</span>
-              <span v-else>Apply Now</span>
+              <span v-if="loading">申请中...</span>
+              <span v-else>立即申请</span>
             </button>
           </div>
         </div>
