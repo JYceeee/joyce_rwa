@@ -23,7 +23,11 @@ const getProductImage = (projectCode) => {
 const getAllProjects = async (req, res) => {
   try {
     console.log('🔍 开始查询所有项目详情...');
-    const sql = `
+    
+    // 获取查询参数
+    const { status } = req.query;
+    
+    let sql = `
       SELECT 
         id, project_code, project_name, loan_status, created_at,
         subscribe_token, total_offering_token,
@@ -33,10 +37,22 @@ const getAllProjects = async (req, res) => {
         commencement_date, expiry_date, expected_recovery_date,
         principal_token_address, interest_token_address, kyc_registry_address, loan_issuer_address
       FROM project 
-      ORDER BY created_at DESC
     `;
     
-    const [rows] = await mysql.promise().execute(sql);
+    // 如果指定了状态，添加WHERE条件
+    if (status && status !== 'all') {
+      sql += ` WHERE loan_status = ?`;
+    }
+    
+    sql += ` ORDER BY created_at DESC`;
+    
+    console.log('📊 执行SQL查询:', sql);
+    console.log('📊 查询参数:', { status });
+    
+    // 根据是否有状态参数决定执行方式
+    const [rows] = status && status !== 'all' 
+      ? await mysql.promise().execute(sql, [status])
+      : await mysql.promise().execute(sql);
     
     // 格式化数据以匹配前端字段结构
     const formattedProjects = rows.map(project => ({
@@ -195,12 +211,19 @@ const getProjectByCode = async (req, res) => {
     
     const project = rows[0];
     const formattedProject = {
-      // 基础信息
+      // 基础信息 - 同时提供下划线和驼峰命名，确保前端兼容性
       id: project.id,
       project_code: project.project_code,
       project_name: project.project_name,
       loan_status: project.loan_status,
       created_at: project.created_at,
+      
+      // 前端期望的字段名（驼峰命名）
+      code: project.project_code,
+      name: project.project_name,
+      status: project.loan_status,
+      subtitle: project.property_summary,
+      type: project.property_type,
       
       // 认购信息
       subscribe_token: project.subscribe_token,
@@ -226,6 +249,7 @@ const getProjectByCode = async (req, res) => {
       lvr: project.lvr,
       interest_rate: project.interest_rate,
       default_rate: project.default_rate,
+      target_yield: project.interest_rate, // 添加前端期望的字段
       
       // 贷款周期
       commencement_date: project.commencement_date,
@@ -574,9 +598,71 @@ const deploySmartContractsToTestnet = async (params) => {
   });
 };
 
+// 根据项目代码获取合约地址
+const getProjectContractAddresses = async (req, res) => {
+  try {
+    const { projectCode } = req.params;
+    
+    console.log('🔍 获取项目合约地址:', projectCode);
+    
+    if (!projectCode) {
+      return res.status(400).json({
+        status: 1,
+        message: '项目代码不能为空'
+      });
+    }
+    
+    const sql = `
+      SELECT 
+        project_code,
+        principal_token_address,
+        interest_token_address,
+        kyc_registry_address,
+        loan_issuer_address
+      FROM project 
+      WHERE project_code = ?
+    `;
+    
+    const [rows] = await mysql.promise().execute(sql, [projectCode]);
+    
+    if (rows.length === 0) {
+      return res.status(404).json({
+        status: 1,
+        message: '项目未找到'
+      });
+    }
+    
+    const projectData = rows[0];
+    
+    // 检查合约地址是否存在
+    if (!projectData.principal_token_address || !projectData.interest_token_address) {
+      return res.status(400).json({
+        status: 1,
+        message: '项目合约地址未配置'
+      });
+    }
+    
+    console.log('✅ 获取到项目合约地址:', projectData);
+    
+    return res.status(200).json({
+      status: 0,
+      message: '获取项目合约地址成功',
+      data: projectData
+    });
+    
+  } catch (error) {
+    console.error('❌ 获取项目合约地址失败:', error);
+    return res.status(500).json({
+      status: 1,
+      message: '获取项目合约地址失败: ' + error.message
+    });
+  }
+};
+
 module.exports = {
   getAllProjects,
   getProjectByCode,
+  getProjectContractAddresses,
   createProject,
   updateProjectSubscription,
   deploySmartContracts

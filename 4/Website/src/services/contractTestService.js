@@ -9,99 +9,28 @@ class ContractTestService {
     this.realTokenAddresses = {
       // 测试网地址
       sepolia: {
-        lpt: import.meta.env.VITE_PRINCIPAL_TOKEN_ADDRESS, // 测试网LPT代币
-        lit: import.meta.env.VITE_INTEREST_TOKEN_ADDRESS, // 测试网LIT代币
-        kycRegistry: import.meta.env.VITE_KYC_REGISTRY_ADDRESS, // 测试网KYC注册表
-        loanIssuer: import.meta.env.VITE_LOAN_ISSUER_ADDRESS  // 测试网贷款发行者
+        lpt: '0xA41b4F0417d588a08F914Ca17b07c99783D5c3FC', // LPrincipalFixed
+        lit: '0x9d3175E3F8c055389e070e058f717D450bB89206', // LInterest
+        kycRegistry: '0x0A96077ffe3f06274d869ba1eed6cB7324270C2f', // KYC Registry
+        loanIssuer: '0x13159e6417D98528C220b12Ec4950D5A343E5eAA', // Loan Issuer
+        complianceGuard: '0x448d5FB04025FDb01b97e9bB5e5FD12c687cd480', // ComplianceGuard
+        holderRegistry: '0x1E77C41899D1d34A11E3BF55809962fE6a929074' // HolderRegistry
       },
-      // 主网地址
+      // 主网地址 (暂时使用相同地址)
       ethereum: {
-        lpt: import.meta.env.VITE_PRINCIPAL_TOKEN_ADDRESS, // 主网LPT代币
-        lit: import.meta.env.VITE_INTEREST_TOKEN_ADDRESS, // 主网LIT代币
-        kycRegistry: import.meta.env.VITE_KYC_REGISTRY_ADDRESS, // 主网KYC注册表
-        loanIssuer: import.meta.env.VITE_LOAN_ISSUER_ADDRESS  // 主网贷款发行者
+        lpt: '0xA41b4F0417d588a08F914Ca17b07c99783D5c3FC', // LPrincipalFixed
+        lit: '0x9d3175E3F8c055389e070e058f717D450bB89206', // LInterest
+        kycRegistry: '0x0A96077ffe3f06274d869ba1eed6cB7324270C2f', // KYC Registry
+        loanIssuer: '0x13159e6417D98528C220b12Ec4950D5A343E5eAA', // Loan Issuer
+        complianceGuard: '0x448d5FB04025FDb01b97e9bB5e5FD12c687cd480', // ComplianceGuard
+        holderRegistry: '0x1E77C41899D1d34A11E3BF55809962fE6a929074' // HolderRegistry
       },
     }
   }
 
-  // 模拟部署合约
-  async deployContracts(walletAddress, networkId) {
-    try {
-      // 模拟API调用延迟
-      await this.delay(2000)
-      
-      // 模拟部署结果
-      const mockContracts = {
-        kycRegistry: this.generateMockAddress(),
-        lpt: this.generateMockAddress(),
-        lit: this.generateMockAddress(),
-        loanIssuer: this.generateMockAddress()
-      }
-      
-      return {
-        success: true,
-        contracts: mockContracts,
-        transactionHash: this.generateMockTxHash(),
-        gasUsed: '2,500,000',
-        blockNumber: Math.floor(Math.random() * 1000000) + 1000000
-      }
-    } catch (error) {
-      throw new Error(`部署失败: ${error.message}`)
-    }
-  }
+  // 合约部署功能已移除
 
-  // 模拟带认购数据的合约部署
-  async deployContractsWithSubscription(subscriptionData) {
-    try {
-      // 验证必要参数
-      if (!subscriptionData.chainId) {
-        throw new Error('链ID未提供')
-      }
-      
-      if (!subscriptionData.walletAddress) {
-        throw new Error('钱包地址未提供')
-      }
-      
-      // 模拟API调用延迟
-      await this.delay(2000)
-      
-      // 根据链ID确定网络信息
-      const networkInfo = this.getNetworkInfo(subscriptionData.chainId)
-      
-      // 获取真实合约地址
-      const realContracts = this.getRealContractAddresses(subscriptionData.chainId)
-      
-      // 使用真实合约地址
-      const contracts = {
-        kycRegistry: realContracts.kycRegistry,
-        lpt: realContracts.lpt,
-        lit: realContracts.lit,
-        loanIssuer: realContracts.loanIssuer
-      }
-      
-      // 生成贷款ID
-      const loanId = Math.floor(Math.random() * 1000) + 1
-      
-      return {
-        success: true,
-        contracts: contracts,
-        loanId: loanId,
-        transactionHash: this.generateMockTxHash(),
-        gasUsed: '3,200,000',
-        blockNumber: Math.floor(Math.random() * 1000000) + 1000000,
-        networkInfo: networkInfo,
-        subscriptionData: {
-          amount: subscriptionData.subscriptionAmount,
-          rate: subscriptionData.annualRate,
-          term: subscriptionData.loanTerm,
-          projectCode: subscriptionData.projectCode,
-          projectName: subscriptionData.projectName
-        }
-      }
-    } catch (error) {
-      throw new Error(`认购部署失败: ${error.message}`)
-    }
-  }
+  // 认购部署功能已移除
 
   // 模拟合约交互测试
   async testContractInteraction(contractAddresses, walletAddress) {

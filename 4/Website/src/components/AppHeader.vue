@@ -115,15 +115,7 @@
           <a href="#" @click.prevent="go('/about')" class="menu-item">About Us</a>
           <a href="#" @click.prevent="go('/listedprojects')" class="menu-item">Listed RWA</a>
           <a href="#" @click.prevent="go('/to-be-listed')" class="menu-item">To be listed RWA</a>
-          <!-- <a href="#" @click.prevent="go('/admin-projects')" class="menu-item">Admin Projects</a> -->
-          <!-- <a href="#" @click.prevent="go('/portfolio')" class="menu-item">My Portfolio</a> -->
-          <!-- <div class="dropdown-container">
-            <a href="#" class="menu-item more-link" @click.prevent="toggleMoreDropdown">More ▾</a>
-            <div v-if="moreDropdownOpen" class="dropdown-menu">
-              <a href="#" @click.prevent="go('/overview')" class="dropdown-item">Overview</a>
-              <a href="#" @click.prevent="go('/about')" class="dropdown-item">About Us</a>
-            </div>
-          </div> -->
+          <a href="#" @click.prevent="go('/portfolio')" class="menu-item">My Portfolio</a>
         </nav>
         
         <!-- 移动端汉堡菜单按钮 -->
@@ -170,7 +162,8 @@
           <div v-else class="wallet-dropdown-container">
              <div class="wallet-btn-wrapper">
                <button class="btn orange pill wallet-main-btn" @click.prevent="goToWallet()">
-                 <span>{{ shortAddress }}</span>
+                 <span class="wallet-address-text">{{ shortAddress }}</span>
+                 <!-- <span class="wallet-icon-text">💳</span> -->
                </button>
                <div class="wallet-divider"></div>
                 <button class="btn orange pill wallet-dropdown-btn" 
@@ -219,18 +212,10 @@
           <!-- <span class="mobile-menu-icon">⏳</span> -->
           <span>To be listed RWA</span>
         </a>
-        <!-- <a href="#" @click.prevent="go('/admin-projects')" class="mobile-menu-item">
-          <span class="mobile-menu-icon">⚙️</span>
-          <span>Admin Projects</span>
-        </a> -->
-        <!-- <a href="#" @click.prevent="go('/portfolio')" class="mobile-menu-item"> -->
+        <a href="#" @click.prevent="go('/portfolio')" class="mobile-menu-item">
           <!-- <span class="mobile-menu-icon">💼</span> -->
-          <!-- <span>My Portfolio</span> -->
-        <!-- </a> -->
-        <!-- <a href="#" @click.prevent="go('/overview')" class="mobile-menu-item"> 
-          <span class="mobile-menu-icon">📋</span> 
-          <span>Overview</span>
-        </a>-->
+          <span>My Portfolio</span>
+        </a>
       </div>
     </div>
     
@@ -701,6 +686,15 @@ export default {
   border-radius: 0;
 }
 
+/* 钱包地址和图标显示控制 */
+.wallet-address-text {
+  display: inline;
+}
+
+.wallet-icon-text {
+  display: none;
+}
+
 .wallet-main-btn:hover {
   background: rgba(255, 255, 255, 0.1);
 }
@@ -1006,24 +1000,27 @@ export default {
   .header {
     margin-left: 0;
     margin-right: 0;
+    padding-left: 30px;
+    padding-right: 30px;
   }
   
   .nav {
-    padding-left: 16px;
-    padding-right: 16px;
-    gap: 8px;
+    padding-left: 0; /* 移除nav的padding，使用header的30px */
+    padding-right: 0;
+    gap: 6px;
     height: 60px; /* 降低移动端header高度 */
   }
   
   .left {
-    gap: 8px;
+    gap: 6px;
     margin-left: 0; /* 重置桌面端边距 */
   }
   
   .right {
-    gap: 4px;
+    gap: 2px;
     margin-right: 0; /* 重置桌面端边距 */
     flex-wrap: nowrap; /* 防止换行 */
+    align-items: center;
   }
   
   .brand-logo {
@@ -1036,52 +1033,58 @@ export default {
   
   .mobile-menu-btn {
     display: flex; /* 显示汉堡菜单按钮 */
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
   }
   
   .search-input.expanded {
-    width: 80px; /* 移动端搜索框更窄，为按钮留空间 */
+    width: 60px; /* 移动端搜索框更窄，为按钮留空间 */
   }
   
   .search-toggle {
-    padding: 6px;
+    padding: 4px;
   }
   
   .search-toggle img {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
   }
   
   .btn {
-    padding: 6px 10px;
-    font-size: 13px;
+    padding: 4px 6px;
+    font-size: 11px;
     white-space: nowrap; /* 防止文字换行 */
     flex-shrink: 0; /* 防止收缩 */
+    min-width: auto;
   }
   
   .btn.pill {
-    padding: 4px 8px;
+    padding: 3px 6px;
   }
   
   /* Profile按钮样式 - 正方形 */
   .btn.light.pill {
-    padding: 8px;
-    font-size: 12px;
-    border-radius: 8px;
-    width: 32px;
-    height: 32px;
+    padding: 6px;
+    font-size: 11px;
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 32px;
+    min-width: 28px;
   }
   
   /* Settings按钮样式 */
   .settings-btn {
-    font-size: 18px !important;
-    padding: 6px !important;
+    font-size: 16px !important;
+    padding: 4px !important;
     flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   .btn.pill span:last-child {
@@ -1095,54 +1098,64 @@ export default {
   }
   
   .wallet-main-btn {
-    padding: 6px 10px;
-    font-size: 12px;
+    padding: 4px 6px;
+    font-size: 10px;
     white-space: nowrap; /* 防止文字换行 */
   }
   
+  /* 移动端钱包按钮只显示图标 */
+  .wallet-address-text {
+    display: none;
+  }
+  
+  .wallet-icon-text {
+    display: inline;
+    font-size: 14px;
+  }
+  
   .wallet-dropdown-btn {
-    padding: 6px 8px;
+    padding: 4px 4px;
     flex-shrink: 0; /* 防止收缩 */
   }
   
   .wallet-divider {
     width: 1px;
-    height: 20px;
-    margin: 0 2px;
+    height: 16px;
+    margin: 0 1px;
   }
   
   .dropdown-menu {
     right: 0;
     left: auto;
-    min-width: 160px;
+    min-width: 140px;
     top: 100%;
   }
   
   .wallet-dropdown-menu {
     right: 0;
     left: auto;
-    min-width: 160px;
+    min-width: 140px;
     top: 100%;
   }
   
   .dropdown-item {
-    padding: 8px 12px;
-    font-size: 13px;
+    padding: 6px 8px;
+    font-size: 12px;
   }
   
   .wallet-dropdown-item {
-    padding: 8px 12px;
-    font-size: 13px;
+    padding: 6px 8px;
+    font-size: 12px;
   }
   
   .dropdown-icon {
-    font-size: 13px;
-    width: 16px;
+    font-size: 12px;
+    width: 14px;
   }
   
   .wallet-dropdown-container {
-    margin-left: 8px;
-    margin-right: 8px;
+    margin-left: 4px;
+    margin-right: 4px;
   }
 }
 
@@ -1171,22 +1184,25 @@ export default {
   .header {
     margin-left: 0;
     margin-right: 0;
+    padding-left: 30px;
+    padding-right: 30px;
   }
   
   .nav {
-    padding-left: 12px;
-    padding-right: 12px;
-    gap: 6px;
+    padding-left: 0; /* 移除nav的padding，使用header的30px */
+    padding-right: 0;
+    gap: 4px;
     height: 56px; /* 进一步降低高度 */
   }
   
   .left {
-    gap: 6px;
+    gap: 4px;
   }
   
   .right {
-    gap: 3px;
+    gap: 1px;
     flex-wrap: nowrap;
+    align-items: center;
   }
   
   .brand-logo {
@@ -1194,129 +1210,12 @@ export default {
   }
   
   .mobile-menu-btn {
-    width: 32px;
-    height: 32px;
-  }
-  
-  .search-input.expanded {
-    width: 60px; /* 更窄的搜索框，为按钮留更多空间 */
-  }
-  
-  .search-toggle {
-    padding: 4px;
-  }
-  
-  .search-toggle img {
-    width: 16px;
-    height: 16px;
-  }
-  
-  .btn {
-    padding: 4px 6px;
-    font-size: 11px;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  
-  .btn.pill {
-    padding: 3px 6px;
-  }
-  
-  .btn.pill span:first-child {
-    font-size: 14px;
-  }
-  
-  /* Profile按钮样式 - 正方形 */
-  .btn.light.pill {
-    padding: 6px;
-    font-size: 11px;
-    border-radius: 6px;
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 28px;
-  }
-  
-  /* Settings按钮样式 */
-  .settings-btn {
-    font-size: 16px !important;
-    padding: 4px !important;
-  }
-  
-  .wallet-main-btn {
-    padding: 4px 6px;
-    font-size: 11px;
-  }
-  
-  .wallet-dropdown-btn {
-    padding: 4px 4px;
-  }
-  
-  .wallet-divider {
-    height: 16px;
-    margin: 0 1px;
-  }
-  
-  .dropdown-menu {
-    min-width: 140px;
-  }
-  
-  .wallet-dropdown-menu {
-    min-width: 140px;
-  }
-  
-  .dropdown-item {
-    padding: 6px 8px;
-    font-size: 12px;
-  }
-  
-  .wallet-dropdown-item {
-    padding: 6px 8px;
-    font-size: 12px;
-  }
-  
-  .wallet-dropdown-container {
-    margin-left: 4px;
-    margin-right: 4px;
-  }
-}
-
-/* 超小屏幕 (小于360px) */
-@media (max-width: 360px) {
-  .header {
-    margin-left: 0;
-    margin-right: 0;
-  }
-  
-  .nav {
-    padding-left: 8px;
-    padding-right: 8px;
-    gap: 4px;
-    height: 52px; /* 最小高度 */
-  }
-  
-  .left {
-    gap: 4px;
-  }
-  
-  .right {
-    gap: 2px;
-    flex-wrap: nowrap;
-  }
-  
-  .brand-logo {
-    height: 28px; /* 最小logo */
-  }
-  
-  .mobile-menu-btn {
     width: 28px;
     height: 28px;
   }
   
   .search-input.expanded {
-    width: 50px; /* 最窄搜索框，为按钮留最大空间 */
+    width: 50px; /* 更窄的搜索框，为按钮留更多空间 */
   }
   
   .search-toggle {
@@ -1333,10 +1232,15 @@ export default {
     font-size: 10px;
     white-space: nowrap;
     flex-shrink: 0;
+    min-width: auto;
   }
   
   .btn.pill {
     padding: 2px 4px;
+  }
+  
+  .btn.pill span:first-child {
+    font-size: 12px;
   }
   
   /* Profile按钮样式 - 正方形 */
@@ -1356,11 +1260,26 @@ export default {
   .settings-btn {
     font-size: 14px !important;
     padding: 3px !important;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   .wallet-main-btn {
     padding: 3px 4px;
-    font-size: 10px;
+    font-size: 9px;
+  }
+  
+  /* 小屏移动端钱包按钮只显示图标 */
+  .wallet-address-text {
+    display: none;
+  }
+  
+  .wallet-icon-text {
+    display: inline;
+    font-size: 12px;
   }
   
   .wallet-dropdown-btn {
@@ -1393,6 +1312,138 @@ export default {
   .wallet-dropdown-container {
     margin-left: 2px;
     margin-right: 2px;
+  }
+}
+
+/* 超小屏幕 (小于360px) */
+@media (max-width: 360px) {
+  .header {
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+  
+  .nav {
+    padding-left: 0; /* 移除nav的padding，使用header的30px */
+    padding-right: 0;
+    gap: 2px;
+    height: 52px; /* 最小高度 */
+  }
+  
+  .left {
+    gap: 2px;
+  }
+  
+  .right {
+    gap: 0px;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+  
+  .brand-logo {
+    height: 28px; /* 最小logo */
+  }
+  
+  .mobile-menu-btn {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .search-input.expanded {
+    width: 40px; /* 最窄搜索框，为按钮留最大空间 */
+  }
+  
+  .search-toggle {
+    padding: 2px;
+  }
+  
+  .search-toggle img {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .btn {
+    padding: 2px 3px;
+    font-size: 9px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: auto;
+  }
+  
+  .btn.pill {
+    padding: 1px 3px;
+  }
+  
+  /* Profile按钮样式 - 正方形 */
+  .btn.light.pill {
+    padding: 3px;
+    font-size: 9px;
+    border-radius: 3px;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+  }
+  
+  /* Settings按钮样式 */
+  .settings-btn {
+    font-size: 12px !important;
+    padding: 2px !important;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .wallet-main-btn {
+    padding: 2px 3px;
+    font-size: 8px;
+  }
+  
+  /* 超小屏移动端钱包按钮只显示图标 */
+  .wallet-address-text {
+    display: none;
+  }
+  
+  .wallet-icon-text {
+    display: inline;
+    font-size: 10px;
+  }
+  
+  .wallet-dropdown-btn {
+    padding: 2px 2px;
+  }
+  
+  .wallet-divider {
+    height: 12px;
+    margin: 0 1px;
+  }
+  
+  .dropdown-menu {
+    min-width: 100px;
+  }
+  
+  .wallet-dropdown-menu {
+    min-width: 100px;
+  }
+  
+  .dropdown-item {
+    padding: 3px 4px;
+    font-size: 10px;
+  }
+  
+  .wallet-dropdown-item {
+    padding: 3px 4px;
+    font-size: 10px;
+  }
+  
+  .wallet-dropdown-container {
+    margin-left: 1px;
+    margin-right: 1px;
   }
 }
 

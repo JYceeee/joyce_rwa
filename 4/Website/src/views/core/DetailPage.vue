@@ -813,7 +813,14 @@ export default {
 /* 响应式设计 */
 @media (max-width: 768px) {
   .container {
-    padding: 16px;
+    padding: 16px 30px;
+  }
+  
+  /* 手机端页边距 */
+  .main-content,
+  .page-container {
+    padding-left: 30px !important;
+    padding-right: 30px !important;
   }
   
   .headline {
@@ -847,6 +854,17 @@ export default {
 @media (max-width: 480px) {
   .headline {
     font-size: 1.5rem;
+  }
+  
+  /* 小屏手机端页边距 */
+  .container {
+    padding: 12px 30px;
+  }
+  
+  .main-content,
+  .page-container {
+    padding-left: 30px !important;
+    padding-right: 30px !important;
   }
   
   .info-card {

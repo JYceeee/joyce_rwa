@@ -2557,7 +2557,22 @@ background: #1d1d36;
 @media (max-width: 768px) {
 /* 移动端筛选器进一步优化 */
 .mm-activity-filters {
-  padding: 12px;
+  padding: 12px 30px;
+}
+
+/* 手机端页边距 */
+.container,
+.main-content,
+.page-container {
+  padding-left: 30px !important;
+  padding-right: 30px !important;
+}
+
+.card,
+.wallet-card {
+  margin-left: 30px;
+  margin-right: 30px;
+  width: calc(100% - 60px);
 }
 
 .mm-filter-row {

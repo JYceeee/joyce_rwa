@@ -4,7 +4,7 @@
     <h1 class="auth-title">Login Your Account</h1>
     <p class="auth-sub">Welcome to Mortgage RWA</p> 
 
-    <!-- 登录状态显示 -->
+    <!-- Login Status Display -->
     <div v-if="loginStatus" class="status" :class="loginStatusClass">
       {{ loginStatusMessage }}
     </div>
@@ -68,7 +68,7 @@ export default {
     }
   },
   mounted() {
-    // 检查是否已登录
+    // Check if already logged in
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     if (isLoggedIn) {
       this.loginStatus = true;
@@ -104,26 +104,26 @@ export default {
         
         if (data.status === 0) {
           this.loginStatusClass = 'status success';
-          // this.loginStatusMessage = `Successful Login！Token: ${data.token ? data.token.substring(0, 50) + '...' : '无'}`;
+          // this.loginStatusMessage = `Successful Login！Token: ${data.token ? data.token.substring(0, 50) + '...' : 'None'}`;
           this.loginStatusMessage = 'Login successful!';
           
-          // 保存登录状态
+          // Save login status
           localStorage.setItem('isLoggedIn', 'true');
           localStorage.setItem('token', data.token);
           
-          // 记住邮箱（可选）
+          // Remember email (optional)
           if (this.remember) localStorage.setItem('remember_email', this.user_email);
           
-          // 保存用户信息到本地存储
+          // Save user info to local storage
           this.saveUserInfo(data);
           
-          // 触发全局登录状态更新事件
+          // Trigger global login status update event
           window.dispatchEvent(new CustomEvent('auth-changed'));
           
-          // this.$emit('notify', '登录成功！现在可以看到Wallet和Profile按钮了。');
+          // this.$emit('notify', 'Login successful! Now you can see Wallet and Profile buttons.');
           this.$emit('notify', 'Login successful!');
           
-          // 跳转到首页
+          // Redirect to home page
           setTimeout(() => {
             this.$router.push('/home');
           }, 1000);
@@ -141,13 +141,17 @@ export default {
       }
     },
 
-    // 保存用户信息到本地存储
+    // Save user info to local storage
     saveUserInfo(loginData) {
       try {
         setUserInfoFromLogin({
           user_email: this.user_email,
-          user_name: loginData.user_name || '', // 如果后端返回用户名
-          ...loginData // 包含其他可能的用户信息
+          user_name: loginData.user_name || '', // If backend returns username
+          ...loginData, // Include other possible user information
+          user_phone: loginData.user_phone || '',
+          user_password: loginData.user_password || '',
+          user_wallet: loginData.user_wallet || '',
+          email_list: loginData.email_list || '',
         });
         console.log('User info saved from login:', this.user_email);
       } catch (error) {
@@ -191,6 +195,55 @@ export default {
   background: #f8d7da;
   color: #721c24;
   border: 1px solid #f5c6cb;
+}
+
+/* 手机端响应式设计 */
+@media (max-width: 768px) {
+  .auth-card {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    margin: 30px 30px;
+    width: calc(100% - 60px);
+    padding: 24px;
+  }
+  
+  .auth-title {
+    font-size: 20px;
+  }
+  
+  .auth-input {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+  
+  .btn-primary, .btn-secondary {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    margin: 16px 30px;
+    width: calc(100% - 60px);
+    padding: 20px;
+  }
+  
+  .auth-title {
+    font-size: 18px;
+  }
+  
+  .auth-input {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  
+  .btn-primary, .btn-secondary {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
 }
 
 </style>

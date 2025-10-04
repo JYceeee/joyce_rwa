@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API连接测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .loading { background-color: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>API连接测试</h1>
+    <button onclick="testAllAPIs()">测试所有API</button>
+    <div id="results"></div>
+
+    <script>
+        async function testAPI(name, url, method = 'GET', body = null) {
+            const resultDiv = document.getElementById('results');
+            const testDiv = document.createElement('div');
+            testDiv.className = 'test-result loading';
+            testDiv.innerHTML = `🔄 测试 ${name}...`;
+            resultDiv.appendChild(testDiv);
+            
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                };
+                
+                if (body) {
+                    options.body = JSON.stringify(body);
+                }
+                
+                const response = await fetch(url, options);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                testDiv.className = 'test-result success';
+                testDiv.innerHTML = `✅ ${name}: 成功<br>状态: ${result.status}<br>消息: ${result.message}`;
+                
+            } catch (error) {
+                testDiv.className = 'test-result error';
+                testDiv.innerHTML = `❌ ${name}: 失败<br>错误: ${error.message}`;
+            }
+        }
+
+        async function testAllAPIs() {
+            document.getElementById('results').innerHTML = '';
+            
+            // 测试项目API
+            await testAPI(
+                '获取项目数据 (RWA001)', 
+                'https://13.239.255.133:10559/api/project/RWA001'
+            );
+            
+            // 测试合约API
+            await testAPI(
+                '获取合约信息 (ERC20Hooked)', 
+                'https://13.239.255.133:10559/contract/ERC20Hooked'
+            );
+            
+            // 测试合约部署信息API
+            await testAPI(
+                '获取合约部署信息 (ERC20Hooked)', 
+                'https://13.239.255.133:10559/contract/ERC20Hooked/deployment'
+            );
+            
+            // 测试交易API
+            await testAPI(
+                '获取交易历史', 
+                'https://13.239.255.133:10559/transaction'
+            );
+        }
+    </script>
+</body>
+</html>

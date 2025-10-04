@@ -38,7 +38,6 @@
       </select>
       <select v-model="filters.status" class="input" style="max-width:160px;height:38px">
         <option value="">All Status</option>
-        <option value="INCOMING">Incoming</option>
         <option value="ACTIVE">Active</option>
         <option value="PERFORMING">Performing</option>
         <option value="COMPLETED">Completed</option>
@@ -475,7 +474,7 @@ export default {
         this.error = null
         console.log('🔄 从数据库加载产品数据...')
 
-        const response = await productAPI.getAllProducts()
+        const response = await productAPI.getAllProducts('ACTIVE')
         
         if (response.status === 0) {
           // 映射新的数据库字段到前端期望的字段名
@@ -568,8 +567,12 @@ export default {
       // 订阅产品列表更新
       this.unsubscribeProducts = subscribeProducts((products) => {
         console.log('📡 ProjectsView: 收到产品数据更新，共', products.length, '个项目')
+        // 只处理ACTIVE状态的项目
+        const activeProducts = products.filter(product => product.status === 'ACTIVE')
+        console.log('📡 ProjectsView: 过滤后ACTIVE项目数量:', activeProducts.length)
+        
         // 映射数据库字段到前端期望的字段名
-        this.products = products.map(product => ({
+        this.products = activeProducts.map(product => ({
           ...product,
           totalOffering: product.total_token,
           subscribed: product.current_subscribed_token,
@@ -807,8 +810,8 @@ export default {
     filteredProducts(){
       const q = this.filters.q.trim().toLowerCase()
       return this.products.filter(p => {
-        // 显示ACTIVE和INCOMING状态的项目
-        if (p.status !== 'ACTIVE' && p.status !== 'INCOMING') {
+        // 只显示ACTIVE状态的项目
+        if (p.status !== 'ACTIVE') {
           return false
         }
         
@@ -1599,7 +1602,16 @@ export default {
   .doc-list {
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
-    padding: 16px;
+    padding: 16px 30px;
+  }
+  
+  /* 手机端页边距 */
+  .main-content {
+    padding: 0 30px;
+  }
+  
+  .container {
+    padding: 0 30px;
   }
   
   .pf-project-card {
@@ -1658,8 +1670,17 @@ export default {
 @media (max-width: 640px){
   .doc-list {
     grid-template-columns: 1fr;
-    padding: 12px;
+    padding: 12px 30px;
     gap: 12px;
+  }
+  
+  /* 小屏手机端页边距 */
+  .main-content {
+    padding: 0 30px;
+  }
+  
+  .container {
+    padding: 0 30px;
   }
   
   .pf-project-card {

@@ -48,7 +48,7 @@
           <p>Through tokenization technology, we will break down traditional real estate investment that requires a large amount of capital into small, tradable units, allowing ordinary investors to enjoy stable returns from real estate investment.</p>
         </div>
         <div class="mission-image">
-          <div class="image-placeholder">🏢</div>
+          <!-- <div class="image-placeholder">🏢</div> -->
         </div>
       </div>
 
@@ -56,22 +56,22 @@
         <h2>Core Values</h2>
         <div class="values-grid">
           <div class="value-card">
-            <div class="value-icon">🔒</div>
+            <!-- <div class="value-icon">🔒</div> -->
             <h3>Security First</h3>
             <p>Use the most advanced encryption technology and multiple security measures to ensure the security of user assets and transactions.</p>
           </div>
           <div class="value-card">
-            <div class="value-icon">🌐</div>
+            <!-- <div class="value-icon">🌐</div> -->
             <h3>Transparent and Open</h3>
             <p>All transaction records are stored on the chain, project information is completely transparent, allowing investors to invest clearly and clearly.</p>
           </div>
           <div class="value-card">
-            <div class="value-icon">🚀</div>
+            <!-- <div class="value-icon">🚀</div> --> 
             <h3>Continuous Innovation</h3>
             <p>Continuously explore new technologies, optimize user experience, and provide better services for investors.</p>
           </div>
           <div class="value-card">
-            <div class="value-icon">🤝</div>
+            <!-- <div class="value-icon">🤝</div> -->
             <h3>User-Centered</h3>
             <p>Provide professional,贴心 services, helping users achieve wealth增值。</p>
           </div>
@@ -82,19 +82,19 @@
         <h2>Core Team</h2>
         <div class="team-grid">
           <div class="team-member">
-            <div class="member-avatar">👨‍💼</div>
+            <!-- <div class="member-avatar">👨‍💼</div> -->
             <h4>张明</h4>
             <p class="member-title"></p>
             <p class="member-bio">拥有15年金融科技经验，曾在多家知名金融机构担任高管职务。</p>
           </div>
           <div class="team-member">
-            <div class="member-avatar">👩‍💻</div>
+            <!-- <div class="member-avatar">👩‍💻</div> -->
             <h4>李华</h4>
             <p class="member-title">CFO</p>
             <p class="member-bio">区块链技术专家，在分布式系统和智能合约开发方面有丰富经验。</p>
           </div>
           <div class="team-member">
-            <div class="member-avatar">👨‍💼</div>
+            <!-- <div class="member-avatar">👨‍💼</div> -->
             <h4>王强</h4>
             <p class="member-title">CMO</p>
             <p class="member-bio">房地产行业资深专家，对市场趋势和投资机会有深刻洞察。</p>

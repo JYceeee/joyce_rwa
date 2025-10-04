@@ -140,16 +140,8 @@
         </div>
         
         <div class="deploy-controls">
-          <button 
-            @click="deployContractsWithSubscription" 
-            class="btn primary buy-btn"
-            :disabled="!connected || loading || !isFormValid"
-          >
-            <span v-if="loading">部署中...</span>
-            <span v-else>BUY & 部署合约</span>
-          </button>
-          <div class="button-hint" v-if="!isFormValid">
-            Please fill in the complete subscription information
+          <div class="removed-notice">
+            <p>合约部署功能已被移除</p>
           </div>
         </div>
         
@@ -421,83 +413,7 @@ const getCurrentChainId = () => {
   return 11155111 // 默认使用 Sepolia 测试网
 }
 
-const deployContractsWithSubscription = async () => {
-  try {
-    loading.value = true
-    error.value = ''
-    deploymentStatus.value = true
-    deploymentLogs.value = []
-    
-    addLog(deploymentLogs.value, '开始认购和合约部署...', 'info')
-    addLog(deploymentLogs.value, `当前网络: ${networkLabel.value || '未知网络'}`, 'info')
-    addLog(deploymentLogs.value, `链ID: ${getCurrentChainId()}`, 'info')
-    addLog(deploymentLogs.value, `项目代号: ${selectedProjectCode.value}`, 'info')
-    addLog(deploymentLogs.value, `项目名称: ${getSelectedProjectName()}`, 'info')
-    addLog(deploymentLogs.value, `认购金额: ${formatNumber(subscriptionAmount.value)} LPT`, 'info')
-    addLog(deploymentLogs.value, `年化利率: ${contractTerms.value.annualRate}% (合约设定)`, 'info')
-    addLog(deploymentLogs.value, `贷款期限: ${contractTerms.value.loanTerm} 天 (合约设定)`, 'info')
-    
-    // 调用合约测试服务，传入认购数据
-    const result = await contractTestService.deployContractsWithSubscription({
-      subscriptionAmount: subscriptionAmount.value,
-      annualRate: contractTerms.value.annualRate,
-      loanTerm: contractTerms.value.loanTerm,
-      projectCode: selectedProjectCode.value,
-      projectName: getSelectedProjectName(),
-      walletAddress: address.value,
-      chainId: getCurrentChainId()
-    })
-    
-    addLog(deploymentLogs.value, '部署 KYCRegistry...', 'info')
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    addLog(deploymentLogs.value, '部署 LPT (本金币)...', 'info')
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    addLog(deploymentLogs.value, '部署 LIT (利息币)...', 'info')
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    addLog(deploymentLogs.value, '部署 LoanIssuer...', 'info')
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    addLog(deploymentLogs.value, '配置合约权限...', 'info')
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    addLog(deploymentLogs.value, '创建贷款合约...', 'info')
-    addLog(deploymentLogs.value, `贷款ID: ${result.loanId}`, 'info')
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    // 使用服务返回的合约地址
-    deployedContracts.value = [
-      { name: 'KYCRegistry', address: result.contracts.kycRegistry },
-      { name: 'LPT (本金币)', address: result.contracts.lpt },
-      { name: 'LIT (利息币)', address: result.contracts.lit },
-      { name: 'LoanIssuer', address: result.contracts.loanIssuer }
-    ]
-    
-    // 自动填充合约地址到交互测试区域
-    contractAddresses.value = {
-      lpt: result.contracts.lpt,
-      lit: result.contracts.lit,
-      issuer: result.contracts.loanIssuer
-    }
-    
-    addLog(deploymentLogs.value, `网络: ${result.networkInfo.name}`, 'info')
-    addLog(deploymentLogs.value, `交易哈希: ${result.transactionHash}`, 'info')
-    addLog(deploymentLogs.value, `Gas 使用: ${result.gasUsed}`, 'info')
-    addLog(deploymentLogs.value, `区块号: ${result.blockNumber}`, 'info')
-    addLog(deploymentLogs.value, '认购和合约部署完成!', 'success')
-    
-    successMessage.value = `认购成功！已部署合约，贷款ID: ${result.loanId}`
-    setTimeout(() => { successMessage.value = '' }, 8000)
-    
-  } catch (err) {
-    error.value = `认购失败: ${err.message}`
-    addLog(deploymentLogs.value, `认购失败: ${err.message}`, 'error')
-  } finally {
-    loading.value = false
-  }
-}
+// 合约部署功能已移除
 
 // 加载可用项目列表
 const loadAvailableProjects = async () => {
@@ -1166,5 +1082,22 @@ watch(contractAddresses, (newVal) => {
   .summary-value {
     text-align: left;
   }
+}
+
+/* 移除通知样式 */
+.removed-notice {
+  text-align: center;
+  padding: 20px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.removed-notice p {
+  color: #f87171;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
 }
 </style> -->

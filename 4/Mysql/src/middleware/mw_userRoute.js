@@ -7,7 +7,7 @@ const user_email = joi.string().trim().email({ tlds: { allow: false } }).require
 const user_password = joi.string().pattern(/^[\S]{6,54}$/).required();
 const user_phone = joi.string().pattern(/^[\+]?[1-9][\d]{0,15}$/).required();
 const user_id = joi.string().optional();
-const email_list = joi.string().valid('Yes', 'No').optional();
+const email_list = joi.enum(['Yes', 'No']).optional();
 // const verification_code = joi.string().length(6).pattern(/^\d{6}$/).optional();
 
 //定义验证注册表单数据的规则对象

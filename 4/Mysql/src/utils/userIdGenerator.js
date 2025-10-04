@@ -25,7 +25,7 @@ function validateUserId(userId) {
   }
   
   // 检查格式: user + 数字时间戳 + 5位随机字符串
-  const pattern = /^user\d{13}[a-z0-9]{5}$/;
+  const pattern = /^user\d{13}[0-9]{5}$/;
   return pattern.test(userId);
 }
 

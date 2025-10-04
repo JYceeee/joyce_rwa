@@ -66,4 +66,48 @@ export default { name: 'AppFooter' }
 .footer {
   background: #0A0A19;
 }
+
+/* 手机端响应式设计 */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 30px !important;
+    padding-right: 30px !important;
+  }
+  
+  .footer-top {
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  .footer-links {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  
+  .footer-bottom {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding-left: 30px !important;
+    padding-right: 30px !important;
+  }
+  
+  .footer-links {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .footer-brand {
+    text-align: center;
+  }
+  
+  .footer-tagline {
+    font-size: 14px;
+  }
+}
 </style>

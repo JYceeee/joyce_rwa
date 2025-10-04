@@ -19,6 +19,70 @@
       </div>
     </div>
 
+    <!-- 合约地址弹窗 -->
+    <div v-if="contractAddressModal.show" class="modal-overlay" @click="closeContractAddressModal"> 
+      <div class="modal-content contract-address-modal" @click.stop>
+        <div class="contract-address-container">
+          <div class="contract-address-header">
+            <h2 class="contract-address-title">Contract Addresses</h2>
+            <button class="close-btn" @click="closeContractAddressModal">×</button>
+          </div>
+          
+          <div class="contract-address-content">
+            <p class="contract-address-description">The following contract addresses will be used for this transaction:</p>
+            
+            <div class="contract-address-grid">
+              <div class="contract-address-item">
+                <div class="contract-address-label">Principal Token Address:</div>
+                <div class="contract-address-value" @click="copyToClipboard(contractAddressModal.principalTokenAddress)">
+                  {{ formatAddress(contractAddressModal.principalTokenAddress) }}
+                  <span class="copy-icon">📋</span>
+                </div>
+              </div>
+              
+              <div class="contract-address-item">
+                <div class="contract-address-label">Interest Token Address:</div>
+                <div class="contract-address-value" @click="copyToClipboard(contractAddressModal.interestTokenAddress)">
+                  {{ formatAddress(contractAddressModal.interestTokenAddress) }}
+                  <span class="copy-icon">📋</span>
+                </div>
+              </div>
+              
+              <div class="contract-address-item">
+                <div class="contract-address-label">KYC Registry Address:</div>
+                <div class="contract-address-value" @click="copyToClipboard(contractAddressModal.kycRegistryAddress)">
+                  {{ formatAddress(contractAddressModal.kycRegistryAddress) }}
+                  <span class="copy-icon">📋</span>
+                </div>
+              </div>
+              
+              <div class="contract-address-item">
+                <div class="contract-address-label">Loan Issuer Address:</div>
+                <div class="contract-address-value" @click="copyToClipboard(contractAddressModal.loanIssuerAddress)">
+                  {{ formatAddress(contractAddressModal.loanIssuerAddress) }}
+                  <span class="copy-icon">📋</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="contract-address-actions">
+            <button class="btn secondary" @click="closeContractAddressModal">Close</button>
+            <button class="btn primary" @click="proceedWithTransaction">Proceed with Transaction</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 一键部署弹窗 -->
+    <OneClickDeployModal
+      :show="showOneClickDeployModal"
+      :projectCode="projectCode"
+      :tradeAmount="parseFloat(tradeAmount) || 0"
+      @close="closeOneClickDeployModal"
+      @completed="handleOneClickDeployCompleted"
+    />
+
     <!-- 交易成功弹窗 -->
     <div v-if="showSuccessModal" class="modal-overlay" @click="closeSuccessModal"> 
       <div class="modal-content success-modal" @click.stop>
@@ -62,6 +126,22 @@
                   <div class="detail-item">
                     <span class="detail-key">Block:</span>
                     <span class="detail-value">{{ successData.blockNumber }}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="detail-card">
+                <div class="detail-header">
+                  <span class="detail-label">Contract Addresses</span>
+                </div>
+                <div class="detail-grid">
+                  <div class="detail-item">
+                    <span class="detail-key">Principal Token:</span>
+                    <span class="detail-value hash-value" @click="copyContractAddress(successData.principalTokenAddress)">{{ formatAddress(successData.principalTokenAddress) }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-key">Interest Token:</span>
+                    <span class="detail-value hash-value" @click="copyContractAddress(successData.interestTokenAddress)">{{ formatAddress(successData.interestTokenAddress) }}</span>
                   </div>
                 </div>
               </div>
@@ -266,8 +346,8 @@
         <div class="form-actions">
             <button 
             class="btn primary trade-btn"
-            @click="deployContractsWithSubscription"
-            :disabled="!connected || !isFormValid || loading"
+            @click="executeOneClickTrade"
+            :disabled="!isFormValid || loading"
             >
             <span class="btn-text">
                 {{ loading ? 'Processing...' : (tradeType === 'buy' ? '确认认购' : '确认赎回') }}
@@ -282,12 +362,17 @@
 </template>
 
 <script>
-import { productAPI, transactionAPI, userAPI } from '@/service/api'
+import { projectAPI, transactionAPI, userAPI } from '@/service/api'
 import { useWallet } from '@/composables/useWallet'
 import { ethers } from 'ethers'
+import { CONTRACT_CONFIG } from '@/config/contractConfig'
+import OneClickDeployModal from '@/components/OneClickDeployModal.vue'
 
 export default {
   name: 'TradeProjectView',
+  components: {
+    OneClickDeployModal
+  },
   props: {
     code: {
       type: String,
@@ -303,6 +388,7 @@ export default {
       error: null,
       showSuccessModal: false,
       showLoadingModal: false,
+      showOneClickDeployModal: false,
       loadingStatus: '',
       successData: {
         tradeType: '',
@@ -313,7 +399,29 @@ export default {
       // 项目数据
       projectData: null,
       projectLoading: true,
-      projectError: null
+      projectError: null,
+      // 合约地址弹窗
+      contractAddressModal: {
+        show: false,
+        principalTokenAddress: '',
+        interestTokenAddress: '',
+        kycRegistryAddress: '',
+        loanIssuerAddress: ''
+      },
+      // 网络配置
+      networkConfig: {
+        sepolia: { chainId: '0xaa36a7', name: 'Sepolia Test Network' },
+        mainnet: { chainId: '0x1', name: 'Ethereum Mainnet' }
+      },
+      // 从合约配置获取LoanIssuer地址
+      loanIssuerAddress: CONTRACT_CONFIG.LOAN_ISSUER_ADDRESS,
+      // 部署的合约地址
+      deployedContracts: {
+        principalTokenAddress: '',
+        interestTokenAddress: '',
+        kycRegistryAddress: '',
+        loanIssuerAddress: ''
+      }
     }
   },
   computed: {
@@ -408,7 +516,7 @@ export default {
         console.log('🔄 TradeProjectView: 从数据库加载项目数据...', this.projectCode)
         
         // 直接从API获取项目数据
-        const response = await productAPI.getProductByCode(this.projectCode)
+        const response = await projectAPI.getProjectByCode(this.projectCode)
         
         if (response.status === 0) {
           const rawData = response.data
@@ -548,8 +656,46 @@ export default {
       return match ? parseInt(match[1]) : 12
     },
     
-    // 部署合约并处理认购
-    async deployContractsWithSubscription() {
+    // 一键交易流程
+    async executeOneClickTrade() {
+      if (!this.isFormValid) {
+        console.warn('⚠️ TradeProjectView: 表单验证失败，无法执行交易')
+        return
+      }
+      
+      // 显示一键部署弹窗
+      this.showOneClickDeployModal = true
+    },
+    
+    // 关闭一键部署弹窗
+    closeOneClickDeployModal() {
+      this.showOneClickDeployModal = false
+    },
+    
+    // 处理一键部署完成
+    async handleOneClickDeployCompleted(deployData) {
+      console.log('✅ TradeProjectView: 一键部署完成:', deployData)
+      
+      // 保存交易信息到数据库
+      await this.saveTransactionToDatabase(deployData)
+      
+      // 显示成功弹窗
+      this.showSuccessModal = true
+      this.successData = {
+        tradeType: this.tradeType,
+        amount: this.tradeAmount,
+        transactionHash: deployData.transactionHash,
+        blockNumber: deployData.blockNumber,
+        principalTokenAddress: deployData.principalTokenAddress,
+        interestTokenAddress: deployData.interestTokenAddress
+      }
+      
+      // 关闭部署弹窗
+      this.showOneClickDeployModal = false
+    },
+    
+    // 原始的一键交易流程（保留作为备用）
+    async executeOneClickTradeOriginal() {
       if (!this.isFormValid) {
         console.warn('⚠️ TradeProjectView: 表单验证失败，无法执行交易')
         return
@@ -558,47 +704,56 @@ export default {
       try {
         this.loading = true
         this.showLoadingModal = true
-        this.loadingStatus = '准备交易...'
+        this.loadingStatus = '开始一键交易流程...'
         
-        console.log('🚀 TradeProjectView: 开始部署合约和处理认购', {
-        projectCode: this.projectCode,
+        console.log('🚀 TradeProjectView: 开始一键交易流程', {
+          projectCode: this.projectCode,
           tradeType: this.tradeType,
-            amount: this.tradeAmount,
+          amount: this.tradeAmount,
           userAddress: this.address
         })
         
-        // 1. 部署智能合约
-        this.loadingStatus = '部署智能合约...'
-        const contractResult = await this.deploySmartContracts()
+        // 步骤1: 准备交易数据
+        this.loadingStatus = '准备交易数据...'
+        const tradeData = {
+          projectCode: this.projectCode,
+          tradeType: this.tradeType,
+          amount: parseFloat(this.tradeAmount),
+          userAddress: this.address
+        }
         
-        // 2. 执行MetaMask交易
+        // 步骤2: 执行MetaMask交易
         this.loadingStatus = '执行MetaMask交易...'
-        const metamaskTxResult = await this.executeMetaMaskTransaction(contractResult)
+        const metamaskResult = await this.executeMetaMaskTransaction()
         
-        // 3. 提取交易信息
+        // 步骤3: 获取现有合约地址
+        this.loadingStatus = '获取合约地址...'
+        const contractAddresses = await this.getExistingContractAddresses()
+        
+        // 步骤4: 提取交易信息
         this.loadingStatus = '提取交易信息...'
-        const transactionInfo = await this.extractTransactionInfo(contractResult, metamaskTxResult)
+        const transactionInfo = this.extractTransactionInfo(metamaskResult, contractAddresses)
         
-        // 4. 保存交易信息到数据库
+        // 步骤5: 保存到数据库
         this.loadingStatus = '保存交易记录...'
         await this.saveTransactionToDatabase(transactionInfo)
         
-        // 5. 显示成功结果
+        // 步骤6: 显示成功结果
         this.loadingStatus = '交易完成!'
         this.showSuccessModal = true
         this.successData = {
           tradeType: this.tradeType,
           amount: this.tradeAmount,
-          transactionHash: transactionInfo.transaction_hash,
-          blockNumber: transactionInfo.block_number,
-          loanIssuerAddress: transactionInfo.loan_issuer_wallet_address,
-          contractAddress: transactionInfo.trade_contract_abi
+          transactionHash: metamaskResult.transactionHash,
+          blockNumber: metamaskResult.blockNumber,
+          principalTokenAddress: contractAddresses.principalTokenAddress,
+          interestTokenAddress: contractAddresses.interestTokenAddress
         }
         
-        console.log('✅ TradeProjectView: 合约部署和认购处理完成')
+        console.log('✅ TradeProjectView: 一键交易流程完成')
         
       } catch (error) {
-        console.error('❌ TradeProjectView: 合约部署失败:', error)
+        console.error('❌ TradeProjectView: 一键交易失败:', error)
         this.error = error.message || '交易失败，请重试'
         alert(`交易失败: ${this.error}`)
       } finally {
@@ -607,38 +762,8 @@ export default {
       }
     },
     
-    // 部署智能合约
-    async deploySmartContracts() {
-      try {
-        console.log('🚀 TradeProjectView: 调用后端部署智能合约API')
-        
-        const contractData = {
-          projectCode: this.projectCode,
-          tradeType: this.tradeType,
-          amount: parseFloat(this.tradeAmount),
-          userAddress: this.address
-        }
-        
-        console.log('📤 TradeProjectView: 发送合约部署数据:', contractData)
-        
-        // 调用后端API部署智能合约
-        const response = await transactionAPI.deploySmartContracts(contractData)
-        
-        if (response.status === 0) {
-          console.log('✅ TradeProjectView: 智能合约部署成功:', response.data)
-          return response.data
-        } else {
-          throw new Error(response.message || '智能合约部署失败')
-        }
-        
-      } catch (error) {
-        console.error('❌ TradeProjectView: 智能合约部署失败:', error)
-        throw new Error('智能合约部署失败: ' + error.message)
-      }
-    },
-    
-    // 执行MetaMask交易
-    async executeMetaMaskTransaction(contractResult) {
+    // MetaMask交易执行
+    async executeMetaMaskTransaction() {
       try {
         console.log('💳 TradeProjectView: 开始执行MetaMask交易')
         
@@ -652,22 +777,23 @@ export default {
           throw new Error('MetaMask未安装，请安装MetaMask扩展')
         }
         
-        // 检查网络
+        // 网络检查 - 确保连接到Sepolia测试网
         const chainId = await window.ethereum.request({ method: 'eth_chainId' })
-        const expectedChainId = '0xaa36a7' // Sepolia testnet
-        if (chainId !== expectedChainId) {
-          // 尝试切换到Sepolia网络
+        const sepoliaChainId = '0xaa36a7'
+        
+        if (chainId !== sepoliaChainId) {
+          this.loadingStatus = '切换到Sepolia测试网...'
           try {
             await window.ethereum.request({
               method: 'wallet_switchEthereumChain',
-              params: [{ chainId: expectedChainId }],
+              params: [{ chainId: sepoliaChainId }],
             })
           } catch (switchError) {
             // 如果网络不存在，添加Sepolia网络
             await window.ethereum.request({
               method: 'wallet_addEthereumChain',
               params: [{
-                chainId: expectedChainId,
+                chainId: sepoliaChainId,
                 chainName: 'Sepolia Test Network',
                 rpcUrls: ['https://sepolia.infura.io/v3/'],
                 nativeCurrency: {
@@ -681,34 +807,36 @@ export default {
           }
         }
         
-        // 获取loan issuer地址
-        const loanIssuerAddress = contractResult.loanIssuerAddress
-        if (!loanIssuerAddress) {
-          throw new Error('无法获取Loan Issuer地址')
+        // 验证LoanIssuer地址
+        console.log('🔍 验证LoanIssuer地址:', this.loanIssuerAddress)
+        if (!this.loanIssuerAddress || !this.isValidEthereumAddress(this.loanIssuerAddress)) {
+          console.error('❌ LoanIssuer地址无效:', this.loanIssuerAddress)
+          throw new Error(`无效的LoanIssuer地址: ${this.loanIssuerAddress}`)
         }
+        console.log('✅ LoanIssuer地址验证通过:', this.loanIssuerAddress)
         
-        // 计算交易金额（ETH）
-        const amountInETH = parseFloat(this.tradeAmount) // 假设1 AUD = 1 ETH for testing
+        // 交易构建 - 构建ETH转账交易参数
+        const amountInETH = parseFloat(this.tradeAmount) // 假设1 Token = 1 ETH for testing
         const amountInWei = ethers.parseEther(amountInETH.toString())
         
         console.log('📊 交易详情:', {
           from: address.value,
-          to: loanIssuerAddress,
+          to: this.loanIssuerAddress,
           amount: amountInETH,
           amountInWei: amountInWei.toString()
         })
         
-        // 构建交易参数
+        // 交易参数
         const transactionParams = {
           from: address.value,
-          to: loanIssuerAddress,
+          to: this.loanIssuerAddress,
           value: '0x' + amountInWei.toString(16),
           gas: '0x5208', // 21000 gas limit for simple transfer
         }
         
         console.log('🚀 发送交易到MetaMask...')
         
-        // 发送交易到MetaMask
+        // 交易发送 - 通过MetaMask发送交易
         const txHash = await window.ethereum.request({
           method: 'eth_sendTransaction',
           params: [transactionParams],
@@ -716,7 +844,8 @@ export default {
         
         console.log('✅ MetaMask交易已发送，交易哈希:', txHash)
         
-        // 等待交易确认
+        // 交易确认 - 等待交易上链
+        this.loadingStatus = '等待交易确认...'
         console.log('⏳ 等待交易确认...')
         const receipt = await this.waitForTransactionConfirmation(txHash)
         
@@ -760,29 +889,51 @@ export default {
       throw new Error('交易确认超时')
     },
     
+    // 获取现有合约地址
+    async getExistingContractAddresses() {
+      try {
+        console.log('🔍 TradeProjectView: 获取现有合约地址')
+        
+        // 从合约配置中获取地址
+        const contractAddresses = {
+          principalTokenAddress: CONTRACT_CONFIG.PRINCIPAL_TOKEN_ADDRESS,
+          interestTokenAddress: CONTRACT_CONFIG.INTEREST_TOKEN_ADDRESS,
+          kycRegistryAddress: CONTRACT_CONFIG.KYC_REGISTRY_ADDRESS,
+          loanIssuerAddress: CONTRACT_CONFIG.LOAN_ISSUER_ADDRESS,
+          complianceGuardAddress: CONTRACT_CONFIG.COMPLIANCE_GUARD_ADDRESS,
+          holderRegistryAddress: CONTRACT_CONFIG.HOLDER_REGISTRY_ADDRESS
+        }
+        
+        console.log('✅ TradeProjectView: 获取到合约地址:', contractAddresses)
+        
+        // 保存到组件状态
+        this.deployedContracts = contractAddresses
+        
+        return contractAddresses
+        
+      } catch (error) {
+        console.error('❌ TradeProjectView: 获取合约地址失败:', error)
+        throw new Error('获取合约地址失败: ' + error.message)
+      }
+    },
+    
     // 提取交易信息
-    async extractTransactionInfo(contractResult, metamaskTxResult) {
-      const { address } = useWallet()
-      
-      console.log('🔍 TradeProjectView: 提取合约信息:', contractResult)
-      console.log('🔍 TradeProjectView: 提取MetaMask交易信息:', metamaskTxResult)
+    extractTransactionInfo(metamaskResult, contractAddresses) {
+      console.log('🔍 TradeProjectView: 提取交易信息:', { metamaskResult, contractAddresses })
       
       return {
-        user_id: null, // 需要从用户认证系统获取
-        network_type: 'ethereum',
-        user_wallet_address: address.value,
+        user_wallet_address: this.address,
         project_code: this.projectCode,
         purchase_amount: parseFloat(this.tradeAmount),
         trade_type: this.tradeType,
-        transaction_hash: metamaskTxResult?.transactionHash || contractResult.transactionHash,
-        block_number: metamaskTxResult?.blockNumber || contractResult.blockNumber,
+        transaction_hash: metamaskResult.transactionHash,
+        block_number: metamaskResult.blockNumber,
         trade_timestamp: new Date().toISOString(),
-        // 从智能合约部署结果中获取
-        trade_contract_abi: contractResult.trade_contract_abi || contractResult.contractAddress || null,
-        compliant_erc20_abi: contractResult.compliant_erc20_abi || null,
-        token_address_native: contractResult.principalTokenAddress || null,
-        token_address_interest: contractResult.interestTokenAddress || null,
-        loan_issuer_wallet_address: contractResult.loanIssuerAddress || null
+        // 合约信息
+        principal_token_address: contractAddresses.principalTokenAddress,
+        interest_token_address: contractAddresses.interestTokenAddress,
+        kyc_registry_address: contractAddresses.kycRegistryAddress,
+        loan_issuer_address: contractAddresses.loanIssuerAddress
       }
     },
     
@@ -815,13 +966,12 @@ export default {
           userAddress: transactionInfo.user_wallet_address,
           transactionHash: transactionInfo.transaction_hash,
           blockNumber: transactionInfo.block_number,
-          userId: userId, // 添加用户ID字段
-          // 添加合约信息字段
-          tradeContractABI: transactionInfo.trade_contract_abi,
-          compliantERC20ABI: transactionInfo.compliant_erc20_abi,
-          tokenAddressNative: transactionInfo.token_address_native,
-          tokenAddressInterest: transactionInfo.token_address_interest,
-          loanIssuerWalletAddress: transactionInfo.loan_issuer_wallet_address
+          userId: userId,
+          // 合约信息字段
+          principalTokenAddress: transactionInfo.principal_token_address,
+          interestTokenAddress: transactionInfo.interest_token_address,
+          kycRegistryAddress: transactionInfo.kyc_registry_address,
+          loanIssuerAddress: transactionInfo.loan_issuer_address
         }
         
         console.log('📤 TradeProjectView: 发送交易数据:', transactionData)
@@ -841,38 +991,41 @@ export default {
       }
     },
     
-    // 执行交易
-    async executeTrade() {
-      if (!this.canExecuteTrade) return
-      
+    // 复制到剪贴板
+    async copyToClipboard(text) {
       try {
-        this.loading = true
-        this.showLoadingModal = true
-        this.loadingStatus = 'Preparing transaction...'
-        
-        // 模拟交易处理
-        await new Promise(resolve => setTimeout(resolve, 2000))
-        
-        // 模拟成功交易
-          this.successData = {
-          tradeType: this.tradeType,
-            amount: this.tradeAmount,
-          transactionHash: '0x' + Math.random().toString(16).substr(2, 64),
-          blockNumber: Math.floor(Math.random() * 1000000) + 1000000
-        }
-        
-        this.showLoadingModal = false
-          this.showSuccessModal = true
-        
-        console.log('✅ TradeProjectView: 交易执行成功:', this.successData)
+        await navigator.clipboard.writeText(text)
+        alert('地址已复制到剪贴板')
       } catch (error) {
-        this.showLoadingModal = false
-        this.error = '交易执行失败'
-        console.error('❌ TradeProjectView: 交易执行失败:', error)
-      } finally {
-        this.loading = false
+        console.error('复制失败:', error)
+        // 降级方案
+        const textArea = document.createElement('textarea')
+        textArea.value = text
+        document.body.appendChild(textArea)
+        textArea.select()
+        document.execCommand('copy')
+        document.body.removeChild(textArea)
+        alert('地址已复制到剪贴板')
       }
     },
+    
+    // 格式化地址显示
+    formatAddress(address) {
+      if (!address) return 'N/A'
+      return `${address.slice(0, 6)}...${address.slice(-4)}`
+    },
+    
+    // 智能合约部署方法已移除
+    
+    // MetaMask交易方法已移除
+    
+    // 交易确认方法已移除
+    
+    // 交易信息提取方法已移除
+    
+    // 数据库保存方法已移除
+    
+    // 执行交易方法已移除
     
     // 关闭成功弹窗
     closeSuccessModal() {
@@ -887,13 +1040,32 @@ export default {
     // 复制哈希值
     copyHash() {
       navigator.clipboard.writeText(this.successData.transactionHash)
-      // 可以添加提示
+      alert('交易哈希已复制到剪贴板')
+    },
+
+    // 复制合约地址
+    copyContractAddress(address) {
+      navigator.clipboard.writeText(address)
+      alert('合约地址已复制到剪贴板')
     },
 
     // 格式化哈希值
     formatHash(hash) {
       if (!hash) return ''
       return `${hash.substr(0, 6)}...${hash.substr(-4)}`
+    },
+
+    // 格式化地址显示
+    formatAddress(address) {
+      if (!address) return 'N/A'
+      return `${address.slice(0, 6)}...${address.slice(-4)}`
+    },
+    
+    // 验证以太坊地址格式
+    isValidEthereumAddress(address) {
+      if (!address) return false
+      // 检查地址格式：0x开头，42个字符，包含0-9a-fA-F
+      return /^0x[0-9a-fA-F]{40}$/.test(address)
     }
   }
 }
@@ -1443,6 +1615,124 @@ export default {
   padding: 20px;
 }
 
+/* 合约地址弹窗样式 */
+.contract-address-modal {
+  background: #1f2937;
+  border-radius: 16px;
+  padding: 0;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+  border: 1px solid #374151;
+}
+
+.contract-address-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.contract-address-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid #374151;
+}
+
+.contract-address-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  color: #ffffff;
+  background: #374151;
+}
+
+.contract-address-content {
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.contract-address-description {
+  color: #d1d5db;
+  font-size: 14px;
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+}
+
+.contract-address-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contract-address-item {
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.contract-address-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.contract-address-value {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  color: #ffffff;
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.contract-address-value:hover {
+  background: #374151;
+  border-color: #6b7280;
+}
+
+.copy-icon {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.contract-address-actions {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #374151;
+  justify-content: flex-end;
+}
+
 .modal-content {
   background: #141426;
   border: 1px solid #374151;
@@ -1617,6 +1907,8 @@ export default {
   gap: 12px;
   justify-content: center;
 }
+
+/* 移除通知样式已删除 */
 
 /* 响应式设计 */
 @media (max-width: 768px) {

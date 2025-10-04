@@ -4,6 +4,13 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { generateUserId } = require('../../utils/userIdGenerator');
 
+// 验证手机号格式的函数
+function isValidPhoneNumber(phone) {
+  // 验证带区号的手机号格式：+国家代码+手机号
+  const phoneRegex = /^\+[1-9]\d{1,14}$/;
+  return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''));
+}
+
 //注册新用户处理函数
 exports.regUser = (req, res) => {
   //获取用户提交数据
@@ -20,6 +27,27 @@ exports.regUser = (req, res) => {
   } else {
     console.log('✅ 使用前端提供的user_id:', userinfo.user_id);
   }
+  
+  // 验证user_id是否成功生成
+  if (!userinfo.user_id || userinfo.user_id.trim() === '') {
+    console.error('❌ user_id生成失败，无法继续注册流程');
+    return res.cc('用户ID生成失败，请重试');
+  }
+  
+  // 验证email_list字段设置
+  console.log('📧 检查邮件列表订阅设置...');
+  console.log('   前端发送的email_list值:', userinfo.email_list);
+  
+  // 确保email_list字段正确设置
+  if (userinfo.email_list === 'Yes' || userinfo.email_list === true || userinfo.email_list === 'true') {
+    userinfo.email_list = 'Yes';
+    console.log('✅ 用户选择接收邮件列表更新');
+  } else {
+    userinfo.email_list = 'No';
+    console.log('✅ 用户选择不接收邮件列表更新');
+  }
+  
+  console.log('📧 最终email_list值:', userinfo.email_list);
 
   //定义SQL语句,查询用户邮箱
   console.log('用户:' + userinfo.user_email)
@@ -43,8 +71,8 @@ exports.regUser = (req, res) => {
       user_password: userinfo.user_password, 
       user_id: userinfo.user_id, // 已经在前面确保有值
       user_email: userinfo.user_email, 
-      user_phone: userinfo.user_phone && userinfo.user_phone.trim() ? userinfo.user_phone.trim() : '', // 确保有值，即使是空字符串
-      email_list: userinfo.email_list || 'No' // 邮件列表订阅，默认为'No'
+      user_phone: userinfo.user_phone && userinfo.user_phone.trim() ? userinfo.user_phone.trim() : '', // 确保有值，即使是空字符串，现在支持带区号的手机号
+      email_list: userinfo.email_list // 使用前面处理过的email_list值
     };
     
     // 验证关键字段不为空
@@ -63,7 +91,39 @@ exports.regUser = (req, res) => {
       return res.cc('密码不能为空');
     }
     
-    console.log('💾 准备插入数据库的数据:', insertData);
+    // 验证手机号格式（如果提供了手机号）
+    if (insertData.user_phone && !isValidPhoneNumber(insertData.user_phone)) {
+      console.error('❌ 手机号格式无效:', insertData.user_phone);
+      return res.cc('手机号格式无效，请包含国家区号');
+    }
+    
+      console.log('💾 准备插入数据库的数据:', insertData);
+      console.log('📋 字段验证详情:');
+      console.log('  ✅ user_id:', insertData.user_id ? '已生成' : '❌ 缺失');
+      console.log('  ✅ user_name:', insertData.user_name || '❌ 缺失');
+      console.log('  ✅ user_email:', insertData.user_email || '❌ 缺失');
+      console.log('  ✅ user_phone:', insertData.user_phone || '❌ 缺失');
+      console.log('  ✅ email_list:', insertData.email_list === 'Yes' ? '用户选择接收邮件' : '用户不接收邮件');
+      console.log('  ✅ user_password:', insertData.user_password ? '[已加密]' : '❌ 未设置');
+      
+      // 最终验证检查
+      const validationResults = {
+        user_id: !!insertData.user_id,
+        user_name: !!insertData.user_name,
+        user_email: !!insertData.user_email,
+        user_phone: insertData.user_phone !== undefined, // 允许空字符串
+        email_list: !!insertData.email_list,
+        user_password: !!insertData.user_password
+      };
+      
+      const allValid = Object.values(validationResults).every(result => result);
+      console.log('🔍 最终验证结果:', validationResults);
+      console.log(allValid ? '✅ 所有字段验证通过' : '❌ 部分字段验证失败');
+      
+      if (!allValid) {
+        console.error('❌ 字段验证失败，无法插入数据库');
+        return res.cc('数据验证失败，请检查输入信息');
+      }
 
     // 定义插入用户数据的SQL语句
     const sql = 'insert into user set ?'

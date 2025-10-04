@@ -5,6 +5,7 @@ const router = express.Router();
 const {
   getAllProjects,
   getProjectByCode,
+  getProjectContractAddresses,
   createProject,
   updateProjectSubscription,
   deploySmartContracts
@@ -23,6 +24,10 @@ router.get('/loans', getAllProjects);          // 向后兼容路径
 router.get('/project/:code', getProjectByCode);        // 主要路径
 router.get('/projects/:code', getProjectByCode);       // 标准RESTful路径
 router.get('/loans/:code', getProjectByCode);          // 向后兼容路径
+
+// 根据项目代码获取合约地址
+router.get('/project/:projectCode/contracts', getProjectContractAddresses);
+router.get('/projects/:projectCode/contracts', getProjectContractAddresses);
 
 // 创建新项目（管理员功能）
 router.post('/projects', createProject);

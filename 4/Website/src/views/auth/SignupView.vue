@@ -1,6 +1,6 @@
 <template>
   <div class="auth-card">
-    <!-- 简单弹窗 -->
+    <!-- Simple Modal -->
     <div v-if="showModal" class="modal-mask">
       <div class="modal-wrapper">
         <div class="modal-container">
@@ -15,7 +15,7 @@
     <h1 class="auth-title">Create an account</h1>
     <!-- <p class="auth-sub">test new user registration function</p> -->
 
-    <!-- 注册状态显示 -->
+    <!-- Registration Status Display -->
     <div v-if="signupStatus" class="status" :class="signupStatusClass">
       {{ signupStatusMessage }}
     </div>
@@ -53,7 +53,7 @@
         required
       />
       
-      <!-- 密码匹配状态提示 -->
+      <!-- Password Match Status Indicator -->
       <div v-if="confirm_password" class="password-status" :class="passwordMatches ? 'match' : 'mismatch'">
         {{ passwordMatches ? '✓ Passwords match' : '✗ Passwords do not match' }}
       </div>
@@ -68,14 +68,33 @@
       />
 
       <label for="sphone" class="auth-label">Phone number</label>
-      <input
-        id="sphone"
-        v-model.trim="user_phone"
-        type="tel"
-        class="input auth-input"
-        placeholder="Enter your phone number"
-        required
-      />
+      <div class="phone-input-container">
+        <select 
+          v-model="country_code" 
+          class="country-code-select"
+          @change="updatePhoneNumber"
+        >
+          <option value="+61">🇦🇺 +61</option>
+          <option value="+86">🇨🇳 +86</option>
+          <option value="+1">🇺🇸 +1</option>
+          <option value="+44">🇬🇧 +44</option>
+          <option value="+81">🇯🇵 +81</option>
+          <option value="+82">🇰🇷 +82</option>
+          <option value="+65">🇸🇬 +65</option>
+          <option value="+852">🇭🇰 +852</option>
+          <option value="+886">🇹🇼 +886</option>
+          <option value="+91">🇮🇳 +91</option>
+        </select>
+        <input
+          id="sphone"
+          v-model.trim="phone_number"
+          type="tel"
+          class="input auth-input phone-number-input"
+          placeholder="Enter your phone number"
+          @input="updatePhoneNumber"
+          required
+        />
+      </div>
 
       <div class="auth-row">
           <label class="auth-check">
@@ -120,6 +139,8 @@ export default {
       confirm_password: '',
       user_name: '',
       user_phone: '',
+      country_code: '+61', // Default Australia country code
+      phone_number: '',
       agreeTerms: false,
       agreeEmailUpdates: false,
       signupStatus: false,
@@ -131,32 +152,40 @@ export default {
   },
     methods: {
       generateUserId() {
-        // 使用共享的user_id生成工具
+        // Use shared user_id generation utility
         return generateUserId();
       },
       
-      // 检查密码匹配
+      // Check password match
       checkPasswordMatch() {
         this.passwordMatches = this.user_password === this.confirm_password;
       },
+      
+      // Update complete phone number
+      updatePhoneNumber() {
+        this.user_phone = this.country_code + this.phone_number;
+      },
     async submitSignup() {
-      // 清除之前的错误状态
+      // Clear previous error states
       this.clearFieldErrors();
       
-      // 收集表单数据
+      // Ensure phone number includes country code
+      this.updatePhoneNumber();
+      
+      // Collect form data
      const payload = {
        user_email: this.user_email?.trim(),
        user_password: this.user_password,
        user_name: this.user_name?.trim(),
-       user_phone: this.user_phone?.trim(),
+       user_phone: this.user_phone?.trim(), // Now includes complete country code + phone number
        user_id: this.generateUserId(),
        email_list: this.agreeEmailUpdates ? 'Yes' : 'No'
      };
       
-      // 调试：检查表单数据
+      // Debug: Check form data
       console.log('🔍 注册表单数据:', payload);
       
-      // 验证表单数据
+      // Validate form data
       const errors = this.validateForm(payload);
       
       if (!this.agreeTerms) {
@@ -175,8 +204,8 @@ export default {
       this.signupStatusMessage = 'Registering...';
       
       try {
-        // 发送注册数据
-        console.log('🚀 发送注册请求:', payload);
+        // Send registration data
+        console.log('🚀 Sending registration request:', payload);
         
         const response = await fetch(import.meta.env.VITE_API_REGISTER_URL, {
           method: 'POST',
@@ -192,10 +221,10 @@ export default {
           this.signupStatusClass = 'status success';
           this.signupStatusMessage = `Registration successful! User: ${this.user_email}`;
           
-          // 保存用户信息到本地存储
+          // Save user info to local storage
           this.saveUserInfo();
           
-          // 详细成功信息
+          // Detailed success information
           console.log('✅ Registration successful!');
           console.log('📧 Email:', this.user_email);
           console.log('👤 Name:', this.user_name);
@@ -204,7 +233,7 @@ export default {
           
           this.$emit('notify', data.message || 'Registration successful! Please login to continue.');
           
-          // 注册成功后跳转到登录页面
+          // Redirect to login page after successful registration
           setTimeout(() => {
             this.$router.push('/login');
           }, 1500);
@@ -212,7 +241,7 @@ export default {
           this.signupStatusClass = 'status error';
           this.signupStatusMessage = `Registration failed: ${data.message}`;
           
-          // 详细错误信息
+          // Detailed error information
           console.error('❌ Registration failed:', data.message);
           console.error('🔍 Error details: status=', data.status);
           
@@ -222,7 +251,7 @@ export default {
         this.signupStatusClass = 'status error';
         this.signupStatusMessage = `Network error: ${error.message}`;
         
-        // 详细网络错误信息
+        // Detailed network error information
         console.error('🌐 Network error:', error.message);
         console.error('🔍 Error type:', error.name);
         
@@ -237,7 +266,7 @@ export default {
       }
     },
 
-    // 保存用户信息到本地存储
+    // Save user info to local storage
     saveUserInfo() {
       try {
         setUserInfoFromSignup({
@@ -254,7 +283,7 @@ export default {
       }
     },
 
-    // 验证表单数据
+    // Validate form data
     validateForm(formData) {
       const errors = [];
       
@@ -276,7 +305,7 @@ export default {
         errors.push('Passwords do not match');
       }
       
-      // user_name是可选的，但如果填写了，长度必须至少2个字符
+      // user_name is optional, but if provided, must be at least 2 characters
       if (formData.user_name && formData.user_name.length < 2) {
         errors.push('Name must be at least 2 characters if provided');
       }
@@ -284,13 +313,13 @@ export default {
       if (!formData.user_phone) {
         errors.push('Phone number is required');
       } else if (!this.isValidPhone(formData.user_phone)) {
-        errors.push('Invalid phone number format');
+        errors.push('Invalid phone number format. Please include country code.');
       }
       
       return errors;
     },
 
-    // 显示字段错误
+    // Show field errors
     showFieldErrors(formData) {
       if (!formData.user_email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.user_email)) {
         this.showFieldError('semail', 'Invalid email format');
@@ -303,16 +332,16 @@ export default {
       } else if (formData.user_password !== this.confirm_password) {
         this.showFieldError('scpass', 'Passwords do not match');
       }
-      // user_name是可选的，只检查长度（如果提供了的话）
+      // user_name is optional, only check length if provided
       if (formData.user_name && formData.user_name.length < 2) {
         this.showFieldError('sname', 'Name must be at least 2 characters if provided');
       }
       if (!formData.user_phone || !this.isValidPhone(formData.user_phone)) {
-        this.showFieldError('sphone', 'Invalid phone number format');
+        this.showFieldError('sphone', 'Invalid phone number format. Please include country code.');
       }
     },
 
-    // 显示单个字段错误
+    // Show single field error
     showFieldError(fieldId, message) {
       const field = document.getElementById(fieldId);
       if (field) {
@@ -325,7 +354,7 @@ export default {
       }
     },
 
-    // 清除字段错误
+    // Clear field errors
     clearFieldErrors() {
       document.querySelectorAll('.auth-input').forEach(input => {
         input.classList.remove('error');
@@ -335,19 +364,19 @@ export default {
       });
     },
 
-    // 验证手机号格式
+    // Validate phone number format
     isValidPhone(phone) {
-      // 简单的手机号验证，支持多种格式
-      const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+      // Validate phone number format with country code
+      const phoneRegex = /^\+[1-9]\d{1,14}$/;
       return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''));
     },
 
-    // 导航到Terms页面
+    // Navigate to Terms page
     goToTerms() {
       this.$router.push('/terms');
     },
 
-    // 导航到Privacy Policy页面
+    // Navigate to Privacy Policy page
     goToPrivacy() {
       this.$router.push('/privacy');
     }
@@ -428,7 +457,74 @@ export default {
   text-decoration: underline;
 }
 
-/* 密码匹配状态样式 */
+/* 手机端响应式设计 */
+@media (max-width: 768px) {
+  .auth-container {
+    padding: 20px 30px;
+    margin: 20px 30px;
+    width: calc(100% - 60px);
+  }
+  
+  .auth-title {
+    font-size: 20px;
+  }
+  
+  .auth-sub {
+    font-size: 14px;
+  }
+  
+  .auth-input {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+  
+  .btn-primary, .btn-secondary {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+  
+  .phone-input-container {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .country-code-select {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  
+  .phone-number-input {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-container {
+    padding: 16px 30px;
+    margin: 16px 30px;
+    width: calc(100% - 60px);
+  }
+  
+  .auth-title {
+    font-size: 18px;
+  }
+  
+  .auth-sub {
+    font-size: 13px;
+  }
+  
+  .auth-input {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  
+  .btn-primary, .btn-secondary {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+}
+
+/* Password match status styles */
 .password-match {
   border-color: #10b981 !important;
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
@@ -439,7 +535,7 @@ export default {
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
 }
 
-/* 密码匹配提示 */
+/* Password match indicator */
 .password-status {
   font-size: 12px;
   margin-top: 4px;
@@ -452,6 +548,40 @@ export default {
 
 .password-status.mismatch {
   color: #ef4444;
+}
+
+/* Phone number input container styles */
+.phone-input-container {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  height: 35px;
+}
+
+.country-code-select {
+  flex: 0 0 auto;
+  padding: 12px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 12px;
+  color: #374151;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  min-width: 100px;
+  height: 45px;
+}
+
+.country-code-select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.phone-number-input {
+  flex: 1;
+  margin: 0;
+  height: 45px;
 }
 
 </style>

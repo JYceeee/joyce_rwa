@@ -35,10 +35,12 @@ const { expressjwt: expressJWT } = require('express-jwt')
 const userRouter = require('./src/routers/userRouter')
 const transactionRouter = require('./src/routers/transactionRouter')
 const unifiedProjectRouter = require('./src/routers/unifiedProjectRouter')
+const contractRouter = require('./src/routers/contractRouter')
 
 // 使用路由模块
 app.use('/user', userRouter)
 app.use('/transaction', transactionRouter)
+app.use('/contract', contractRouter)
 app.use('/api', unifiedProjectRouter)
 app.use('/project', unifiedProjectRouter)  // 独立的project路由
 

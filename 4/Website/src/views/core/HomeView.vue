@@ -1,5 +1,5 @@
 <template>
-  <!-- 开场视频覆盖层 -->
+  <!-- Intro Video Overlay -->
   <div 
     v-if="showIntroVideo || isTransitioning" 
     class="intro-video-overlay"
@@ -20,32 +20,42 @@
         @error="handleIntroVideoError"
       >
         <source src="/videos/Introvideo.mp4" type="video/mp4">
-        您的浏览器不支持视频播放
+        Your browser does not support video playback
       </video>
       
-      <!-- 视频遮罩层 -->
+      <!-- Skip Button (右上角) -->
+      <button 
+        v-if="showIntroSkipButton" 
+        class="skip-button" 
+        @click="skipIntroVideo"
+        title="Skip Video"
+      >
+    -> Skip
+      </button>
+      
+      <!-- Video Overlay -->
       <div class="video-overlay">
-        <!-- 加载指示器 -->
+        <!-- Loading Indicator -->
         <div v-if="introVideoLoading" class="loading-indicator">
           <div class="loading-spinner"></div>
-          <p class="loading-text">正在加载视频...</p>
+          <p class="loading-text">Loading video...</p>
         </div>
         
-        <!-- 错误提示 -->
+        <!-- Error Message -->
         <div v-if="introVideoError" class="error-message">
-          <p>视频加载失败</p>
-          <button class="btn btn-secondary" @click="closeIntroVideo">关闭</button>
+          <p>Video loading failed</p>
+          <button class="btn btn-secondary" @click="closeIntroVideo">Close</button>
         </div>
       </div>
       
-      <!-- 品牌信息展示 -->
+      <!-- Brand Information Display -->
       <div class="brand-info">
         <div class="logo-container">
           <!-- <img src="/icons/RWA-logo.png" alt="RWA Logo" class="brand-logo"> -->
         </div>
-        <h1 class="headline">我们专注于将房地产资产打造为<br>投资人偏爱的 RWA 底层资产</br>
+        <h1 class="headline">We focus on transforming real estate assets into underlying RWA preferred by investors
         </h1>
-        <p class="brand-subtitle">澳洲地产资产上链 · 安全、低风险、高回报的 RWA 投资平台</p>
+        <p class="brand-subtitle">Australian Real Estate Assets On-Chain · Secure, Low-Risk, High-Return RWA Investment Platform</p>
       </div>
     </div>
   </div>
@@ -57,11 +67,11 @@
   >
     <div class="grid">
       <div>
-        <h1 class="headline">我们专注于将房地产资产打造为<br>投资人偏爱的 RWA 底层资产</br>
+        <h1 class="headline">We focus on transforming real estate assets into underlying RWA preferred by investors
           <!-- Invest in RWA Property Loans with Monthly Returns -->
         </h1>
         <!-- <p class="sub">We specialize in originating real estate assets into RWA underlying assets that investors prefer</p> -->
-        <p class="sub">澳洲地产资产上链 · 安全、低风险、高回报的 RWA 投资平台
+        <p class="sub">Australian Real Estate Assets On-Chain · Secure, Low-Risk, High-Return RWA Investment Platform
           <!-- Australian Real Estate On-Chain · A safe, compliant, and high-return RWA investment platform-->
           </p>
         <p class="foot">By continuing, you agree to our Terms and acknowledge our 
@@ -69,13 +79,9 @@
         <div style="margin-top: 40px;margin-left: 100px;display: flex;gap: 20px;width: 500px;">
           <button class="btn-primary" @click="goToProjects">Invest Now</button>
           <button class="btn-secondary" @click="goToContact">Contact Us</button>
-          <button class="btn-intro" @click="playIntroVideo">
-            <span class="btn-icon">🎬</span>
-            观看介绍视频
-          </button>
         </div>
       </div>
-        <!-- 区块链智能合约交易动态图样 -->
+        <!-- Blockchain Smart Contract Trading Dynamic Pattern -->
          <video autoplay loop muted playsinline class="bg-video">
            <source src="/videos/Blockchainvideo.mp4" type="video/mp4">
          </video>
@@ -271,28 +277,28 @@ export default {
         message: ''
       },
       isSubmitting: false,
-      // 开场视频相关状态
+      // Intro video related states
       showIntroVideo: false,
       introVideoLoading: true,
       showIntroSkipButton: false,
       introVideoError: false,
       introVideoTimer: null,
-      // 过渡效果状态
+      // Transition effect states
       isTransitioning: false,
       transitionTimer: null
     }
   },
   computed: {
-    // 获取INCOMING状态的项目，按project code升序排列
+    // Get INCOMING status projects, sorted by project code in ascending order
     upcomingProjects() {
       return this.products
         .filter(product => product.status === 'INCOMING')
         .sort((a, b) => {
-          // 按project code升序排列
+          // Sort by project code in ascending order
           return a.code.localeCompare(b.code)
         })
     },
-    // 获取最新的upcoming项目作为New Listing
+    // Get the latest upcoming project as New Listing
     newListingProject() {
       return this.upcomingProjects.length > 0 ? this.upcomingProjects[0] : null
     }
@@ -300,23 +306,23 @@ export default {
   methods: { 
     notify(msg){ this.$emit('notify', msg) },
     
-    // 从数据库加载产品数据
+    // Load product data from database
     async loadProducts() {
       this.loading = true
       this.error = null
       
       try {
-        console.log('HomeView: 从数据库加载产品数据...')
+        console.log('HomeView: Loading product data from database...')
         const response = await productAPI.getAllProducts()
         
         if (response.status === 0) {
           const products = response.data || []
           
-          // 立即更新产品列表，触发响应式更新
+          // Immediately update product list, trigger reactive update
           this.products = products
           
-          console.log('HomeView: 成功加载', products.length, '个产品')
-          console.log('HomeView: Upcoming项目:', this.upcomingProjects)
+          console.log('HomeView: Successfully loaded', products.length, 'products')
+          console.log('HomeView: Upcoming projects:', this.upcomingProjects)
           
           // 如果有项目数据，显示成功消息
           if (products.length > 0) {
@@ -431,12 +437,13 @@ export default {
       this.showIntroVideo = true
       this.introVideoLoading = true
       this.introVideoError = false
-      this.showIntroSkipButton = false
+      this.showIntroSkipButton = true // 立即显示跳过按钮
       
-      // 3秒后显示跳过按钮
-      this.introVideoTimer = setTimeout(() => {
-        this.showIntroSkipButton = true
-      }, 3000)
+      // 清除之前的定时器
+      if (this.introVideoTimer) {
+        clearTimeout(this.introVideoTimer)
+        this.introVideoTimer = null
+      }
     },
     
     // 跳转到项目页面
@@ -590,6 +597,9 @@ export default {
   },
   async mounted() {
     console.log('🏠 HomeView: 组件已挂载，开始初始化...')
+    
+    // 自动播放intro video
+    this.playIntroVideo()
     
     // 设置数据库同步
     this.setupDatabaseSync()
@@ -830,7 +840,7 @@ export default {
   margin: 0;
   opacity: 0.9;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-  max-width: 500px;
+  max-width: 800px;
   line-height: 1.5;
 }
 
@@ -869,6 +879,34 @@ export default {
   .brand-subtitle {
     font-size: 14px;
   }
+  
+  /* 手机端页边距 */
+  .hero .headline {
+    margin-left: 30px;
+    margin-right: 30px;
+    width: calc(100% - 60px);
+  }
+  
+  .hero .sub {
+    margin-left: 30px;
+    margin-right: 30px;
+    width: calc(100% - 60px);
+  }
+  
+  .hero .foot {
+    margin-left: 30px;
+    margin-right: 30px;
+  }
+  
+  .hero div[style*="display: flex"] {
+    margin-left: 30px !important;
+    margin-right: 30px !important;
+    width: calc(100% - 60px) !important;
+  }
+  
+  .contact-container {
+    padding: 0 30px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -894,6 +932,35 @@ export default {
   
   .brand-subtitle {
     font-size: 13px;
+  }
+  
+  /* 小屏手机端页边距 */
+  .hero .headline {
+    margin-left: 30px;
+    margin-right: 30px;
+    width: calc(100% - 60px);
+    font-size: 24px;
+  }
+  
+  .hero .sub {
+    margin-left: 30px;
+    margin-right: 30px;
+    width: calc(100% - 60px);
+  }
+  
+  .hero .foot {
+    margin-left: 30px;
+    margin-right: 30px;
+  }
+  
+  .hero div[style*="display: flex"] {
+    margin-left: 30px !important;
+    margin-right: 30px !important;
+    width: calc(100% - 60px) !important;
+  }
+  
+  .contact-container {
+    padding: 0 30px;
   }
 }
 
@@ -961,10 +1028,10 @@ export default {
 .hero .headline {
   color: #ffffff;
   font-family: Georgia, 'Times New Roman', Times, serif;
-  font-size: 45px;
+  font-size: 40px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   margin-left:100px;
-  width:700px;
+  width:1000px;
 }
 
 .hero .sub {

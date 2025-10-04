@@ -8,25 +8,25 @@
     <div class="overview-content">
       <div class="feature-grid">
         <div class="feature-card">
-          <div class="feature-icon">🏠</div>
+          <!-- <div class="feature-icon">🏠</div> -->
           <h3>Real Estate Tokenization</h3>
           <p>Convert traditional real estate investments into tradable digital tokens, reducing investment门槛, and improving liquidity.</p>
         </div>
         
         <div class="feature-card">
-          <div class="feature-icon">💰</div>
+          <!-- <div class="feature-icon">💰</div> -->
           <h3>Stable Income</h3>
           <p>Based on high-quality real estate mortgage loans, providing stable rental income and capital appreciation potential.</p>
         </div>
         
         <div class="feature-card">
-          <div class="feature-icon">🔒</div>
+          <!-- <div class="feature-icon">🔒</div> -->
           <h3>Secure and Transparent</h3>
           <p>Based on blockchain technology, all transaction records are transparent and smart contracts are automatically executed.</p>
         </div>
         
         <div class="feature-card">
-          <div class="feature-icon">📊</div>
+          <!-- <div class="feature-icon">📊</div> -->
           <h3>Real-Time Data</h3>
           <p>Provide real-time market data, project information and investment performance, helping you make wise decisions.</p>
         </div>
