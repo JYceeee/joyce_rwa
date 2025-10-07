@@ -278,9 +278,9 @@ const createProject = async (req, res) => {
         loan_type, loan_product, loan_amount, loan_purpose,
         loan_term_months, lvr, interest_rate, default_rate,
         commencement_date, expiry_date, expected_recovery_date,
-        created_by, updated_by
+        created_by, updated_by,
         principal_token_address, interest_token_address, kyc_registry_address, loan_issuer_address
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     
     const values = [

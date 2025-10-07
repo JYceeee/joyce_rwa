@@ -24,6 +24,7 @@ router.get('/loans', getAllProjects);          // 向后兼容路径
 router.get('/project/:code', getProjectByCode);        // 主要路径
 router.get('/projects/:code', getProjectByCode);       // 标准RESTful路径
 router.get('/loans/:code', getProjectByCode);          // 向后兼容路径
+router.get('/select/:code', getProjectByCode);         // 前端调用的路径
 
 // 根据项目代码获取合约地址
 router.get('/project/:projectCode/contracts', getProjectContractAddresses);

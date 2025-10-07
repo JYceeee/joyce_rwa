@@ -954,6 +954,13 @@ export default {
 </script>
 
 <style scoped>
+/* Profile 页面主题适配 */
+.profile-page {
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
 /* 加载指示器样式 */
 .loading-indicator {
   display: inline-block;
@@ -982,7 +989,7 @@ export default {
 
 .btn-refresh {
   background: #007bff;
-  color: white;
+  color: var(--text);
   border: none;
   padding: 6px 12px;
   border-radius: 4px;
@@ -1002,7 +1009,7 @@ export default {
 
 .btn-retry {
   background: #dc3545;
-  color: white;
+  color: var(--text);
   border: none;
   padding: 6px 12px;
   border-radius: 4px;
@@ -1027,18 +1034,18 @@ export default {
   margin: 20px 0;
   margin-left: 50px;
   padding: 24px;
-  background: rgba(45, 55, 72, 0.8);
+  background: var(--card-bg);
   border-radius: 16px;
-  border: 1px solid rgba(74, 85, 104, 0.4);
+  border: 1px solid var(--border);
   backdrop-filter: blur(12px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow);
 }
 
 .user-contact-info .label {
   margin: 0 0 20px 0;
   font-size: 20px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text);
   display: block;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   letter-spacing: 0.5px;
@@ -1049,12 +1056,12 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 16px 0;
-  border-bottom: 1px solid rgba(74, 85, 104, 0.4);
+  border-bottom: 1px solid var(--border);
   transition: background-color 0.2s ease;
 }
 
 .contact-item:hover {
-  background-color: rgba(74, 85, 104, 0.1);
+  background-color: var(--hover-bg);
   border-radius: 8px;
   margin: 0 -8px;
   padding-left: 8px;
@@ -1081,7 +1088,7 @@ export default {
   display: flex;
   align-items: center;
   font-weight: 600;
-  color: #f4f7f9;
+  color: var(--text);
   min-width: 80px;
   flex-shrink: 0;
   font-size: 14px;
@@ -1089,12 +1096,12 @@ export default {
 }
 
 .contact-value {
-  color: #ffffff;
+  color: var(--text);
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
-  background: rgba(31, 41, 55, 0.6);
+  background: var(--bg-secondary);
   padding: 6px 12px;
   border-radius: 6px;
-  border: 1px solid rgba(74, 85, 104, 0.3);
+  border: 1px solid var(--border);
   flex: 1;
   max-width: 200px;
   word-break: break-all;
@@ -1107,8 +1114,8 @@ export default {
 }
 
 .contact-value:hover {
-  background: rgba(31, 41, 55, 0.8);
-  border-color: rgba(74, 85, 104, 0.5);
+  background: var(--hover-bg);
+  border-color: var(--border-light);
 }
 
 /* Email验证状态样式 */
@@ -1135,9 +1142,9 @@ export default {
 }
 
 .btn-small {
-  background: #374151;
-  color: #ffffff;
-  border: 1px solid #4b5563;
+  background: var(--bg-secondary);
+  color: var(--text);
+  border: 1px solid var(--border);
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
@@ -1147,7 +1154,7 @@ export default {
 }
 
 .btn-small:hover {
-  background: #4b5563;
+  background: var(--hover-bg);
 }
 
 /* 确保按钮贴着右侧 */
@@ -1188,9 +1195,9 @@ export default {
   margin: 20px 0;
   margin-left: 50px;
   padding: 20px;
-  background: rgba(45, 55, 72, 0.6);
+  background: var(--card-bg);
   border-radius: 12px;
-  border: 1px solid rgba(74, 85, 104, 0.3);
+  border: 1px solid var(--border);
   backdrop-filter: blur(10px);
 }
 
@@ -1198,7 +1205,7 @@ export default {
   margin: 0 0 16px 0;
   font-size: 18px;
   font-weight: 600;
-  color: #f4f7f9;
+  color: var(--text);
 }
 
 .status-item {
@@ -1206,7 +1213,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 1px solid rgba(74, 85, 104, 0.3);
+  border-bottom: 1px solid var(--border);
 }
 
 .status-item:last-child {
@@ -1217,7 +1224,7 @@ export default {
   display: flex;
   align-items: center;
   font-weight: 500;
-  color: #e2e8f0;
+  color: var(--text);
 }
 
 .status-icon {
@@ -1440,7 +1447,7 @@ export default {
   max-width: 420px;
 }
 .modal-container {
-  background: #1f2937;
+  background: var(--modal-bg);
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.5);
   padding: 28px 24px 18px;
@@ -1452,9 +1459,9 @@ export default {
 /* 页面容器深色主题 - 与图片风格一致 */
 .profile-page { 
   padding-bottom: 64px; 
-  background: linear-gradient(180deg, #0f1419 0%, #1a1f2e 50%, #2d3748 100%);
+  background: var(--gradient-bg-hero);
   min-height: 100vh;
-  color: #ffffff;
+  color: var(--text);
 }
 
 .container {
@@ -1465,13 +1472,13 @@ export default {
 .topbar { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:24px 16px;font-size: 20px; }.breadcrumb { display:flex; align-items:center; gap:10px; color:#9ca3af; }
 .crumb-back { border:0; background:transparent; cursor:pointer; color:#9ca3af; }
 .sep{ opacity:.6; }
-.crumb-current{ color:#ffffff; font-weight:600; }
+.crumb-current{ color:var(--text); font-weight:600; }
 
 /* 标题块 */
 .head { display:flex; align-items:center; gap:16px; padding:0 16px 8px; }
-.avatar{ width:44px; height:44px; border-radius:999px; background:#374151; display:grid; place-items:center;}
-.avatar-initial{ font-weight:700; color:#ffffff; }
-.title{ font-size:24px; line-height:1.2; margin:0; color:#ffffff; }
+.avatar{ width:44px; height:44px; border-radius:999px; background:var(--bg-secondary); display:grid; place-items:center;}
+.avatar-initial{ font-weight:700; color:var(--text); }
+.title{ font-size:24px; line-height:1.2; margin:0; color:var(--text); }
 .subtitle{ margin:2px 0 0; color:#9ca3af; }
 
 /* 表单与控件 */
@@ -1490,10 +1497,10 @@ export default {
 
 /* KYC 横幅 */
 .kyc-banner{ display:flex; align-items:center; gap:10px; height:40px; border-radius:8px; padding:0 12px; border:1px solid; }
-.kyc-banner.orange{ background:#1f2937; color:#f97316; border-color:#374151; }
-.kyc-banner.green{ background:#1f2937; color:#16a34a; border-color:#374151; }
+.kyc-banner.orange{ background:var(--card-bg); color:#f97316; border-color:var(--border); }
+.kyc-banner.green{ background:var(--card-bg); color:#16a34a; border-color:var(--border); }
 .kyc-banner .icon{
-  width:28px; height:28px; border-radius:10px; background:#374151; display:grid; place-items:center;
+  width:28px; height:28px; border-radius:10px; background:var(--bg-secondary); display:grid; place-items:center;
   box-shadow:0 2px 6px rgba(0, 0, 0, 0.2), inset 0 0 0 1px #4b5563; opacity:.9;
 }
 

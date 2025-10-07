@@ -1278,21 +1278,13 @@ padding-left: 2px;
 }
 /* ========== MetaMask-like Design ========== */
 .mm-page{
---bg:#0A0A19;
---text:#0f172a;           /* slate-900 */
---muted:#6b7280;          /* gray-500 */
---dim:#94a3b8;            /* slate-400 */
---blue:#4f46e5;           /* indigo-600 */
---blue-ink:#4338ca;
---border:#e5e7eb;
---rise:#16a34a;
---orange:#f59e0b;
 font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
-color:var(--text);
+color: var(--text);
 max-width: 960px;
 margin: 0 auto;
 padding: 24px;
 background: var(--bg);
+min-height: 100vh;
 }
 
 /* 顶部条 */
@@ -1301,54 +1293,55 @@ background: var(--bg);
 .mm-avatar{width:32px;height:32px;border-radius:50%;background: radial-gradient(100% 100% at 30% 20%, #cfe3ff 0%, #b9c8ff 40%, #9db4ff 100%);}
 .mm-account-title{
 font-weight:600;
-color:#FFFFFF;
+color: var(--text);
 }
 
-.mm-account-line{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);}
+.mm-account-line{display:flex;align-items:center;gap:8px;font-size:13px;color: var(--text-secondary);}
 .mm-addr{max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .mm-link{color:var(--blue);text-decoration:none;cursor:pointer;} /**change the style of this button**/
 .mm-link:hover{color:var(--blue-ink);text-decoration:underline;}
 .mm-status{display:flex;align-items:center;gap:10px;}
 .mm-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;}
-.mm-status-text{font-size:14px;color:#acb3bd;}
+.mm-status-text{font-size:14px;color: var(--text-secondary);}
 
 /* 按钮 */
 
 
-.mm-btn{border:1px solid var(--border);background:#6b7280;border-radius:999px;padding:6px 6px;margin:0 0px;cursor:pointer;font-size:14px;color:#FFFFFF;}
+.mm-btn{border:1px solid var(--border);background: var(--bg-secondary);border-radius:999px;padding:6px 6px;margin:0 0px;cursor:pointer;font-size:14px;color: var(--text);}
 .mm-btn:hover{opacity:.9;}
 .mm-outline{border-color:var(--border)}
 
 /* 英雄区 */
 .mm-hero{margin-top:8px;}
-.mm-balance{font-size:48px;font-weight:800;letter-spacing:-.02em;color:#FFFFFF;}
-.mm-subline{margin-top:6px;display:flex;align-items:center;gap:12px;color:#cbd5e1;font-size:18px;}
+.mm-balance{font-size:48px;font-weight:800;letter-spacing:-.02em;color: var(--text);}
+.mm-subline{margin-top:6px;display:flex;align-items:center;gap:12px;color: var(--text-secondary);font-size:18px;}
 
 /* 操作按钮：一行 */
 .mm-actions{display:flex;gap:16px;margin-top:12px;}
-.mm-action{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:14px 0;border:none;border-radius:16px;background:#141426;cursor:pointer;color:#FFFFFF;}
-.mm-action-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--blue);color:#fff;font-weight:700;}
+.mm-action{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:14px 0;border:none;border-radius:16px;background: var(--card-bg);cursor:pointer;color: var(--text);}
+.mm-action-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--brand);color: var(--text);font-weight:700;}
 .mm-action-text{font-size:14px}
 
 /* 信息条 */
 .mm-info{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px;}
-.mm-card{border:1px solid #2a2a4a;border-radius:16px;padding:16px;background:#1c1c36;width:200px;}
-.mm-card-label{font-size:12px;color:#64748b;margin-bottom:6px;}
-.mm-card-title{font-weight:600;color:#FFFFFF;}
-.mm-card-sub{font-size:12px;color:#64748b;margin-top:4px;}
+.mm-card{border:1px solid var(--border);border-radius:16px;padding:16px;background: var(--card-bg);width:200px;}
+.mm-card-label{font-size:12px;color: var(--text-secondary);margin-bottom:6px;}
+.mm-card-title{font-weight:600;color: var(--text);}
+.mm-card-sub{font-size:12px;color: var(--text-secondary);margin-top:4px;}
 
 /* Tabs */
 .mm-tabs{display:flex;gap:28px;border-bottom:1px solid var(--border);margin-top:8px;}
-.mm-tab{appearance:none;border:none;background:none;padding:14px 0;cursor:pointer;color:#95a0af;font-weight:600;position:relative;border-radius:8px 8px 0 0;transition:all 0.2s ease;}
-.mm-tab.is-active{color:#6b7280;background:#ffffff;padding:14px 16px;margin:0 -16px;}
+.mm-tab{appearance:none;border:none;background:none;padding:14px 0;cursor:pointer;color: var(--text-secondary);font-weight:600;position:relative;border-radius:8px 8px 0 0;transition:all 0.2s ease;}
+.mm-tab.is-active{color: var(--text);background: var(--card-bg);padding:14px 16px;margin:0 -16px;}
 .mm-tab.is-active::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;background:var(--text);border-radius:3px 3px 0 0;}
 
 /* Activity 页签样式 */
 .mm-activity-section {
-  background: #1d1d36;
+  background: var(--card-bg);
   border-radius: 12px;
   padding: 16px;
   margin-top: 16px;
+  border: 1px solid var(--border);
 }
 
 /* Activity 左右分栏布局 */

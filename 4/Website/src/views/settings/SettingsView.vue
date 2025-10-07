@@ -39,7 +39,7 @@
             <!-- General Settings -->
             <div v-if="activeSection === 'general'" class="settings-section">
             <div class="settings-items">
-            <div class="settings-item">
+            <!-- <div class="settings-item">
               <div class="settings-info">
                 <h3 class="settings-name">语言</h3>
                 <p class="settings-description">选择您偏好的语言</p>
@@ -50,7 +50,7 @@
                   <option value="zh">中文</option>
                 </select>
               </div>
-            </div>
+            </div> -->
 
             <div class="settings-item">
               <div class="settings-info">
@@ -58,18 +58,38 @@
                 <p class="settings-description">选择您偏好的主题</p>
               </div>
               <div class="settings-control">
-                <select class="settings-select">
+                <select 
+                  class="settings-select" 
+                  :value="currentTheme" 
+                  @change="handleThemeChange"
+                >
                   <option value="dark">深色</option>
                   <option value="light">浅色</option>
-                  <option value="auto">自动</option>
                 </select>
               </div>
             </div>
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">时区</h3>
-                <p class="settings-description">设置您的本地时区</p>
+                <h3 class="settings-name">{{ t('settings.language') }}</h3>
+                <p class="settings-description">{{ t('settings.language.description') }}</p>
+              </div>
+              <div class="settings-control">
+                <select 
+                  class="settings-select" 
+                  :value="currentLanguage" 
+                  @change="handleLanguageChange"
+                >
+                  <option value="zh">{{ t('settings.language.zh') }}</option>
+                  <option value="en">{{ t('settings.language.en') }}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="settings-item">
+              <div class="settings-info">
+                <h3 class="settings-name">{{ t('settings.timezone') }}</h3>
+                <p class="settings-description">{{ t('settings.timezone.description') }}</p>
               </div>
               <div class="settings-control">
                 <select class="settings-select">
@@ -141,22 +161,22 @@
             <div class="settings-items">
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Default Wallet</h3>
-                <p class="settings-description">Select your preferred wallet provider</p>
+                <h3 class="settings-name">默认钱包</h3>
+                <p class="settings-description">选择您偏好的钱包提供商</p>
               </div>
               <div class="settings-control">
                 <select class="settings-select">
                   <option value="metamask">MetaMask</option>
-                  <option value="walletconnect">WalletConnect</option>
-                  <option value="coinbase">Coinbase Wallet</option>
+                  <option value="walletconnect">钱包连接器</option>
+                  <!-- <option value="coinbase">Coinbase Wallet</option> -->
                 </select>
               </div>
             </div>
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Auto-Connect</h3>
-                <p class="settings-description">Automatically connect wallet on page load</p>
+                <h3 class="settings-name">自动连接</h3>
+                <p class="settings-description">在页面加载时自动连接钱包</p>
               </div>
               <div class="settings-control">
                 <label class="toggle-switch">
@@ -168,11 +188,11 @@
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Gas Settings</h3>
-                <p class="settings-description">Configure transaction gas preferences</p>
+                <h3 class="settings-name">Gas设置</h3>
+                <p class="settings-description">配置交易Gas偏好</p>
               </div>
               <div class="settings-control">
-                <button class="btn btn-secondary">Gas Settings</button>
+                <button class="btn btn-secondary">Gas设置</button>
               </div>
             </div>
           </div>
@@ -183,8 +203,8 @@
             <div class="settings-items">
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Push Notifications</h3>
-                <p class="settings-description">Enable browser push notifications</p>
+                <h3 class="settings-name">推送通知</h3>
+                <p class="settings-description">启用浏览器推送通知</p>
               </div>
               <div class="settings-control">
                 <label class="toggle-switch">
@@ -196,8 +216,8 @@
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Email Notifications</h3>
-                <p class="settings-description">Receive important updates via email</p>
+                <h3 class="settings-name">邮箱通知</h3>
+                <p class="settings-description">通过邮箱接收重要更新</p>
               </div>
               <div class="settings-control">
                 <label class="toggle-switch">
@@ -209,8 +229,8 @@
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">SMS Alerts</h3>
-                <p class="settings-description">Get critical alerts via SMS</p>
+                <h3 class="settings-name">SMS通知</h3>
+                <p class="settings-description">通过短信接收重要更新</p>
               </div>
               <div class="settings-control">
                 <label class="toggle-switch">
@@ -227,23 +247,23 @@
             <div class="settings-items">
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Auto-Refresh</h3>
-                <p class="settings-description">Automatically refresh data</p>
+                <h3 class="settings-name">自动刷新</h3>
+                <p class="settings-description">自动刷新数据</p>
               </div>
               <div class="settings-control">
                 <select class="settings-select">
-                  <option value="0">Disabled</option>
-                  <option value="30">30 seconds</option>
-                  <option value="60">1 minute</option>
-                  <option value="300">5 minutes</option>
+                  <option value="0">禁用</option>
+                  <option value="30">30秒</option>
+                  <option value="60">1分钟</option>
+                  <option value="300">5分钟</option>
                 </select>
               </div>
             </div>
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Cache Size</h3>
-                <p class="settings-description">Maximum cache storage size</p>
+                <h3 class="settings-name">缓存大小</h3>
+                <p class="settings-description">最大缓存存储大小</p>
               </div>
               <div class="settings-control">
                 <select class="settings-select">
@@ -257,11 +277,11 @@
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Clear Cache</h3>
-                <p class="settings-description">Clear all cached data</p>
+                <h3 class="settings-name">清除缓存</h3>
+                <p class="settings-description">清除所有缓存数据</p>
               </div>
               <div class="settings-control">
-                <button class="btn btn-secondary">Clear Cache</button>
+                <button class="btn btn-secondary">清除缓存</button>
               </div>
             </div>
           </div>
@@ -272,25 +292,25 @@
             <div class="settings-items">
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Profile Visibility</h3>
-                <p class="settings-description">Control who can see your profile information</p>
+                <h3 class="settings-name">主页可见性</h3>
+                <p class="settings-description">控制谁可以看到您的个人信息</p>
               </div>
               <div class="settings-control">
                 <select class="settings-select">
-                  <option value="public">Public</option>
-                  <option value="friends">Friends Only</option>
-                  <option value="private">Private</option>
+                  <option value="public">公开</option>
+                  <option value="friends">仅好友可见</option>
+                  <option value="private">私密</option>
                 </select>
               </div>
             </div>
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Two-Factor Authentication</h3>
-                <p class="settings-description">Add an extra layer of security to your account</p>
+                <h3 class="settings-name">两步验证</h3>
+                <p class="settings-description">为您的账户添加额外一层安全性</p>
               </div>
               <div class="settings-control">
-                <button class="btn btn-secondary">Enable 2FA</button>
+                <button class="btn btn-secondary">启用两步验证</button>
               </div>
             </div>
           </div>
@@ -301,22 +321,22 @@
             <div class="settings-items">
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Default Trading Pair</h3>
-                <p class="settings-description">Set your preferred trading pair for quick access</p>
+                <h3 class="settings-name">默认交易对</h3>
+                <p class="settings-description">设置您偏好的交易对以快速访问</p>
               </div>
               <div class="settings-control">
                 <select class="settings-select">
-                  <option value="ETH/USDT">ETH/USDT</option>
-                  <option value="BTC/USDT">BTC/USDT</option>
-                  <option value="USDC/USDT">USDC/USDT</option>
+                  <option value="ETH/USDT">ETH/USDT(以太坊/美元)</option>
+                  <option value="BTC/USDT">BTC/USDT(比特币/美元)</option>
+                  <option value="USDC/USDT">USDC/USDT(美元稳定币/美元)</option>
                 </select>
               </div>
             </div>
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Auto-Confirm Trades</h3>
-                <p class="settings-description">Automatically confirm trades under specified amount</p>
+                <h3 class="settings-name">自动确认交易</h3>
+                <p class="settings-description">在指定金额下自动确认交易</p>
               </div>
               <div class="settings-control">
                 <label class="toggle-switch">
@@ -328,11 +348,11 @@
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Price Alerts</h3>
-                <p class="settings-description">Get notified when prices reach your target</p>
+                <h3 class="settings-name">价格提醒</h3>
+                <p class="settings-description">当价格达到您设定的目标时通知您</p>
               </div>
               <div class="settings-control">
-                <button class="btn btn-secondary">Manage Alerts</button>
+                <button class="btn btn-secondary">管理提醒</button>
               </div>
             </div>
           </div>
@@ -343,8 +363,8 @@
             <div class="settings-items">
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Data Collection</h3>
-                <p class="settings-description">Allow us to collect anonymous usage data</p>
+                <h3 class="settings-name">数据收集</h3>
+                <p class="settings-description">允许我们收集匿名使用数据</p>
               </div>
               <div class="settings-control">
                 <label class="toggle-switch">
@@ -356,8 +376,8 @@
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Marketing Emails</h3>
-                <p class="settings-description">Receive promotional emails and updates</p>
+                <h3 class="settings-name">营销邮箱</h3>
+                <p class="settings-description">接收促销邮件和更新</p>
               </div>
               <div class="settings-control">
                 <label class="toggle-switch">
@@ -369,8 +389,8 @@
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Third-Party Sharing</h3>
-                <p class="settings-description">Allow sharing data with trusted partners</p>
+                <h3 class="settings-name">第三方分享</h3>
+                <p class="settings-description">允许与信任的合作伙伴共享数据</p>
               </div>
               <div class="settings-control">
                 <label class="toggle-switch">
@@ -387,25 +407,25 @@
             <div class="settings-items">
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">API Access</h3>
-                <p class="settings-description">Manage your API keys and permissions</p>
+                <h3 class="settings-name">API访问</h3>
+                <p class="settings-description">管理您的API密钥和权限</p>
               </div>
               <div class="settings-control">
-                <button class="btn btn-secondary">API Settings</button>
+                <button class="btn btn-secondary">API设置</button>
               </div>
             </div>
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Export Data</h3>
-                <p class="settings-description">Download your account data</p>
+                <h3 class="settings-name">导出数据</h3>
+                <p class="settings-description">下载您的账户数据</p>
               </div>
               <div class="settings-control">
-                <button class="btn btn-secondary">Export</button>
+                <button class="btn btn-secondary">导出</button>
               </div>
             </div>
 
-            <div class="settings-item">
+            <!-- <div class="settings-item">
               <div class="settings-info">
                 <h3 class="settings-name">Developer Mode</h3>
                 <p class="settings-description">Enable developer tools and debug mode</p>
@@ -416,12 +436,12 @@
                   <span class="toggle-slider"></span>
                 </label>
               </div>
-            </div>
+            </div> -->
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Analytics</h3>
-                <p class="settings-description">Help improve the app by sharing usage data</p>
+                <h3 class="settings-name">分析</h3>
+                <p class="settings-description">帮助改进应用程序通过共享使用数据</p>
               </div>
               <div class="settings-control">
                 <label class="toggle-switch">
@@ -433,14 +453,14 @@
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Reset Preferences</h3>
-                <p class="settings-description">Reset all options to default values</p>
+                <h3 class="settings-name">重置偏好</h3>
+                <p class="settings-description">重置所有选项为默认值</p>
               </div>
               <div class="settings-control">
-                <button class="btn btn-danger">Reset All</button>
+                <button class="btn btn-danger">重置所有</button>
               </div>
             </div>
-            </div>
+            </div> 
           </div>
           </div>
 
@@ -472,10 +492,13 @@
                     <p class="settings-description">选择您偏好的主题</p>
                   </div>
                   <div class="settings-control">
-                    <select class="settings-select">
+                    <select 
+                      class="settings-select" 
+                      :value="currentTheme" 
+                      @change="handleThemeChange"
+                    >
                       <option value="dark">深色</option>
                       <option value="light">浅色</option>
-                      <option value="auto">自动</option>
                     </select>
                   </div>
                 </div>
@@ -498,7 +521,7 @@
                 <div class="settings-item">
                   <div class="settings-info">
                     <h3 class="settings-name">开场视频</h3>
-                    <p class="settings-description">重新观看网站开场视频</p>
+                    <p class="settings-description">不再观看网站开场视频</p>
                   </div>
                   <div class="settings-control">
                     <button class="btn btn-secondary" @click="watchIntroVideo">观看开场视频</button>
@@ -621,18 +644,37 @@
         </div>
 
         <!-- 页面操作按钮 -->
-        <div class="page-actions">
+        <!-- <div class="page-actions">
           <button class="btn btn-primary" @click="saveSettings">保存设置</button>
           <button class="btn btn-secondary" @click="resetSettings">重置</button>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { useTheme } from '@/composables/useTheme'
+import { useLanguage } from '@/composables/useLanguage'
+
 export default {
   name: 'SettingsView',
+  setup() {
+    const { currentTheme, setTheme, getCurrentTheme, getAvailableThemes } = useTheme()
+    const { currentLanguage, setLanguage, getCurrentLanguage, getAvailableLanguages, t } = useLanguage()
+    
+    return {
+      currentTheme,
+      setTheme,
+      getCurrentTheme,
+      getAvailableThemes,
+      currentLanguage,
+      setLanguage,
+      getCurrentLanguage,
+      getAvailableLanguages,
+      t
+    }
+  },
   data() {
     return {
       activeSection: 'general', // 默认显示General Settings
@@ -649,7 +691,6 @@ export default {
       ],
       settings: {
         language: 'en',
-        theme: 'dark',
         timezone: 'UTC',
         sessionTimeout: 30,
         defaultWallet: 'metamask',
@@ -729,6 +770,16 @@ export default {
       // 清除开场视频观看记录，跳转到开场视频页面
       localStorage.removeItem('rwa_intro_seen');
       this.$router.push('/intro');
+    },
+    handleThemeChange(event) {
+      const newTheme = event.target.value;
+      this.setTheme(newTheme);
+      console.log('Theme changed to:', newTheme);
+    },
+    handleLanguageChange(event) {
+      const newLanguage = event.target.value;
+      this.setLanguage(newLanguage);
+      console.log('Language changed to:', newLanguage);
     }
   },
   mounted() {

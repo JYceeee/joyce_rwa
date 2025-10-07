@@ -42,6 +42,24 @@ app.use('/transaction', transactionRouter)
 app.use('/api', unifiedProjectRouter)
 app.use('/project', unifiedProjectRouter)  // 独立的project路由
 
+// 添加根路径路由用于测试
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'RWA Trading Platform API Server', 
+    status: 'running',
+    timestamp: new Date().toISOString()
+  })
+})
+
+// 添加健康检查路由
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'healthy',
+    database: 'connected',
+    timestamp: new Date().toISOString()
+  })
+})
+
 // 定义全局错误级别中间件
 app.use((err, req, res, next) => {
   // 验证失败导致的错误

@@ -24,24 +24,24 @@
     <!-- 加载状态 -->
     <div v-if="loading" class="loading-container">
       <div class="loading-spinner"></div>
-      <p>加载产品数据...</p>
+      <p>{{ t('common.loadingProducts') }}</p>
     </div>
 
     <!-- 错误状态 -->
     <div v-else-if="error" class="error-container">
       <div class="error-message">
-        <h3>加载失败</h3>
+        <h3>{{ t('common.loadFailed') }}</h3>
         <!-- <p>{{ error }}</p> -->
-        <button @click="loadProducts" class="btn retry-btn">重试</button>
+        <button @click="loadProducts" class="btn retry-btn">{{ t('common.retry') }}</button>
       </div>
     </div>
 
     <!-- 单个产品详情视图 -->
-    <!-- <section v-else-if="isDetailView && currentProduct" class="doc-list">  -->
-      <!-- <article class="doc-card" aria-labelledby="'title-' + currentProduct.code"> --> 
+    <!-- <section v-else-if="isDetailView && currentProduct" class="doc-list"> 
+     <article class="doc-card" aria-labelledby="'title-' + urrentProduct.code">  -->
         <!-- 主要内容区域 -->
         <!-- <div class="main-content">
-          <div class="left-content"> -->
+          <div class="left-content">  -->
             <!-- 项目标题信息 -->
             <!-- <section class="title-section">
               <div class="title-header">
@@ -58,28 +58,28 @@
                   <span class="info-value">{{ currentProduct.type }}</span>
                 </div>
               </div>
-            </section> -->
-            <!-- <hr class="sep" />
+            </section> 
+            <hr class="sep" />
           </div>
         </div>  -->
 
         <!-- 按钮与进度条-->
-        <!-- <div class="progress-actions-row">
+         <!-- <div class="progress-actions-row">
           <div class="progress-container">
             <div class="progress-bar">
               <div class="progress-fill" :style="{ width: getProgressPercentage(currentProduct) + '%' }"></div>
               <div class="progress-empty" :style="{ width: (100 - getProgressPercentage(currentProduct)) + '%' }"></div>
             </div>
             <span class="progress-text">{{ getProgressPercentage(currentProduct) }}%</span>
-          </div>
-          <div class="doc-actions"> -->
+          </div> -->
+          <!-- <div class="doc-actions">  -->
             <!-- 统一显示Buy和Detail按钮 -->
             <!-- <a href="#" class="btn small orange" @click.prevent="openTrade(currentProduct.code)">Learn More & Buy</a> -->
             <!-- <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">Detail</a> -->
-          <!-- </div>
-        </div>
-      </article> -->
-    <!-- </section> -->
+          <!-- </div>-->
+       <!-- </div>
+      </article> 
+    </section> -->
 
     <!-- 产品列表视图 -->
     <section v-else class="doc-list">
@@ -98,65 +98,36 @@
                 <!-- • {{ p.name }} -->
               </h4>
              </div>
-             <p>{{ p.property_summary }}</p>
+             <p>{{ p.propertySummary }}</p>
            </div>
            <button class="pf-project-btn pf-project-btn-secondary pf-title-btn" @click="openTrade(p.code)">详情</button>
-         </div>
+          </div>
 
          <!-- 项目指标 -->
-         <!-- <div class="pf-project-metrics">
+         <div class="pf-project-metrics">
            <div class="pf-project-metric">
-             <span class="pf-metric-label">LOAN SIZE</span>
-             <span class="pf-metric-value">{{ p.loanAmount}}</span>
+             <span class="pf-metric-label">贷款金额</span>
+             <span class="pf-metric-value">AUD{{ formatNumber(p.loanAmount)}}</span>
            </div>
            <div class="pf-project-metric">
-             <span class="pf-metric-label">EST. YIELD (IRR)</span>
-             <span class="pf-metric-value" style="color: #16a34a;">{{ p.metrics.targetLoanYield }}</span>
+             <span class="pf-metric-label">利率</span>
+             <span class="pf-metric-value" style="color: #16a34a;">{{ p.interestRate }}%/年</span>
            </div>
            <div class="pf-project-metric">
-             <span class="pf-metric-label">TERM</span>
-             <span class="pf-metric-value">{{ p.loanTerm }}</span>
-           </div>
-         </div> -->
-
-         <!-- 新增项目指标 -->
-         <div class="pf-project-metrics pf-project-metrics-new">
-           <div class="pf-project-metric">
-             <span class="pf-metric-label">发行主体</span>
-             <span class="pf-metric-value">{{ p.issuer || 'TBA' }}</span>
-           </div>
-           <div class="pf-project-metric">
-             <span class="pf-metric-label">底层资产</span>
-             <span class="pf-metric-value">{{ p.underlyingAsset || 'TBA' }}</span>
-           </div>
-           <div class="pf-project-metric">
-             <span class="pf-metric-label">Sponsor</span>
-             <span class="pf-metric-value">{{ p.sponsor || 'TBA' }}</span>
-           </div>
-           <div class="pf-project-metric">
-             <span class="pf-metric-label">Valuer</span>
-             <span class="pf-metric-value">{{ p.valuer || 'TBA' }}</span>
-           </div>
-           <div class="pf-project-metric">
-             <span class="pf-metric-label">Lawyer</span>
-             <span class="pf-metric-value">{{ p.lawyer || 'TBA' }}</span>
-           </div>
-           <div class="pf-project-metric">
-             <span class="pf-metric-label">Trustee</span>
-             <span class="pf-metric-value">{{ p.trustee || 'TBA' }}</span>
+             <span class="pf-metric-label">贷款期限</span>
+             <span class="pf-metric-value">{{ p.loanTermMonths }}月</span>
            </div>
          </div>
-
          <!-- 投资进度信息 -->
-         <!-- <div class="pf-investment-progress">
+         <div class="pf-investment-progress">
            <div class="pf-progress-metrics">
              <div class="pf-progress-metric">
                <span class="pf-progress-label">当前认购</span>
-               <span class="pf-progress-value">{{ formatNumber(p.subscribed || 0) }}</span>
+               <span class="pf-progress-value">{{ formatNumber(p.subscribed) }}</span>
              </div>
              <div class="pf-progress-metric">
                <span class="pf-progress-label">总发行量</span>
-               <span class="pf-progress-value">{{ formatNumber(p.totalOffering || 0) }}</span>
+               <span class="pf-progress-value">{{ formatNumber(p.totalOffering) }}</span>
              </div>
            </div>
            <div class="pf-progress-bar-container">
@@ -165,19 +136,55 @@
              </div>
              <div class="pf-progress-text">{{ getSubscriptionProgress(p) }}% 已认购</div>
            </div>
-         </div> -->
+         </div>
+         <!-- 展开/收起按钮 -->
+         <div class="pf-expand-toggle" @click.stop="toggleProjectDetails(p.code)">
+           <span class="expand-text">相关方信息</span>
+           <span class="expand-icon" :class="{ 'expanded': isProjectExpanded(p.code) }">▼</span>
+         </div>
 
-         <!-- Etherscan链接 -->
-         <div class="pf-etherscan-link">
-           <a 
-             href="https://etherscan.io/address/0xA41b4F0417d588a08F914Ca17b07c99783D5c3FC" 
-             target="_blank" 
-             rel="noopener noreferrer"
-             class="etherscan-link"
-           >
-             <span class="etherscan-icon">🔗</span>
-             <span class="etherscan-text">在Etherscan上查看</span>
-           </a>
+         <!-- 可展开的详情内容 -->
+         <div class="pf-expandable-content" :class="{ 'expanded': isProjectExpanded(p.code) }">
+           <!-- 新增项目指标 -->
+           <div class="pf-project-metrics pf-project-metrics-new">
+             <div class="pf-project-metric">
+               <span class="pf-metric-label">发行主体</span>
+               <span class="pf-metric-value">{{ p.issuer || 'TBA' }}</span>
+             </div>
+             <div class="pf-project-metric">
+               <span class="pf-metric-label">底层资产</span>
+               <span class="pf-metric-value">{{ p.collateral || 'TBA' }}</span>
+             </div>
+             <div class="pf-project-metric">
+               <span class="pf-metric-label">保荐人</span>
+               <span class="pf-metric-value">{{ p.sponsor || 'TBA' }}</span>
+             </div>
+             <div class="pf-project-metric">
+               <span class="pf-metric-label">评估机构</span>
+               <span class="pf-metric-value">{{ p.valuer || 'TBA' }}</span>
+             </div>
+             <div class="pf-project-metric">
+               <span class="pf-metric-label">律师</span>
+               <span class="pf-metric-value">{{ p.lawyer || 'TBA' }}</span>
+             </div>
+             <div class="pf-project-metric">
+               <span class="pf-metric-label">监管方</span>
+               <span class="pf-metric-value">{{ p.trustee || 'TBA' }}</span>
+             </div>
+           </div>
+           
+           <!-- Etherscan链接 -->
+           <div class="pf-etherscan-link" v-if="p.principalTokenAddress">
+             <a 
+               :href="`https://etherscan.io/address/${p.principalTokenAddress}`" 
+               target="_blank" 
+               rel="noopener noreferrer"
+               class="etherscan-link"
+             >
+               <span class="etherscan-icon">🔗</span>
+               <span class="etherscan-text">在Etherscan上查看</span>
+             </a>
+           </div>
          </div>
       </article>
     </section>
@@ -188,9 +195,14 @@
 <script>
 import { productAPI } from '@/service/api'
 import { useDatabaseSync } from '@/service/dataSyncService.js'
+import { useLanguage } from '@/composables/useLanguage'
 
 export default { 
   name: 'ListedProjectsView',
+  setup() {
+    const { t } = useLanguage()
+    return { t }
+  },
   props: {
     code: {
       type: String,
@@ -206,7 +218,8 @@ export default {
       error: null,
       refreshInterval: null,
       lastRefreshTime: null,
-      isDetailView: false // 是否为详情视图
+      isDetailView: false, // 是否为详情视图
+      expandedProjects: {} // 存储每个项目的展开状态
     }
   },
   async mounted() {
@@ -266,91 +279,141 @@ export default {
           const rawData = response.data
           const product = {
             ...rawData,
+
+            // 基础信息
+            code: rawData.project_code,
+            name: rawData.project_name,
+            status: rawData.loan_status,
+            
+            // 认购信息
             totalOffering: rawData.total_offering_token,
             subscribed: rawData.subscribe_token,
-            targetYield: rawData.target_yield,
-            ltv: rawData.LTV,
-            annualInterestRate: rawData.interest_rate,
+            totalOfferingRaw: rawData.total_offering_token || 0,
+            subscribedRaw: rawData.subscribe_token || 0,
+            
+            // 物业信息
+            propertyLocation: rawData.property_location,
+            propertyState: rawData.property_state,
+            propertyType: rawData.property_type,
+            propertyValue: rawData.property_value,
+            propertySummary: rawData.property_type,
+            
+            // 贷款信息
+            mortgageType: rawData.mortage_type,
             loanAmount: rawData.loan_amount,
-            valuation: rawData.valuation,
-            // image: rawData.image || this.getProductImage(rawData.code),
+            loanTermMonths: rawData.loan_term_months,
+            
+            // 贷款比率
+            lvr: rawData.lvr,
+            interestRate: rawData.interest_rate,
+            defaultRate: rawData.default_rate,
+            
+            // 贷款周期
+            commencementDate: rawData.commencement_date,
+            expiryDate: rawData.expiry_date,
+            expectedRecoveryDate: rawData.expected_recovery_date,
+            
+            // 相关主体信息
+            borrower: rawData.Borrower,
+            lender: rawData.Lender,
+            issuer: rawData.Issuer,
+            sponsor: rawData.Sponsor,
+            valuer: rawData.Valuer,
+            lawyer: rawData.Lawyer,
+            trustee: rawData.Trustee,
+            collateral: rawData.Collateral,
+            
+            // 合约地址
+            principalTokenAddress: rawData.principal_token_address,
+            interestTokenAddress: rawData.interest_token_address,
+            kycRegistryAddress: rawData.kyc_registry_address,
+            loanIssuerAddress: rawData.loan_issuer_address,
+            tradeContractAddress: rawData.trade_contract_address,
+            complianceGuardContractAddress: rawData.compliance_guard_contract_address,
+            holderRegistry: rawData.Holder_Registry,
+            
+            // 前端显示字段
+            subtitle: `${rawData.mortage_type} - ${rawData.property_type}`,
+            loanAmountFormatted: rawData.loan_amount ? `AUD${rawData.loan_amount.toLocaleString()}` : 'AUD0',
+            loanTermFormatted: `${rawData.loan_term_months} months`,
+            targetYield: rawData.interest_rate,
+            valuation: rawData.property_value,
             
             // 原始数值用于计算
             totalOfferingRaw: rawData.total_offering_token || 0,
             subscribedRaw: rawData.subscribe_token || 0
           }
           
-          // 构建与TradeProjectView一致的数据结构
+          // 构建与列表数据结构一致的数据结构
           this.currentProduct = {
-            // 基本信息
+            // 基础信息
+            id: product.id,
             code: product.code,
             name: product.name,
-            image: product.image,
-            subtitle: product.subtitle,
-            type: product.type,
-            risk: product.risk,
-            targetYield: product.targetYield,
             status: product.status,
-            summary: product.summary,
             
-            // 投资信息
+            // 认购信息
             totalOffering: product.totalOffering,
             subscribed: product.subscribed,
-            totalSubscriptionTokens: product.totalSubscriptionTokens,
-            subscribedTokens: product.subscribedTokens,
+            totalOfferingRaw: product.totalOfferingRaw,
+            subscribedRaw: product.subscribedRaw,
+            
+            // 物业信息
+            propertyLocation: product.propertyLocation,
+            propertyState: product.propertyState,
+            propertyType: product.propertyType,
+            propertyValue: product.propertyValue,
+            propertySummary: product.propertySummary,
+            
+            // 贷款信息
+            mortgageType: product.mortgageType,
+            loanAmount: product.loanAmount,
+            loanTermMonths: product.loanTermMonths,
+            
+            // 贷款比率
+            lvr: product.lvr,
+            interestRate: product.interestRate,
+            defaultRate: product.defaultRate,
+            
+            // 贷款周期
+            commencementDate: product.commencementDate,
+            expiryDate: product.expiryDate,
+            expectedRecoveryDate: product.expectedRecoveryDate,
+            
+            // 相关主体信息
+            borrower: product.borrower,
+            lender: product.lender,
+            issuer: product.issuer,
+            sponsor: product.sponsor,
+            valuer: product.valuer,
+            lawyer: product.lawyer,
+            trustee: product.trustee,
+            collateral: product.collateral,
+            
+            // 合约地址
+            principalTokenAddress: product.principalTokenAddress,
+            interestTokenAddress: product.interestTokenAddress,
+            kycRegistryAddress: product.kycRegistryAddress,
+            loanIssuerAddress: product.loanIssuerAddress,
+            tradeContractAddress: product.tradeContractAddress,
+            complianceGuardContractAddress: product.complianceGuardContractAddress,
+            holderRegistry: product.holderRegistry,
+            
+            // 前端显示字段
+            subtitle: product.subtitle,
+            loanAmountFormatted: product.loanAmountFormatted,
+            loanTermFormatted: product.loanTermFormatted,
+            targetYield: product.targetYield,
+            valuation: product.valuation,
+            image: product.image || this.getProductImage(product.code),
             
             // 计算指标
             metrics: {
               currentElaraPrice: this.calculateTokenPrice(product),
-              collateralPropertyValue: product.valuation || 'TBA',
+              collateralPropertyValue: product.valuation ? `AUD${product.valuation.toLocaleString()}` : 'TBA',
               rentalIncome: this.calculateRentalIncome(product),
               targetLoanYield: `${product.targetYield}% p.a.`
-            },
-            
-            // Key Facts 关键信息
-            loanAmount: product.loanAmount,
-            annualInterestRate: product.annualInterestRate,
-            loanTerm: product.loanTerm,
-            ltv: product.ltv,
-            drawdownDate: product.drawdownDate,
-            earlyRepayment: product.earlyRepayment,
-            repaymentArrangement: product.repaymentArrangement,
-            
-            // Parties 相关主体
-            issuer: product.issuer,
-            pwShareholders: product.pwShareholders,
-            lender: product.lender,
-            borrower: product.borrower,
-            
-            // 新增项目指标字段
-            underlyingAsset: product.underlyingAsset || 'TBA',
-            sponsor: product.sponsor || 'TBA',
-            valuer: product.valuer || 'TBA',
-            lawyer: product.lawyer || 'TBA',
-            trustee: product.trustee || 'TBA',
-            guarantor: product.guarantor,
-            
-            // Disbursement & Interest 放款和利息
-            disbursementMethod: product.disbursementMethod,
-            interest: product.interest,
-            earlyRepaymentDetails: product.earlyRepaymentDetails,
-            maturityDate: product.maturityDate,
-            
-            // Collateral 抵押品
-            propertyAddress: product.propertyAddress,
-            valuation: product.valuation,
-            securityRank: product.securityRank,
-            
-            // Default & Remedies 违约和补救措施
-            defaultInterestRate: product.defaultInterestRate,
-            defaultTriggers: product.defaultTriggers,
-            defaultProcess: product.defaultProcess,
-            
-            // On-Chain & Documents 链上和文档
-            issuerToken: product.issuerToken,
-            loanToken: product.loanToken,
-            valuationReport: product.valuationReport,
-            mortgageDeed: product.mortgageDeed
+            }
           }
           
           this.lastRefreshTime = new Date()
@@ -376,14 +439,14 @@ export default {
         const response = await productAPI.getAllProducts('ACTIVE')
         
         if (response.status === 0) {
-          // 映射新的数据库字段到前端期望的字段名
+          // 映射数据库字段到前端期望的字段名
           this.products = (response.data || []).map(project => {
             const mappedProduct = {
               // 基础信息
               id: project.id,
-              code: project.project_code || project.code,
-              name: project.project_name || project.name,
-              status: project.loan_status || project.status || 'UNKNOWN',
+              code: project.project_code,
+              name: project.project_name,
+              status: project.loan_status || 'UNKNOWN',
               
               // 认购信息
               totalOffering: project.total_offering_token ? `AUD${project.total_offering_token.toLocaleString()}` : 'AUD0',
@@ -394,43 +457,60 @@ export default {
               subscribedRaw: project.subscribe_token || 0,
               
               // 物业信息
-              property_location: project.property_location || project.propertyLocation,
-              property_state: project.property_state || project.propertyState,
-              property_type: project.property_type || project.propertyType,
-              property_value: project.property_value || project.propertyValue,
-              property_summary: project.property_summary || project.propertySummary,
+              propertyLocation: project.property_location,
+              propertyState: project.property_state,
+              propertyType: project.property_type,
+              propertyValue: project.property_value,
+              propertySummary: project.property_type, // 使用property_type作为summary
               
               // 贷款信息
-              loan_type: project.loan_type || project.loanType,
-              loan_product: project.loan_product || project.loanProduct,
-              loan_amount: project.loan_amount || project.loanAmount,
-              loan_purpose: project.loan_purpose || project.loanPurpose,
-              loan_term_months: project.loan_term_months || project.loanTermMonths,
+              mortgageType: project.mortage_type,
+              loanAmount: project.loan_amount,
+              loanTermMonths: project.loan_term_months,
               
               // 贷款比率
               lvr: project.lvr,
-              interest_rate: project.interest_rate || project.interestRate,
-              default_rate: project.default_rate || project.defaultRate,
+              interestRate: project.interest_rate,
+              defaultRate: project.default_rate,
               
               // 贷款周期
-              commencement_date: project.commencement_date || project.commencementDate,
-              expiry_date: project.expiry_date || project.expiryDate,
-              expected_recovery_date: project.expected_recovery_date || project.expectedRecoveryDate,
+              commencementDate: project.commencement_date,
+              expiryDate: project.expiry_date,
+              expectedRecoveryDate: project.expected_recovery_date,
+              
+              // 相关主体信息
+              borrower: project.Borrower,
+              lender: project.Lender,
+              issuer: project.Issuer,
+              sponsor: project.Sponsor,
+              valuer: project.Valuer,
+              lawyer: project.Lawyer,
+              trustee: project.Trustee,
+              collateral: project.Collateral,
+              
+              // 合约地址
+              principalTokenAddress: project.principal_token_address,
+              interestTokenAddress: project.interest_token_address,
+              kycRegistryAddress: project.kyc_registry_address,
+              loanIssuerAddress: project.loan_issuer_address,
+              tradeContractAddress: project.trade_contract_address,
+              complianceGuardContractAddress: project.compliance_guard_contract_address,
+              holderRegistry: project.Holder_Registry,
               
               // 前端显示字段
-              subtitle: `${project.loan_product || project.loanProduct} - ${project.property_type || project.propertyType}`,
-              loanAmount: (project.loan_amount || project.loanAmount) ? `AUD${(project.loan_amount || project.loanAmount).toLocaleString()}` : 'AUD0',
-              loanTerm: `${project.loan_term_months || project.loanTermMonths} months`,
-              targetYield: project.interest_rate || project.interestRate,
-              image: project.image || this.getProductImage(project.project_code || project.code)
+              subtitle: `${project.mortage_type} - ${project.property_type}`,
+              loanAmountFormatted: project.loan_amount ? `AUD${project.loan_amount.toLocaleString()}` : 'AUD0',
+              loanTermFormatted: `${project.loan_term_months} months`,
+              targetYield: project.interest_rate,
+              image: project.image || this.getProductImage(project.project_code)
             }
             
             // 添加计算指标
             mappedProduct.metrics = {
               currentElaraPrice: this.calculateTokenPrice(mappedProduct),
-              collateralPropertyValue: (project.property_value || project.propertyValue) ? `AUD${(project.property_value || project.propertyValue).toLocaleString()}` : 'TBA',
+              collateralPropertyValue: project.property_value ? `AUD${project.property_value.toLocaleString()}` : 'TBA',
               rentalIncome: this.calculateRentalIncome(mappedProduct),
-              targetLoanYield: `${(project.interest_rate || project.interestRate)}% p.a.`
+              targetLoanYield: `${project.interest_rate}% p.a.`
             }
             
             return mappedProduct
@@ -473,18 +553,62 @@ export default {
         // 映射数据库字段到前端期望的字段名
         this.products = activeProducts.map(product => ({
           ...product,
-          totalOffering: product.total_token,
-          subscribed: product.current_subscribed_token,
-          targetYield: product.target_yield,
-          ltv: product.LTV,
-          annualInterestRate: product.annual_interest_rate,
+          // 基础信息
+          code: product.project_code,
+          name: product.project_name,
+          status: product.loan_status,
           
-          // 原始数值用于计算
-          totalOfferingRaw: product.total_token || 0,
-          subscribedRaw: product.current_subscribed_token || 0,
+          // 认购信息
+          totalOffering: product.total_offering_token ? `AUD${product.total_offering_token.toLocaleString()}` : 'AUD0',
+          subscribed: product.subscribe_token ? `AUD${product.subscribe_token.toLocaleString()}` : 'AUD0',
+          totalOfferingRaw: product.total_offering_token || 0,
+          subscribedRaw: product.subscribe_token || 0,
+          
+          // 物业信息
+          propertyLocation: product.property_location,
+          propertyState: product.property_state,
+          propertyType: product.property_type,
+          propertyValue: product.property_value,
+          propertySummary: product.property_type,
+          
+          // 贷款信息
+          mortgageType: product.mortage_type,
           loanAmount: product.loan_amount,
-          valuation: product.valuation,
-          image: product.image || this.getProductImage(product.code)
+          loanTermMonths: product.loan_term_months,
+          lvr: product.lvr,
+          interestRate: product.interest_rate,
+          defaultRate: product.default_rate,
+          
+          // 贷款周期
+          commencementDate: product.commencement_date,
+          expiryDate: product.expiry_date,
+          expectedRecoveryDate: product.expected_recovery_date,
+          
+          // 相关主体信息
+          borrower: product.Borrower,
+          lender: product.Lender,
+          issuer: product.Issuer,
+          sponsor: product.Sponsor,
+          valuer: product.Valuer,
+          lawyer: product.Lawyer,
+          trustee: product.Trustee,
+          collateral: product.Collateral,
+          
+          // 合约地址
+          principalTokenAddress: product.principal_token_address,
+          interestTokenAddress: product.interest_token_address,
+          kycRegistryAddress: product.kyc_registry_address,
+          loanIssuerAddress: product.loan_issuer_address,
+          tradeContractAddress: product.trade_contract_address,
+          complianceGuardContractAddress: product.compliance_guard_contract_address,
+          holderRegistry: product.Holder_Registry,
+          
+          // 前端显示字段
+          subtitle: `${product.mortage_type} - ${product.property_type}`,
+          loanAmountFormatted: product.loan_amount ? `AUD${product.loan_amount.toLocaleString()}` : 'AUD0',
+          loanTermFormatted: `${product.loan_term_months} months`,
+          targetYield: product.interest_rate,
+          image: product.image || this.getProductImage(product.project_code)
         }))
         this.lastRefreshTime = new Date()
       })
@@ -698,6 +822,19 @@ export default {
       const num = parseFloat(value)
       if (isNaN(num)) return value
       return num.toLocaleString()
+    },
+
+    // 切换项目详情展开状态
+    toggleProjectDetails(projectCode) {
+      console.log('🔄 切换项目展开状态:', projectCode, '当前状态:', this.expandedProjects[projectCode])
+      // Vue 3 中直接修改响应式对象
+      this.expandedProjects[projectCode] = !this.expandedProjects[projectCode]
+      console.log('✅ 切换后状态:', this.expandedProjects[projectCode])
+    },
+
+    // 检查项目是否已展开
+    isProjectExpanded(projectCode) {
+      return !!this.expandedProjects[projectCode]
     }
   },
   computed: {
@@ -744,13 +881,13 @@ export default {
     },
 
     projectData() {
-      // 从ProductDetailsInfo获取项目数据（保留作为备用）
-      const product = this.project
+      // 从currentProduct获取项目数据（保留作为备用）
+      const product = this.currentProduct
       
       if (product) {
-        console.log('TradeProjectView: Retrieve project data from database:', product)
+        console.log('ListedProjectsView: Retrieve project data from currentProduct:', product)
         
-        // 构建符合模板需求的数据结构，完整映射ProductDetailsInfo.js中的所有字段
+        // 构建符合模板需求的数据结构，完整映射数据库字段
         return {
           // 基本信息
           code: product.code,
@@ -773,7 +910,6 @@ export default {
           metrics: {
             currentElaraPrice: this.calculateTokenPrice(product),
             collateralPropertyValue: product.valuation || 'TBA',
-            rentalIncome: this.calculateRentalIncome(product),
             targetLoanYield: `${product.targetYield}% p.a.`
           },
           
@@ -794,7 +930,7 @@ export default {
           guarantor: product.guarantor,
           
           // 新增项目指标字段
-          underlyingAsset: product.underlyingAsset || 'TBA',
+          underlyingAsset: product.collateral || 'TBA',
           sponsor: product.sponsor || 'TBA',
           valuer: product.valuer || 'TBA',
           lawyer: product.lawyer || 'TBA',
@@ -804,10 +940,10 @@ export default {
           disbursementMethod: product.disbursementMethod,
           interest: product.interest,
           earlyRepaymentDetails: product.earlyRepaymentDetails,
-          maturityDate: product.maturityDate,
+          maturityDate: product.expiryDate,
           
           // Collateral 抵押品
-          propertyAddress: product.propertyAddress,
+          propertyAddress: product.propertyLocation,
           valuation: product.valuation,
           securityRank: product.securityRank,
           
@@ -868,7 +1004,7 @@ export default {
   margin-bottom: 16px;
 }
 .headline {
-  color: #ffffff !important;
+  color: var(--text) !important;
   margin: 0 0 6px 0;
 }
 .subline{
@@ -884,17 +1020,17 @@ export default {
   margin-bottom: 20px;
 }
 .filters .input {
-  background: #141426;
-  border: 1px solid #374151;
-  color: #ffffff;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text);
 }
-.filters .input::placeholder { color: #9ca3af; }
+.filters .input::placeholder { color: var(--text-secondary); }
 .filters .btn {
-  background: #374151;
-  border: 1px solid #4b5563;
-  color: #ffffff;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text);
 }
-.filters .btn:hover { background: #4b5563; }
+.filters .btn:hover { background: var(--hover-bg); }
 
 /* 收益率区间滑块样式 */
 .yield-range-filter {
@@ -906,7 +1042,7 @@ export default {
 
 .yield-range-label {
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--text-secondary);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -921,7 +1057,7 @@ export default {
 
 .yield-range-display {
   font-size: 14px;
-  color: #ffffff;
+  color: var(--text);
   font-weight: 600;
   white-space: nowrap;
   padding: 0;
@@ -930,7 +1066,7 @@ export default {
 .yield-range-slider {
   position: relative;
   height: 20px;
-  background: #374151;
+  background: var(--bg-secondary);
   border-radius: 10px;
   padding: 0 10px;
   flex: 1;
@@ -1092,7 +1228,7 @@ export default {
 
 .doc-list{
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 2px;
 }
 
@@ -1101,23 +1237,23 @@ export default {
   width:100%;
   padding:16px;
   border-radius:12px;
-  background:#141426;
+  background: var(--card-bg);
   border:1px solid var(--border);
-  box-shadow: 0 6px 18px rgba(0,0,0,.25);
+  box-shadow: var(--shadow);
 }
 
 .pf-project-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
 .pf-project-image{width:40px;height:40px;border-radius:8px;}
 .pf-project-info{flex:1;}
 .pf-title-row{display:flex;justify-content:space-between;align-items:center;gap:12px;}
-.pf-project-info h4{margin:0;font-size:16px;font-weight:700;color:#ffffff;flex:1;}
-.pf-project-info p{margin:4px 0 0 0;font-size:12px;color:#9ca3af;}
+.pf-project-info h4{margin:0;font-size:16px;font-weight:700;color: var(--text);flex:1;}
+.pf-project-info p{margin:4px 0 0 0;font-size:12px;color: var(--text-secondary);}
 .pf-title-btn{padding:6px 12px;font-size:12px;white-space:nowrap;}
 
 .pf-project-metrics{margin-bottom:16px;}
 .pf-project-metric{display:flex;justify-content:space-between;align-items:center;padding:4px 0;}
-.pf-metric-label{font-size:12px;color:#9ca3af;}
-.pf-metric-value{font-size:14px;font-weight:600;color:#ffffff;}
+.pf-metric-label{font-size:12px;color: var(--text-secondary);}
+.pf-metric-value{font-size:14px;font-weight:600;color: var(--text);}
 .pf-metric-value.risk-low{color:#16a34a;}
 .pf-metric-value.risk-medium{color:#d97706;}
 .pf-metric-value.risk-high{color:#dc2626;}
@@ -1133,11 +1269,11 @@ export default {
 }
 .pf-project-metrics-new .pf-metric-label{
   font-size:11px;
-  color:#6b7280;
+  color: var(--text-secondary);
 }
 .pf-project-metrics-new .pf-metric-value{
   font-size:13px;
-  color:#d1d5db;
+  color: var(--text);
 }
 
 /* 投资进度信息样式 */
@@ -1169,7 +1305,7 @@ export default {
 
 .pf-progress-label{
   font-size:10px;
-  color:#9ca3af;
+  color: var(--text-secondary);
   text-transform:uppercase;
   letter-spacing:0.5px;
   margin-bottom:4px;
@@ -1179,7 +1315,7 @@ export default {
 .pf-progress-value{
   font-size:14px;
   font-weight:700;
-  color:#ffffff;
+  color: var(--text);
 }
 
 .pf-progress-bar-container{
@@ -1189,7 +1325,7 @@ export default {
 .pf-progress-bar{
   width:100%;
   height:6px;
-  background:rgba(255,255,255,0.1);
+  background:var(--border-light);
   border-radius:3px;
   overflow:hidden;
   margin-bottom:8px;
@@ -1202,11 +1338,21 @@ export default {
   transition:width 0.5s ease;
 }
 
+/* 浅色主题下的进度条颜色 */
+[data-theme="light"] .pf-progress-fill{
+  background:linear-gradient(90deg,#059669,#047857);
+}
+
 .pf-progress-text{
   text-align:center;
   font-size:12px;
   font-weight:600;
   color:#10b981;
+}
+
+/* 浅色主题下的进度文字颜色 */
+[data-theme="light"] .pf-progress-text{
+  color:#059669;
 }
 
 .pf-project-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
@@ -1711,6 +1857,57 @@ export default {
   font-size: 14px;
 }
 
+/* 展开/收起功能样式 */
+.pf-expand-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: var(--card-subtle);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.pf-expand-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.expand-text {
+  font-size: 12px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.expand-icon {
+  font-size: 12px;
+  color: #9ca3af;
+  transition: transform 0.3s ease;
+  transform: rotate(0deg);
+}
+
+.expand-icon.expanded {
+  transform: rotate(180deg);
+}
+
+.pf-expandable-content {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.pf-expandable-content.expanded {
+  max-height: 500px;
+  opacity: 1;
+  margin-top: 12px;
+}
+
 /* 移动端响应式样式 */
 @media (max-width: 768px) {
   .pf-etherscan-link {
@@ -1729,6 +1926,24 @@ export default {
   
   .etherscan-text {
     font-size: 13px;
+  }
+
+  /* 移动端展开功能样式 */
+  .pf-expand-toggle {
+    margin-top: 8px;
+    padding: 6px 10px;
+  }
+
+  .expand-text {
+    font-size: 11px;
+  }
+
+  .expand-icon {
+    font-size: 11px;
+  }
+
+  .pf-expandable-content.expanded {
+    margin-top: 8px;
   }
 }
 

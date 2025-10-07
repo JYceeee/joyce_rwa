@@ -1,6 +1,7 @@
 /*mysql配置信息*/
 require('dotenv').config()
-module.exports = {
+
+const dbConfig = {
   mysql: {
     host: process.env.db_host || process.env.VITE_DB_HOST || 'localhost',                        // 数据库IP地址
     user: process.env.db_user || process.env.VITE_DB_USER || 'root',                             // 用户名
@@ -12,3 +13,12 @@ module.exports = {
     idleTimeout: process.env.db_idleTimeout || process.env.VITE_DB_IDLE_TIMEOUT || 30000,               //空闲30秒后回收
   }
 };
+
+console.log('🔍 数据库配置:', {
+  host: dbConfig.mysql.host,
+  user: dbConfig.mysql.user,
+  database: dbConfig.mysql.database,
+  port: dbConfig.mysql.port
+});
+
+module.exports = dbConfig;

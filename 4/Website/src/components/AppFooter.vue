@@ -47,7 +47,8 @@
     </div> -->
 
     <div class="container footer-bottom">
-      <p>© 2025 Mortgage RWA. All rights reserved.</p>
+      <p>{{ t('footer.disclaimer') }}</p>
+      <p>{{ t('footer.copyright') }}</p>
       <div class="social-icons">
         <a href="#"><img src="/icons/X-logo.png" alt="X" /></a>
         <a href="#"><img src="/icons/Linkedin-logo.png" alt="LinkedIn" /></a>
@@ -59,12 +60,25 @@
 </template>
 
 <script>
-export default { name: 'AppFooter' }
+import { useLanguage } from '@/composables/useLanguage'
+
+export default { 
+  name: 'AppFooter',
+  setup() {
+    const { t } = useLanguage()
+    return { t }
+  }
+}
 </script>
 
 <style scoped>
 .footer {
-  background: #0A0A19;
+  background: var(--card-bg);
+  color: var(--text);
+}
+
+.footer-bottom {
+  color: var(--text);
 }
 
 /* 手机端响应式设计 */

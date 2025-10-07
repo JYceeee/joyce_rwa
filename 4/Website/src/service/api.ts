@@ -9,7 +9,9 @@ interface ApiResponse<T = any> {
 
 // API完整URL配置 - 直接从环境变量获取完整URL
 const getApiUrl = (envKey: string, fallback: string) => {
-  return (import.meta as any).env[envKey] || fallback
+  const envValue = (import.meta as any).env[envKey]
+  console.log(`🔍 API配置: ${envKey} = ${envValue || '未设置'}`)
+  return envValue || fallback
 }
 
 // 项目API接口
@@ -27,6 +29,8 @@ export const projectAPI = {
       if (status && status !== 'all') {
         url += `?status=${encodeURIComponent(status)}`
       }
+      
+      console.log('📊 API: 请求URL:', url)
 
       const response = await fetch(url, {
         method: 'GET',
@@ -62,7 +66,10 @@ export const projectAPI = {
     try {
       console.log('📊 API: 从数据库根据代码获取项目:', code)
 
-      const response = await fetch(`${getApiUrl('VITE_API_PROJECT_BY_CODE_URL', 'http://localhost:3000/project/select')}/${code}`, {
+      const url = `${getApiUrl('VITE_API_PROJECT_BY_CODE_URL', 'http://localhost:3000/project/select')}/${code}`
+      console.log('📊 API: 请求项目详情URL:', url)
+      
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

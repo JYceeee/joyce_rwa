@@ -1,10 +1,11 @@
 <template>
-  <!-- Intro Video Overlay -->
-  <div 
-    v-if="showIntroVideo || isTransitioning" 
-    class="intro-video-overlay"
-    :class="{ 'fade-out': isTransitioning }"
-  >
+  <div class="about-page">
+    <!-- Intro Video Overlay -->
+    <div 
+      v-if="showIntroVideo || isTransitioning" 
+      class="intro-video-overlay"
+      :class="{ 'fade-out': isTransitioning }"
+    >
     <div 
       class="intro-video-container"
       :class="{ 'fade-out': isTransitioning }"
@@ -20,7 +21,7 @@
         @error="handleIntroVideoError"
       >
         <source src="/videos/Introvideo.mp4" type="video/mp4">
-        你的浏览器不支持视频播放
+        {{ t('common.browserNotSupported') }}
       </video>
       
       <!-- Skip Button (右上角) -->
@@ -30,7 +31,7 @@
         @click="skipIntroVideo"
         title="Skip Video"
       >
-    -> 跳过视频
+    {{ t('common.skipVideo') }}
       </button>
       
       <!-- Video Overlay -->
@@ -38,13 +39,13 @@
         <!-- Loading Indicator -->
         <div v-if="introVideoLoading" class="loading-indicator">
           <div class="loading-spinner"></div>
-          <p class="loading-text">加载视频...</p>
+          <p class="loading-text">{{ t('common.loadingVideo') }}</p>
         </div>
         
         <!-- Error Message -->
         <div v-if="introVideoError" class="error-message">
-          <p>视频加载失败</p>
-          <button class="btn btn-secondary" @click="closeIntroVideo">关闭</button>
+          <p>{{ t('common.videoLoadError') }}</p>
+          <button class="btn btn-secondary" @click="closeIntroVideo">{{ t('common.close') }}</button>
         </div>
       </div>
       
@@ -53,16 +54,15 @@
         <div class="logo-container">
           <!-- <img src="/icons/RWA-logo.png" alt="RWA Logo" class="brand-logo"> -->
         </div>
-        <h1 class="headline">我们是专注于把房地产资产包装成<br>投资人喜欢的RWA底层资产的<br>RWA Dealmaker</br>
-        </h1>
-        <p class="brand-subtitle">本平台以保护RWA投资人的投资安全为出发点，组织合法合规，风险低，回报高的优质资产</p>
+        <h1 class="headline">{{ t('about.headline') }}</h1>
+        
       </div>
     </div>
   </div>
 
   <div class="container" :class="{ 'fade-in': !showIntroVideo && !isTransitioning }">
     <div class="page-header">
-      <h1>关于我们</h1>
+      <h1 class="title" style="color: var(--heading-color);">{{ t('about.title') }}</h1>
       <!-- <p class="page-subtitle">Innovative technology company dedicated to revolutionizing real estate investment</p> -->
     </div>
 
@@ -74,21 +74,23 @@
           <div class="vision-text">
             <p class="vision-intro">
               <!-- <strong>RWAT dealmaker</strong> -->
-              我们是专注于把房地产资产包装成投资人喜欢的RWA底层资产的RWA Dealmaker，
-              即本平台以保护RWA投资人的投资安全为出发点，组织合法合规，风险低，回报高的优质资产
-              （比如澳大利亚抵押率不超过70%，利率大约为9%的第一抵押权人的住宅抵押贷款资产），
-              促成投资人和资产持有人交易的dealmaker。
+              我们是专注于把房地产资产包装成投资人喜欢的RWA底层资产的RWA Dealmaker。
+              <!-- 致力于将优质房地产资产转化为符合投资者需求的RWA（实物资产）底层资产。 -->
+              本平台以保障RWA投资者资金安全为核心，精选合法合规、风险低、回报高的优质资产
+              （如澳大利亚抵押率不超过70%、年化利率约9%的第一顺位住宅抵押贷款资产），
+              促成投资者与资产持有人之间的交易。
+
             </p>
             
             <p class="vision-intro">
-            本平台上展示的底层资产受资产所在国家的法律保护，且资金可以自由进出该国家。
-            如果投资人有要求，项目交易结构可以让底层资产和资金独立隔离和托管给合格的第三方机构。
+              平台展示的底层资产均受资产所在国家法律法规保护，资金可自由跨境流动。
+              根据投资者需求，交易结构可实现底层资产与资金的独立隔离，并委托合格第三方机构进行托管。
             </p>
             
             <p class="vision-intro">
-              本平台除了促成投资人和RWA底层资产持有人达成交易以外，还可以额外整合RWA代币化全链条各机构的合作，
-              包括专业的RWA代币化的技术服务公司以及各国RWAT的持牌发行商和交易所等，
-              实现RWA代币化合法的，高效的，低成本的的公开或非公开发行的成功。
+              除撮合投资者与RWA底层资产持有人的交易外，本平台还整合RWA代币化全链条的生态合作，
+              涵盖专业RWA代币化技术服务公司、持牌RWA代币发行商及交易所等，确保代币化流程合法合规、
+              高效低成本，支持公开或非公开的成功发行。
             </p>
           </div>
       </div>
@@ -169,11 +171,18 @@
       </div> -->
     </div>
   </div>
+  </div>
 </template>
 
 <script>
+import { useLanguage } from '@/composables/useLanguage'
+
 export default {
   name: 'AboutUsView',
+  setup() {
+    const { t } = useLanguage()
+    return { t }
+  },
   data() {
     return {
       // Intro video related states
@@ -560,6 +569,8 @@ export default {
   font-size: 1.1rem;
   margin: 0;
   text-align: justify;
+  text-indent: 2em;
+  display: block;
 }
 
 .vision-image {

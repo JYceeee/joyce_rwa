@@ -3,8 +3,8 @@
   <div v-if="showLinkWalletModal" class="modal-mask">
     <div class="modal-wrapper">
       <div class="modal-container">
-        <h2 style="margin-bottom:8px;color:#ffffff;">连接钱包</h2>
-        <p style="color:#ffffff;">选择一个MetaMask账户来连接到您的个人资料:</p>
+        <h2 style="margin-bottom:8px;color:#ffffff;">{{ t('wallet.connect') }}</h2>
+        <p style="color:#ffffff;">{{ t('wallet.connect.description') }}</p>
         
         <!-- 账户选择列表 - 图片样式 -->
         <div v-if="availableAccounts.length > 0" class="account-grid">
@@ -54,12 +54,12 @@
         
         <!-- 无账户状态 -->
         <div v-if="!loadingAccounts && availableAccounts.length === 0" class="no-accounts">
-          <p>没有找到MetaMask中的其他账户。</p>
-          <p>请在MetaMask中添加更多账户并重试。</p>
+          <p>{{ t('wallet.noAccounts') }}</p>
+          <p>{{ t('wallet.addAccounts') }}</p>
         </div>
         
         <div style="text-align:right;margin-top:20px;">
-          <button class="mm-btn mm-outline" @click="showLinkWalletModal=false">取消</button>
+          <button class="mm-btn mm-outline" @click="showLinkWalletModal=false">{{ t('common.cancel') }}</button>
           <button 
             v-if="availableAccounts.length > 0" 
             class="mm-btn mm-primary" 
@@ -78,8 +78,8 @@
   <div v-if="showDisconnectModal" class="modal-mask">
     <div class="modal-wrapper">
       <div class="modal-container">
-        <h2 style="margin-bottom:8px;color:#ffffff;">断开钱包</h2>
-        <p style="color:#ffffff;">您确定要断开这个钱包吗？</p>
+        <h2 style="margin-bottom:8px;color:#ffffff;">{{ t('wallet.disconnect') }}</h2>
+        <p style="color:#ffffff;">{{ t('wallet.disconnect.confirm') }}</p>
         <div>
           <span style="display:block;font-size:15px;padding:8px 0;color:#ffffff;background:#2a2a4a;border-radius:8px;">{{ fullAddress }}</span>
         </div>
@@ -112,10 +112,10 @@
         </a>
         <nav class="menu" aria-label="Primary">
           <!-- <a href="#" @click.prevent="go('/home')" class="menu-item">首页</a> -->
-          <a href="#" @click.prevent="go('/about')" class="menu-item">关于我们</a>
-          <a href="#" @click.prevent="go('/listedprojects')" class="menu-item">已上链RWA</a>
-          <a href="#" @click.prevent="go('/to-be-listed')" class="menu-item">待上链RWA</a>
-          <a href="#" @click.prevent="goToContactUs" class="menu-item">联系我们</a>
+          <a href="#" @click.prevent="go('/about')" class="menu-item">{{ t('nav.about') }}</a>
+          <a href="#" @click.prevent="go('/listedprojects')" class="menu-item">{{ t('nav.listedProjects') }}</a>
+          <a href="#" @click.prevent="go('/to-be-listed')" class="menu-item">{{ t('nav.toBeListed') }}</a>
+          <a href="#" @click.prevent="goToContactUs" class="menu-item">{{ t('nav.contact') }}</a>
           <!-- <a href="#" @click.prevent="go('/portfolio')" class="menu-item">我的投资组合</a> -->
         </nav>
         
@@ -139,7 +139,7 @@
           <!-- 钱包连接状态显示 -->
           <div v-if="!connected" class="wallet-connect-section">
             <button class="btn orange pill" @click.prevent="connectWallet">
-              <span>连接钱包</span>
+              <span>{{ t('wallet.connect') }}</span>
             </button>
           </div>
           
@@ -156,13 +156,13 @@
                  <span class="dropdown-arrow">▾</span>
                </button>
             </div>
-            <div v-if="walletDropdownOpen" class="wallet-dropdown-menu">
-              <div class="wallet-dropdown-header">钱包管理</div>
+            <div v-if="walletDropdownOpen" class="wallet-dropdown-menu" style="color: #ffffff;">
+              <div class="wallet-dropdown-header">{{ t('wallet.management') }}</div>
               <a href="#" @click.prevent="showLinkWalletModal = true; walletDropdownOpen = false" class="wallet-dropdown-item">
-                <span>连接新钱包</span>
+                <span>{{ t('wallet.connect.new') }}</span>
               </a>
               <a href="#" @click.prevent="showDisconnectModal = true; walletDropdownOpen = false" class="wallet-dropdown-item">
-                <span>断开钱包</span>
+                <span>{{ t('wallet.disconnect') }}</span>
               </a>
             </div>
           </div>
@@ -172,8 +172,8 @@
           <button class="btn ghost pill settings-btn" @click.prevent="go('/settings')">⚙️</button>
         </div>
         <div v-else>
-          <a class="btn ghost" href="#" @click.prevent="go('/login')">登录</a>
-          <a class="btn orange" href="#" @click.prevent="go('/signup')">注册</a>
+          <a class="btn ghost" href="#" @click.prevent="go('/login')">{{ t('common.login') }}</a>
+          <a class="btn orange" href="#" @click.prevent="go('/signup')">{{ t('common.signup') }}</a>
         </div>
       </div>
     </div>
@@ -187,19 +187,19 @@
         </a> -->
         <a href="#" @click.prevent="go('/about')" class="mobile-menu-item">
           <!-- <span class="mobile-menu-icon">🏢</span> -->
-          <span>关于我们</span>
+          <span>{{ t('nav.about') }}</span>
         </a>
         <a href="#" @click.prevent="go('/listedprojects')" class="mobile-menu-item">
           <!-- <span class="mobile-menu-icon">📊</span> -->
-          <span>已上链RWA</span>
+          <span>{{ t('nav.listedProjects') }}</span>
         </a>
         <a href="#" @click.prevent="go('/to-be-listed')" class="mobile-menu-item">
           <!-- <span class="mobile-menu-icon">⏳</span> -->
-          <span>待上链RWA</span>
+          <span>{{ t('nav.toBeListed') }}</span>
         </a>
         <a href="#" @click.prevent="goToContactUs" class="mobile-menu-item">
           <!-- <span class="mobile-menu-icon">📞</span> -->
-          <span>联系我们</span>
+          <span>{{ t('nav.contact') }}</span>
         </a>
         <!-- <a href="#" @click.prevent="go('/portfolio')" class="mobile-menu-item">
           <span>My Portfolio</span>
@@ -213,19 +213,22 @@
 <script>
 import { isLoggedIn, clearAuth, AUTH_CHANGED_EVENT } from '@/utils/auth';
 import { useWallet } from '@/composables/useWallet';
+import { useLanguage } from '@/composables/useLanguage';
 
 export default {
   name: 'AppHeader',
   props: {},
   setup() {
     const { connected, fullAddress, shortAddress, connect, disconnect } = useWallet()
+    const { t } = useLanguage()
     
     return {
       connected,
       fullAddress,
       shortAddress,
       connect,
-      disconnect
+      disconnect,
+      t
     }
   },
   data(){
@@ -646,7 +649,7 @@ export default {
 .wallet-main-btn {
   background: transparent;
   border: none;
-  color: white;
+  color: var(--wallet-text);
   padding: 10px 16px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -663,13 +666,13 @@ export default {
 }
 
 .wallet-main-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--hover-bg);
 }
 
 .wallet-divider {
   width: 1px;
   height: 16px;
-  background: white;
+  background: var(--wallet-text);
   opacity: 0.3;
   flex-shrink: 0;
 }
@@ -677,7 +680,7 @@ export default {
 .wallet-dropdown-btn {
   background: transparent;
   border: none;
-  color: white;
+  color: var(--wallet-text);
   padding: 10px 12px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -688,7 +691,7 @@ export default {
 }
 
 .wallet-dropdown-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--hover-bg);
 }
 
 .dropdown-arrow {
@@ -833,7 +836,7 @@ export default {
 
 /* 菜单项样式 */
 .menu-item {
-  color: #ffffff;
+  color: var(--text);
   text-decoration: none;
   font-weight: 500;
   font-size: 16px;
@@ -847,11 +850,19 @@ export default {
 }
 
 /* Header样式 */
-/* Header右侧按钮样式 */
+.header {
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.header .logo {
+  color: var(--text);
+}
+
 .header .btn {
   font-size: 15px;
-  gap: 2px;
-
+  gap: 12px;
+  color: var(--text);
 }
 
 /* 深色主题适配 - 已直接应用深色样式 */
@@ -897,7 +908,7 @@ export default {
   top: 60px; /* 匹配移动端header高度 */
   left: 0;
   right: 0;
-  background: var(--bg);
+  background: var(--card-bg);
   border-bottom: 1px solid var(--border);
   z-index: 999;
   animation: slideDown 0.3s ease-out;
@@ -987,42 +998,44 @@ export default {
   }
   
   .right {
-    gap: 1px;
+    gap: 8px;
     margin-right: 0; /* 重置桌面端边距 */
     flex-wrap: nowrap; /* 防止换行 */
     align-items: center;
-    justify-content: space-between; /* 改为space-between实现左中右分布 */
+    justify-content: center; /* 改为center实现居中对齐 */
     min-width: 0; /* 允许收缩 */
     width: 100%;
-    max-width: 180px;
+    max-width: 200px;
   }
   
-  /* 移动端按钮布局 - 左中右分布 */
+  /* 移动端按钮布局 - 居中对齐 */
   .right > div {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     width: 100%;
-    gap: 2px;
+    gap: 12px;
   }
   
   /* Wallet按钮 - 左侧 */
   .wallet-connect-section,
   .wallet-dropdown-container {
-    flex: 1;
+    flex: 0 0 auto;
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
+    align-items: center;
   }
   
   /* Profile按钮 - 中间 */
   .btn.light.pill {
     flex: 0 0 auto;
-    margin: 0 2px;
+    margin: 0;
   }
   
   /* Settings按钮 - 右侧 */
   .settings-btn {
     flex: 0 0 auto;
+    background:#94a3b8;
   }
   
   .brand-logo {
@@ -1067,7 +1080,6 @@ export default {
   
   /* Settings按钮样式 */
   .settings-btn {
-    font-size: 16px !important;
     padding: 4px !important;
     flex-shrink: 0;
     width: 28px;
@@ -1192,22 +1204,22 @@ export default {
   }
   
   .right {
-    gap: 0px;
+    gap: 6px;
     flex-wrap: nowrap;
     align-items: center;
-    justify-content: space-between; /* 改为space-between实现左中右分布 */
+    justify-content: center; /* 改为center实现居中对齐 */
     min-width: 0;
     width: 100%;
-    max-width: 160px;
+    max-width: 180px;
   }
   
-  /* 小屏幕按钮布局 - 左中右分布 */
+  /* 小屏幕按钮布局 - 居中对齐 */
   .right > div {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     width: 100%;
-    gap: 1px;
+    gap: 10px;
   }
   
   /* Wallet按钮 - 左侧 */
@@ -1270,7 +1282,6 @@ export default {
   
   /* Settings按钮样式 */
   .settings-btn {
-    font-size: 14px !important;
     padding: 3px !important;
     width: 24px;
     height: 24px;
@@ -1425,7 +1436,6 @@ export default {
   
   /* Settings按钮样式 */
   .settings-btn {
-    font-size: 12px !important;
     padding: 2px !important;
     width: 20px;
     height: 20px;
@@ -1621,10 +1631,11 @@ export default {
 }
 
 .modal-container {
-  background: #1a1a2e;
+  background: var(--card-bg);
   border-radius: 12px;
   padding: 24px;
   min-width: 400px;
+  color: var(--text);
   max-width: 500px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
@@ -1632,27 +1643,27 @@ export default {
 .mm-btn {
   padding: 10px 20px;
   border-radius: 8px;
-  border: 1px solid #374151;
-  background: #1f2937;
-  color: #ffffff;
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  color: var(--text);
   cursor: pointer;
   font-weight: 600;
   transition: all 0.2s ease;
 }
 
 .mm-btn:hover {
-  background: #374151;
+  background: var(--hover-bg);
 }
 
 .mm-btn.mm-outline {
   background: transparent;
-  border-color: #6b7280;
-  color: #9ca3af;
+  border-color: var(--text-secondary);
+  color: var(--text-secondary);
 }
 
 .mm-btn.mm-outline:hover {
-  background: #374151;
-  color: #ffffff;
+  background: var(--hover-bg);
+  color: var(--text);
 }
 
 .mm-btn.mm-primary {
@@ -1856,15 +1867,37 @@ export default {
 
 /* Settings按钮样式 - 移除背景和边框 */
 .settings-btn {
-  font-size:22px;
   background: transparent !important;
   border: none !important;
+  color: var(--text);
   padding: 8px !important;
 }
 
 .settings-btn:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
+  background: var(--hover-bg) !important;
   border: none !important;
+}
+
+.settings-icon {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  transition: fill 0.2s ease;
+}
+
+/* 响应式 SVG 图标大小 */
+@media (max-width: 768px) {
+  .settings-icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 640px) {
+  .settings-icon {
+    width: 16px;
+    height: 16px;
+  }
 }
 
 </style>

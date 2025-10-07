@@ -5,21 +5,20 @@
     :class="{ 'fade-in': !showIntroVideo && !isTransitioning }"
   >
     <!-- Background Decorations -->
-    <div class="contact-bg-decoration">
+    <!-- <div class="contact-bg-decoration">
       <div class="blockchain-token token-1"></div>
       <div class="blockchain-token token-2"></div>
       <div class="blockchain-token token-3"></div>
       <div class="real-estate-icon building-1"></div>
       <div class="real-estate-icon building-2"></div>
-    </div>
-
+    </div> -->
     <!-- Main Contact Container -->
     <div class="contact-container">
       <!-- Bold Header -->
       <header class="contact-header">
-        <h2 class="headline">联系我们</h2>
+        <h2 class="headline">{{ t('contact.title') }}</h2>
+        <p>{{ t('contact.description') }}</p>
       </header>
-
       <!-- Two Column Layout -->
       <div class="contact-layout">
         <!-- Right Column: Contact Form -->
@@ -27,7 +26,7 @@
           <div class="contact-form-card">
             <form @submit.prevent="submitForm" class="modern-form">
               <div class="form-group">
-                <label for="contact-name">姓名 *</label>
+                <label for="contact-name">{{ t('contact.name') }} *</label>
                 <input 
                   type="text" 
                   id="contact-name" 
@@ -38,7 +37,7 @@
               </div>
 
               <div class="form-group">
-                <label for="contact-email">邮箱 *</label>
+                <label for="contact-email">{{ t('contact.email') }} *</label>
                 <input 
                   type="email" 
                   id="contact-email" 
@@ -72,7 +71,7 @@
               </div>
 
               <div class="form-group">
-                <label for="contact-message">消息*</label>
+                <label for="contact-message">{{ t('contact.message') }}*</label>
                 <textarea 
                   id="contact-message" 
                   v-model="form.message" 
@@ -83,7 +82,7 @@
               </div>
 
               <button type="submit" class="send-message-btn" :disabled="isSubmitting">
-                {{ isSubmitting ? '发送中...' : '发送消息' }}
+                {{ isSubmitting ? t('common.sending') : t('contact.send') }}
               </button>
             </form>
           </div>
@@ -116,8 +115,14 @@
 </template>
 
 <script>
+import { useLanguage } from '@/composables/useLanguage'
+
 export default {
   name: 'ContactUs',
+  setup() {
+    const { t } = useLanguage()
+    return { t }
+  },
   props: {
     showIntroVideo: {
       type: Boolean,
@@ -319,9 +324,9 @@ export default {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 30px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--heading-color);
   margin: 0;
-  background: #ffffff;
+  background: var(--heading-color);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -410,8 +415,8 @@ export default {
 }
 
 .contact-form-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--form-bg);
+  border: 1px solid var(--border);
   border-radius: 24px;
   padding: 40px;
   backdrop-filter: blur(10px);
@@ -432,7 +437,7 @@ export default {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 0.95rem;
   font-weight: 500;
-  color: #ffffff;
+  color: var(--text);
   margin-bottom: 8px;
 }
 
@@ -441,42 +446,43 @@ export default {
 .form-group textarea {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   padding: 16px 20px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--form-bg);
+  border: 1px solid var(--border);
   border-radius: 12px;
-  color: #ffffff;
+  color: var(--text);
   font-size: 1rem;
   transition: all 0.3s ease;
 }
 
 .form-group input::placeholder,
 .form-group textarea::placeholder {
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #141426;
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 0 0 3px rgba(20, 20, 38, 0.3);
+  border-color: var(--brand);
+  background: var(--hover-bg);
+  box-shadow: 0 0 0 3px var(--ring);
 }
 
-/* 下拉菜单选项样式 - 深色主题 */
+/* 下拉菜单选项样式 */
 .form-group select option {
-  background: #1a1a2e !important;
-  color: #ffffff !important;
+  background: var(--modal-bg) !important;
+  color: var(--text) !important;
   padding: 12px 16px;
   border: none;
 }
 
 .form-group select option:hover {
-  background: #16213e !important;
+  background: var(--hover-bg) !important;
 }
 
 .form-group select option:checked {
-  background: #141426 !important;
+  background: var(--brand) !important;
+  color: var(--text) !important;
 }
 
 .form-group textarea {
@@ -487,10 +493,10 @@ export default {
 .send-message-btn {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   padding: 16px 32px;
-  background: #141426;
-  border: 1px solid #141426;
+  background: var(--brand);
+  border: 1px solid var(--brand);
   border-radius: 12px;
-  color: #ffffff;
+  color: var(--text);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -499,10 +505,10 @@ export default {
 }
 
 .send-message-btn:hover:not(:disabled) {
-  background: #1a1a2e;
-  border-color: #1a1a2e;
+  background: var(--brand-600);
+  border-color: var(--brand-600);
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(20, 20, 38, 0.4);
+  box-shadow: 0 8px 25px var(--shadow);
 }
 
 .send-message-btn:disabled {
