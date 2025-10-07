@@ -571,6 +571,7 @@ export default {
   text-align: justify;
   text-indent: 2em;
   display: block;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .vision-image {

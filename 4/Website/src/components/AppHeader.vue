@@ -486,7 +486,7 @@ export default {
       const svg = `
         <svg width="80" height="80" xmlns="http://www.w3.org/2000/svg">
           <rect width="80" height="80" fill="${bgColor}" rx="40"/>
-          <text x="40" y="45" font-family="Arial, sans-serif" font-size="24" font-weight="bold" 
+          <text x="40" y="45" font-family="Segoe UI, Tahoma, Geneva, Verdana, sans-serif" font-size="24" font-weight="bold" 
                 text-anchor="middle" fill="${textColor}">
             ${address.slice(2, 4).toUpperCase()}
           </text>
@@ -1782,7 +1782,7 @@ export default {
 }
 
 .account-address {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 12px;
   color: #9ca3af;
   font-weight: 500;

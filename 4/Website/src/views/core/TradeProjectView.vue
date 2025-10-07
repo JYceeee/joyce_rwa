@@ -1539,7 +1539,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 13px;
   color: #e5e7eb;
   background: rgba(0, 0, 0, 0.3);
@@ -2164,7 +2164,7 @@ export default {
 }
 
 .contract-address-value {
-  font-family: 'Courier New', monospace;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 14px;
   color: var(--text);
   background: #1f2937;

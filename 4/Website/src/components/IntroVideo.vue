@@ -294,7 +294,7 @@ export default {
   font-weight: 700;
   margin: 0 0 12px 0;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .brand-subtitle {

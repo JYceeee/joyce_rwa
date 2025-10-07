@@ -21,7 +21,7 @@
   --card-bg: #1a1a2e;
   
   /* 字体变量 */
-  --heading-font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  --heading-font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   --heading-weight: 700;
   
   /* 渐变背景变量 */
@@ -33,7 +33,7 @@
 * { box-sizing: border-box } html,body { height: 100% }
 body {
   margin: 0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: var(--text);
   background: var(--bg);
   line-height: 1.5;

@@ -199,7 +199,7 @@ export default {
   color: #8ca0c3;
 }
 .kv .v.addr {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #7dc4ff;
 }
 .muted {

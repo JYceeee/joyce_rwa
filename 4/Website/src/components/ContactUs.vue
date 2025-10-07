@@ -32,7 +32,7 @@
                   id="contact-name" 
                   v-model="form.name" 
                   required
-                  placeholder="请输入您的全名"
+                  :placeholder="t('contact.name.placeholder')"
                 >
               </div>
 
@@ -43,30 +43,30 @@
                   id="contact-email" 
                   v-model="form.email" 
                   required
-                  placeholder="请输入您的邮箱"
+                  :placeholder="t('contact.email.placeholder')"
                 >
               </div>
 
               <div class="form-group">
-                <label for="contact-type">类型 *</label>
+                <label for="contact-type">{{ t('contact.type') }} *</label>
                 <select id="contact-type" v-model="form.type" required>
-                  <option value="choose">请选择</option>
-                  <option value="individual">个人</option>
-                  <option value="business">企业</option>
-                  <option value="other">其他</option>
+                  <option value="choose">{{ t('contact.type.placeholder') }}</option>
+                  <option value="individual">{{ t('contact.type.individual') }}</option>
+                  <option value="business">{{ t('contact.type.business') }}</option>
+                  <option value="other">{{ t('contact.type.other') }}</option>
                 </select>
               </div>
 
               <div class="form-group">
-                <label for="contact-subject">主题 *</label>
+                <label for="contact-subject">{{ t('contact.subject') }} *</label>
                 <select id="contact-subject" v-model="form.subject" required>
-                  <option value="choose">请选择</option>
-                  <option value="investor">投资咨询</option>
-                  <option value="asset_holder">资产列表</option>
-                  <option value="general">一般问题</option>
-                  <option value="technical">技术支持</option>
-                  <option value="business">业务合作</option>
-                  <option value="other">其他</option>
+                  <option value="choose">{{ t('contact.subject.placeholder') }}</option>
+                  <option value="investor">{{ t('contact.subject.investor') }}</option>
+                  <option value="asset_holder">{{ t('contact.subject.asset_holder') }}</option>
+                  <option value="general">{{ t('contact.subject.general') }}</option>
+                  <option value="technical">{{ t('contact.subject.technical') }}</option>
+                  <option value="business">{{ t('contact.subject.business') }}</option>
+                  <option value="other">{{ t('contact.subject.other') }}</option>
                 </select>
               </div>
 
@@ -77,7 +77,7 @@
                   v-model="form.message" 
                   rows="5" 
                   required
-                  placeholder="告诉我们如何帮助您..."
+                  :placeholder="t('contact.message.placeholder')"
                 ></textarea>
               </div>
 
@@ -91,7 +91,7 @@
 
       <!-- Social Media Section -->
       <div class="social-media-section">
-        <h3>关注我们</h3>
+        <h3 style="color: #000000;">关注我们</h3>
         <div class="social-links">
           <a href="#" class="social-link" title="LinkedIn">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

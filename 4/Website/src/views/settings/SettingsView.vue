@@ -4,7 +4,7 @@
       <!-- 左侧边栏 - 桌面端显示 -->
       <div class="settings-sidebar desktop-only">
         <div class="sidebar-header">
-          <h1 class="sidebar-title">设置</h1>
+          <h1 class="sidebar-title">{{ t('settings.title') }}</h1>
         </div>
         <nav class="sidebar-nav">
           <button 
@@ -15,7 +15,7 @@
             @click="setActiveSection(section.id)"
           >
             <span class="sidebar-icon">{{ section.icon }}</span>
-            <span class="sidebar-text">{{ section.title }}</span>
+            <span class="sidebar-text">{{ t(section.title) }}</span>
           </button>
         </nav>
       </div>
@@ -29,8 +29,8 @@
         
         <!-- 移动端标题 -->
         <div class="main-header mobile-only">
-          <h2 class="main-title">设置</h2>
-          <p class="main-subtitle">管理您的应用程序设置</p>
+          <h2 class="main-title">{{ t('settings.title') }}</h2>
+          <p class="main-subtitle">{{ t('settings.subtitle') }}</p>
         </div>
         
         <div class="main-content">
@@ -41,21 +41,21 @@
             <div class="settings-items">
             <!-- <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">语言</h3>
-                <p class="settings-description">选择您偏好的语言</p>
+                <h3 class="settings-name">{{ t('settings.language') }}</h3>
+                <p class="settings-description">{{ t('settings.language.description') }}</p>
               </div>
               <div class="settings-control">
                 <select class="settings-select">
-                  <option value="en">英语</option>
-                  <option value="zh">中文</option>
+                  <option value="en">{{ t('settings.language.en') }}</option>
+                  <option value="zh">{{ t('settings.language.zh') }}</option>
                 </select>
               </div>
             </div> -->
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">主题</h3>
-                <p class="settings-description">选择您偏好的主题</p>
+                <h3 class="settings-name">{{ t('settings.theme') }}</h3>
+                <p class="settings-description">{{ t('settings.theme.description') }}</p>
               </div>
               <div class="settings-control">
                 <select 
@@ -63,8 +63,8 @@
                   :value="currentTheme" 
                   @change="handleThemeChange"
                 >
-                  <option value="dark">深色</option>
-                  <option value="light">浅色</option>
+                  <option value="dark">{{ t('settings.theme.dark') }}</option>
+                  <option value="light">{{ t('settings.theme.light') }}</option>
                 </select>
               </div>
             </div>
@@ -93,23 +93,23 @@
               </div>
               <div class="settings-control">
                 <select class="settings-select">
-                  <option value="UTC">UTC</option>
-                  <option value="EST">东部时间</option>
-                  <option value="PST">太平洋时间</option>
-                  <option value="CST">中国标准时间</option>
+                  <option value="UTC">{{ t('settings.timezone.utc') }}</option>
+                  <option value="EST">{{ t('settings.timezone.est') }}</option>
+                  <option value="PST">{{ t('settings.timezone.pst') }}</option>
+                  <option value="CST">{{ t('settings.timezone.cst') }}</option>
                 </select>
               </div>
             </div>
 
-            <div class="settings-item">
+            <!-- <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">开场视频</h3>
-                <p class="settings-description">重新观看网站开场视频</p>
+                <h3 class="settings-name">{{ t('settings.introVideo') }}</h3>
+                <p class="settings-description">{{ t('settings.introVideo.description') }}</p>
               </div>
               <div class="settings-control">
-                <button class="btn btn-secondary" @click="watchIntroVideo">观看开场视频</button>
+                <button class="btn btn-secondary" @click="watchIntroVideo">{{ t('settings.introVideo.watch') }}</button>
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
 
@@ -118,33 +118,33 @@
             <div class="settings-items">
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">密码</h3>
-                <p class="settings-description">更改您的账户密码</p>
+                <h3 class="settings-name">{{ t('settings.password') }}</h3>
+                <p class="settings-description">{{ t('settings.password.description') }}</p>
               </div>
               <div class="settings-control">
-                <button class="btn btn-secondary">更改密码</button>
+                <button class="btn btn-secondary">{{ t('settings.password.change') }}</button>
               </div>
             </div>
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">会话超时</h3>
-                <p class="settings-description">设置自动登出时间</p>
+                <h3 class="settings-name">{{ t('settings.sessionTimeout') }}</h3>
+                <p class="settings-description">{{ t('settings.sessionTimeout.description') }}</p>
               </div>
               <div class="settings-control">
                 <select class="settings-select">
-                  <option value="15">15分钟</option>
-                  <option value="30">30分钟</option>
-                  <option value="60">1小时</option>
-                  <option value="480">8小时</option>
+                  <option value="15">{{ t('settings.sessionTimeout.15min') }}</option>
+                  <option value="30">{{ t('settings.sessionTimeout.30min') }}</option>
+                  <option value="60">{{ t('settings.sessionTimeout.1hour') }}</option>
+                  <option value="480">{{ t('settings.sessionTimeout.8hours') }}</option>
                 </select>
               </div>
             </div>
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">登录提醒</h3>
-                <p class="settings-description">接收新登录尝试的通知</p>
+                <h3 class="settings-name">{{ t('settings.loginAlerts') }}</h3>
+                <p class="settings-description">{{ t('settings.loginAlerts.description') }}</p>
               </div>
               <div class="settings-control">
                 <label class="toggle-switch">
@@ -161,13 +161,13 @@
             <div class="settings-items">
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">默认钱包</h3>
-                <p class="settings-description">选择您偏好的钱包提供商</p>
+                <h3 class="settings-name">{{ t('settings.defaultWallet') }}</h3>
+                <p class="settings-description">{{ t('settings.defaultWallet.description') }}</p>
               </div>
               <div class="settings-control">
                 <select class="settings-select">
-                  <option value="metamask">MetaMask</option>
-                  <option value="walletconnect">钱包连接器</option>
+                  <option value="metamask">{{ t('settings.defaultWallet.metamask') }}</option>
+                  <option value="walletconnect">{{ t('settings.defaultWallet.walletconnect') }}</option>
                   <!-- <option value="coinbase">Coinbase Wallet</option> -->
                 </select>
               </div>
@@ -175,8 +175,8 @@
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">自动连接</h3>
-                <p class="settings-description">在页面加载时自动连接钱包</p>
+                <h3 class="settings-name">{{ t('settings.autoConnect') }}</h3>
+                <p class="settings-description">{{ t('settings.autoConnect.description') }}</p>
               </div>
               <div class="settings-control">
                 <label class="toggle-switch">
@@ -188,11 +188,11 @@
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">Gas设置</h3>
-                <p class="settings-description">配置交易Gas偏好</p>
+                <h3 class="settings-name">{{ t('settings.gasSettings') }}</h3>
+                <p class="settings-description">{{ t('settings.gasSettings.description') }}</p>
               </div>
               <div class="settings-control">
-                <button class="btn btn-secondary">Gas设置</button>
+                <button class="btn btn-secondary">{{ t('settings.gasSettings.configure') }}</button>
               </div>
             </div>
           </div>
@@ -203,8 +203,8 @@
             <div class="settings-items">
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">推送通知</h3>
-                <p class="settings-description">启用浏览器推送通知</p>
+                <h3 class="settings-name">{{ t('settings.pushNotifications') }}</h3>
+                <p class="settings-description">{{ t('settings.pushNotifications.description') }}</p>
               </div>
               <div class="settings-control">
                 <label class="toggle-switch">
@@ -216,8 +216,8 @@
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">邮箱通知</h3>
-                <p class="settings-description">通过邮箱接收重要更新</p>
+                <h3 class="settings-name">{{ t('settings.emailNotifications') }}</h3>
+                <p class="settings-description">{{ t('settings.emailNotifications.description') }}</p>
               </div>
               <div class="settings-control">
                 <label class="toggle-switch">
@@ -229,8 +229,8 @@
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">SMS通知</h3>
-                <p class="settings-description">通过短信接收重要更新</p>
+                <h3 class="settings-name">{{ t('settings.smsNotifications') }}</h3>
+                <p class="settings-description">{{ t('settings.smsNotifications.description') }}</p>
               </div>
               <div class="settings-control">
                 <label class="toggle-switch">
@@ -247,23 +247,23 @@
             <div class="settings-items">
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">自动刷新</h3>
-                <p class="settings-description">自动刷新数据</p>
+                <h3 class="settings-name">{{ t('settings.autoRefresh') }}</h3>
+                <p class="settings-description">{{ t('settings.autoRefresh.description') }}</p>
               </div>
               <div class="settings-control">
                 <select class="settings-select">
-                  <option value="0">禁用</option>
-                  <option value="30">30秒</option>
-                  <option value="60">1分钟</option>
-                  <option value="300">5分钟</option>
+                  <option value="0">{{ t('settings.autoRefresh.disabled') }}</option>
+                  <option value="30">{{ t('settings.autoRefresh.30sec') }}</option>
+                  <option value="60">{{ t('settings.autoRefresh.1min') }}</option>
+                  <option value="300">{{ t('settings.autoRefresh.5min') }}</option>
                 </select>
               </div>
             </div>
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">缓存大小</h3>
-                <p class="settings-description">最大缓存存储大小</p>
+                <h3 class="settings-name">{{ t('settings.cacheSize') }}</h3>
+                <p class="settings-description">{{ t('settings.cacheSize.description') }}</p>
               </div>
               <div class="settings-control">
                 <select class="settings-select">
@@ -277,11 +277,11 @@
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">清除缓存</h3>
-                <p class="settings-description">清除所有缓存数据</p>
+                <h3 class="settings-name">{{ t('settings.clearCache') }}</h3>
+                <p class="settings-description">{{ t('settings.clearCache.description') }}</p>
               </div>
               <div class="settings-control">
-                <button class="btn btn-secondary">清除缓存</button>
+                <button class="btn btn-secondary">{{ t('settings.clearCache.button') }}</button>
               </div>
             </div>
           </div>
@@ -292,25 +292,25 @@
             <div class="settings-items">
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">主页可见性</h3>
-                <p class="settings-description">控制谁可以看到您的个人信息</p>
+                <h3 class="settings-name">{{ t('settings.profileVisibility') }}</h3>
+                <p class="settings-description">{{ t('settings.profileVisibility.description') }}</p>
               </div>
               <div class="settings-control">
                 <select class="settings-select">
-                  <option value="public">公开</option>
-                  <option value="friends">仅好友可见</option>
-                  <option value="private">私密</option>
+                  <option value="public">{{ t('settings.profileVisibility.public') }}</option>
+                  <option value="friends">{{ t('settings.profileVisibility.friends') }}</option>
+                  <option value="private">{{ t('settings.profileVisibility.private') }}</option>
                 </select>
               </div>
             </div>
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">两步验证</h3>
-                <p class="settings-description">为您的账户添加额外一层安全性</p>
+                <h3 class="settings-name">{{ t('settings.twoFactorAuth') }}</h3>
+                <p class="settings-description">{{ t('settings.twoFactorAuth.description') }}</p>
               </div>
               <div class="settings-control">
-                <button class="btn btn-secondary">启用两步验证</button>
+                <button class="btn btn-secondary">{{ t('settings.twoFactorAuth.enable') }}</button>
               </div>
             </div>
           </div>
@@ -321,22 +321,22 @@
             <div class="settings-items">
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">默认交易对</h3>
-                <p class="settings-description">设置您偏好的交易对以快速访问</p>
+                <h3 class="settings-name">{{ t('settings.defaultTradingPair') }}</h3>
+                <p class="settings-description">{{ t('settings.defaultTradingPair.description') }}</p>
               </div>
               <div class="settings-control">
                 <select class="settings-select">
-                  <option value="ETH/USDT">ETH/USDT(以太坊/美元)</option>
-                  <option value="BTC/USDT">BTC/USDT(比特币/美元)</option>
-                  <option value="USDC/USDT">USDC/USDT(美元稳定币/美元)</option>
+                  <option value="ETH/USDT">{{ t('settings.defaultTradingPair.ethUsdt') }}</option>
+                  <option value="BTC/USDT">{{ t('settings.defaultTradingPair.btcUsdt') }}</option>
+                  <option value="USDC/USDT">{{ t('settings.defaultTradingPair.usdcUsdt') }}</option>
                 </select>
               </div>
             </div>
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">自动确认交易</h3>
-                <p class="settings-description">在指定金额下自动确认交易</p>
+                <h3 class="settings-name">{{ t('settings.autoConfirmTrades') }}</h3>
+                <p class="settings-description">{{ t('settings.autoConfirmTrades.description') }}</p>
               </div>
               <div class="settings-control">
                 <label class="toggle-switch">
@@ -348,11 +348,11 @@
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">价格提醒</h3>
-                <p class="settings-description">当价格达到您设定的目标时通知您</p>
+                <h3 class="settings-name">{{ t('settings.priceAlerts') }}</h3>
+                <p class="settings-description">{{ t('settings.priceAlerts.description') }}</p>
               </div>
               <div class="settings-control">
-                <button class="btn btn-secondary">管理提醒</button>
+                <button class="btn btn-secondary">{{ t('settings.priceAlerts.manage') }}</button>
               </div>
             </div>
           </div>
@@ -363,8 +363,8 @@
             <div class="settings-items">
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">数据收集</h3>
-                <p class="settings-description">允许我们收集匿名使用数据</p>
+                <h3 class="settings-name">{{ t('settings.dataCollection') }}</h3>
+                <p class="settings-description">{{ t('settings.dataCollection.description') }}</p>
               </div>
               <div class="settings-control">
                 <label class="toggle-switch">
@@ -376,8 +376,8 @@
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">营销邮箱</h3>
-                <p class="settings-description">接收促销邮件和更新</p>
+                <h3 class="settings-name">{{ t('settings.marketingEmails') }}</h3>
+                <p class="settings-description">{{ t('settings.marketingEmails.description') }}</p>
               </div>
               <div class="settings-control">
                 <label class="toggle-switch">
@@ -389,8 +389,8 @@
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">第三方分享</h3>
-                <p class="settings-description">允许与信任的合作伙伴共享数据</p>
+                <h3 class="settings-name">{{ t('settings.thirdPartySharing') }}</h3>
+                <p class="settings-description">{{ t('settings.thirdPartySharing.description') }}</p>
               </div>
               <div class="settings-control">
                 <label class="toggle-switch">
@@ -407,21 +407,21 @@
             <div class="settings-items">
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">API访问</h3>
-                <p class="settings-description">管理您的API密钥和权限</p>
+                <h3 class="settings-name">{{ t('settings.apiAccess') }}</h3>
+                <p class="settings-description">{{ t('settings.apiAccess.description') }}</p>
               </div>
               <div class="settings-control">
-                <button class="btn btn-secondary">API设置</button>
+                <button class="btn btn-secondary">{{ t('settings.apiAccess.configure') }}</button>
               </div>
             </div>
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">导出数据</h3>
-                <p class="settings-description">下载您的账户数据</p>
+                <h3 class="settings-name">{{ t('settings.exportData') }}</h3>
+                <p class="settings-description">{{ t('settings.exportData.description') }}</p>
               </div>
               <div class="settings-control">
-                <button class="btn btn-secondary">导出</button>
+                <button class="btn btn-secondary">{{ t('settings.exportData.button') }}</button>
               </div>
             </div>
 
@@ -440,8 +440,8 @@
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">分析</h3>
-                <p class="settings-description">帮助改进应用程序通过共享使用数据</p>
+                <h3 class="settings-name">{{ t('settings.analytics') }}</h3>
+                <p class="settings-description">{{ t('settings.analytics.description') }}</p>
               </div>
               <div class="settings-control">
                 <label class="toggle-switch">
@@ -453,11 +453,11 @@
 
             <div class="settings-item">
               <div class="settings-info">
-                <h3 class="settings-name">重置偏好</h3>
-                <p class="settings-description">重置所有选项为默认值</p>
+                <h3 class="settings-name">{{ t('settings.resetPreferences') }}</h3>
+                <p class="settings-description">{{ t('settings.resetPreferences.description') }}</p>
               </div>
               <div class="settings-control">
-                <button class="btn btn-danger">重置所有</button>
+                <button class="btn btn-danger">{{ t('settings.resetPreferences.button') }}</button>
               </div>
             </div>
             </div> 
@@ -679,15 +679,15 @@ export default {
     return {
       activeSection: 'general', // 默认显示General Settings
       settingsSections: [
-        { id: 'general', title: '常规', icon: '', description: '基本应用程序设置和偏好' },
-        { id: 'security', title: '安全', icon: '', description: '密码、身份验证和安全设置' },
-        { id: 'wallet', title: '钱包', icon: '', description: '钱包连接和交易设置' },
-        { id: 'notifications', title: '通知', icon: '', description: '通知偏好和提醒设置' },
-        { id: 'performance', title: '性能', icon: '', description: '性能优化和缓存设置' },
-        { id: 'account', title: '账户', icon: '', description: '账户选项和个人资料设置' },
-        { id: 'trading', title: '交易', icon: '', description: '交易偏好和选项设置' },
-        { id: 'privacy', title: '隐私', icon: '', description: '隐私控制和数据设置' },
-        { id: 'advanced', title: '高级', icon: '', description: '高级设置和开发者选项' }
+        { id: 'general', title: 'settings.general', icon: '', description: 'settings.general.description' },
+        { id: 'security', title: 'settings.security', icon: '', description: 'settings.security.description' },
+        { id: 'wallet', title: 'settings.wallet', icon: '', description: 'settings.wallet.description' },
+        { id: 'notifications', title: 'settings.notifications', icon: '', description: 'settings.notifications.description' },
+        { id: 'performance', title: 'settings.performance', icon: '', description: 'settings.performance.description' },
+        { id: 'account', title: 'settings.account', icon: '', description: 'settings.account.description' },
+        { id: 'trading', title: 'settings.trading', icon: '', description: 'settings.trading.description' },
+        { id: 'privacy', title: 'settings.privacy', icon: '', description: 'settings.privacy.description' },
+        { id: 'advanced', title: 'settings.advanced', icon: '', description: 'settings.advanced.description' }
       ],
       settings: {
         language: 'en',
@@ -721,11 +721,11 @@ export default {
     },
     getActiveSectionTitle() {
       const section = this.settingsSections.find(s => s.id === this.activeSection);
-      return section ? section.title : 'Settings';
+      return section ? this.t(section.title) : this.t('settings.title');
     },
     getActiveSectionDescription() {
       const section = this.settingsSections.find(s => s.id === this.activeSection);
-      return section ? section.description : 'Manage your application preferences';
+      return section ? this.t(section.description) : this.t('settings.subtitle');
     },
     saveSettings() {
       // Save settings logic
@@ -797,6 +797,7 @@ export default {
   min-height: 100vh;
   background: var(--bg, #0f0f23);
   padding: 40px 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .settings-container {

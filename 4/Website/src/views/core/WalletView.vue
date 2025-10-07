@@ -1278,7 +1278,7 @@ padding-left: 2px;
 }
 /* ========== MetaMask-like Design ========== */
 .mm-page{
-font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 color: var(--text);
 max-width: 960px;
 margin: 0 auto;
@@ -1892,7 +1892,7 @@ color: var(--text);
   color: #ffffff;
   font-size: 12px;
   font-weight: 600;
-  font-family: 'Courier New', monospace;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* 交易类型特殊样式 */
@@ -1986,6 +1986,41 @@ color: var(--text);
 .mm-token-footer{display:flex;align-items:center;justify-content:space-between;padding:10px 2px;color:#94a3b8;font-size:12px;}
 .mm-tip{color:#94a3b8}
 
+/* 浅色主题下的Token列表样式 */
+[data-theme="light"] .mm-tokenlist{
+border: 1px solid #d1d5db;
+background: #ffffff;
+}
+[data-theme="light"] .mm-token{
+border-bottom: 1px solid #e5e7eb;
+color: #000000;
+}
+[data-theme="light"] .mm-token:last-child{
+border-bottom: none;
+}
+[data-theme="light"] .mm-token-icon{
+background: #f3f4f6;
+color: #374151;
+}
+[data-theme="light"] .mm-token-title{
+color: #000000;
+}
+[data-theme="light"] .mm-dim{
+color: #6b7280;
+}
+[data-theme="light"] .mm-token-amount{
+color: #6b7280;
+}
+[data-theme="light"] .mm-token-sub{
+color: #000000;
+}
+[data-theme="light"] .mm-token-footer{
+color: #6b7280;
+}
+[data-theme="light"] .mm-tip{
+color: #6b7280;
+}
+
 /* 提示 */
 .mm-warn{color:#b45309;font-size:13px;margin-top:8px;}
 .mm-error{color:#dc2626;font-size:13px;margin-top:8px;}
@@ -2005,6 +2040,20 @@ background: #1d1d36;
 .mm-note{color:var(--muted);font-size:13px}
 .mm-input{height:36px;border:1px solid #2a2a4a;border-radius:10px;padding:0 10px;outline:none;background:#1d1d36;color:#ffffff;}
 .mm-input::placeholder{color:#94a3b8;}
+
+/* 浅色主题下的自定义代币输入样式 */
+[data-theme="light"] .mm-custom{
+border: 1px solid #d1d5db;
+background: #ffffff;
+}
+[data-theme="light"] .mm-input{
+border: 1px solid #d1d5db;
+background: #ffffff;
+color: #000000;
+}
+[data-theme="light"] .mm-input::placeholder{
+color: #6b7280;
+}
 
 /* 警告信息样式 */
 .mm-warning {
@@ -2153,7 +2202,7 @@ background: #1d1d36;
 }
 
 .mm-activity-transaction-hash .mm-activity-value {
-  font-family: 'Courier New', monospace;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 11px;
   word-break: break-all;
 }

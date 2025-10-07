@@ -19,7 +19,7 @@
       <div>
         <h1 class="title">{{ userName }}</h1>
       </div>
-      <p class="title">{{ userid }}</p>
+      <!-- <p class="title">{{ userid }}</p> -->
      
     </div>
     <form class="container form" @submit.prevent="onSave">
@@ -1097,7 +1097,7 @@ export default {
 
 .contact-value {
   color: var(--text);
-  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: var(--bg-secondary);
   padding: 6px 12px;
   border-radius: 6px;

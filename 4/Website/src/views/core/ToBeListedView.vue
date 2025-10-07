@@ -1332,6 +1332,12 @@
     border:1px solid rgba(255,255,255,0.1);
     border-radius:12px;
   }
+
+  /* 浅色主题下的投资进度样式 */
+  [data-theme="light"] .pf-investment-progress{
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+  }
   
   .pf-progress-metrics{
     display:grid;
@@ -1406,9 +1412,21 @@
   .pf-project-actions{display:flex;gap:8px;flex-wrap:wrap;}
   .pf-project-btn{padding:8px 16px;border-radius:8px;border:1px solid #374151;background:#1f2937;color:#ffffff;cursor:pointer;font-size:14px;font-weight:600;transition:all 0.2s ease;}
   .pf-project-btn:hover{background:#d97706;}
-  .pf-project-btn-secondary{background:var(--primary);color:#fff;border-color:var(--primary);}
-  .pf-project-btn-secondary:hover{background:var(--primary-ink);}
-  .pf-project-btn-interest{background:#dc2626;color:#fff;border-color:#dc2626;}
+    .pf-project-btn-secondary{background:var(--primary);color:#fff;border-color:var(--primary);}
+    .pf-project-btn-secondary:hover{background:var(--primary-ink);}
+    
+    /* 浅色主题下的详情按钮样式 */
+    [data-theme="light"] .pf-project-btn-secondary{
+      background: #ffffff;
+      color: #374151;
+      border-color: #374151;
+    }
+    [data-theme="light"] .pf-project-btn-secondary:hover{
+      background: #f3f4f6;
+      color: #374151;
+      border-color: #374151;
+    }
+    .pf-project-btn-interest{background:#dc2626;color:#fff;border-color:#dc2626;}
   .pf-project-btn-interest:hover{background:#b91c1c;}
   
   /* 保留原有的doc-card样式作为备用 */

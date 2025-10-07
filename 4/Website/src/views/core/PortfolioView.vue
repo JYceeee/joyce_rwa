@@ -3003,7 +3003,7 @@ window.addEventListener('storage', (e) => {
 .caret.open{transform:rotate(180deg)}
 .pf-acc-item{display:flex;align-items:center;gap:10px;margin-top:8px;padding:8px;border-radius:10px;background:#1f2937}
 .pf-avatar{width:28px;height:28px;border-radius:50%;background:radial-gradient(100% 100% at 25% 25%,#ffd79a 0%,#ff9e6e 40%,#ff7b7b 100%);box-shadow: inset 0 0 0 2px #374151;}
-.pf-addr{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;color:#9ca3af}
+.pf-addr{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;color:#9ca3af}
 
 .pf-main{width:800px;background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px 18px;margin-left:66px;margin-top:16px;}
 .pf-hero{padding:8px 4px 12px;border-bottom:1px solid var(--border)}
@@ -3632,7 +3632,7 @@ window.addEventListener('storage', (e) => {
 
 /* 饼图标签样式 */
 .pf-pie-label-text {
-  font-family: Inter, system-ui, -apple-system, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 20px;
   font-weight: 600;
   fill: #ffffff;

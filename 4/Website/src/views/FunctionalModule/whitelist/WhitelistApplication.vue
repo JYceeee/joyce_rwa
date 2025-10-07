@@ -516,34 +516,34 @@ export default {
   border-radius: 8px;
   padding: 0 12px;
   border: 1px solid;
-  background: #1f2937;
+  background: var(--card-bg);
 }
 
 .whitelist-banner.gray {
   color: #9ca3af;
-  border-color: #374151;
+  border-color: var(--border);
 }
 
 .whitelist-banner.orange {
   color: #f97316;
-  border-color: #374151;
+  border-color: var(--border);
 }
 
 .whitelist-banner.green {
   color: #16a34a;
-  border-color: #374151;
+  border-color: var(--border);
 }
 
 .whitelist-banner.red {
   color: #dc2626;
-  border-color: #374151;
+  border-color: var(--border);
 }
 
 .whitelist-banner .icon {
   width: 28px;
   height: 28px;
   border-radius: 10px;
-  background: #374151;
+  background: var(--bg-secondary);
   display: grid;
   place-items: center;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2), inset 0 0 0 1px #4b5563;
