@@ -215,7 +215,7 @@
                 </div>
                 <div class="metric-item">
                   <span class="metric-label">认购比例</span>
-                  <span class="metric-value" style="color: #3b82f6;">{{ projectData?.subscriptionProgress?.toFixed(0) || '0%' }}</span>
+                  <span class="metric-value" style="color: #3b82f6;">{{ projectData?.subscriptionProgress?.toFixed(0) + '%' }}</span>
                 </div>
               </div>
             </div>
@@ -809,7 +809,7 @@ export default {
             
             // 前端显示字段
             subtitle: `${rawData.mortage_type} - ${rawData.property_type}`,
-            loanAmountFormatted: rawData.loan_amount ? `AUD${rawData.loan_amount.toLocaleString()}` : 'AUD0',
+            loanAmountFormatted: this.formatCurrency(rawData.loan_amount),
             loanTermFormatted: `${rawData.loan_term_months} months`,
             targetYield: rawData.interest_rate,
             valuation: rawData.property_value,
@@ -843,9 +843,10 @@ export default {
     calculateSubscriptionProgress(rawData) {
       const total = rawData.total_offering_token || 0
       const subscribed = rawData.subscribe_token || 0
-      if (total === 0) return '0%'
-      return `${((subscribed / total) * 100).toFixed(2)}%`
+      if (total === 0) return 0
+      return (subscribed / total) * 100
     },
+
     
     // 获取产品图片
     getProductImage(code) {

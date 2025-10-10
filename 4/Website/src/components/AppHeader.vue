@@ -174,6 +174,7 @@
         <div v-else>
           <a class="btn ghost" href="#" @click.prevent="go('/login')">{{ t('common.login') }}</a>
           <a class="btn orange" href="#" @click.prevent="go('/signup')">{{ t('common.signup') }}</a>
+          <a href="#" @click.prevent="go('/settings')"><button class="btn ghost pill settings-btn">⚙️</button></a>
         </div>
       </div>
     </div>
@@ -649,7 +650,7 @@ export default {
 .wallet-main-btn {
   background: transparent;
   border: none;
-  color: var(--wallet-text);
+  color: #ffffff;
   padding: 10px 16px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -672,7 +673,7 @@ export default {
 .wallet-divider {
   width: 1px;
   height: 16px;
-  background: var(--wallet-text);
+  background: #ffffff;
   opacity: 0.3;
   flex-shrink: 0;
 }
@@ -680,7 +681,7 @@ export default {
 .wallet-dropdown-btn {
   background: transparent;
   border: none;
-  color: var(--wallet-text);
+  color: #ffffff;
   padding: 10px 12px;
   cursor: pointer;
   transition: all 0.2s ease;

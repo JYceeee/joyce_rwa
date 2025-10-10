@@ -322,9 +322,9 @@
               name: rawData.project_name,
               status: rawData.loan_status,
               
-              // 认购信息
-              totalOffering: rawData.total_offering_token,
-              subscribed: rawData.subscribe_token,
+              // 认购信息            
+              totalOffering: this.formatCurrency(rawData.total_offering_token),
+              subscribed: this.formatCurrency(rawData.subscribe_token),
               totalOfferingRaw: rawData.total_offering_token || 0,
               subscribedRaw: rawData.subscribe_token || 0,
               
@@ -370,8 +370,8 @@
               holderRegistry: rawData.Holder_Registry,
               
               // 前端显示字段
-              subtitle: `${rawData.mortage_type} - ${rawData.property_type}`,
-              loanAmountFormatted: rawData.loan_amount ? `AUD${rawData.loan_amount.toLocaleString()}` : 'AUD0',
+              subtitle: `${rawData.mortage_type} - ${rawData.property_type}`,         
+              loanAmountFormatted: this.formatCurrency(rawData.loan_amount),
               loanTermFormatted: `${rawData.loan_term_months} months`,
               targetYield: rawData.interest_rate,
               valuation: rawData.property_value,
@@ -486,8 +486,8 @@
                 status: project.loan_status || 'UNKNOWN',
                 
                 // 认购信息
-                totalOffering: project.total_offering_token ? `AUD${project.total_offering_token.toLocaleString()}` : 'AUD0',
-                subscribed: project.subscribe_token ? `AUD${project.subscribe_token.toLocaleString()}` : 'AUD0',
+                totalOffering: this.formatCurrency(project.total_offering_token),
+                subscribed: this.formatCurrency(project.subscribe_token),
                 
                 // 原始数值用于计算
                 totalOfferingRaw: project.total_offering_token || 0,
@@ -536,7 +536,7 @@
                 
                 // 前端显示字段
                 subtitle: `${project.mortage_type} - ${project.property_type}`,
-                loanAmountFormatted: project.loan_amount ? `AUD${project.loan_amount.toLocaleString()}` : 'AUD0',
+                loanAmountFormatted: this.formatCurrency(project.loan_amount),
                 loanTermFormatted: `${project.loan_term_months} months`,
                 targetYield: project.interest_rate,
                 image: project.image || this.getProductImage(project.project_code)
@@ -654,11 +654,14 @@
           console.log('⏹️ 停止自动刷新')
         }
       },
-      formatCurrency(value) {
-        if (!value) return null
+      formatCurrency(value, currency = 'AUD') {
+        if (value === null || value === undefined || value === '') return `${currency}0.00`
         const num = parseFloat(value)
-        if (isNaN(num)) return value
-        return `AUD${num.toLocaleString()}`
+        if (isNaN(num)) return `${currency}0.00`
+        return `${currency}${num.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+        })}`
       },
       resetFilters(){ this.filters = { q: '', type: '', risk: '', status: '', minYield: 0, maxYield: 20 } },
       

@@ -100,33 +100,33 @@
              </div>
              <p>{{ p.propertySummary }}</p>
            </div>
-           <button class="pf-project-btn pf-project-btn-secondary pf-title-btn" @click="openTrade(p.code)">详情</button>
+           <button class="pf-project-btn pf-project-btn-secondary pf-title-btn" @click="openTrade(p.code)">{{ t('project.details') }}</button>
           </div>
 
          <!-- 项目指标 -->
          <div class="pf-project-metrics">
            <div class="pf-project-metric">
-             <span class="pf-metric-label">贷款金额</span>
+             <span class="pf-metric-label">{{ t('project.loanAmount') }}</span>
              <span class="pf-metric-value">AUD{{ formatNumber(p.loanAmount)}}</span>
            </div>
            <div class="pf-project-metric">
-             <span class="pf-metric-label">利率</span>
-             <span class="pf-metric-value" style="color: #16a34a;">{{ p.interestRate }}%/年</span>
+             <span class="pf-metric-label">{{ t('project.interestRate') }}</span>
+             <span class="pf-metric-value" style="color: #16a34a;">{{ p.interestRate }}%{{ t('project.perYear') }}</span>
            </div>
            <div class="pf-project-metric">
-             <span class="pf-metric-label">贷款期限</span>
-             <span class="pf-metric-value">{{ p.loanTermMonths }}月</span>
+             <span class="pf-metric-label">{{ t('project.loanTerm') }}</span>
+             <span class="pf-metric-value">{{ p.loanTermMonths }}{{ t('project.months') }}</span>
            </div>
          </div>
          <!-- 投资进度信息 -->
          <div class="pf-investment-progress">
            <div class="pf-progress-metrics">
              <div class="pf-progress-metric">
-               <span class="pf-progress-label">当前认购</span>
+               <span class="pf-progress-label">{{ t('project.currentSubscription') }}</span>
                <span class="pf-progress-value">{{ formatNumber(p.subscribed) }}</span>
              </div>
              <div class="pf-progress-metric">
-               <span class="pf-progress-label">总发行量</span>
+               <span class="pf-progress-label">{{ t('project.totalOffering') }}</span>
                <span class="pf-progress-value">{{ formatNumber(p.totalOffering) }}</span>
              </div>
            </div>
@@ -134,12 +134,12 @@
              <div class="pf-progress-bar">
                <div class="pf-progress-fill" :style="{ width: getSubscriptionProgress(p) + '%' }"></div>
              </div>
-             <div class="pf-progress-text">{{ getSubscriptionProgress(p) }}% 已认购</div>
+             <div class="pf-progress-text">{{ getSubscriptionProgress(p) }}% {{ t('project.subscribed') }}</div>
            </div>
          </div>
          <!-- 展开/收起按钮 -->
          <div class="pf-expand-toggle" @click.stop="toggleProjectDetails(p.code)">
-           <span class="expand-text">相关方信息</span>
+           <span class="expand-text">{{ t('project.partyInfo') }}</span>
            <span class="expand-icon" :class="{ 'expanded': isProjectExpanded(p.code) }">▼</span>
          </div>
 
@@ -148,27 +148,27 @@
            <!-- 新增项目指标 -->
            <div class="pf-project-metrics pf-project-metrics-new">
              <div class="pf-project-metric">
-               <span class="pf-metric-label">发行主体</span>
+               <span class="pf-metric-label">{{ t('project.issuer') }}</span>
                <span class="pf-metric-value">{{ p.issuer || 'TBA' }}</span>
              </div>
              <div class="pf-project-metric">
-               <span class="pf-metric-label">底层资产</span>
+               <span class="pf-metric-label">{{ t('project.underlyingAsset') }}</span>
                <span class="pf-metric-value">{{ p.collateral || 'TBA' }}</span>
              </div>
              <div class="pf-project-metric">
-               <span class="pf-metric-label">保荐人</span>
+               <span class="pf-metric-label">{{ t('project.sponsor') }}</span>
                <span class="pf-metric-value">{{ p.sponsor || 'TBA' }}</span>
              </div>
              <div class="pf-project-metric">
-               <span class="pf-metric-label">评估机构</span>
+               <span class="pf-metric-label">{{ t('project.valuer') }}</span>
                <span class="pf-metric-value">{{ p.valuer || 'TBA' }}</span>
              </div>
              <div class="pf-project-metric">
-               <span class="pf-metric-label">律师</span>
+               <span class="pf-metric-label">{{ t('project.lawyer') }}</span>
                <span class="pf-metric-value">{{ p.lawyer || 'TBA' }}</span>
              </div>
              <div class="pf-project-metric">
-               <span class="pf-metric-label">监管方</span>
+               <span class="pf-metric-label">{{ t('project.trustee') }}</span>
                <span class="pf-metric-value">{{ p.trustee || 'TBA' }}</span>
              </div>
            </div>
@@ -182,7 +182,7 @@
                class="etherscan-link"
              >
                <span class="etherscan-icon">🔗</span>
-               <span class="etherscan-text">在Etherscan上查看</span>
+               <span class="etherscan-text">{{ t('project.viewOnEtherscan') }}</span>
              </a>
            </div>
          </div>
@@ -334,7 +334,7 @@ export default {
             
             // 前端显示字段
             subtitle: `${rawData.mortage_type} - ${rawData.property_type}`,
-            loanAmountFormatted: rawData.loan_amount ? `AUD${rawData.loan_amount.toLocaleString()}` : 'AUD0',
+            loanAmountFormatted: this.formatCurrency(rawData.loan_amount),
             loanTermFormatted: `${rawData.loan_term_months} months`,
             targetYield: rawData.interest_rate,
             valuation: rawData.property_value,
@@ -449,8 +449,8 @@ export default {
               status: project.loan_status || 'UNKNOWN',
               
               // 认购信息
-              totalOffering: project.total_offering_token ? `AUD${project.total_offering_token.toLocaleString()}` : 'AUD0',
-              subscribed: project.subscribe_token ? `AUD${project.subscribe_token.toLocaleString()}` : 'AUD0',
+              totalOffering: this.formatCurrency(project.total_offering_token),
+              subscribed: this.formatCurrency(project.subscribe_token),
               
               // 原始数值用于计算
               totalOfferingRaw: project.total_offering_token || 0,
@@ -499,7 +499,7 @@ export default {
               
               // 前端显示字段
               subtitle: `${project.mortage_type} - ${project.property_type}`,
-              loanAmountFormatted: project.loan_amount ? `AUD${project.loan_amount.toLocaleString()}` : 'AUD0',
+              loanAmountFormatted: this.formatCurrency(project.loan_amount),
               loanTermFormatted: `${project.loan_term_months} months`,
               targetYield: project.interest_rate,
               image: project.image || this.getProductImage(project.project_code)
@@ -663,12 +663,14 @@ export default {
         console.log('⏹️ 停止自动刷新')
       }
     },
-
-    formatCurrency(value) {
-      if (!value) return null
+    formatCurrency(value, currency = 'AUD') {
+      if (value === null || value === undefined || value === '') return `${currency}0.00`
       const num = parseFloat(value)
-      if (isNaN(num)) return value
-      return `AUD${num.toLocaleString()}`
+      if (isNaN(num)) return `${currency}0.00`
+      return `${currency}${num.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })}`
     },
 
     resetFilters(){ this.filters = { q: '', type: '', risk: '', status: '', minYield: 0, maxYield: 20 } },

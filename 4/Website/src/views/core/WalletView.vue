@@ -3,14 +3,14 @@
   <div v-if="showDisconnectModal" class="modal-mask">
     <div class="modal-wrapper">
       <div class="modal-container">
-        <h2 style="margin-bottom:8px;color:#ffffff;">Disconnect Wallet</h2>
-        <p style="color:#ffffff;">Select the wallet account you want to disconnect:</p>
+        <h2 style="margin-bottom:8px;color:#ffffff;">{{ t('wallet.disconnect') }}</h2>
+        <p style="color:#ffffff;">{{ t('wallet.disconnect.select') }}</p>
         <div style="margin:16px 0;">
           <span style="display:block;font-size:15px;padding:8px 0;color:#ffffff;background:#2a2a4a;border-radius:8px;">{{ selectedAccount }}</span>
         </div>
         <div style="text-align:right;">
-          <button class="mm-btn mm-outline" @click="showDisconnectModal=false">Cancel</button>
-          <button class="mm-btn mm-outline" style="margin-left:8px;" @click="disconnectAccount">Confirm</button>
+          <button class="mm-btn mm-outline" @click="showDisconnectModal=false">{{ t('common.cancel') }}</button>
+          <button class="mm-btn mm-outline" style="margin-left:8px;" @click="disconnectAccount">{{ t('common.confirm') }}</button>
         </div>
       </div>
     </div>
@@ -19,10 +19,10 @@
   <div v-if="showDisconnectSuccess" class="modal-mask">
     <div class="modal-wrapper">
       <div class="modal-container">
-        <h2 style="margin-bottom:8px;color:#ffffff;">Wallet Disconnected</h2>
+        <h2 style="margin-bottom:8px;color:#ffffff;">{{ t('wallet.disconnected') }}</h2>
         <p style="color:#ffffff;">{{ disconnectSuccessMsg }}</p>
         <div style="text-align:right;">
-          <button class="mm-btn mm-outline" @click="showDisconnectSuccess=false">Confirm</button>
+          <button class="mm-btn mm-outline" @click="showDisconnectSuccess=false">{{ t('common.confirm') }}</button>
         </div>
       </div>
     </div>
@@ -34,23 +34,30 @@
     <section class="mm-account-section">
       <header class="mm-topbar">
         <div class="mm-account">
-          <div class="mm-avatar"></div>
+          <div class="mm-avatar">
+            <img 
+              :src="getWalletIcon()" 
+              :alt="t('wallet.account')"
+              class="mm-avatar-img"
+              @error="handleImageError"
+            />
+          </div>
           <div class="mm-account-meta">
             <div class="mm-account-title" style="display:flex;align-items:center;gap:12px;">
-              <span>Account</span>
+              <span>{{ t('wallet.account') }}</span>
               <div v-if="connected" class="mm-status">
                 <span class="mm-dot"></span>
-                <span class="mm-status-text">Connected</span>
+                <span class="mm-status-text">{{ t('wallet.connected') }}</span>
               </div>
             </div>
             <div class="mm-account-line">
               <template v-if="selectedAccount">
                 <span class="mm-addr" :title="selectedAccount">{{ selectedAccount }}</span>
-                <button v-if="connected" class="mm-btn mm-outline mm-copy" @click="onCopy">Copy</button>
+                <button v-if="connected" class="mm-btn mm-outline mm-copy" @click="onCopy">{{ t('wallet.copy') }}</button>
 
               </template>
               <template v-else>
-                <span class="mm-addr" style="color:#b45309;">please connect your wallet in wallet management</span>
+                <span class="mm-addr" style="color:#b45309;">{{ t('wallet.connectWalletManagement') }}</span>
               </template>
             </div>
             <!-- <button v-if="!connected || !selectedAccount" class="mm-btn mm-outline" style="margin-top:6px;" @click="connect">Connect MetaMask</button> -->
@@ -62,29 +69,22 @@
     <!-- Main Dashboard Section -->
     <section v-if="connected && selectedAccount" class="mm-dashboard-section">
       <div class="mm-hero">
-        <!-- 当前网络 -->
-        <div class="mm-card">
-          <div class="mm-card-label">当前网络</div>
-          <div class="mm-card-title">{{ networkLabel }}</div>
-          <div class="mm-card-sub">Chain ID: {{ chainId }}</div>
-        </div>
-
         <!-- 资产标题区 -->
         <div class="mm-balance">{{ nativeBalanceDisplay }} {{ nativeSymbol }}</div>
         <div class="mm-subline">
           <span>AUD{{ nativeToAudDisplay || 0 }}</span> 
-          <a href="#" @click.prevent="$router.push('/portfolio')" class="mm-link">Portfolio ↗</a>
+          <a href="#" @click.prevent="$router.push('/portfolio')" class="mm-link">{{ t('wallet.portfolio') }} ↗</a>
         </div>
       </div>
 
       <!-- 自定义代币输入 -->
       <div class="mm-custom">
-        <span class="mm-net-left">在此插入您的合约地址：</span>
+        <span class="mm-net-left">{{ t('wallet.insertContractAddress') }}</span>
         <form class="mm-custom-form" @submit.prevent="addToken">
-          <input v-model="customAddress" class="mm-input" placeholder="粘贴ERC20合约地址" />
-          <input v-model="customLabel" class="mm-input" placeholder="标签（可选）" />
-          <button class="mm-btn mm-outline" type="submit" :disabled="!customAddress">添加代币</button>
-          <button class="mm-btn mm-outline" type="button" @click="refreshTokens">刷新</button>
+          <input v-model="customAddress" class="mm-input" :placeholder="t('wallet.pasteERC20Address')" />
+          <input v-model="customLabel" class="mm-input" :placeholder="t('wallet.labelOptional')" />
+          <button class="mm-btn mm-outline" type="submit" :disabled="!customAddress">{{ t('wallet.addToken') }}</button>
+          <button class="mm-btn mm-outline" type="button" @click="refreshTokens">{{ t('wallet.refresh') }}</button>
         </form>
         <!-- 警告信息显示 -->
         <div v-if="warning" class="mm-warning">
@@ -92,34 +92,36 @@
           <span class="mm-warning-text">{{ warning }}</span>
         </div>
       </div>
-      <!-- 信息条：网络 / 原生余额 -->
-      <!-- <div class="mm-info">
-        <div class="mm-card">
-          <div class="mm-card-label">当前网络</div>
-          <div class="mm-card-title">{{ networkLabel }}</div>
-          <div class="mm-card-sub">Chain ID: {{ chainId }}</div>
-        </div>
-        <div class="mm-card">
-          <div class="mm-card-label">Native Balance</div>
-          <div class="mm-card-title">{{ nativeBalanceDisplay }} {{ nativeSymbol }}</div>
-          <div class="mm-card-sub">≈ {{ nativeToAudDisplay || 0 }} AUD</div>
-        </div>
-      </div> -->
+
       <!-- Tabs -->
       <nav class="mm-tabs">
         <button
           class="mm-tab"
           :class="{ 'is-active': activeTab==='tokens' }"
           @click="activeTab='tokens'"
-        >代币</button>
+        >{{ t('wallet.tokens') }}</button>
       </nav>
     
 
       <!-- Tokens 列表 -->
-      <div v-if="activeTab==='tokens'" class="mm-tokenlist" style="background:#1d1d36;">
+        <!-- 当前网络 -->
+        <div class="mm-card">
+          <div class="mm-card-value">{{ t('wallet.currentNetwork') }}: {{ networkLabel }}</div>
+          <!-- <div class="mm-card-sub">Chain ID: {{ chainId }}</div> -->
+           <p class="mm-card-sub">当您在钱包中切换网络时，本页网络会自动切换</p>
+          </div>
+      <div v-if="activeTab==='tokens'" class="mm-tokenlist">
+        
         <div class="mm-token">
           <div class="mm-token-left">
-            <div class="mm-token-icon mm-eth"></div>
+            <div class="mm-token-icon mm-network-icon">
+              <img 
+                :src="getNetworkIcon()" 
+                :alt="networkLabel"
+                class="mm-network-img"
+                @error="handleNetworkImageError"
+              />
+            </div>
             <div>
               <div class="mm-token-title">
                 {{ networkLabel }}
@@ -133,18 +135,18 @@
           </div>
         </div>
 
-        <div v-for="t in sortedTokens" :key="t.address" class="mm-token" @click="$router.push({ name: 'tokenDetail', params: { address: t.address } })">
+        <div v-for="token in sortedTokens" :key="token.address" class="mm-token" @click="$router.push({ name: 'tokenDetail', params: { address: token.address } })">
           <div class="mm-token-left">
-            <div class="mm-token-icon">{{ (t.symbol || 'T').slice(0,1) }}</div>
+            <div class="mm-token-icon">{{ (token.symbol || 'T').slice(0,1) }}</div>
             <div>
-              <!-- <div class="mm-token-title">{{ t.symbol || 'Token' }}</div> -->
-              <div class="mm-token-sub">{{ t.name }}</div>
-              <div style="font-size:10px;color:#FFFFFF;">点击可查看详情</div>
+              <!-- <div class="mm-token-title">{{ token.symbol || 'Token' }}</div> -->
+              <div class="mm-token-sub">{{ token.name }}</div>
+              <div style="font-size:10px;color:#FFFFFF;">{{ t('wallet.clickForDetails') }}</div>
 
             </div>
           </div>
           <div class="mm-token-right">
-            <div class="mm-token-sub">{{ t.displayBalance }}</div>
+            <div class="mm-token-sub">{{ token.displayBalance }}</div>
           </div>
         </div>
       </div>
@@ -155,7 +157,7 @@
   <p v-if="warning" class="mm-warn">{{ warning }}</p>
   <p v-if="error" class="mm-error">{{ error }}</p>
   <transition name="fade">
-    <div v-if="copied" class="mm-toast">已复制</div>
+    <div v-if="copied" class="mm-toast">{{ t('wallet.copied') }}</div>
   </transition>
 </template>
 
@@ -171,6 +173,9 @@ const disconnectSuccessMsg = ref('')
 import { onMounted, onBeforeUnmount, reactive, ref, computed } from 'vue'
 import { ethers } from 'ethers'
 import { useWallet } from '/src/composables/useWallet'
+import { useLanguage } from '@/composables/useLanguage'
+
+const { t } = useLanguage()
 
 const {
 connected, address, fullAddress,
@@ -180,6 +185,59 @@ tokens, warning, error, loadingTokens,
 activeTab, connect, disconnect, refreshTokens, copyAddress,
 addCustomToken, audPrice, priceChange24h
 } = useWallet()
+
+// 检测钱包类型并返回对应的图标
+const getWalletIcon = () => {
+  if (!connected.value || !window.ethereum) {
+    return '/icons/default-wallet.png' // 默认图标
+  }
+  
+  // 检测 MetaMask
+  if (window.ethereum.isMetaMask) {
+    return '/icons/metamask.png'
+  }
+  
+  // 检测其他钱包类型
+  if (window.ethereum.isCoinbaseWallet) {
+    return '/icons/coinbase.png'
+  }
+  
+  if (window.ethereum.isRabby) {
+    return '/icons/rabby.png'
+  }
+  
+  // 默认返回 MetaMask 图标（因为大多数情况下都是 MetaMask）
+  return '/icons/metamask.png'
+}
+
+// 处理图片加载错误
+const handleImageError = (event) => {
+  event.target.src = '/icons/default-wallet.png'
+}
+
+// 根据网络获取对应的图标
+const getNetworkIcon = () => {
+  if (!networkLabel.value) {
+    return '/icons/default-network.png'
+  }
+  
+  const network = networkLabel.value.toLowerCase()
+  
+  if (network.includes('sepolia')) {
+    return '/icons/Sepolia.png'
+  } else if (network.includes('ethereum') || network.includes('mainnet')) {
+    return '/icons/EthereunMainnet.png'
+  }
+  
+  // 默认图标
+  return '/icons/default-network.png'
+}
+
+// 处理网络图标加载错误
+const handleNetworkImageError = (event) => {
+  // 如果图片加载失败，使用默认网络图标
+  event.target.src = '/icons/Sepolia.png'
+}
 
 // Wallet Management 相关
 import { watch } from 'vue'
@@ -1290,7 +1348,23 @@ min-height: 100vh;
 /* 顶部条 */
 .mm-topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
 .mm-account{display:flex;align-items:center;gap:12px;}
-.mm-avatar{width:32px;height:32px;border-radius:50%;background: radial-gradient(100% 100% at 30% 20%, #cfe3ff 0%, #b9c8ff 40%, #9db4ff 100%);}
+.mm-avatar{
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  background: radial-gradient(100% 100% at 30% 20%, #cfe3ff 0%, #b9c8ff 40%, #9db4ff 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.mm-avatar-img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+} 
+
 .mm-account-title{
 font-weight:600;
 color: var(--text);
@@ -1324,7 +1398,7 @@ color: var(--text);
 
 /* 信息条 */
 .mm-info{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px;}
-.mm-card{border:1px solid var(--border);border-radius:16px;padding:16px;background: var(--card-bg);width:200px;}
+.mm-card{margin-top:20px;border:1px solid var(--border);border-radius:16px;padding:16px;width:300px;height:80px;align-items:center;justify-content:center;}
 .mm-card-label{font-size:12px;color: var(--text-secondary);margin-bottom:6px;}
 .mm-card-title{font-weight:600;color: var(--text);}
 .mm-card-sub{font-size:12px;color: var(--text-secondary);margin-top:4px;}
@@ -1963,6 +2037,11 @@ color: var(--text);
 .mm-net-left{font-weight:600;color:#FFFFFF;}
 .mm-icon{color:#475569}
 
+/* 浅色主题下的网络栏样式 */
+[data-theme="light"] .mm-net-left{
+  color: #000000;
+}
+
 /* Sort menu */
 .mm-sort-menu{position:absolute;right:0;top:36px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow);padding:6px;z-index:20;min-width:150px}
 .mm-sort-item{display:block;width:100%;text-align:left;background:#fff;border:1px solid transparent;border-radius:8px;padding:6px 10px;cursor:pointer;color:#334155}
@@ -1976,6 +2055,16 @@ color: var(--text);
 .mm-token-left{display:flex;align-items:center;gap:12px;}
 .mm-token-icon{width:36px;height:36px;border-radius:50%;background:#2a2a4a;display:flex;align-items:center;justify-content:center;font-weight:700;color:#FFFFFF;}
 .mm-eth{background: radial-gradient(100% 100% at 30% 20%, #cfe3ff 0%, #b9c8ff 40%, #9db4ff 100%);}
+.mm-network-icon{
+  overflow: hidden;
+  padding: 2px;
+}
+.mm-network-img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
 .mm-token-title{font-weight:600;color:#ffffff;}
 .mm-dim{color:#94a3b8;}
 .mm-rise{color:#10b981;font-size:12px;margin-top:2px;}
