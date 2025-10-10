@@ -17,7 +17,7 @@
       <!-- Bold Header -->
       <header class="contact-header">
         <h2 class="headline">{{ t('contact.title') }}</h2>
-        <p>{{ t('contact.description') }}</p>
+        <p class="description">{{ t('contact.description') }}</p>
       </header>
       <!-- Two Column Layout -->
       <div class="contact-layout">
@@ -91,7 +91,7 @@
 
       <!-- Social Media Section -->
       <div class="social-media-section">
-        <h3 style="color: #000000;">关注我们</h3>
+        <h3 style="color: #000000;">{{ t('follow.us') }}</h3>
         <div class="social-links">
           <a href="#" class="social-link" title="LinkedIn">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -167,28 +167,42 @@ export default {
       this.isSubmitting = true
       
       try {
-        // 这里可以添加实际的表单提交逻辑
-        // 例如发送到后端API
-        console.log('Submit contact form:', this.form)
+        // 发送到后端API
+        const response = await fetch('http://localhost:3000/api/contact', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: this.form.name,
+            email: this.form.email,
+            type: this.form.type,
+            subject: this.form.subject,
+            message: this.form.message
+          })
+        })
         
-        // 模拟API调用
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        const result = await response.json()
         
-        // 显示成功消息
-        alert('Message sent successfully! We will reply to you as soon as possible.')
-        
-        // 重置表单
-        this.form = {
-          name: '',
-          email: '',
-          type: 'choose',
-          subject: 'choose',
-          message: ''
+        if (result.success) {
+          // 显示成功消息
+          alert('Message sent successfully! We will reply to you within 24 hours.')
+          
+          // 重置表单
+          this.form = {
+            name: '',
+            email: '',
+            type: 'choose',
+            subject: 'choose',
+            message: ''
+          }
+        } else {
+          throw new Error(result.message || 'Failed to send message')
         }
         
       } catch (error) {
         console.error('Form submission failed:', error)
-        alert('Message sending failed, please try again later.')
+        alert(`Message sending failed: ${error.message}. Please try again later.`)
       } finally {
         this.isSubmitting = false
       }
@@ -330,6 +344,15 @@ export default {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.description {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-left: 120px;
+  width: 80%;
 }
 
 /* Two Column Layout */

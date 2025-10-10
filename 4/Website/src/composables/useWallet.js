@@ -71,21 +71,27 @@ function normalizeErr(e) {
   return msg
 }
 
-function attachEventListeners() {
-  if (!window.ethereum) return
-  window.ethereum.on('accountsChanged', handleAccountsChanged)
-  window.ethereum.on('chainChanged', handleChainChanged)
+ function attachEventListeners() {
+   // 只为MetaMask附加事件监听
+   if (window.ethereum && window.ethereum.on) {
+     window.ethereum.on('accountsChanged', handleAccountsChanged)
+     window.ethereum.on('chainChanged', handleChainChanged)
+   }
+  
   if (provider && !blockListenerAttached) {
     blockHandler = async () => { try { await refreshNative() } catch {} }
     provider.on('block', blockHandler)
     blockListenerAttached = true
   }
 }
+
 function detachEventListeners() {
-  if (window.ethereum) {
+  // 从MetaMask中移除事件监听
+  if (window.ethereum && window.ethereum.removeListener) {
     window.ethereum.removeListener('accountsChanged', handleAccountsChanged)
     window.ethereum.removeListener('chainChanged', handleChainChanged)
   }
+  
   if (provider && blockListenerAttached && blockHandler) {
     provider.removeListener('block', blockHandler)
     blockListenerAttached = false
@@ -126,19 +132,234 @@ async function fetchAudPriceSafely() {
   }
 }
 
-// ===== Public actions =====
-async function connect() {
-  console.log('🔄 useWallet connect() called')
-  error.value = ''; warning.value = ''
-  try {
-    if (!window.ethereum) { 
-      console.log('❌ MetaMask not detected')
-      warning.value = 'MetaMask not detected. Please install MetaMask extension.'; 
+// ===== Mobile Wallet Connection =====
+async function connectMobileWallet() {
+  console.log('📱 Attempting mobile wallet connection')
+  
+  // 检测用户设备类型
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  
+  if (!isMobile) {
+    warning.value = 'Please install MetaMask extension or use a mobile device to connect with wallet apps.'
       return 
     }
     
-    console.log('🔗 Creating provider...')
-    provider = new ethers.BrowserProvider(window.ethereum, 'any')
+  // 生成深链接URLs
+  const walletApps = [
+    {
+      name: 'MetaMask',
+      url: `https://metamask.app.link/dapp/${window.location.hostname}`,
+      icon: '🦊'
+    },
+    {
+      name: 'Trust Wallet',
+      url: `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(window.location.href)}`,
+      icon: '🔒'
+    },
+    {
+      name: 'Coinbase Wallet',
+      url: `https://go.cb-w.com/dapp?cb_url=${encodeURIComponent(window.location.href)}`,
+      icon: '🔵'
+    },
+    {
+      name: 'Rainbow',
+      url: `https://rnbwapp.com/wc?uri=${encodeURIComponent(window.location.href)}`,
+      icon: '🌈'
+    }
+  ]
+  
+  // 显示钱包选择弹窗
+  showWalletSelectionModal(walletApps)
+}
+
+function showWalletSelectionModal(wallets) {
+  // 检测当前主题
+  const isLightTheme = document.documentElement.getAttribute('data-theme') === 'light'
+  
+  // 创建模态框
+  const modal = document.createElement('div')
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  `
+  
+  const modalContent = document.createElement('div')
+  const backgroundColor = isLightTheme ? '#ffffff' : '#1a1a2e'
+  const borderColor = isLightTheme ? '#e5e7eb' : '#2a2a4a'
+  const textColor = isLightTheme ? '#1f2937' : '#ffffff'
+  
+  modalContent.style.cssText = `
+    background: ${backgroundColor};
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 400px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    border: 1px solid ${borderColor};
+    color: ${textColor};
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, ${isLightTheme ? '0.25' : '0.5'});
+  `
+  
+  // 获取当前语言
+  const currentLang = localStorage.getItem('language') || 'zh'
+  const isChinese = currentLang === 'zh'
+  
+  const title = document.createElement('h2')
+  title.textContent = isChinese ? '连接钱包' : 'Connect Wallet'
+  title.style.cssText = `
+    margin: 0 0 16px 0;
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+  `
+  
+  const description = document.createElement('p')
+  description.textContent = isChinese ? '选择您喜欢的钱包应用进行连接:' : 'Choose your preferred wallet app to connect:'
+  const descriptionColor = isLightTheme ? '#6b7280' : '#94a3b8'
+  description.style.cssText = `
+    margin: 0 0 24px 0;
+    color: ${descriptionColor};
+    text-align: center;
+    font-size: 14px;
+  `
+  
+  const walletList = document.createElement('div')
+  walletList.style.cssText = `
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+  `
+  
+  wallets.forEach(wallet => {
+    const walletItem = document.createElement('button')
+    const walletBgColor = isLightTheme ? '#f9fafb' : '#2a2a4a'
+    const walletBorderColor = isLightTheme ? '#d1d5db' : '#374151'
+    const walletTextColor = isLightTheme ? '#1f2937' : '#ffffff'
+    
+    walletItem.style.cssText = `
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: ${walletBgColor};
+      border: 1px solid ${walletBorderColor};
+      border-radius: 12px;
+      color: ${walletTextColor};
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 100%;
+      text-align: left;
+    `
+    
+    walletItem.innerHTML = `
+      <span style="font-size: 24px;">${wallet.icon}</span>
+      <span>${wallet.name}</span>
+    `
+    
+    walletItem.addEventListener('mouseenter', () => {
+      const hoverBgColor = isLightTheme ? '#f3f4f6' : '#374151'
+      const hoverBorderColor = isLightTheme ? '#9ca3af' : '#4b5563'
+      walletItem.style.background = hoverBgColor
+      walletItem.style.borderColor = hoverBorderColor
+    })
+    
+    walletItem.addEventListener('mouseleave', () => {
+      walletItem.style.background = walletBgColor
+      walletItem.style.borderColor = walletBorderColor
+    })
+    
+    walletItem.addEventListener('click', () => {
+      console.log(`🔗 Opening ${wallet.name}:`, wallet.url)
+      window.location.href = wallet.url
+      modal.remove()
+    })
+    
+    walletList.appendChild(walletItem)
+  })
+  
+  const cancelButton = document.createElement('button')
+  cancelButton.textContent = isChinese ? '取消' : 'Cancel'
+  const cancelBorderColor = isLightTheme ? '#d1d5db' : '#6b7280'
+  const cancelTextColor = isLightTheme ? '#6b7280' : '#6b7280'
+  
+  cancelButton.style.cssText = `
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: 1px solid ${cancelBorderColor};
+    border-radius: 8px;
+    color: ${cancelTextColor};
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  `
+  
+  cancelButton.addEventListener('mouseenter', () => {
+    const hoverBgColor = isLightTheme ? '#f9fafb' : '#374151'
+    const hoverBorderColor = isLightTheme ? '#9ca3af' : '#9ca3af'
+    const hoverTextColor = isLightTheme ? '#374151' : '#ffffff'
+    cancelButton.style.background = hoverBgColor
+    cancelButton.style.borderColor = hoverBorderColor
+    cancelButton.style.color = hoverTextColor
+  })
+  
+  cancelButton.addEventListener('mouseleave', () => {
+    cancelButton.style.background = 'transparent'
+    cancelButton.style.borderColor = cancelBorderColor
+    cancelButton.style.color = cancelTextColor
+  })
+  
+  cancelButton.addEventListener('click', () => {
+    modal.remove()
+  })
+  
+  // 点击背景关闭模态框
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.remove()
+    }
+  })
+  
+  modalContent.appendChild(title)
+  modalContent.appendChild(description)
+  modalContent.appendChild(walletList)
+  modalContent.appendChild(cancelButton)
+  modal.appendChild(modalContent)
+  
+  document.body.appendChild(modal)
+}
+
+async function connectWithProvider(walletProvider, walletId) {
+  console.log(`🔗 Creating provider for ${walletId}...`)
+  console.log('🔍 Wallet provider details:', {
+    walletId,
+    walletName: walletProvider?.walletName || walletId,
+    provider: walletProvider,
+    isMetaMask: walletProvider?.isMetaMask,
+    isOkxWallet: walletProvider?.isOkxWallet,
+    isBinance: walletProvider?.isBinance,
+    isPhantom: walletProvider?.isPhantom,
+    isConnected: walletProvider?.isConnected,
+    selectedAddress: walletProvider?.selectedAddress
+  })
+  
+  try {
+    // 创建provider
+    provider = new ethers.BrowserProvider(walletProvider, 'any')
     
     console.log('📝 Requesting accounts...')
     const accounts = await provider.send('eth_requestAccounts', [])
@@ -161,24 +382,89 @@ async function connect() {
     await refreshTokens()
     attachEventListeners()
     
-    console.log('✅ Wallet connected successfully:', accounts[0])
+    const walletName = walletProvider?.walletName || walletId
+    console.log(`✅ ${walletName} connected successfully:`, accounts[0])
+    
+    // 存储连接的钱包信息
+    localStorage.setItem('connectedWallet', walletId)
+    localStorage.setItem('walletAddress', accounts[0])
     
     // 触发自定义事件通知其他组件
     window.dispatchEvent(new CustomEvent('walletConnected', { 
-      detail: { address: accounts[0], chainId: chainId.value } 
+      detail: { 
+        address: accounts[0], 
+        chainId: chainId.value,
+        walletId: walletId,
+        provider: walletProvider
+      } 
     }))
+    
+  } catch (connectionError) {
+    console.error(`❌ ${walletId} connection failed:`, connectionError)
+    
+    // 根据不同的错误类型提供更具体的错误消息
+    if (connectionError.code === 4001) {
+      error.value = 'User rejected the connection request.'
+    } else if (connectionError.code === -32002) {
+      error.value = 'Connection request already pending. Please check your wallet.'
+    } else if (connectionError.message.includes('User denied') || connectionError.message.includes('User rejected')) {
+      error.value = 'Connection was denied. Please approve the connection in your wallet.'
+    } else if (connectionError.message.includes('Already processing')) {
+      error.value = 'Wallet is already processing a request. Please wait and try again.'
+    } else if (connectionError.message.includes('wallet is not installed')) {
+      error.value = 'Wallet extension is not installed or not detected.'
+    } else {
+      error.value = normalizeErr(connectionError)
+    }
+    
+    throw connectionError
+  }
+}
+
+// ===== Public actions =====
+async function connect() {
+  console.log('🔄 useWallet connect() called')
+  error.value = ''; warning.value = ''
+  
+  try {
+    // 检查是否有MetaMask
+    if (!window.ethereum) {
+      // 检测是否为移动设备
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      
+      if (isMobile) {
+        console.log('❌ No MetaMask detected on mobile, trying mobile wallet connection')
+        await connectMobileWallet()
+        return
+      } else {
+        warning.value = 'MetaMask is not installed. Please install MetaMask extension.'
+        window.open('https://metamask.io/download/', '_blank')
+        return
+      }
+    }
+    
+    console.log('✅ MetaMask detected, connecting...')
+    
+    // 直接使用MetaMask连接
+    await connectWithProvider(window.ethereum, 'metamask')
+    
   } catch (e) { 
+    if (e.message === 'User cancelled wallet selection') {
+      console.log('ℹ️ User cancelled wallet selection')
+      return
+    }
+    
     console.error('❌ Wallet connection failed:', e)
     
     // 提供更具体的错误消息
     if (e.code === 4001) {
       error.value = 'User rejected the connection request.'
     } else if (e.code === -32002) {
-      error.value = 'Connection request already pending. Please check your MetaMask.'
+      error.value = 'Connection request already pending. Please check your wallet.'
     } else if (e.message.includes('User denied')) {
-      error.value = 'Connection was denied. Please approve the connection in MetaMask.'
+      error.value = 'Connection was denied. Please approve the connection in your wallet.'
     } else if (e.message.includes('Already processing')) {
-      error.value = 'MetaMask is already processing a request. Please wait and try again.'
+      error.value = 'Wallet is already processing a request. Please wait and try again.'
     } else {
       error.value = normalizeErr(e)
     }
@@ -247,15 +533,33 @@ async function refreshNetwork() {
   fetchAudPriceSafely()
 }
 async function refreshNative() { nativeBalance.value = await provider.getBalance(address.value) }
+// 获取钱包内的代币列表（MetaMask）
+async function getWalletTokens() {
+  console.log('🔍 Getting tokens from MetaMask wallet')
+  
+  try {
+    // MetaMask不直接提供获取代币列表的API
+    // 我们使用自定义代币列表，这些是用户手动添加的代币
+    const custom = getCustomTokens(chainId.value)
+    console.log('MetaMask custom tokens:', custom)
+    
+    return custom
+  } catch (error) {
+    console.error('Failed to get wallet tokens:', error)
+    return []
+  }
+}
+
 async function refreshTokens() {
   loadingTokens.value = true
   tokens.splice(0)
   try {
-    const builtIn = TOKENS_BY_CHAIN[chainId.value] || []
-    const custom = getCustomTokens(chainId.value)
-    const list = [...builtIn, ...custom]
+    // 获取当前钱包的代币列表
+    const walletTokens = await getWalletTokens()
+    console.log(`📋 Wallet tokens:`, walletTokens)
     
-    for (const item of list) {
+    // 处理钱包内的代币
+    for (const item of walletTokens) {
       if (!ethers.isAddress(item.address)) continue
       
       try {
@@ -282,17 +586,18 @@ async function refreshTokens() {
             console.warn(`获取 ${item.address} 小数位失败:`, e.message)
             return 18
           }),
-          safeString(() => c.symbol(), item.label || 'TKN'),
-          safeString(() => c.name(), item.label || 'Token'),
+          safeString(() => c.symbol(), item.symbol || item.label || 'TKN'),
+          safeString(() => c.name(), item.name || item.label || 'Token'),
         ])
         
         const display = formatUnitsSafe(raw, decimals)
         tokens.push({
           address: item.address,
-          symbol: symbol || item.label || 'TKN',
-          name: name || item.label || 'Token',
+          symbol: symbol || item.symbol || item.label || 'TKN',
+          name: name || item.name || item.label || 'Token',
           decimals,
-          displayBalance: display
+          displayBalance: display,
+          source: item.source || 'Custom'
         })
         
       } catch (e) {
@@ -305,6 +610,9 @@ async function refreshTokens() {
         continue
       }
     }
+    
+    console.log(`✅ Loaded ${tokens.length} tokens from connected wallet`)
+    
   } catch (e) { 
     error.value = normalizeErr(e) 
   }
@@ -408,8 +716,17 @@ function removeCustomToken(addr){
 function initIfNeeded() {
   if (initialized) return
   initialized = true
+  
+  // 检查是否为移动设备且没有钱包扩展
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  
+  // 只检查MetaMask
   if (!window.ethereum) { 
-    warning.value = 'MetaMask not detected.'; 
+    if (isMobile) {
+      warning.value = 'MetaMask not detected. Use MetaMask mobile app to connect.'
+    } else {
+      warning.value = 'MetaMask not detected. Please install MetaMask extension.'
+    }
     return 
   }
   
@@ -421,6 +738,10 @@ function initIfNeeded() {
           signer = await provider.getSigner()
           address.value = accs[0]
           connected.value = true
+          
+          // 设置connectedWallet为metamask
+          localStorage.setItem('connectedWallet', 'metamask')
+          
           await refreshAll()
           attachEventListeners()
         } catch (err) {

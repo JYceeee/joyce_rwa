@@ -35,12 +35,14 @@ const { expressjwt: expressJWT } = require('express-jwt')
 const userRouter = require('./src/routers/userRouter')
 const transactionRouter = require('./src/routers/transactionRouter')
 const unifiedProjectRouter = require('./src/routers/unifiedProjectRouter')
+const contactRouter = require('./src/routers/contactRouter')
 
 // 使用路由模块
 app.use('/user', userRouter)
 app.use('/transaction', transactionRouter)
 app.use('/api', unifiedProjectRouter)
 app.use('/project', unifiedProjectRouter)  // 独立的project路由
+app.use('/api', contactRouter)  // 联系表单路由
 
 // 添加根路径路由用于测试
 app.get('/', (req, res) => {

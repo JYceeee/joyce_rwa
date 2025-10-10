@@ -7,7 +7,7 @@
           <svg viewBox="0 0 24 24" class="i"><path d="M10 19a1 1 0 0 1-.7-.3l-7-7a1 1 0 0 1 0-1.4l7-7a1 1 0 1 1 1.4 1.4L4.41 11H21a1 1 0 1 1 0 2H4.41l6.3 6.3A1 1 0 0 1 10 19z"/></svg>
         </button>
         <span class="sep">/</span>
-        <span class="crumb-current">个人中心</span>
+        <span class="crumb-current">{{ t('profile.personalCenter') }}</span>
       </nav>
     </header>
       
@@ -28,38 +28,38 @@
     <div class="user-contact-info">
       <!--email and phone-->
       <div>
-        <label class="label">个人信息 <span class="req"></span></label>
+        <label class="label">{{ t('profile.personalInfo') }} <span class="req"></span></label>
         <div class="contact-item">
           <!-- <span class="contact-icon">📧</span> -->
-          <span class="contact-label">邮箱:</span>
+          <span class="contact-label">{{ t('profile.email') }}</span>
           <span class="contact-value">
-            {{ userEmail || 'Not provided' }}
+            {{ userEmail || t('profile.notProvided') }}
           </span>
           <span class="email-status" :class="emailVerificationClass"> &nbsp; {{ emailVerificationText }}</span>
           <button v-if="!emailVerified" class="btn-small" type="button" @click="sendEmailVerification">
-            验证邮箱
+            {{ t('profile.verifyEmail') }}
           </button>
         </div>
         <div class="contact-item">
           <!-- <span class="contact-icon">📱</span> -->
-          <span class="contact-label">手机号:</span>
+          <span class="contact-label">{{ t('profile.phone') }}</span>
           <span class="contact-value">
-            {{ userPhone || 'Not provided' }}
+            {{ userPhone || t('profile.notProvided') }}
           </span>
-          <button class="btn-small" type="button" >修改手机号</button>
+          <button class="btn-small" type="button" >{{ t('profile.changePhone') }}</button>
         </div>
         <div class="contact-item">
-          <span class="contact-label">密码:</span>
-          <button class="btn-small" type="button" >修改密码</button>
+          <span class="contact-label">{{ t('profile.password') }}</span>
+          <button class="btn-small" type="button" >{{ t('profile.changePassword') }}</button>
         </div>
         <div v-if="userLoading" class="contact-item loading-item">
           <span class="contact-icon">🔄</span>
-          <span class="contact-label">状态:</span>
-          <span class="contact-value">加载用户信息...</span>
+          <span class="contact-label">{{ t('profile.status') }}</span>
+          <span class="contact-value">{{ t('profile.loadingUserInfo') }}</span>
         </div>
         <div v-if="userError && !userLoading" class="contact-item error-item">
           <span class="contact-icon">⚠️</span>
-          <span class="contact-label">状态:</span>
+          <span class="contact-label">{{ t('profile.status') }}</span>
           <span class="contact-value">{{ userError }}</span>
         </div>
       </div>
@@ -68,21 +68,17 @@
       <div v-if="showEmailModal" class="modal-mask">
         <div class="modal-wrapper">
           <div class="modal-container">
-            <h2 style="margin-bottom:8px;">检查您的邮箱</h2>
-            <p>Verify your email address to use your account.<br>
-            我们发送了一封带有验证按钮的邮件到您的邮箱。<br>
-            您收到了邮件吗？如果没有，请检查您的垃圾邮件文件夹或请求新的验证邮件，有效期为3天。<br>
-            如果您在3天内未验证您的邮箱地址，您将需要创建一个新账户。<br>
-            如果您遇到问题，请参阅账户帮助。</p>
+            <h2 style="margin-bottom:8px;">{{ t('profile.checkEmail') }}</h2>
+            <p v-html="t('profile.verifyEmailDescription')"></p>
             <div style="margin-top:12px; display:flex; flex-wrap:wrap; gap:10px;">
-              <a href="#" style="color:#ea7a2e; text-decoration:underline;">账户帮助</a>
-              <a href="#" style="color:#ea7a2e; text-decoration:underline;">订阅</a>
-              <a href="#" style="color:#ea7a2e; text-decoration:underline;">取消订阅</a>
-              <a href="#" style="color:#ea7a2e; text-decoration:underline;">隐私 / 不卖我的信息</a>
-              <a href="#" style="color:#ea7a2e; text-decoration:underline;">Cookie 偏好</a>
+              <a href="#" style="color:#ea7a2e; text-decoration:underline;">{{ t('profile.accountHelp') }}</a>
+              <a href="#" style="color:#ea7a2e; text-decoration:underline;">{{ t('profile.subscribe') }}</a>
+              <a href="#" style="color:#ea7a2e; text-decoration:underline;">{{ t('profile.unsubscribe') }}</a>
+              <a href="#" style="color:#ea7a2e; text-decoration:underline;">{{ t('profile.privacy') }}</a>
+              <a href="#" style="color:#ea7a2e; text-decoration:underline;">{{ t('profile.cookiePreferences') }}</a>
             </div>
             <div style="margin-top:18px; text-align:right;">
-              <button class="btn orange" @click="showEmailModal=false">确定</button>
+              <button class="btn orange" @click="showEmailModal=false">{{ t('profile.confirm') }}</button>
             </div>
           </div>
         </div>
@@ -91,25 +87,25 @@
     
     <!-- KYC & Whitelist Status Section -->
     <div class="status-section">
-      <h3 class="status-title">账户状态</h3>
+      <h3 class="status-title">{{ t('profile.accountStatus') }}</h3>
       <!-- KYC -->
       <div class="field">
-        <label class="label">KYC 验证 <span class="req">*</span></label>
+        <label class="label">{{ t('profile.kycVerification') }} <span class="req">*</span></label>
         <div class="kyc-banner" :class="isVerified ? 'green' : 'orange'" role="status">
           <span class="icon">
             <svg viewBox="0 0 24 24" class="i">
               <path d="M12 2 2 7l10 5 10-5-10-5Zm0 7L2 4v13l10 5 10-5V4L12 9Zm0 9.5-7-3.5V9l7 3.5V20.5Z"/>
             </svg>
           </span>
-          <span v-if="!isVerified">立即验证</span>
+          <span v-if="!isVerified">{{ t('profile.startVerification') }}</span>
           <span v-else class="verified">
             <svg viewBox="0 0 24 24" class="i"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
             <!-- Verified -->{{ kycLevelText }}
             <!-- <span class="level-badge" :class="kycLevelClass"> {{ kycLevelText }}</span> -->
           </span>
           <!-- 右侧按钮：未验证=Start；已验证=Cancel -->
-          <button v-if="!isVerified" class="link" type="button" @click="verifyKYC">开始</button>
-          <button v-else class="link danger" type="button" @click="cancelKYC">取消验证</button>
+          <button v-if="!isVerified" class="link" type="button" @click="verifyKYC">{{ t('profile.start') }}</button>
+          <button v-else class="link danger" type="button" @click="cancelKYC">{{ t('profile.cancelVerification') }}</button>
         </div>
       </div>
 
@@ -125,7 +121,7 @@
 
       <!-- Trading Permission -->
       <div class="field">
-        <label class="label">交易权限 <span class="req"></span></label>
+        <label class="label">{{ t('profile.tradingPermission') }} <span class="req"></span></label>
         <div class="kyc-banner" :class="isVerified ? 'green' : 'orange'" role="status">
           <span class="icon">
             <svg viewBox="0 0 24 24" class="i">
@@ -140,18 +136,18 @@
                   </li></span>
           <span class="permission-badge" :class="tradingPermissionClass">{{ tradingPermissionText }}</span>
           <!-- 右侧按钮：未验证=Start；已验证=Cancel -->
-          <button v-if="!isVerified" class="link" type="button" @click="verifyKYC">开始</button>
-          <button v-else class="link danger" type="button" @click="cancelKYC">取消验证</button>
+          <button v-if="!isVerified" class="link" type="button" @click="verifyKYC">{{ t('profile.start') }}</button>
+          <button v-else class="link danger" type="button" @click="cancelKYC">{{ t('profile.cancelVerification') }}</button>
         </div>
       </div>
     </div>
   
     <!-- 底部按钮 -->
     <div class="actions bottom">
-      <button class="btn light" type="button" @click="onCancel">取消</button>
-      <button class="btn orange" type="submit">保存</button>
+      <button class="btn light" type="button" @click="onCancel">{{ t('common.cancel') }}</button>
+      <button class="btn orange" type="submit">{{ t('common.save') }}</button>
       <!-- 新增：安全退出 -->
-      <button class="btn light" type="button" @click="logout" style="margin-left:auto;">安全退出</button>
+      <button class="btn light" type="button" @click="logout" style="margin-left:auto;">{{ t('profile.logout') }}</button>
     </div>
     </form>
 
@@ -178,6 +174,7 @@ import {
 } from '@/service/userService'
 import { userAPI } from '@/service/api'
 import { unifiedContractService as contractService } from '@/service/unifiedContractService'
+import { useLanguage } from '@/composables/useLanguage'
 
 export default {
   name: 'ProfileView',
@@ -563,6 +560,11 @@ export default {
     this._offAuthChange && this._offAuthChange()
   },
   methods:{
+    // 获取翻译文本
+    t(key) {
+      const { t } = useLanguage()
+      return t(key)
+    },
     // 初始化用户信息显示
     initializeUserDisplay() {
       console.log('🚀 ProfileView: 初始化用户信息显示')

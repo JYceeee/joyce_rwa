@@ -643,8 +643,8 @@ a { color: inherit; text-decoration: none }
 .auth-alt{ text-align:center; color:var(--muted); margin-top:6px }
 
 /* orange button (reused) */
-.btn.orange{ background:#f97316; color:var(--wallet-text); border-color:transparent }
-.btn.orange:hover{ background:#ea580c }
+.btn.orange{ background:#f97316; color:#ffffff; border-color:transparent }
+.btn.orange:hover{ background:#ea580c;color:#ffffff; border-color:transparent }
 
 .signup-icons {
   display: flex;
@@ -723,5 +723,32 @@ h1, h2, h3, h4, h5, h6,
 /* 深色主题保持原有样式 */
 [data-theme="dark"] .about-page {
   background: var(--gradient-bg-hero);
+}
+
+/* 浅色主题字体设置 - 与深色主题保持一致 */
+[data-theme="light"] {
+  --heading-font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --heading-weight: 700;
+}
+
+/* 确保浅色主题下所有元素使用相同的字体 */
+[data-theme="light"] body,
+[data-theme="light"] h1, 
+[data-theme="light"] h2, 
+[data-theme="light"] h3, 
+[data-theme="light"] h4, 
+[data-theme="light"] h5, 
+[data-theme="light"] h6,
+[data-theme="light"] .main-title, 
+[data-theme="light"] .sidebar-title, 
+[data-theme="light"] .section-title,
+[data-theme="light"] .headline, 
+[data-theme="light"] .page-title, 
+[data-theme="light"] .hero-title,
+[data-theme="light"] .title, 
+[data-theme="light"] .heading, 
+[data-theme="light"] .header-title,
+[data-theme="light"] .auth-title {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
 }
 

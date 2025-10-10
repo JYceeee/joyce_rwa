@@ -67,6 +67,7 @@ const translations = {
     'wallet.disconnect.select': '选择要断开的钱包账户：',
     'wallet.disconnected': '钱包已断开',
     'wallet.management': '钱包管理',
+    'wallet.networkSwitchNote': '当您在钱包中切换网络时，本页网络会自动切换',
     'wallet.address': '钱包地址',
     'wallet.balance': '余额',
     'wallet.transaction': '交易',
@@ -85,6 +86,18 @@ const translations = {
     'wallet.refresh': '刷新',
     'wallet.tokens': '代币',
     'wallet.clickForDetails': '点击可查看详情',
+    'wallet.connectSelectedAccount': '连接选定的账户',
+    'wallet.loadingAccounts': '加载账户...',
+    'wallet.account': '账户',
+    'wallet.disconnectSuccess': '钱包已断开',
+    'wallet.disconnectSuccessMsg': '钱包已成功断开连接',
+    'wallet.addressAdded': '钱包地址 {address} 已添加',
+    'wallet.addressExists': '该钱包地址已存在',
+    'wallet.invalidAddress': '请输入有效的以太坊地址',
+    'wallet.noWalletToSet': '没有可设置的钱包地址',
+    'wallet.primaryWalletSet': '主钱包已设置为: {wallet}',
+    'wallet.invalidSelection': '无效的选择',
+    'wallet.walletDisconnected': '钱包 {address} 已断开连接',
     
     // 设置页面
     'settings.title': '设置',
@@ -258,10 +271,13 @@ const translations = {
     'about.title': '关于我们',
     'about.headline': '我们是专注于把房地产资产包装成投资人喜欢的RWA底层资产的RWA Dealmaker',
     'about.description': '我们致力于为投资者提供透明、安全、高效的房地产代币化投资平台。',
+    'about.intro1': '我们是专注于把房地产资产包装成投资人喜欢的RWA底层资产的RWA Dealmaker。本平台以保障RWA投资者资金安全为核心，精选合法合规、风险低、回报高的优质资产（如澳大利亚抵押率不超过70%、年化利率约9%的第一顺位住宅抵押贷款资产），促成投资者与资产持有人之间的交易。',
+    'about.intro2': '平台展示的底层资产均受资产所在国家法律法规保护，资金可自由跨境流动。根据投资者需求，交易结构可实现底层资产与资金的独立隔离，并委托合格第三方机构进行托管。',
+    'about.intro3': '除撮合投资者与RWA底层资产持有人的交易外，本平台还整合RWA代币化全链条的生态合作，涵盖专业RWA代币化技术服务公司、持牌RWA代币发行商及交易所等，确保代币化流程合法合规、高效低成本，支持公开或非公开的成功发行。',
     
     // 联系我们
     'contact.title': '联系我们',
-    'contact.description': '如果您是资产所有人或有意投资，欢迎联系我们。',
+    'contact.description': '如果您想将房地产资产或房地产抵押贷款资产作为RWA的底层资产进行融资或有意购买RWA资产，欢迎联系我们。',
     'contact.name': '姓名',
     'contact.name.placeholder': '请输入您的全名',
     'contact.email': '邮箱',
@@ -280,8 +296,9 @@ const translations = {
     'contact.subject.business': '业务合作',
     'contact.subject.other': '其他',
     'contact.message': '消息',
-    'contact.message.placeholder': '告诉我们如何帮助您...',
+    'contact.message.placeholder': '告诉我们您想投资什么项目...',
     'contact.send': '发送消息',
+    'follow.us': '关注我们',
     
     // 页脚
     'footer.disclaimer': '免责声明：本平台提供的信息仅供参考，不保证其真实性、准确性或完整性，亦不构成投资邀约或投资建议。',
@@ -290,7 +307,35 @@ const translations = {
     // 交易页面
     'trade.contractAddress': '合约地址',
     'trade.contractAddressDescription': '以下合约地址将用于此次交易:',
-    'trade.principalTokenAddress': '本金代币地址'
+    'trade.principalTokenAddress': '本金代币地址',
+    
+    // Profile页面
+    'profile.personalCenter': '个人中心',
+    'profile.personalInfo': '个人信息',
+    'profile.email': '邮箱:',
+    'profile.phone': '手机号:',
+    'profile.password': '密码:',
+    'profile.verifyEmail': '验证邮箱',
+    'profile.changePhone': '修改手机号',
+    'profile.changePassword': '修改密码',
+    'profile.status': '状态:',
+    'profile.loadingUserInfo': '加载用户信息...',
+    'profile.notProvided': '未提供',
+    'profile.accountStatus': '账户状态',
+    'profile.kycVerification': 'KYC 验证',
+    'profile.startVerification': '立即验证',
+    'profile.tradingPermission': '交易权限',
+    'profile.start': '开始',
+    'profile.cancelVerification': '取消验证',
+    'profile.logout': '安全退出',
+    'profile.checkEmail': '检查您的邮箱',
+    'profile.verifyEmailDescription': '我们发送了一封带有验证按钮的邮件到您的邮箱。<br>您收到了邮件吗？如果没有，请检查您的垃圾邮件文件夹或请求新的验证邮件，有效期为3天。<br>如果您在3天内未验证您的邮箱地址，您将需要创建一个新账户。<br>如果您遇到问题，请参阅账户帮助。',
+    'profile.accountHelp': '账户帮助',
+    'profile.subscribe': '订阅',
+    'profile.unsubscribe': '取消订阅',
+    'profile.privacy': '隐私 / 不卖我的信息',
+    'profile.cookiePreferences': 'Cookie 偏好',
+    'profile.confirm': '确定'
   },
   en: {
     // Common
@@ -340,6 +385,7 @@ const translations = {
     'wallet.disconnect.select': 'Select the wallet account you want to disconnect:',
     'wallet.disconnected': 'Wallet Disconnected',
     'wallet.management': 'Wallet Management',
+    'wallet.networkSwitchNote': 'When you switch the network in your wallet, the network on this page will be automatically switched',
     'wallet.address': 'Wallet Address',
     'wallet.balance': 'Balance',
     'wallet.transaction': 'Transaction',
@@ -358,6 +404,18 @@ const translations = {
     'wallet.refresh': 'Refresh',
     'wallet.tokens': 'Tokens',
     'wallet.clickForDetails': 'Click for details',
+    'wallet.connectSelectedAccount': 'Connect Selected Account',
+    'wallet.loadingAccounts': 'Loading accounts...',
+    'wallet.account': 'Account',
+    'wallet.disconnectSuccess': 'Wallet Disconnected',
+    'wallet.disconnectSuccessMsg': 'Wallet has been successfully disconnected',
+    'wallet.addressAdded': 'Wallet address {address} has been added',
+    'wallet.addressExists': 'This wallet address already exists',
+    'wallet.invalidAddress': 'Please enter a valid Ethereum address',
+    'wallet.noWalletToSet': 'No wallet address available to set',
+    'wallet.primaryWalletSet': 'Primary wallet has been set to: {wallet}',
+    'wallet.invalidSelection': 'Invalid selection',
+    'wallet.walletDisconnected': 'Wallet {address} has been disconnected',
     
     // Settings
     'settings.title': 'Settings',
@@ -531,10 +589,13 @@ const translations = {
     'about.title': 'About Us',
     'about.headline': 'We are RWA Dealmakers focused on packaging real estate assets into RWA underlying assets that investors love',
     'about.description': 'We are committed to providing investors with a transparent, secure, and efficient real estate tokenization investment platform.',
+    'about.intro1': 'We are RWA Dealmakers specializing in packaging real estate assets into RWA underlying assets that investors favor. Our platform prioritizes the safety of RWA investors\' funds, carefully selecting legally compliant, low-risk, high-return quality assets (such as first-lien residential mortgage assets in Australia with loan-to-value ratios not exceeding 70% and annual interest rates of approximately 9%), facilitating transactions between investors and asset holders.',
+    'about.intro2': 'The underlying assets displayed on our platform are all protected by the laws and regulations of the countries where the assets are located, allowing free cross-border capital flows. According to investor needs, the transaction structure can achieve independent segregation of underlying assets and funds, with custody entrusted to qualified third-party institutions.',
+    'about.intro3': 'Beyond facilitating transactions between investors and RWA underlying asset holders, our platform also integrates end-to-end ecosystem cooperation for RWA tokenization, including professional RWA tokenization technology service companies, licensed RWA token issuers, and exchanges, ensuring that the tokenization process is legally compliant, efficient, and cost-effective, supporting successful public or private issuances.',
     
     // Contact Us
     'contact.title': 'Contact Us',
-    'contact.description': 'If you are an asset owner or interested in investing, please contact us.',
+    'contact.description': 'If you would like to use real estate assets or real estate mortgage loan assets as underlying assets for RWA financing, or if you are interested in purchasing RWA assets, please contact us.',
     'contact.name': 'Name',
     'contact.name.placeholder': 'Please enter your full name',
     'contact.email': 'Email',
@@ -553,8 +614,9 @@ const translations = {
     'contact.subject.business': 'Business Partnership',
     'contact.subject.other': 'Other',
     'contact.message': 'Message',
-    'contact.message.placeholder': 'Tell us how we can help you...',
+    'contact.message.placeholder': 'Tell us what project you would like to invest in...',
     'contact.send': 'Send Message',
+    'follow.us': 'Follow Us',
     
     // Footer
     'footer.disclaimer': 'Disclaimer: The information provided on this platform is for reference only and does not guarantee its authenticity, accuracy or completeness, nor does it constitute an investment invitation or investment advice.',
@@ -563,7 +625,35 @@ const translations = {
     // Trading Page
     'trade.contractAddress': 'Contract Address',
     'trade.contractAddressDescription': 'The following contract addresses will be used for this transaction:',
-    'trade.principalTokenAddress': 'Principal Token Address'
+    'trade.principalTokenAddress': 'Principal Token Address',
+    
+    // Profile page
+    'profile.personalCenter': 'Personal Center',
+    'profile.personalInfo': 'Personal Information',
+    'profile.email': 'Email:',
+    'profile.phone': 'Phone:',
+    'profile.password': 'Password:',
+    'profile.verifyEmail': 'Verify Email',
+    'profile.changePhone': 'Change Phone',
+    'profile.changePassword': 'Change Password',
+    'profile.status': 'Status:',
+    'profile.loadingUserInfo': 'Loading user information...',
+    'profile.notProvided': 'Not provided',
+    'profile.accountStatus': 'Account Status',
+    'profile.kycVerification': 'KYC Verification',
+    'profile.startVerification': 'Start Verification',
+    'profile.tradingPermission': 'Trading Permission',
+    'profile.start': 'Start',
+    'profile.cancelVerification': 'Cancel Verification',
+    'profile.logout': 'Logout',
+    'profile.checkEmail': 'Check Your Email',
+    'profile.verifyEmailDescription': 'We sent an email with a verification button to your email address.<br>Did you receive the email? If not, please check your spam folder or request a new verification email, valid for 3 days.<br>If you do not verify your email address within 3 days, you will need to create a new account.<br>If you encounter problems, please refer to account help.',
+    'profile.accountHelp': 'Account Help',
+    'profile.subscribe': 'Subscribe',
+    'profile.unsubscribe': 'Unsubscribe',
+    'profile.privacy': 'Privacy / Do Not Sell My Info',
+    'profile.cookiePreferences': 'Cookie Preferences',
+    'profile.confirm': 'Confirm'
   }
 }
 

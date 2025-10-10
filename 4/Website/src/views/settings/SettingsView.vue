@@ -69,22 +69,6 @@
               </div>
             </div>
 
-            <div class="settings-item">
-              <div class="settings-info">
-                <h3 class="settings-name">{{ t('settings.language') }}</h3>
-                <p class="settings-description">{{ t('settings.language.description') }}</p>
-              </div>
-              <div class="settings-control">
-                <select 
-                  class="settings-select" 
-                  :value="currentLanguage" 
-                  @change="handleLanguageChange"
-                >
-                  <option value="zh">{{ t('settings.language.zh') }}</option>
-                  <option value="en">{{ t('settings.language.en') }}</option>
-                </select>
-              </div>
-            </div>
 
             <div class="settings-item">
               <div class="settings-info">
@@ -287,181 +271,9 @@
           </div>
         </div>
 
-          <!-- Account Options -->
-          <div v-if="activeSection === 'account'" class="settings-section">
-            <div class="settings-items">
-            <div class="settings-item">
-              <div class="settings-info">
-                <h3 class="settings-name">{{ t('settings.profileVisibility') }}</h3>
-                <p class="settings-description">{{ t('settings.profileVisibility.description') }}</p>
-              </div>
-              <div class="settings-control">
-                <select class="settings-select">
-                  <option value="public">{{ t('settings.profileVisibility.public') }}</option>
-                  <option value="friends">{{ t('settings.profileVisibility.friends') }}</option>
-                  <option value="private">{{ t('settings.profileVisibility.private') }}</option>
-                </select>
-              </div>
-            </div>
 
-            <div class="settings-item">
-              <div class="settings-info">
-                <h3 class="settings-name">{{ t('settings.twoFactorAuth') }}</h3>
-                <p class="settings-description">{{ t('settings.twoFactorAuth.description') }}</p>
-              </div>
-              <div class="settings-control">
-                <button class="btn btn-secondary">{{ t('settings.twoFactorAuth.enable') }}</button>
-              </div>
-            </div>
-          </div>
-        </div>
 
-          <!-- Trading Options -->
-          <div v-if="activeSection === 'trading'" class="settings-section">
-            <div class="settings-items">
-            <div class="settings-item">
-              <div class="settings-info">
-                <h3 class="settings-name">{{ t('settings.defaultTradingPair') }}</h3>
-                <p class="settings-description">{{ t('settings.defaultTradingPair.description') }}</p>
-              </div>
-              <div class="settings-control">
-                <select class="settings-select">
-                  <option value="ETH/USDT">{{ t('settings.defaultTradingPair.ethUsdt') }}</option>
-                  <option value="BTC/USDT">{{ t('settings.defaultTradingPair.btcUsdt') }}</option>
-                  <option value="USDC/USDT">{{ t('settings.defaultTradingPair.usdcUsdt') }}</option>
-                </select>
-              </div>
-            </div>
 
-            <div class="settings-item">
-              <div class="settings-info">
-                <h3 class="settings-name">{{ t('settings.autoConfirmTrades') }}</h3>
-                <p class="settings-description">{{ t('settings.autoConfirmTrades.description') }}</p>
-              </div>
-              <div class="settings-control">
-                <label class="toggle-switch">
-                  <input type="checkbox">
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-            </div>
-
-            <div class="settings-item">
-              <div class="settings-info">
-                <h3 class="settings-name">{{ t('settings.priceAlerts') }}</h3>
-                <p class="settings-description">{{ t('settings.priceAlerts.description') }}</p>
-              </div>
-              <div class="settings-control">
-                <button class="btn btn-secondary">{{ t('settings.priceAlerts.manage') }}</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-          <!-- Privacy Options -->
-          <div v-if="activeSection === 'privacy'" class="settings-section">
-            <div class="settings-items">
-            <div class="settings-item">
-              <div class="settings-info">
-                <h3 class="settings-name">{{ t('settings.dataCollection') }}</h3>
-                <p class="settings-description">{{ t('settings.dataCollection.description') }}</p>
-              </div>
-              <div class="settings-control">
-                <label class="toggle-switch">
-                  <input type="checkbox" checked>
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-            </div>
-
-            <div class="settings-item">
-              <div class="settings-info">
-                <h3 class="settings-name">{{ t('settings.marketingEmails') }}</h3>
-                <p class="settings-description">{{ t('settings.marketingEmails.description') }}</p>
-              </div>
-              <div class="settings-control">
-                <label class="toggle-switch">
-                  <input type="checkbox">
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-            </div>
-
-            <div class="settings-item">
-              <div class="settings-info">
-                <h3 class="settings-name">{{ t('settings.thirdPartySharing') }}</h3>
-                <p class="settings-description">{{ t('settings.thirdPartySharing.description') }}</p>
-              </div>
-              <div class="settings-control">
-                <label class="toggle-switch">
-                  <input type="checkbox">
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-          <!-- Advanced Settings -->
-          <div v-if="activeSection === 'advanced'" class="settings-section">
-            <div class="settings-items">
-            <div class="settings-item">
-              <div class="settings-info">
-                <h3 class="settings-name">{{ t('settings.apiAccess') }}</h3>
-                <p class="settings-description">{{ t('settings.apiAccess.description') }}</p>
-              </div>
-              <div class="settings-control">
-                <button class="btn btn-secondary">{{ t('settings.apiAccess.configure') }}</button>
-              </div>
-            </div>
-
-            <div class="settings-item">
-              <div class="settings-info">
-                <h3 class="settings-name">{{ t('settings.exportData') }}</h3>
-                <p class="settings-description">{{ t('settings.exportData.description') }}</p>
-              </div>
-              <div class="settings-control">
-                <button class="btn btn-secondary">{{ t('settings.exportData.button') }}</button>
-              </div>
-            </div>
-
-            <!-- <div class="settings-item">
-              <div class="settings-info">
-                <h3 class="settings-name">Developer Mode</h3>
-                <p class="settings-description">Enable developer tools and debug mode</p>
-              </div>
-              <div class="settings-control">
-                <label class="toggle-switch">
-                  <input type="checkbox">
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-            </div> -->
-
-            <div class="settings-item">
-              <div class="settings-info">
-                <h3 class="settings-name">{{ t('settings.analytics') }}</h3>
-                <p class="settings-description">{{ t('settings.analytics.description') }}</p>
-              </div>
-              <div class="settings-control">
-                <label class="toggle-switch">
-                  <input type="checkbox" checked>
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-            </div>
-
-            <div class="settings-item">
-              <div class="settings-info">
-                <h3 class="settings-name">{{ t('settings.resetPreferences') }}</h3>
-                <p class="settings-description">{{ t('settings.resetPreferences.description') }}</p>
-              </div>
-              <div class="settings-control">
-                <button class="btn btn-danger">{{ t('settings.resetPreferences.button') }}</button>
-              </div>
-            </div>
-            </div> 
-          </div>
           </div>
 
           <!-- 移动端：显示所有section -->
@@ -473,18 +285,6 @@
                 <p class="section-description">基本应用程序设置和偏好</p>
               </div>
               <div class="settings-items">
-                <div class="settings-item">
-                  <div class="settings-info">
-                    <h3 class="settings-name">语言</h3>
-                    <p class="settings-description">选择您偏好的语言</p>
-                  </div>
-                  <div class="settings-control">
-                    <select class="settings-select">
-                      <option value="en">英语</option>
-                      <option value="zh">中文</option>
-                    </select>
-                  </div>
-                </div>
 
                 <div class="settings-item">
                   <div class="settings-info">
@@ -683,11 +483,7 @@ export default {
         { id: 'security', title: 'settings.security', icon: '', description: 'settings.security.description' },
         { id: 'wallet', title: 'settings.wallet', icon: '', description: 'settings.wallet.description' },
         { id: 'notifications', title: 'settings.notifications', icon: '', description: 'settings.notifications.description' },
-        { id: 'performance', title: 'settings.performance', icon: '', description: 'settings.performance.description' },
-        { id: 'account', title: 'settings.account', icon: '', description: 'settings.account.description' },
-        { id: 'trading', title: 'settings.trading', icon: '', description: 'settings.trading.description' },
-        { id: 'privacy', title: 'settings.privacy', icon: '', description: 'settings.privacy.description' },
-        { id: 'advanced', title: 'settings.advanced', icon: '', description: 'settings.advanced.description' }
+        { id: 'performance', title: 'settings.performance', icon: '', description: 'settings.performance.description' }
       ],
       settings: {
         language: 'en',

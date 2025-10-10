@@ -63,6 +63,14 @@
             <!-- <button v-if="!connected || !selectedAccount" class="mm-btn mm-outline" style="margin-top:6px;" @click="connect">Connect MetaMask</button> -->
           </div>
         </div>
+        
+        <!-- Current Network Section -->
+        <div class="mm-network-section">
+          <div class="mm-network-card">
+            <div class="mm-network-title">{{ t('wallet.currentNetwork') }}: {{ networkLabel }}</div>
+            <div class="mm-network-subtitle">{{ t('wallet.networkSwitchNote') }}</div>
+          </div>
+        </div>
       </header>
     </section>
 
@@ -104,12 +112,6 @@
     
 
       <!-- Tokens 列表 -->
-        <!-- 当前网络 -->
-        <div class="mm-card">
-          <div class="mm-card-value">{{ t('wallet.currentNetwork') }}: {{ networkLabel }}</div>
-          <!-- <div class="mm-card-sub">Chain ID: {{ chainId }}</div> -->
-           <p class="mm-card-sub">当您在钱包中切换网络时，本页网络会自动切换</p>
-          </div>
       <div v-if="activeTab==='tokens'" class="mm-tokenlist">
         
         <div class="mm-token">
@@ -186,27 +188,13 @@ activeTab, connect, disconnect, refreshTokens, copyAddress,
 addCustomToken, audPrice, priceChange24h
 } = useWallet()
 
-// 检测钱包类型并返回对应的图标
+// 返回MetaMask钱包图标
 const getWalletIcon = () => {
-  if (!connected.value || !window.ethereum) {
-    return '/icons/default-wallet.png' // 默认图标
+  if (!connected.value) {
+    return '/icons/login-wallet-icon.png' // 未连接时的默认图标
   }
   
-  // 检测 MetaMask
-  if (window.ethereum.isMetaMask) {
-    return '/icons/metamask.png'
-  }
-  
-  // 检测其他钱包类型
-  if (window.ethereum.isCoinbaseWallet) {
-    return '/icons/coinbase.png'
-  }
-  
-  if (window.ethereum.isRabby) {
-    return '/icons/rabby.png'
-  }
-  
-  // 默认返回 MetaMask 图标（因为大多数情况下都是 MetaMask）
+  // 始终返回MetaMask图标
   return '/icons/metamask.png'
 }
 
@@ -1346,8 +1334,54 @@ min-height: 100vh;
 }
 
 /* 顶部条 */
-.mm-topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
-.mm-account{display:flex;align-items:center;gap:12px;}
+.mm-topbar{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.mm-account{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+/* Network Section */
+.mm-network-section {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  height: 52px; /* 与avatar高度保持一致 */
+}
+
+.mm-network-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 16px;
+  min-width: 280px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mm-network-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+  line-height: 1.2;
+}
+
+.mm-network-subtitle {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.2;
+}
 .mm-avatar{
   width:52px;
   height:52px;
@@ -2189,6 +2223,38 @@ color: #6b7280;
 }
 
 @media (max-width: 768px) {
+/* 移动端topbar布局调整 */
+.mm-topbar {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.mm-account {
+  flex: none;
+}
+
+.mm-network-section {
+  flex: none;
+  justify-content: center;
+  height: auto; /* 移动端不需要固定高度 */
+}
+
+.mm-network-card {
+  min-width: auto;
+  width: 100%;
+  padding: 12px 16px;
+  height: auto; /* 移动端自适应高度 */
+}
+
+.mm-network-title {
+  font-size: 14px;
+}
+
+.mm-network-subtitle {
+  font-size: 11px;
+}
+
 /* 移动端筛选器进一步优化 */
 .mm-activity-filters {
   padding: 12px 30px;
