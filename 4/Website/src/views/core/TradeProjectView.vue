@@ -8,12 +8,103 @@
             <div class="spinner"></div>
           </div>
           <div class="loading-content">
-            <h2 class="loading-title">Processing...</h2>
-            <p class="loading-description">We are processing your transaction request, please wait...</p>
+            <h2 class="loading-title">{{ t('trade.processingTitle') }}</h2>
+            <p class="loading-description">{{ t('trade.processingDesc') }}</p>
             <div class="loading-status">
               <div class="status-indicator"></div>
               <span>{{ loadingStatus }}</span>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 认购状态弹窗 -->
+    <div v-if="showSubscriptionModal" class="modal-overlay" @click="closeSubscriptionModal">
+      <div class="modal-content subscription-modal" @click.stop>
+        <div class="subscription-container">
+          
+          <!-- 提交中状态 -->
+          <div v-if="subscriptionStatus === 'submitting'" class="subscription-status submitting">
+            <div class="status-icon">
+              <div class="loading-spinner"></div>
+            </div>
+            <div class="status-content">
+              <h2 class="status-title">{{ t('trade.submitting') }}</h2>
+              <p class="status-description">{{ t('trade.submittingDesc') }}</p>
+            </div>
+          </div>
+          
+          <!-- 提交成功状态 -->
+          <div v-else-if="subscriptionStatus === 'submitted'" class="subscription-status submitted">
+            <div class="status-icon">
+              <div class="success-checkmark">
+                <div class="checkmark-stem"></div>
+                <div class="checkmark-kick"></div>
+              </div>
+            </div>
+            <div class="status-content">
+              <h2 class="status-title">{{ t('trade.submitted') }}</h2>
+              <p class="status-description">{{ t('trade.submittedDesc') }}</p>
+              
+              <div class="subscription-details">
+                <div class="detail-card">
+                  <div class="detail-header">
+                    <span class="detail-label">{{ tradeType === 'buy' ? t('trade.subscriptionSummary') : t('trade.redemptionSummary') }}</span>
+                  </div>
+                  <div class="detail-grid">
+                    <div class="detail-item">
+                      <span class="detail-key">{{ t('trade.projectCode') }}:</span>
+                      <span class="detail-value">{{ subscriptionData.projectCode }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-key">{{ t('trade.projectName') }}:</span>
+                      <span class="detail-value">{{ subscriptionData.projectName }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-key">{{ t('trade.tradeType') }}:</span>
+                      <span class="detail-value">{{ subscriptionData.tradeType === 'buy' ? t('trade.tokenPurchase') : t('trade.interestRedemption') }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-key">{{ t('trade.tokenAmount') }}:</span>
+                      <span class="detail-value">{{ subscriptionData.amount }} {{ t('trade.tokens') }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-key">{{ t('trade.annualYield') }}:</span>
+                      <span class="detail-value">{{ subscriptionData.interestRate }}%</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-key">{{ t('trade.expectedReturn') }}:</span>
+                      <span class="detail-value">{{ subscriptionData.expectedReturn }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 提交失败状态 -->
+          <div v-else-if="subscriptionStatus === 'failed'" class="subscription-status failed">
+            <div class="status-icon">
+              <div class="error-icon">✕</div>
+            </div>
+            <div class="status-content">
+              <h2 class="status-title">{{ t('trade.failed') }}</h2>
+              <p class="status-description">{{ subscriptionError }}</p>
+            </div>
+          </div>
+          
+          <!-- 操作按钮 -->
+          <div class="subscription-actions">
+            <button v-if="subscriptionStatus === 'submitted'" class="btn primary" @click="viewPortfolioFromSubscription">
+              {{ t('trade.viewPortfolio') }}
+            </button>
+            <button v-if="subscriptionStatus === 'failed'" class="btn primary" @click="closeSubscriptionModal">
+              {{ t('trade.resubmit') }}
+            </button>
+            <button class="btn secondary" @click="closeSubscriptionModal">
+              {{ t('common.close') }}
+            </button>
           </div>
         </div>
       </div>
@@ -190,7 +281,6 @@
             <h1 class="project-title"> {{ projectData?.code || 'Loading...' }}   
               <!-- •{{ projectData?.name }}  -->
             </h1>
-            <p class="project-subtitle">{{ projectData?.subtitle || 'Loading...' }}</p>
             <div class="project-meta">
               <span class="meta-item">{{ projectData?.propertyType || 'Loading...' }}</span>
               <span class="meta-item">{{ projectData?.propertyState || 'Loading...' }}</span>
@@ -215,7 +305,7 @@
                 </div>
                 <div class="metric-item">
                   <span class="metric-label">认购比例</span>
-                  <span class="metric-value" style="color: #3b82f6;">{{ projectData?.subscriptionProgress?.toFixed(0) + '%' }}</span>
+                  <span class="metric-value subscription-progress">{{ projectData?.subscriptionProgress?.toFixed(0) + '%' }}</span>
                 </div>
               </div>
             </div>
@@ -337,10 +427,10 @@
                 <span class="status-label">钱包地址：</span>
                 <span class="status-value">{{ shortAddress }}</span>
               </div>
-              <div class="wallet-status-item" v-if="connected">
+              <!-- <div class="wallet-status-item" v-if="connected">
                 <span class="status-label">网络：</span>
                 <span class="status-value">{{ networkLabel }}</span>
-              </div>
+              </div> -->
             </div>
           </div>
 
@@ -371,40 +461,37 @@
           <!-- 交易摘要 -->
           <div v-if="tradeAmount && parseFloat(tradeAmount) > 0" class="subscription-summary">
             <div class="summary-header">
-              <h3 class="summary-title">{{ tradeType === 'buy' ? '认购摘要' : '赎回摘要' }}</h3>
-              <!-- <div class="summary-badge" :class="tradeType">
-                {{ tradeType === 'buy' ? '认购' : '赎回利息' }}
-              </div> -->
+              <h3 class="summary-title">{{ tradeType === 'buy' ? t('trade.subscriptionSummary') : t('trade.redemptionSummary') }}</h3>
         </div>
 
             <div class="summary-content">
               <div class="summary-row">
-                <span class="summary-label">项目代码：</span>
+                <span class="summary-label">{{ t('trade.projectCode') }}：</span>
                 <span class="summary-value">{{ projectData?.code || 'N/A' }}</span>
       </div>
 
               <div class="summary-row">
-                <span class="summary-label">交易类型：</span>
-                <span class="summary-value">{{ tradeType === 'buy' ? '代币认购' : '利息赎回' }}</span>
+                <span class="summary-label">{{ t('trade.tradeType') }}：</span>
+                <span class="summary-value">{{ tradeType === 'buy' ? t('trade.tokenPurchase') : t('trade.interestRedemption') }}</span>
         </div> 
 
               <div class="summary-row">
-                <span class="summary-label">代币数量：</span>
-                <span class="summary-value">{{ formatNumber(tradeAmount) }} 代币</span>
+                <span class="summary-label">{{ t('trade.tokenAmount') }}：</span>
+                <span class="summary-value">{{ formatNumber(tradeAmount) }} {{ t('trade.tokens') }}</span>
       </div>
 
               <div class="summary-row">
-                <span class="summary-label">年化收益率：</span>
+                <span class="summary-label">{{ t('trade.annualYield') }}：</span>
                 <span class="summary-value">{{ projectData?.interestRate || 'N/A' }}%</span>
       </div>
 
               <div class="summary-row">
-                <span class="summary-label">预期收益：</span>
+                <span class="summary-label">{{ t('trade.expectedReturn') }}：</span>
                 <span class="summary-value">{{ calculateExpectedReturn() }}</span>
       </div>
           
               <div class="summary-row">
-                <span class="summary-label">贷款期限：</span>
+                <span class="summary-label">{{ t('trade.loanTerm') }}：</span>
                 <span class="summary-value">{{ projectData?.loanTerm || 'N/A' }}</span>
         </div>
         </div>
@@ -413,7 +500,7 @@
               <div class="risk-warning">
                 <div class="warning-icon">⚠️</div>
                 <div class="warning-text">
-                  <p>投资需自担风险。请仔细阅读项目详情,并评估自身的风险承受能力。</p>
+                  <p>{{ t('trade.riskWarning') }}</p>
         </div>
           </div>
           </div>
@@ -427,7 +514,7 @@
             :disabled="!isFormValid || loading"
             >
             <span class="btn-text">
-                {{ loading ? 'Processing...' : (tradeType === 'buy' ? 'Confirm Subscription' : 'Confirm Redemption') }}
+                {{ loading ? t('trade.processing') : (tradeType === 'buy' ? t('trade.confirmSubscription') : t('trade.confirmRedemption')) }}
                   </span>
             </button>
                 </div>
@@ -483,7 +570,7 @@
           </div>
         </div> -->
       </div>
-    </div>
+  </div>
 </template>
 
 <script>
@@ -521,6 +608,18 @@ export default {
         transactionHash: '',
         blockNumber: 0
       },
+      // 认购状态弹窗
+      showSubscriptionModal: false,
+      subscriptionStatus: 'submitting', // submitting, submitted, failed
+      subscriptionData: {
+        tradeType: '',
+        amount: '',
+        projectCode: '',
+        transactionHash: '',
+        blockNumber: 0,
+        messageId: ''
+      },
+      subscriptionError: '',
       // 项目数据
       projectData: null,
       projectLoading: false,
@@ -930,7 +1029,7 @@ export default {
       return match ? parseInt(match[1]) : 12
     },
     
-    // 一键交易流程
+    // 一键交易流程 - 取消MetaMask交互
     async executeOneClickTrade() {
       if (!this.isFormValid) {
         console.warn('⚠️ TradeProjectView: 表单验证失败，无法执行交易')
@@ -939,10 +1038,10 @@ export default {
       
       try {
         this.loading = true
-        this.showLoadingModal = true
-        this.loadingStatus = '开始一键交易流程...'
+        this.showSubscriptionModal = true
+        this.subscriptionStatus = 'submitting'
         
-        console.log('🚀 TradeProjectView: 开始一键交易流程', {
+        console.log('🚀 TradeProjectView: 开始认购流程', {
           projectCode: this.projectCode,
           tradeType: this.tradeType,
           amount: this.tradeAmount,
@@ -950,47 +1049,151 @@ export default {
         })
         
         // 步骤1: 准备交易数据
-        this.loadingStatus = '准备交易数据...'
         const tradeData = {
           projectCode: this.projectCode,
           tradeType: this.tradeType,
           amount: parseFloat(this.tradeAmount),
-          userAddress: this.address
+          userAddress: this.address,
+          price: 1.00, // 固定价格
+          total: parseFloat(this.tradeAmount),
+          transactionHash: 'sim_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+          blockNumber: Math.floor(Math.random() * 1000000) + 1000000,
+          userId: this.getUserId(),
+          // 合约信息字段
+          tradeContractABI: '',
+          compliantERC20ABI: '',
+          tokenAddressNative: this.projectData?.principalTokenAddress || '',
+          tokenAddressInterest: this.projectData?.interestTokenAddress || '',
+          loanIssuerWalletAddress: this.projectData?.loanIssuerAddress || ''
         }
         
-        // 步骤2: 执行MetaMask交易
-        this.loadingStatus = '执行MetaMask交易...'
-        const metamaskResult = await this.executeMetaMaskTransaction()
+        // 步骤2: 提交到后端API
+        console.log('📤 提交认购数据到后端:', tradeData)
+        const response = await this.submitSubscriptionToAPI(tradeData)
         
-        // 步骤3: 获取现有合约地址
-        this.loadingStatus = '获取合约地址...'
-        const contractAddresses = await this.getExistingContractAddresses()
-        
-        // 步骤4: 显示成功结果
-        this.loadingStatus = '交易完成!'
-        this.showSuccessModal = true
-        this.successData = {
-          tradeType: this.tradeType,
-          amount: this.tradeAmount,
-          transactionHash: metamaskResult.transactionHash,
-          blockNumber: metamaskResult.blockNumber,
-          principalTokenAddress: contractAddresses.principalTokenAddress,
-          interestTokenAddress: contractAddresses.interestTokenAddress
+        if (response.success) {
+          // 步骤3: 显示成功结果
+          this.subscriptionStatus = 'submitted'
+          this.subscriptionData = {
+            tradeType: this.tradeType,
+            amount: this.tradeAmount,
+            projectCode: this.projectCode,
+            projectName: this.projectData?.name || '',
+            interestRate: this.projectData?.interestRate || 'N/A',
+            expectedReturn: this.calculateExpectedReturn(),
+            messageId: response.messageId
+          }
+          
+          console.log('✅ TradeProjectView: 认购流程完成')
+        } else {
+          throw new Error(response.message || '认购提交失败')
         }
-        
-        console.log('✅ TradeProjectView: 一键交易流程完成')
         
       } catch (error) {
-        console.error('❌ TradeProjectView: 一键交易失败:', error)
-        this.error = error.message || '交易失败，请重试'
-        alert(`交易失败: ${this.error}`)
+        console.error('❌ TradeProjectView: 认购失败:', error)
+        this.subscriptionStatus = 'failed'
+        this.subscriptionError = error.message || '认购失败，请重试'
       } finally {
         this.loading = false
-        this.showLoadingModal = false
       }
     },
     
-    // MetaMask交易执行
+    // 获取用户ID
+    getUserId() {
+      try {
+        const userInfo = localStorage.getItem('userInfo')
+        if (userInfo) {
+          const user = JSON.parse(userInfo)
+          return user.user_id || user.id || null
+        }
+      } catch (error) {
+        console.error('获取用户ID失败:', error)
+      }
+      return null
+    },
+    
+    // 提交认购到后端API - 使用远程数据库
+    async submitSubscriptionToAPI(tradeData) {
+      try {
+        console.log('📤 提交认购数据到远程数据库API:', tradeData)
+        
+        // ⚠️ 重要：这是后端API服务器地址，不是数据库地址
+        // 端口应该是3000（后端API端口），不是3306（MySQL数据库端口）
+        const apiUrl = 'http://localhost:3000'
+        if (!apiUrl) {
+          throw new Error('远程API地址未配置，请设置VUE_APP_API_URL环境变量')
+        }
+        
+        const endpoint = `${apiUrl}/api/subscriptions`
+        
+        // 转换数据格式以匹配新的API（基于认购摘要信息）
+        const subscriptionData = {
+          user_id: tradeData.userId,
+          user_wallet_address: tradeData.userAddress,
+          project_code: tradeData.projectCode,
+          project_name: this.projectData?.name || this.projectData?.projectName || '',
+          trade_type: tradeData.tradeType.toUpperCase() === 'BUY' ? 'BUY_TOKEN' : 'SELL_INTEREST',
+          token_amount: parseFloat(this.tradeAmount),
+          interest_rate: this.projectData?.interestRate || null,
+          expected_return: this.calculateExpectedReturn(),
+          token_address_native: tradeData.tokenAddressNative,
+          token_address_interest: tradeData.tokenAddressInterest,
+          loan_issuer_address: tradeData.loanIssuerWalletAddress
+        }
+        
+        console.log('📤 API端点:', endpoint)
+        console.log('📤 提交数据:', subscriptionData)
+        
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(subscriptionData)
+        })
+        
+        const result = await response.json()
+        console.log('📤 远程API响应:', result)
+        
+        if (response.ok && result.status === 0) {
+          return {
+            success: true,
+            messageId: result.data?.id || 'unknown'
+          }
+        } else {
+          return {
+            success: false,
+            message: result.message || '认购提交失败'
+          }
+        }
+      } catch (error) {
+        console.error('❌ 提交认购到远程数据库失败:', error)
+        return {
+          success: false,
+          message: `提交认购失败: ${error.message}`
+        }
+      }
+    },
+    
+    // 关闭认购弹窗
+    closeSubscriptionModal() {
+      this.showSubscriptionModal = false
+      this.subscriptionStatus = 'submitting'
+      this.subscriptionError = ''
+    },
+    
+    // 查看投资组合
+    viewPortfolioFromSubscription() {
+      this.closeSubscriptionModal()
+      this.$router.push('/portfolio')
+    },
+    
+    // 复制交易哈希
+    copyTransactionHash() {
+      // 功能已移除，认购摘要不包含交易哈希
+    },
+    
+    // MetaMask交易执行（已废弃）
     async executeMetaMaskTransaction() {
       try {
         console.log('💳 TradeProjectView: 开始执行MetaMask交易')
@@ -1145,7 +1348,6 @@ export default {
       }
     },
     
-    
     // 复制到剪贴板
     async copyToClipboard(text) {
       try {
@@ -1257,6 +1459,14 @@ export default {
     radial-gradient(circle at 20% 80%, rgba(51, 204, 255, 0.15) 0%, transparent 50%),
     radial-gradient(circle at 80% 20%, rgba(0, 153, 204, 0.15) 0%, transparent 50%),
     radial-gradient(circle at 40% 40%, rgba(25, 25, 112, 0.1) 0%, transparent 50%);
+}
+
+/* 浅色主题下的trade页面背景 */
+[data-theme="light"] .trade-page {
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(37, 99, 235, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(147, 197, 253, 0.05) 0%, transparent 50%);
 }
 
 .container {
@@ -1379,6 +1589,13 @@ export default {
   box-shadow: 0 6px 18px rgba(0,0,0,.25);
 }
 
+/* 浅色主题下的项目信息卡片 */
+[data-theme="light"] .project-info-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 6px 18px rgba(0,0,0,.1);
+}
+
 .project-header {
   display: flex;
   align-items: flex-start;
@@ -1402,12 +1619,6 @@ export default {
   font-weight: 700;
   color: var(--text);
   margin: 0 0 8px 0;
-}
-
-.project-subtitle {
-  color: #9ca3af;
-  margin: 0 0 12px 0;
-  font-size: 14px;
 }
 
 .project-meta {
@@ -1478,6 +1689,10 @@ export default {
   font-size: 14px;
   font-weight: 700;
   color: var(--text);
+}
+
+.subscription-progress {
+  color: #3b82f6;
 }
 
 /* 合约地址区域 */
@@ -1583,6 +1798,13 @@ export default {
   box-shadow: 0 6px 18px rgba(0,0,0,.25);
 }
 
+/* 浅色主题下的交易表单卡片 */
+[data-theme="light"] .trade-form-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 6px 18px rgba(0,0,0,.1);
+}
+
 /* 项目状态卡片 */
 .project-status-card {
   background: #141426;
@@ -1590,6 +1812,13 @@ export default {
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0 6px 18px rgba(0,0,0,.25);
+}
+
+/* 浅色主题下的项目状态卡片 */
+[data-theme="light"] .project-status-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 6px 18px rgba(0,0,0,.1);
 }
 
 .status-header {
@@ -1678,6 +1907,13 @@ export default {
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0 6px 18px rgba(0,0,0,.25);
+}
+
+/* 浅色主题下的项目最新动态卡片 */
+[data-theme="light"] .project-news-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 6px 18px rgba(0,0,0,.1);
 }
 
 .news-header {
@@ -1799,7 +2035,7 @@ export default {
 
 /* 认购摘要样式 */
 .subscription-summary {
-  background: var(--gradient-bg);
+  background: #f3f4f6; /* 浅灰色背景 */
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 20px;
@@ -2432,6 +2668,477 @@ export default {
   .success-actions {
   flex-direction: column;
   }
+}
+
+/* 认购状态弹窗样式 */
+.subscription-modal {
+  max-width: 600px;
+}
+
+.subscription-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 24px;
+}
+
+.subscription-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.subscription-status.submitting {
+  color: #3b82f6;
+}
+
+.subscription-status.submitted {
+  color: #16a34a;
+}
+
+.subscription-status.failed {
+  color: #dc2626;
+}
+
+.status-icon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.1);
+  border: 2px solid #3b82f6;
+}
+
+.subscription-status.submitted .status-icon {
+  background: rgba(22, 163, 74, 0.1);
+  border-color: #16a34a;
+}
+
+.subscription-status.failed .status-icon {
+  background: rgba(220, 38, 38, 0.1);
+  border-color: #dc2626;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(59, 130, 246, 0.3);
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.success-checkmark {
+  position: relative;
+  width: 32px;
+  height: 32px;
+}
+
+.checkmark-stem {
+  position: absolute;
+  width: 3px;
+  height: 16px;
+  background: #16a34a;
+  left: 14px;
+  top: 6px;
+  transform: rotate(45deg);
+}
+
+.checkmark-kick {
+  position: absolute;
+  width: 3px;
+  height: 10px;
+  background: #16a34a;
+  left: 8px;
+  top: 12px;
+  transform: rotate(-45deg);
+}
+
+.error-icon {
+  font-size: 24px;
+  font-weight: bold;
+  color: #dc2626;
+}
+
+.status-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.status-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.status-description {
+  font-size: 16px;
+  color: #9ca3af;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.subscription-details {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.detail-card {
+  background: rgba(55, 65, 81, 0.5);
+  border: 1px solid #374151;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: left;
+}
+
+.detail-header {
+  margin-bottom: 12px;
+}
+
+.detail-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.detail-key {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.detail-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.transaction-hash {
+  cursor: pointer;
+  color: #3b82f6 !important;
+  text-decoration: underline;
+}
+
+.transaction-hash:hover {
+  color: #60a5fa !important;
+}
+
+.subscription-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* 浅色主题适配 */
+[data-theme="light"] .subscription-modal {
+  background: #ffffff;
+  border-color: #e5e7eb;
+}
+
+/* 浅色主题下的文本颜色 */
+[data-theme="light"] .breadcrumb {
+  color: #6b7280;
+}
+
+[data-theme="light"] .crumb-back {
+  color: #60a5fa; /* 浅蓝色 */
+}
+
+[data-theme="light"] .sep {
+  color: #9ca3af;
+}
+
+[data-theme="light"] .loading-text,
+[data-theme="light"] .error-container {
+  color: #6b7280;
+}
+
+[data-theme="light"] .error-container h2 {
+  color: #dc2626;
+}
+
+/* 浅色主题下的项目标签 */
+[data-theme="light"] .project-tag {
+  background: rgba(59, 130, 246, 0.1);
+  color: #60a5fa; /* 浅蓝色 */
+}
+
+/* 浅色主题下的指标标签和值 */
+[data-theme="light"] .metric-label {
+  color: #6b7280;
+}
+
+[data-theme="light"] .metric-value {
+  color: #111827;
+}
+
+[data-theme="light"] .subscription-progress {
+  color: #60a5fa; /* 浅蓝色 */
+}
+
+/* 浅色主题下的合约地址标题 */
+[data-theme="light"] .contract-address-title {
+  color: #60a5fa; /* 浅蓝色 */
+}
+
+/* 浅色主题下的合约地址值 */
+[data-theme="light"] .contract-address-value {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+}
+
+[data-theme="light"] .contract-address-value:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+/* 浅色主题下的表单输入框 */
+[data-theme="light"] .form-input {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+}
+
+[data-theme="light"] .form-input:focus {
+  border-color: #60a5fa; /* 浅蓝色 */
+}
+
+[data-theme="light"] .form-input::placeholder {
+  color: #9ca3af;
+}
+
+/* 浅色主题下的交易类型按钮 */
+[data-theme="light"] .trade-type-btn {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+}
+
+[data-theme="light"] .trade-type-btn:hover {
+  background: #f3f4f6;
+}
+
+[data-theme="light"] .trade-type-btn.active {
+  background: #60a5fa; /* 浅蓝色 */
+  border-color: #60a5fa;
+}
+
+[data-theme="light"] .trade-type-btn.active:hover {
+  background: #3b82f6;
+}
+
+/* 浅色主题下的主要按钮 */
+[data-theme="light"] .btn.primary {
+  background: #60a5fa; /* 浅蓝色 */
+  color: #ffffff;
+}
+
+[data-theme="light"] .btn.primary:hover:not(:disabled) {
+  background: #3b82f6;
+}
+
+[data-theme="light"] .btn.primary:disabled {
+  background: #d1d5db;
+  color: #9ca3af;
+}
+
+/* 浅色主题下的次要按钮 */
+[data-theme="light"] .btn.secondary {
+  background: #f3f4f6;
+  color: #111827;
+  border: 1px solid #d1d5db;
+}
+
+[data-theme="light"] .btn.secondary:hover {
+  background: #e5e7eb;
+}
+
+/* 浅色主题下的金额显示 */
+[data-theme="light"] .amount-value {
+  color: #60a5fa; /* 浅蓝色 */
+}
+
+[data-theme="light"] .amount-currency {
+  color: #6b7280;
+}
+
+/* 浅色主题下的摘要标签和值 */
+[data-theme="light"] .summary-label {
+  color: #6b7280;
+}
+
+[data-theme="light"] .summary-value {
+  color: #111827;
+}
+
+[data-theme="light"] .summary-value.amount {
+  color: #059669;
+}
+
+/* 浅色主题下的风险警告 */
+[data-theme="light"] .summary-footer p {
+  color: #f59e0b;
+}
+
+/* 浅色主题下的合约地址弹窗 */
+[data-theme="light"] .contract-address-modal {
+  background: #ffffff;
+}
+
+[data-theme="light"] .close-btn {
+  color: #6b7280;
+}
+
+[data-theme="light"] .close-btn:hover {
+  color: #111827;
+  background: #f3f4f6;
+}
+
+[data-theme="light"] .contract-address-description {
+  color: #6b7280;
+}
+
+[data-theme="light"] .contract-address-item {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+
+[data-theme="light"] .contract-address-label {
+  color: #6b7280;
+}
+
+[data-theme="light"] .contract-address-value {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #111827;
+}
+
+[data-theme="light"] .contract-address-value:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+/* 浅色主题下的新闻相关 */
+[data-theme="light"] .news-label {
+  color: #60a5fa; /* 浅蓝色 */
+}
+
+[data-theme="light"] .news-text {
+  color: #374151;
+}
+
+/* 浅色主题下的状态相关 */
+[data-theme="light"] .status-label {
+  color: #6b7280;
+}
+
+[data-theme="light"] .status-value.connected {
+  color: #059669;
+}
+
+[data-theme="light"] .status-value.disconnected {
+  color: #dc2626;
+}
+
+[data-theme="light"] .status-description {
+  color: #6b7280;
+}
+
+[data-theme="light"] .subscription-status.submitting {
+  color: #2563eb;
+}
+
+[data-theme="light"] .subscription-status.submitted {
+  color: #059669;
+}
+
+[data-theme="light"] .subscription-status.failed {
+  color: #dc2626;
+}
+
+[data-theme="light"] .status-icon {
+  background: rgba(37, 99, 235, 0.1);
+  border-color: #2563eb;
+}
+
+[data-theme="light"] .subscription-status.submitted .status-icon {
+  background: rgba(5, 150, 105, 0.1);
+  border-color: #059669;
+}
+
+[data-theme="light"] .subscription-status.failed .status-icon {
+  background: rgba(220, 38, 38, 0.1);
+  border-color: #dc2626;
+}
+
+[data-theme="light"] .loading-spinner {
+  border-color: rgba(37, 99, 235, 0.3);
+  border-top-color: #2563eb;
+}
+
+[data-theme="light"] .checkmark-stem,
+[data-theme="light"] .checkmark-kick {
+  background: #059669;
+}
+
+[data-theme="light"] .status-description {
+  color: #6b7280;
+}
+
+[data-theme="light"] .detail-card {
+  background: rgba(249, 250, 251, 0.8);
+  border-color: #e5e7eb;
+}
+
+[data-theme="light"] .detail-label {
+  color: #6b7280;
+}
+
+[data-theme="light"] .detail-key {
+  color: #6b7280;
+}
+
+[data-theme="light"] .detail-value {
+  color: #111827;
+}
+
+[data-theme="light"] .transaction-hash {
+  color: #2563eb !important;
+}
+
+[data-theme="light"] .transaction-hash:hover {
+  color: #3b82f6 !important;
+}
+
+/* 浅色主题下的认购摘要背景 */
+[data-theme="light"] .subscription-summary {
+  background: #f9fafb; /* 更浅的灰色背景 */
 }
 </style>
 

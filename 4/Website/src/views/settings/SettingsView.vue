@@ -85,6 +85,46 @@
               </div>
             </div>
 
+            <!-- Notification Settings in General -->
+            <div class="settings-item">
+              <div class="settings-info">
+                <h3 class="settings-name">{{ t('settings.pushNotifications') }}</h3>
+                <p class="settings-description">{{ t('settings.pushNotifications.description') }}</p>
+              </div>
+              <div class="settings-control">
+                <label class="toggle-switch">
+                  <input type="checkbox" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="settings-item">
+              <div class="settings-info">
+                <h3 class="settings-name">{{ t('settings.emailNotifications') }}</h3>
+                <p class="settings-description">{{ t('settings.emailNotifications.description') }}</p>
+              </div>
+              <div class="settings-control">
+                <label class="toggle-switch">
+                  <input type="checkbox" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="settings-item">
+              <div class="settings-info">
+                <h3 class="settings-name">{{ t('settings.smsNotifications') }}</h3>
+                <p class="settings-description">{{ t('settings.smsNotifications.description') }}</p>
+              </div>
+              <div class="settings-control">
+                <label class="toggle-switch">
+                  <input type="checkbox">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
             <!-- <div class="settings-item">
               <div class="settings-info">
                 <h3 class="settings-name">{{ t('settings.introVideo') }}</h3>
@@ -182,50 +222,6 @@
           </div>
         </div>
 
-          <!-- Notification Settings -->
-          <div v-if="activeSection === 'notifications'" class="settings-section">
-            <div class="settings-items">
-            <div class="settings-item">
-              <div class="settings-info">
-                <h3 class="settings-name">{{ t('settings.pushNotifications') }}</h3>
-                <p class="settings-description">{{ t('settings.pushNotifications.description') }}</p>
-              </div>
-              <div class="settings-control">
-                <label class="toggle-switch">
-                  <input type="checkbox" checked>
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-            </div>
-
-            <div class="settings-item">
-              <div class="settings-info">
-                <h3 class="settings-name">{{ t('settings.emailNotifications') }}</h3>
-                <p class="settings-description">{{ t('settings.emailNotifications.description') }}</p>
-              </div>
-              <div class="settings-control">
-                <label class="toggle-switch">
-                  <input type="checkbox" checked>
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-            </div>
-
-            <div class="settings-item">
-              <div class="settings-info">
-                <h3 class="settings-name">{{ t('settings.smsNotifications') }}</h3>
-                <p class="settings-description">{{ t('settings.smsNotifications.description') }}</p>
-              </div>
-              <div class="settings-control">
-                <label class="toggle-switch">
-                  <input type="checkbox">
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-
           <!-- Performance Settings -->
           <div v-if="activeSection === 'performance'" class="settings-section">
             <div class="settings-items">
@@ -318,6 +314,46 @@
                   </div>
                 </div>
 
+                <!-- Notification Settings in Mobile General -->
+                <div class="settings-item">
+                  <div class="settings-info">
+                    <h3 class="settings-name">推送通知</h3>
+                    <p class="settings-description">接收浏览器推送通知</p>
+                  </div>
+                  <div class="settings-control">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="settings-item">
+                  <div class="settings-info">
+                    <h3 class="settings-name">邮件通知</h3>
+                    <p class="settings-description">接收邮件通知</p>
+                  </div>
+                  <div class="settings-control">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="settings-item">
+                  <div class="settings-info">
+                    <h3 class="settings-name">短信通知</h3>
+                    <p class="settings-description">接收短信通知</p>
+                  </div>
+                  <div class="settings-control">
+                    <label class="toggle-switch">
+                      <input type="checkbox">
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+
                 <div class="settings-item">
                   <div class="settings-info">
                     <h3 class="settings-name">开场视频</h3>
@@ -406,40 +442,6 @@
               </div>
             </div>
 
-            <!-- Notification Settings -->
-            <div class="settings-section mobile-section">
-              <div class="section-header">
-                <h3 class="section-title">通知设置</h3>
-                <p class="section-description">管理您的通知偏好</p>
-              </div>
-              <div class="settings-items">
-                <div class="settings-item">
-                  <div class="settings-info">
-                    <h3 class="settings-name">邮件通知</h3>
-                    <p class="settings-description">接收邮件通知</p>
-                  </div>
-                  <div class="settings-control">
-                    <label class="toggle-switch">
-                      <input type="checkbox" checked>
-                      <span class="toggle-slider"></span>
-                    </label>
-                  </div>
-                </div>
-
-                <div class="settings-item">
-                  <div class="settings-info">
-                    <h3 class="settings-name">推送通知</h3>
-                    <p class="settings-description">接收浏览器推送通知</p>
-                  </div>
-                  <div class="settings-control">
-                    <label class="toggle-switch">
-                      <input type="checkbox">
-                      <span class="toggle-slider"></span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -482,7 +484,6 @@ export default {
         { id: 'general', title: 'settings.general', icon: '', description: 'settings.general.description' },
         { id: 'security', title: 'settings.security', icon: '', description: 'settings.security.description' },
         { id: 'wallet', title: 'settings.wallet', icon: '', description: 'settings.wallet.description' },
-        { id: 'notifications', title: 'settings.notifications', icon: '', description: 'settings.notifications.description' },
         { id: 'performance', title: 'settings.performance', icon: '', description: 'settings.performance.description' }
       ],
       settings: {

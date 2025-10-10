@@ -143,15 +143,15 @@
             <!-- 项目指标 -->
             <div class="pf-project-metrics">
               <div class="pf-project-metric">
-                <span class="pf-metric-label">LOAN SIZE</span>
+                <span class="pf-metric-label">{{ t('tobelisted.loanSize') }}</span>
                 <span class="pf-metric-value">AUD{{ formatNumber(p.loanAmount)}}</span>
               </div>
               <div class="pf-project-metric">
-                <span class="pf-metric-label">EST. YIELD (IRR)</span>
+                <span class="pf-metric-label">{{ t('tobelisted.estYield') }}</span>
                 <span class="pf-metric-value" style="color: #16a34a;">{{ p.interestRate }}%/年</span>
               </div>
               <div class="pf-project-metric">
-                <span class="pf-metric-label">TERM</span>
+                <span class="pf-metric-label">{{ t('tobelisted.term') }}</span>
                 <span class="pf-metric-value">{{ p.loanTermMonths }}月</span>
               </div>
             </div>
@@ -159,11 +159,11 @@
             <div class="pf-investment-progress">
               <div class="pf-progress-metrics">
                 <div class="pf-progress-metric">
-                  <span class="pf-progress-label">已认购</span>
+                  <span class="pf-progress-label">{{ t('tobelisted.subscribed') }}</span>
                   <span class="pf-progress-value">{{ formatNumber(p.subscribed || 0) }}</span>
                 </div>
                 <div class="pf-progress-metric">
-                  <span class="pf-progress-label">总发行量</span>
+                  <span class="pf-progress-label">{{ t('tobelisted.totalOffering') }}</span>
                   <span class="pf-progress-value">{{ formatNumber(p.totalOffering || 0) }}</span>
                 </div>
               </div>
@@ -171,12 +171,12 @@
                 <div class="pf-progress-bar">
                   <div class="pf-progress-fill" :style="{ width: getSubscriptionProgress(p) + '%' }"></div>
                 </div>
-                <div class="pf-progress-text">{{ getSubscriptionProgress(p) }}% 已认购</div>
+                <div class="pf-progress-text">{{ getSubscriptionProgress(p) }}% {{ t('tobelisted.subscriptionProgress') }}</div>
               </div>
             </div>
             <!-- 展开/收起按钮 -->
             <div class="pf-expand-toggle" @click.stop="toggleProjectDetails(p.code)">
-              <span class="expand-text">相关方信息</span>
+              <span class="expand-text">{{ t('tobelisted.relatedPartyInfo') }}</span>
               <span class="expand-icon" :class="{ 'expanded': isProjectExpanded(p.code) }">▼</span>
             </div>
 
@@ -185,28 +185,28 @@
               <!-- 新增项目指标 -->
               <div class="pf-project-metrics pf-project-metrics-new">
                 <div class="pf-project-metric">
-                  <span class="pf-metric-label">发行主体</span>
-                  <span class="pf-metric-value">{{ p.issuer || 'TBA' }}</span>
+                  <span class="pf-metric-label">{{ t('tobelisted.issuer') }}</span>
+                  <span class="pf-metric-value">{{ p.issuer || t('tobelisted.tba') }}</span>
                 </div>
                 <div class="pf-project-metric">
-                  <span class="pf-metric-label">底层资产</span>
-                  <span class="pf-metric-value">{{ p.collateral || 'TBA' }}</span>
+                  <span class="pf-metric-label">{{ t('tobelisted.collateral') }}</span>
+                  <span class="pf-metric-value">{{ p.collateral || t('tobelisted.tba') }}</span>
                 </div>
                 <div class="pf-project-metric">
-                  <span class="pf-metric-label">保荐人</span>
-                  <span class="pf-metric-value">{{ p.sponsor || 'TBA' }}</span>
+                  <span class="pf-metric-label">{{ t('tobelisted.sponsor') }}</span>
+                  <span class="pf-metric-value">{{ p.sponsor || t('tobelisted.tba') }}</span>
                 </div>
                 <div class="pf-project-metric">
-                  <span class="pf-metric-label">评估机构</span>
-                  <span class="pf-metric-value">{{ p.valuer || 'TBA' }}</span>
+                  <span class="pf-metric-label">{{ t('tobelisted.valuer') }}</span>
+                  <span class="pf-metric-value">{{ p.valuer || t('tobelisted.tba') }}</span>
                 </div>
                 <div class="pf-project-metric">
-                  <span class="pf-metric-label">律师</span>
-                  <span class="pf-metric-value">{{ p.lawyer || 'TBA' }}</span>
+                  <span class="pf-metric-label">{{ t('tobelisted.lawyer') }}</span>
+                  <span class="pf-metric-value">{{ p.lawyer || t('tobelisted.tba') }}</span>
                 </div>
                 <div class="pf-project-metric">
-                  <span class="pf-metric-label">监管方</span>
-                  <span class="pf-metric-value">{{ p.trustee || 'TBA' }}</span>
+                  <span class="pf-metric-label">{{ t('tobelisted.trustee') }}</span>
+                  <span class="pf-metric-value">{{ p.trustee || t('tobelisted.tba') }}</span>
                 </div>
               </div>
               
@@ -219,7 +219,7 @@
                   class="etherscan-link"
                 >
                   <span class="etherscan-icon">🔗</span>
-                  <span class="etherscan-text">在Etherscan上查看</span>
+                  <span class="etherscan-text">{{ t('tobelisted.viewOnEtherscan') }}</span>
                 </a>
               </div>
             </div>
@@ -1780,7 +1780,7 @@
     }
     
     .pf-progress-metrics {
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr 1fr; /* 移动端也保持两列布局 */
       gap: 8px;
     }
     
@@ -1855,7 +1855,7 @@
     }
     
     .pf-progress-metrics {
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr 1fr; /* 超小屏幕也保持两列布局 */
       gap: 6px;
     }
     

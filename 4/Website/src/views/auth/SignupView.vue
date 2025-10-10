@@ -13,8 +13,8 @@
     </div>
 
     <!-- <div class="auth-logo"><img src="/icons/RWA-logo.png" alt="Mortgage RWA" /></div> -->
-    <h1 class="auth-title">注册您的账户</h1>
-    <!-- <p class="auth-sub">欢迎来到RWADealmaker</p> -->
+    <h1 class="auth-title">{{ t('signup.title') }}</h1>
+    <!-- <p class="auth-sub">{{ t('signup.subtitle') }}</p> -->
 
     <!-- Registration Status Display -->
     <div v-if="signupStatus" class="status" :class="signupStatusClass">
@@ -22,53 +22,53 @@
     </div>
 
     <form class="auth-form" @submit.prevent="submitSignup">
-      <label for="semail" class="auth-label">邮箱</label>
+      <label for="semail" class="auth-label">{{ t('signup.email') }}</label>
       <input
         id="semail"
         v-model.trim="user_email"
         type="email"
         class="input auth-input"
-        placeholder="输入您的邮箱"
+        :placeholder="t('signup.emailPlaceholder')"
         required
       />
       
-      <label for="spass" class="auth-label">密码</label>
+      <label for="spass" class="auth-label">{{ t('signup.password') }}</label>
       <input
         id="spass"
         v-model="user_password"
         type="password"
         class="input auth-input"
-        placeholder="输入您的密码"
+        :placeholder="t('signup.passwordPlaceholder')"
         required
       />
       
-      <!-- <label for="scpass" class="auth-label">确认密码</label> -->
+      <!-- <label for="scpass" class="auth-label">{{ t('signup.confirmPassword') }}</label> -->
       <input
         id="scpass"
         v-model="confirm_password"
         type="password"
         class="input auth-input"
         :class="{ 'password-match': passwordMatches && confirm_password, 'password-mismatch': !passwordMatches && confirm_password }"
-        placeholder="确认您的密码"
+        :placeholder="t('signup.confirmPasswordPlaceholder')"
         @input="checkPasswordMatch"
         required
       />
       
       <!-- Password Match Status Indicator -->
       <div v-if="confirm_password" class="password-status" :class="passwordMatches ? 'match' : 'mismatch'">
-        {{ passwordMatches ? '✓ 密码匹配' : '✗ 密码不匹配' }}
+        {{ passwordMatches ? t('signup.passwordMatch') : t('signup.passwordMismatch') }}
       </div>
       
-      <label for="sname" class="auth-label">姓名</label>
+      <label for="sname" class="auth-label">{{ t('signup.name') }}</label>
       <input
         id="sname"
         v-model.trim="user_name"
         type="text"
         class="input auth-input"
-        placeholder="输入您的姓名"
+        :placeholder="t('signup.namePlaceholder')"
       />
 
-      <label for="sphone" class="auth-label">电话号码</label>
+      <label for="sphone" class="auth-label">{{ t('signup.phone') }}</label>
       <div class="phone-input-container">
         <select 
           v-model="country_code" 
@@ -91,7 +91,7 @@
           v-model.trim="phone_number"
           type="tel"
           class="input auth-input phone-number-input"
-          placeholder="输入您的电话号码"
+          :placeholder="t('signup.phonePlaceholder')"
           @input="updatePhoneNumber"
           required
         />
@@ -100,26 +100,26 @@
       <div class="auth-row">
           <label class="auth-check">
             <input type="checkbox" v-model="agreeTerms" />
-            <span>我同意 
-              <a href="#" @click.prevent="goToTerms">Terms</a> and 
-              <a href="#" @click.prevent="goToPrivacy">Privacy Policy.</a>
+            <span>{{ t('signup.agreeTerms') }} 
+              <a href="#" @click.prevent="goToTerms">{{ t('signup.terms') }}</a> {{ t('signup.and') }} 
+              <a href="#" @click.prevent="goToPrivacy">{{ t('signup.privacyPolicy') }}</a>
             </span>
           </label>
       </div>
       <div class="auth-row">
         <label class="auth-check">
           <input type="checkbox" v-model="agreeEmailUpdates" />
-          <span>我想要接收来自RWA的电子邮件更新。 </span>
+          <span>{{ t('signup.agreeEmailUpdates') }} </span>
         </label>
       </div>
 
       <button class="btn orange auth-submit" type="submit" :disabled="loading || !agreeTerms" >
-        {{ loading ? '注册中...' : '注册' }}
+        {{ loading ? t('signup.signingUp') : t('signup.signupButton') }}
       </button>
 
       <p class="auth-alt">
-        已经有账户？
-        <a href="#" class="auth-link" @click.prevent="go('/login')">登录</a>
+        {{ t('signup.haveAccount') }}
+        <a href="#" class="auth-link" @click.prevent="go('/login')">{{ t('signup.loginLink') }}</a>
       </p>
     </form>
     </div>
@@ -129,6 +129,7 @@
 <script>
 import { setUserInfoFromSignup } from '@/service/userService'
 import { generateUserId } from '@/utils/userIdGenerator'
+import { useLanguage } from '@/composables/useLanguage'
 
 export default {
   name: 'SignupView',
@@ -152,6 +153,10 @@ export default {
     };
   },
     methods: {
+      t(key) {
+        const { t } = useLanguage()
+        return t(key)
+      },
       generateUserId() {
         // Use shared user_id generation utility
         return generateUserId();
@@ -487,6 +492,7 @@ export default {
   }
   
   .auth-input {
+    height: 42px; /* 保持与桌面端相同的高度 */
     padding: 12px 16px;
     font-size: 14px;
   }
@@ -497,17 +503,20 @@ export default {
   }
   
   .phone-input-container {
-    flex-direction: column;
+    flex-direction: row; /* 移动端也保持水平布局 */
     gap: 8px;
   }
   
   .country-code-select {
-    width: 100%;
-    margin-bottom: 8px;
+    flex: 0 0 auto; /* 区号选择器固定宽度 */
+    width: auto;
+    min-width: 100px;
+    margin-bottom: 0;
   }
   
   .phone-number-input {
-    width: 100%;
+    flex: 1; /* 电话输入框占据剩余空间 */
+    width: auto;
   }
 }
 
@@ -531,6 +540,7 @@ export default {
   }
   
   .auth-input {
+    height: 42px; /* 保持与桌面端相同的高度 */
     padding: 10px 14px;
     font-size: 13px;
   }
@@ -572,12 +582,13 @@ export default {
   display: flex;
   gap: 8px;
   align-items: center;
-  height: 35px;
+  height: 42px; /* 与区号选择器高度保持一致 */
+  margin-bottom: 16px; /* 与其他输入框保持一致的底部边距 */
 }
 
 .country-code-select {
   flex: 0 0 auto;
-  padding: 12px 8px;
+  padding: 12px 16px; /* 与电话输入框padding保持一致 */
   border: 1px solid #d1d5db;
   border-radius: 6px;
   background: #fff;
@@ -586,7 +597,8 @@ export default {
   cursor: pointer;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   min-width: 100px;
-  height: 45px;
+  height: 42px;
+  box-sizing: border-box; /* 确保padding包含在高度内 */
 }
 
 .country-code-select:focus {
@@ -598,7 +610,65 @@ export default {
 .phone-number-input {
   flex: 1;
   margin: 0;
-  height: 45px;
+  margin-bottom: 0; /* 确保没有底部边距 */
+  height: 42px; /* 与区号选择器高度保持一致 */
+  padding: 12px 16px; /* 与区号选择器padding保持一致 */
+  box-sizing: border-box; /* 确保padding包含在高度内 */
+}
+
+/* 输入框基础样式 */
+.input {
+  width: 100%;
+  height: 42px; /* 固定高度，与区号选择器保持一致 */
+  padding: 12px 16px; /* 调整padding以适应42px高度 */
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 500;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  margin-bottom: 16px;
+  box-sizing: border-box; /* 确保padding包含在高度内 */
+}
+
+.input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.input::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+/* 深色主题下的输入框样式 */
+[data-theme="dark"] .input {
+  background: #f9fafb; /* 浅色背景 */
+  border-color: #d1d5db;
+  color: #374151; /* 深色文字 */
+}
+
+[data-theme="dark"] .input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+[data-theme="dark"] .input::placeholder {
+  color: #6b7280;
+}
+
+/* 深色主题下的区号选择器样式 */
+[data-theme="dark"] .country-code-select {
+  background: #f9fafb; /* 浅色背景 */
+  border-color: #d1d5db;
+  color: #374151; /* 深色文字 */
+}
+
+[data-theme="dark"] .country-code-select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 </style>

@@ -37,12 +37,35 @@
           <img src="/icons/RWA-logo.svg" alt="Mortgage RWA" class="brand-logo" />
         </a>
         <nav class="menu" aria-label="Primary">
-          <!-- <a href="#" @click.prevent="go('/home')" class="menu-item">首页</a> -->
-          <a href="#" @click.prevent="go('/about')" class="menu-item">{{ t('nav.about') }}</a>
-          <a href="#" @click.prevent="go('/listedprojects')" class="menu-item">{{ t('nav.listedProjects') }}</a>
-          <a href="#" @click.prevent="go('/to-be-listed')" class="menu-item">{{ t('nav.toBeListed') }}</a>
-          <a href="#" @click.prevent="goToContactUs" class="menu-item">{{ t('nav.contact') }}</a>
-          <!-- <a href="#" @click.prevent="go('/portfolio')" class="menu-item">我的投资组合</a> -->
+          <!-- 普通用户菜单 -->
+          <template v-if="!isAdmin">
+            <!-- <a href="#" @click.prevent="go('/home')" class="menu-item">首页</a> -->
+            <a href="#" @click.prevent="go('/about')" class="menu-item">{{ t('nav.about') }}</a>
+            <a href="#" @click.prevent="go('/listedprojects')" class="menu-item">{{ t('nav.listedProjects') }}</a>
+            <a href="#" @click.prevent="go('/to-be-listed')" class="menu-item">{{ t('nav.toBeListed') }}</a>
+            <a href="#" @click.prevent="goToContactUs" class="menu-item">{{ t('nav.contact') }}</a>
+            
+            <!-- More 下拉菜单 -->
+            <!-- <div class="more-dropdown-container">
+              <button class="menu-item more-btn" @click.prevent="toggleMoreDropdown">
+                {{ t('nav.more') }}
+                <span class="more-arrow" :class="{ open: moreDropdownOpen }">▾</span>
+              </button>
+              <div v-if="moreDropdownOpen" class="more-dropdown-menu">
+                <a href="#" @click.prevent="go('/portfolio')" class="more-dropdown-item">
+                  <span>{{ t('nav.portfolio') }}</span>
+                </a>
+              </div>
+            </div> -->
+          </template>
+          
+          <!-- 管理员菜单 -->
+          <template v-else>
+            <a href="#" @click.prevent="go('/admin')" class="menu-item">Dashboard</a>
+            <a href="#" @click.prevent="go('/admin/subscriptions')" class="menu-item">认购管理</a>
+            <a href="#" @click.prevent="go('/listedprojects')" class="menu-item">{{ t('nav.listedProjects') }}</a>
+            <a href="#" @click.prevent="go('/to-be-listed')" class="menu-item">{{ t('nav.toBeListed') }}</a>
+          </template>
         </nav>
         
         <!-- 移动端汉堡菜单按钮 -->
@@ -92,9 +115,12 @@
           <button class="btn light pill" @click.prevent="goToProfile()">
             <span>👤</span>
           </button>
-          <button class="btn ghost pill settings-btn" @click.prevent="go('/settings')">⚙️</button>
+          <!-- <button class="btn ghost pill settings-btn" @click.prevent="go('/settings')">⚙️</button> -->
           <button class="btn ghost pill language-btn" @click.prevent="toggleLanguage">
             <span>{{ getCurrentLanguageDisplay() }}</span>
+          </button>
+          <button class="btn ghost pill theme-btn" @click.prevent="toggleTheme">
+            <span>{{ currentTheme === 'dark' ? '🌙' : '☀️' }}</span>
           </button>
         </div>
         <div v-else>
@@ -104,6 +130,9 @@
           <button class="btn ghost pill language-btn" @click.prevent="toggleLanguage">
             <span>{{ getCurrentLanguageDisplay() }}</span>
           </button>
+          <button class="btn ghost pill theme-btn" @click.prevent="toggleTheme">
+            <span>{{ currentTheme === 'dark' ? '🌙' : '☀️' }}</span>
+          </button>
         </div>
       </div>
     </div>
@@ -111,29 +140,64 @@
     <!-- 移动端菜单 -->
     <div v-if="mobileMenuOpen" class="mobile-menu">
       <div class="mobile-menu-content">
-        <!-- <a href="#" @click.prevent="go('/home')" class="mobile-menu-item">
-          <span class="mobile-menu-icon">🏠</span> 
-          <span>Home</span>
-        </a> -->
-        <a href="#" @click.prevent="go('/about')" class="mobile-menu-item">
-          <!-- <span class="mobile-menu-icon">🏢</span> -->
-          <span>{{ t('nav.about') }}</span>
-        </a>
-        <a href="#" @click.prevent="go('/listedprojects')" class="mobile-menu-item">
-          <!-- <span class="mobile-menu-icon">📊</span> -->
-          <span>{{ t('nav.listedProjects') }}</span>
-        </a>
-        <a href="#" @click.prevent="go('/to-be-listed')" class="mobile-menu-item">
-          <!-- <span class="mobile-menu-icon">⏳</span> -->
-          <span>{{ t('nav.toBeListed') }}</span>
-        </a>
-        <a href="#" @click.prevent="goToContactUs" class="mobile-menu-item">
-          <!-- <span class="mobile-menu-icon">📞</span> -->
-          <span>{{ t('nav.contact') }}</span>
-        </a>
-        <!-- <a href="#" @click.prevent="go('/portfolio')" class="mobile-menu-item">
-          <span>My Portfolio</span>
-        </a> -->
+        <!-- 普通用户移动端菜单 -->
+        <template v-if="!isAdmin">
+          <!-- <a href="#" @click.prevent="go('/home')" class="mobile-menu-item">
+            <span class="mobile-menu-icon">🏠</span> 
+            <span>Home</span>
+          </a> -->
+          <a href="#" @click.prevent="go('/about')" class="mobile-menu-item">
+            <!-- <span class="mobile-menu-icon">🏢</span> -->
+            <span>{{ t('nav.about') }}</span>
+          </a>
+          <a href="#" @click.prevent="go('/listedprojects')" class="mobile-menu-item">
+            <!-- <span class="mobile-menu-icon">📊</span> -->
+            <span>{{ t('nav.listedProjects') }}</span>
+          </a>
+          <a href="#" @click.prevent="go('/to-be-listed')" class="mobile-menu-item">
+            <!-- <span class="mobile-menu-icon">⏳</span> -->
+            <span>{{ t('nav.toBeListed') }}</span>
+          </a>
+          <a href="#" @click.prevent="goToContactUs" class="mobile-menu-item">
+            <!-- <span class="mobile-menu-icon">📞</span> -->
+            <span>{{ t('nav.contact') }}</span>
+          </a>
+          <!-- <a href="#" @click.prevent="go('/portfolio')" class="mobile-menu-item">
+            <span>{{ t('nav.portfolio') }}</span>
+          </a> -->
+          <!-- <div class="mobile-menu-item mobile-toggle-buttons">
+            <button class="btn ghost pill language-btn" @click.prevent="toggleLanguage">
+              <span>{{ getCurrentLanguageDisplay() }}</span>
+            </button>
+            <button class="btn ghost pill theme-btn" @click.prevent="toggleTheme">
+              <span>{{ currentTheme === 'dark' ? '🌙' : '☀️' }}</span>
+            </button>
+          </div> -->
+        </template>
+        
+        <!-- 管理员移动端菜单 -->
+        <template v-else>
+          <a href="#" @click.prevent="go('/admin')" class="mobile-menu-item">
+            <span>Dashboard</span>
+          </a>
+          <a href="#" @click.prevent="go('/admin/subscriptions')" class="mobile-menu-item">
+            <span>认购管理</span>
+          </a>
+          <a href="#" @click.prevent="go('/listedprojects')" class="mobile-menu-item">
+            <span>{{ t('nav.listedProjects') }}</span>
+          </a>
+          <a href="#" @click.prevent="go('/to-be-listed')" class="mobile-menu-item">
+            <span>{{ t('nav.toBeListed') }}</span>
+          </a>
+          <!-- <div class="mobile-menu-item mobile-toggle-buttons">
+            <button class="btn ghost pill language-btn" @click.prevent="toggleLanguage">
+              <span>{{ getCurrentLanguageDisplay() }}</span>
+            </button>
+            <button class="btn ghost pill theme-btn" @click.prevent="toggleTheme">
+              <span>{{ currentTheme === 'dark' ? '🌙' : '☀️' }}</span>
+            </button>
+          </div> -->
+        </template>
       </div>
     </div>
     
@@ -144,6 +208,7 @@
 import { isLoggedIn, clearAuth, AUTH_CHANGED_EVENT } from '@/utils/auth';
 import { useWallet } from '@/composables/useWallet';
 import { useLanguage } from '@/composables/useLanguage';
+import { useTheme } from '@/composables/useTheme';
 
 export default {
   name: 'AppHeader',
@@ -151,6 +216,7 @@ export default {
   setup() {
     const { connected, fullAddress, shortAddress, connect, disconnect } = useWallet()
     const { t, setLanguage, getCurrentLanguage } = useLanguage()
+    const { currentTheme, setTheme, toggleTheme } = useTheme()
     
     return {
       connected,
@@ -160,12 +226,16 @@ export default {
       disconnect,
       t,
       setLanguage,
-      getCurrentLanguage
+      getCurrentLanguage,
+      currentTheme,
+      setTheme,
+      toggleTheme
     }
   },
   data(){
     return { 
       isLoggedIn: false,
+      isAdmin: false,
       moreDropdownOpen: false,
       mobileMenuOpen: false,
       walletDropdownOpen: false,
@@ -235,8 +305,14 @@ export default {
     checkLogin(){
       this.isLoggedIn = isLoggedIn();
     },
+    checkAdminStatus(){
+      this.isAdmin = localStorage.getItem('isAdmin') === 'true';
+    },
     logout(){
       clearAuth();
+      // 清除管理员状态
+      localStorage.removeItem('isAdmin');
+      this.isAdmin = false;
       this.$router.push('/login');
     },
 
@@ -384,8 +460,10 @@ export default {
   mounted(){
     document.addEventListener('click', this.onDocClick);
     this.checkLogin();
+    this.checkAdminStatus();
     // 监听自定义的 auth 变更事件（同页可用）
     window.addEventListener(AUTH_CHANGED_EVENT, this.checkLogin);
+    window.addEventListener(AUTH_CHANGED_EVENT, this.checkAdminStatus);
     // 页面刷新时也能保持状态
     this.isLoggedIn = isLoggedIn();
   },
@@ -637,6 +715,77 @@ export default {
   border-color: #ea580c;
 }
 
+
+/* More 下拉菜单样式 */
+.more-dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+.more-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+}
+
+.more-arrow {
+  font-size: 12px;
+  transition: transform 0.2s ease;
+}
+
+.more-arrow.open {
+  transform: rotate(180deg);
+}
+
+.more-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  min-width: 160px;
+  z-index: 1000;
+  margin-top: 4px;
+}
+
+.more-dropdown-item {
+  display: block;
+  padding: 12px 16px;
+  color: var(--text);
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+  border-radius: 8px;
+  margin: 4px;
+}
+
+.more-dropdown-item:hover {
+  background: var(--hover-bg);
+  color: var(--text);
+}
+
+/* 浅色主题适配 */
+[data-theme="light"] .more-dropdown-menu {
+  background: var(--card-bg);
+  border-color: var(--border);
+  box-shadow: var(--shadow);
+}
+
+[data-theme="light"] .more-dropdown-item {
+  color: var(--text);
+}
+
+[data-theme="light"] .more-dropdown-item:hover {
+  background: var(--hover-bg);
+}
 
 .more-link {
   position: relative;
@@ -914,12 +1063,13 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-right: 8px; /* 添加右边距 */
   }
   
   /* Profile按钮 - 中间 */
   .btn.light.pill {
     flex: 0 0 auto;
-    margin: 0;
+    margin: 0 8px; /* 左右边距 */
   }
   
   /* Settings按钮 - 右侧 */
@@ -933,17 +1083,76 @@ export default {
     flex: 0 0 auto;
     background: transparent !important;
     border: none !important;
-    color: var(--text);
+    color: #000000 !important; /* 始终保持黑色 */
     font-size: 12px;
     font-weight: 600;
     min-width: 40px;
+    height: 28px; /* 与其他按钮保持一致的高度 */
     padding: 6px 8px;
     transition: all 0.2s ease;
+    margin-left: 8px; /* 添加左边距 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .language-btn:hover {
     background: var(--hover-bg) !important;
     border: none !important;
+    color: #000000 !important; /* 保持黑色 */
+  }
+  
+  /* 深色主题下的语言按钮为白色 */
+  [data-theme="dark"] .language-btn {
+    color: #ffffff !important;
+  }
+  
+  [data-theme="dark"] .language-btn:hover {
+    color: #ffffff !important;
+  }
+  
+  /* 浅色主题下的语言按钮为黑色 */
+  [data-theme="light"] .language-btn {
+    color: #000000 !important;
+  }
+  
+  [data-theme="light"] .language-btn:hover {
+    color: #000000 !important;
+  }
+  
+  /* 主题切换按钮 - 桌面端 */
+  .theme-btn {
+    flex: 0 0 auto;
+    background: transparent !important;
+    border: none !important;
+    color: #000000 !important; /* 始终保持黑色 */
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 40px;
+    height: 28px; /* 与其他按钮保持一致的高度 */
+    padding: 6px 8px;
+    transition: all 0.2s ease;
+    margin-left: 8px; /* 添加左边距 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .theme-btn:hover {
+    background: var(--hover-bg) !important;
+    border: none !important;
+    color: #000000 !important; /* 保持黑色 */
+  }
+  
+  /* 所有主题下的主题按钮都保持黑色 */
+  [data-theme="dark"] .theme-btn,
+  [data-theme="light"] .theme-btn {
+    color: #000000 !important;
+  }
+  
+  [data-theme="dark"] .theme-btn:hover,
+  [data-theme="light"] .theme-btn:hover {
+    color: #000000 !important;
   }
   
   .brand-logo {
@@ -1136,12 +1345,13 @@ export default {
     flex: 1;
     display: flex;
     justify-content: flex-start;
+    margin-right: 8px; /* 添加右边距 */
   }
   
   /* Profile按钮 - 中间 */
   .btn.light.pill {
     flex: 0 0 auto;
-    margin: 0 1px;
+    margin: 0 8px; /* 增加左右边距 */
   }
   
   /* Settings按钮 - 右侧 */
@@ -1186,6 +1396,14 @@ export default {
     align-items: center;
     justify-content: center;
     min-width: 24px;
+  }
+  
+  /* 中等屏幕语言和主题按钮高度调整 */
+  .language-btn,
+  .theme-btn {
+    height: 24px;
+    font-size: 10px;
+    padding: 4px 6px;
   }
   
   /* Settings按钮样式 */
@@ -1294,12 +1512,13 @@ export default {
     flex: 1;
     display: flex;
     justify-content: flex-start;
+    margin-right: 8px; /* 添加右边距 */
   }
   
   /* Profile按钮 - 中间 */
   .btn.light.pill {
     flex: 0 0 auto;
-    margin: 0 1px;
+    margin: 0 8px; /* 增加左右边距 */
   }
   
   /* Settings按钮 - 右侧 */
@@ -1342,6 +1561,14 @@ export default {
     min-width: 20px;
   }
   
+  /* 最小屏幕语言和主题按钮高度调整 */
+  .language-btn,
+  .theme-btn {
+    height: 20px;
+    font-size: 9px;
+    padding: 3px 5px;
+  }
+  
   /* Settings按钮样式 */
   .settings-btn {
     padding: 2px !important;
@@ -1357,6 +1584,7 @@ export default {
     padding: 2px 4px !important;
     background: transparent !important;
     border: none !important;
+    color: #000000 !important; /* 默认文字为黑色 */
     min-width: 30px;
     height: 20px;
     display: flex;
@@ -1366,6 +1594,41 @@ export default {
     font-weight: 600;
     background: transparent !important;
     border: none !important;
+  }
+  
+  /* 移动端深色主题下的语言按钮 */
+  [data-theme="dark"] .language-btn {
+    color: #ffffff !important; /* 深色主题下文字为白色 */
+  }
+  
+  /* 移动端浅色主题下的语言按钮 */
+  [data-theme="light"] .language-btn {
+    color: #000000 !important; /* 浅色主题下文字为黑色 */
+  }
+  
+  /* 移动端切换按钮容器 */
+  .mobile-toggle-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  
+  /* 移动端主题按钮样式 */
+  .mobile-toggle-buttons .theme-btn {
+    color: #000000 !important;
+  }
+  
+  /* 移动端深色主题下的主题按钮 */
+  [data-theme="dark"] .mobile-toggle-buttons .theme-btn {
+    color: #000000 !important;
+  }
+  
+  /* 移动端浅色主题下的主题按钮 */
+  [data-theme="light"] .mobile-toggle-buttons .theme-btn {
+    color: #000000 !important;
   }
   
   .wallet-main-btn {

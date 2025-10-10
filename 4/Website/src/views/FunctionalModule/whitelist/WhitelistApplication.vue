@@ -2,7 +2,7 @@
   <div class="whitelist-application">
     <!-- 白名单状态横幅 -->
     <div class="field">
-      <label class="label">白名单状态</label>
+      <label class="label">{{ t('whitelist.status') }}</label>
       <div class="whitelist-banner" :class="statusClass" role="status">
         <span class="icon">
           <svg viewBox="0 0 24 24" class="i">
@@ -12,16 +12,16 @@
         <!-- 文案：根据状态显示不同信息 -->
         <span v-if="whitelistStatus === 'approved'" class="verified">
           <svg viewBox="0 0 24 24" class="i"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
-          白名单已批准
+          {{ t('whitelist.approved') }}
         </span>
-        <span v-else-if="whitelistStatus === 'pending'">白名单申请待审核</span>
-        <span v-else-if="whitelistStatus === 'rejected'">不符合交易资格</span>
-        <span v-else>申请白名单</span>
+        <span v-else-if="whitelistStatus === 'pending'">{{ t('whitelist.pending') }}</span>
+        <span v-else-if="whitelistStatus === 'rejected'">{{ t('whitelist.rejected') }}</span>
+        <span v-else>{{ t('whitelist.apply') }}</span>
         <!-- 右侧按钮：根据状态显示不同操作 -->
-        <button v-if="whitelistStatus === 'none'" class="link" type="button" @click="applyWhitelist" :disabled="loading">立即申请</button>
-        <button v-else-if="whitelistStatus === 'pending'" class="link" type="button" @click="checkWhitelistStatus" :disabled="loading">查看状态</button>
-        <button v-else-if="whitelistStatus === 'approved'" class="link" type="button" @click="goToProjects">开始交易</button>
-        <button v-else-if="whitelistStatus === 'rejected'" class="link" type="button" @click="reapplyWhitelist" :disabled="loading">重新申请</button>
+        <button v-if="whitelistStatus === 'none'" class="link" type="button" @click="applyWhitelist" :disabled="loading">{{ t('whitelist.applyNow') }}</button>
+        <button v-else-if="whitelistStatus === 'pending'" class="link" type="button" @click="checkWhitelistStatus" :disabled="loading">{{ t('whitelist.checkStatus') }}</button>
+        <button v-else-if="whitelistStatus === 'approved'" class="link" type="button" @click="goToProjects">{{ t('whitelist.startTrading') }}</button>
+        <button v-else-if="whitelistStatus === 'rejected'" class="link" type="button" @click="reapplyWhitelist" :disabled="loading">{{ t('whitelist.reapply') }}</button>
       </div>
     </div>
 
@@ -29,19 +29,19 @@
     <div v-if="showApplicationModal" class="modal-mask">
       <div class="modal-wrapper">
         <div class="modal-container">
-          <h2 style="margin-bottom:8px;">申请白名单</h2>
-          <p>您即将申请白名单以开始交易资产。</p>
-          <p><strong>要求：</strong></p>
+          <h2 style="margin-bottom:8px;">{{ t('whitelist.applicationTitle') }}</h2>
+          <p>{{ t('whitelist.applicationDescription') }}</p>
+          <p><strong>{{ t('whitelist.requirements') }}</strong></p>
           <ul style="margin: 8px 0; padding-left: 20px;">
-            <li>KYC验证已完成 ✅</li>
-            <li>有效的钱包连接</li>
-            <li>同意条款和条件</li>
+            <li>{{ t('whitelist.kycCompleted') }}</li>
+            <li>{{ t('whitelist.validWallet') }}</li>
+            <li>{{ t('whitelist.agreeTerms') }}</li>
           </ul>
           <div style="margin-top:18px; display:flex; gap:12px; justify-content:flex-end;">
-            <button class="btn light" @click="showApplicationModal = false" :disabled="loading">取消</button>
+            <button class="btn light" @click="showApplicationModal = false" :disabled="loading">{{ t('common.cancel') }}</button>
             <button class="btn orange" @click="submitApplication" :disabled="loading">
-              <span v-if="loading">申请中...</span>
-              <span v-else>立即申请</span>
+              <span v-if="loading">{{ t('whitelist.applying') }}</span>
+              <span v-else>{{ t('whitelist.applyNow') }}</span>
             </button>
           </div>
         </div>
@@ -75,8 +75,8 @@
             <h2 style="margin-bottom:8px;">{{ resultTitle }}</h2>
             <p>{{ resultMessage }}</p>
             <div style="margin-top:18px; display:flex; gap:12px; justify-content:center;">
-              <button v-if="resultType === 'success'" class="btn orange" @click="goToProjects">Start Trading</button>
-              <button class="btn light" @click="closeResultModal">Close</button>
+              <button v-if="resultType === 'success'" class="btn orange" @click="goToProjects">{{ t('whitelist.startTrading') }}</button>
+              <button class="btn light" @click="closeResultModal">{{ t('whitelist.close') }}</button>
             </div>
           </div>
         </div>
@@ -94,7 +94,7 @@
             <h2 style="margin-bottom:8px; color: #dc2626;">{{ validationErrorTitle }}</h2>
             <p style="color: #6b7280; margin-bottom: 20px;">{{ validationErrorMessage }}</p>
             <div style="margin-top:18px; display:flex; gap:12px; justify-content:center;">
-              <button class="btn orange" @click="showValidationErrorModal = false">确认</button>
+              <button class="btn orange" @click="showValidationErrorModal = false">{{ t('whitelist.confirm') }}</button>
             </div>
           </div>
         </div>
@@ -108,6 +108,7 @@ import { unifiedContractService as contractService } from '@/service/unifiedCont
 import { getKycStatus, getKycLevel, setKycLevel, KYC_STATUS, KYC_LEVELS } from '@/service/kycService.js'
 import { useAuth } from '@/composables/useAuth.js'
 import { isLoggedIn } from '@/utils/auth.js'
+import { useLanguage } from '@/composables/useLanguage'
 
 export default {
   name: 'WhitelistApplication',
@@ -169,6 +170,10 @@ export default {
     }
   },
   methods: {
+    t(key) {
+      const { t } = useLanguage()
+      return t(key)
+    },
     // 加载白名单状态（简化逻辑）
     async loadWhitelistStatus() {
       try {

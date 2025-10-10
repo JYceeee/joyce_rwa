@@ -517,7 +517,7 @@ export const transactionAPI = {
       if (params.limit) queryParams.append('limit', params.limit.toString())
       if (params.offset) queryParams.append('offset', params.offset.toString())
 
-      const url = `${getApiUrl('VITE_API_TRANSACTION_URL', 'http://localhost:3000/api/transaction')}?${queryParams.toString()}`
+      const url = `${getApiUrl('VITE_API_TRANSACTION_URL', 'http://localhost:3000/transaction')}?${queryParams.toString()}`
 
       const response = await fetch(url, {
         method: 'GET',

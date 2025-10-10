@@ -2,8 +2,8 @@
   <div class="login-container">
     <div class="auth-card">
     <!-- <div class="auth-logo"><img src="/icons/signup-icon1.png" alt="Mortgage RWA" /></div> -->
-    <h1 class="auth-title">登录您的账户</h1>
-    <p class="auth-sub">欢迎来到RWADealmaker</p> 
+    <h1 class="auth-title">{{ t('login.title') }}</h1>
+    <p class="auth-sub">{{ t('login.subtitle') }}</p> 
 
     <!-- Login Status Display -->
     <div v-if="loginStatus" class="status" :class="loginStatusClass">
@@ -11,22 +11,22 @@
     </div>
 
     <form class="auth-form" @submit.prevent="submitLogin">
-      <label for="lemail" class="auth-label">邮箱</label>
+      <label for="lemail" class="auth-label">{{ t('login.email') }}</label>
       <input
         id="lemail"
         type="email"
         class="input auth-input"
-        placeholder="输入您的邮箱"
+        :placeholder="t('login.emailPlaceholder')"
         v-model.trim="user_email"
         required
       />
 
-      <label for="lpass" class="auth-label">密码</label>
+      <label for="lpass" class="auth-label">{{ t('login.password') }}</label>
       <input
         id="lpass"
         type="password"
         class="input auth-input"
-        placeholder="输入您的密码"
+        :placeholder="t('login.passwordPlaceholder')"
         v-model="user_password"
         required
       />
@@ -34,18 +34,18 @@
       <div class="auth-row">
         <label class="auth-check">
           <input type="checkbox" v-model="remember" />
-          <span>记住30天</span>
+          <span>{{ t('login.remember') }}</span>
         </label>
-        <a href="#" class="auth-link" @click.prevent="$emit('navigate','forgot')">忘记密码</a>
+        <a href="#" class="auth-link" @click.prevent="$emit('navigate','forgot')">{{ t('login.forgotPassword') }}</a>
       </div>
 
       <button class="btn orange auth-submit" type="submit" :disabled="loading">
-        {{ loading ? '登录中...' : '登录' }}
+        {{ loading ? t('login.loggingIn') : t('login.loginButton') }}
       </button>
 
       <p class="auth-alt">
-        没有账户？
-        <a href="#" class="auth-link" @click.prevent="$emit('navigate','signup')">注册</a>
+        {{ t('login.noAccount') }}
+        <a href="#" class="auth-link" @click.prevent="$emit('navigate','signup')">{{ t('login.signupLink') }}</a>
       </p>
     </form>
     </div>
@@ -54,6 +54,7 @@
 
 <script>
 import { setUserInfoFromLogin } from '@/service/userService'
+import { useLanguage } from '@/composables/useLanguage'
 
 export default {
   name: 'LoginView',
@@ -79,6 +80,10 @@ export default {
     }
   },
   methods: {
+    t(key) {
+      const { t } = useLanguage()
+      return t(key)
+    },
     async submitLogin() {
       if (!this.user_email || !this.user_password) {
         this.$emit('notify', 'Please enter email and password');
@@ -119,15 +124,23 @@ export default {
           // Save user info to local storage
           this.saveUserInfo(data);
           
+          // Check if admin user
+          const isAdmin = this.user_email === 'han@rwadealmaker.com';
+          localStorage.setItem('isAdmin', isAdmin.toString());
+          
           // Trigger global login status update event
           window.dispatchEvent(new CustomEvent('auth-changed'));
           
           // this.$emit('notify', 'Login successful! Now you can see Wallet and Profile buttons.');
-          this.$emit('notify', 'Login successful!');
+          this.$emit('notify', isAdmin ? 'Admin login successful!' : 'Login successful!');
           
-          // Redirect to aboutus page
+          // Redirect based on user type
           setTimeout(() => {
-            this.$router.push('/about');
+            if (isAdmin) {
+              this.$router.push('/admin');
+            } else {
+              this.$router.push('/about');
+            }
           }, 1000);
         } else {
           this.loginStatusClass = 'status error';

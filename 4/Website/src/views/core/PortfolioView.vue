@@ -43,9 +43,17 @@
                 :class="{ active: selectedAccount === account.address }"
                 @click="selectAccount(account.address)"
               >
-                <div class="pf-avatar"></div>
+                <div class="pf-avatar">
+                  <img 
+                    :src="getWalletIcon(account.address)" 
+                    :alt="getWalletName(account.address)"
+                    class="pf-wallet-icon"
+                    @error="handleImageError"
+                  />
+                </div>
                 <div class="pf-acc-info">
-                  <div class="pf-acc-name">{{ account.name || 'Account' }}</div>
+                  <div class="pf-acc-name">{{ account.name || getWalletName(account.address) }}</div>
+                  <div class="pf-wallet-type">{{ getWalletType(account.address) }}</div>
                   <div class="pf-addr" :title="account.address">
                     {{ formatAddress(account.address) }}
                   </div>
@@ -688,15 +696,18 @@
                   </div>
                   <div class="pf-transaction-details">
                     <div class="pf-transaction-title">
-                      {{ transaction.type.toUpperCase() }} {{ transaction.amount }} {{ transaction.projectCode }}
+                      {{ transaction.type.toUpperCase() }} {{ transaction.amount || transaction.purchase_amount }} {{ transaction.projectCode }}
                     </div>
                     <div class="pf-transaction-subtitle">
                       Project: {{ transaction.projectCode }}
                     </div>
+                    <div class="pf-transaction-subtitle" v-if="transaction.trade_type">
+                      Type: {{ transaction.trade_type }}
+                    </div>
                   </div>
                   <div class="pf-transaction-value">
-                    <div class="pf-transaction-time">{{ formatTime(transaction.timestamp) }}</div>
-                    <div class="pf-transaction-price">Amount: {{ transaction.amount }}</div>
+                    <div class="pf-transaction-time">{{ formatTime(transaction.created_at || transaction.timestamp) }}</div>
+                    <div class="pf-transaction-price">Amount: {{ transaction.amount || transaction.purchase_amount }}</div>
                   </div>
                 </div>
               </div>
@@ -1830,8 +1841,12 @@ const handleAction = (action) => {
 }
 
 // 账户管理方法
-const selectAccount = (accountAddress) => {
+const selectAccount = async (accountAddress) => {
   selectedAccount.value = accountAddress
+  console.log('📂 Portfolio selected account:', accountAddress)
+  
+  // 切换账户时重新加载交易数据
+  await loadTransactionsFromAPI()
 }
 
 const addAccount = () => {
@@ -1952,6 +1967,70 @@ const formatAddress = (address) => {
   return `${address.slice(0, 6)}...${address.slice(-4)}`
 }
 
+// 获取钱包图标
+const getWalletIcon = (address) => {
+  if (!address) return '/icons/login-wallet-icon.png'
+  
+  // 从localStorage获取连接的钱包类型
+  const connectedWallet = localStorage.getItem('connectedWallet')
+  
+  if (connectedWallet === 'metamask') {
+    return '/icons/metamask.png'
+  } else if (connectedWallet === 'okx') {
+    return '/icons/okx.png'
+  } else if (connectedWallet === 'binance') {
+    return '/icons/binance.png'
+  } else if (connectedWallet === 'phantom') {
+    return '/icons/phantom.png'
+  }
+  
+  // 默认图标
+  return '/icons/login-wallet-icon.png'
+}
+
+// 获取钱包名称
+const getWalletName = (address) => {
+  if (!address) return 'Unknown Wallet'
+  
+  const connectedWallet = localStorage.getItem('connectedWallet')
+  
+  if (connectedWallet === 'metamask') {
+    return 'MetaMask'
+  } else if (connectedWallet === 'okx') {
+    return 'OKX Wallet'
+  } else if (connectedWallet === 'binance') {
+    return 'Binance Wallet'
+  } else if (connectedWallet === 'phantom') {
+    return 'Phantom'
+  }
+  
+  return 'Wallet'
+}
+
+// 获取钱包类型
+const getWalletType = (address) => {
+  if (!address) return 'Unknown'
+  
+  const connectedWallet = localStorage.getItem('connectedWallet')
+  
+  if (connectedWallet === 'metamask') {
+    return 'EVM Wallet'
+  } else if (connectedWallet === 'okx') {
+    return 'EVM Wallet'
+  } else if (connectedWallet === 'binance') {
+    return 'EVM Wallet'
+  } else if (connectedWallet === 'phantom') {
+    return 'Solana Wallet'
+  }
+  
+  return 'Wallet'
+}
+
+// 处理图片加载错误
+const handleImageError = (event) => {
+  event.target.src = '/icons/login-wallet-icon.png'
+}
+
 const getAccountBalance = (accountAddress) => {
   const account = accounts.value.find(acc => acc.address === accountAddress)
   if (!account) return '0.0000'
@@ -1982,18 +2061,31 @@ const refreshPortfolio = async () => {
 const loadTransactionsFromAPI = async () => {
   try {
     console.log('📊 PortfolioView: 从API获取交易数据...')
+    console.log('📊 PortfolioView: 当前选中的账户:', selectedAccount.value)
+    
+    // 如果没有选中的账户，使用当前连接的钱包地址
+    const targetAddress = selectedAccount.value || fullAddress.value
+    
+    if (!targetAddress) {
+      console.log('⚠️ PortfolioView: 没有可用的钱包地址，跳过交易数据获取')
+      apiTransactions.value = []
+      return
+    }
     
     const params = {
-      userAddress: selectedAccount.value,
+      userAddress: targetAddress,
       limit: 100,
       offset: 0
     }
+    
+    console.log('📊 PortfolioView: 请求参数:', params)
     
     const response = await transactionAPI.getTransactionHistory(params)
     
     if (response.status === 0) {
       apiTransactions.value = response.data || []
       console.log('✅ PortfolioView: 成功获取', apiTransactions.value.length, '条交易记录')
+      console.log('📊 PortfolioView: 交易记录详情:', apiTransactions.value)
     } else {
       console.error('❌ PortfolioView: 获取交易数据失败:', response.message)
       apiTransactions.value = []
@@ -2733,8 +2825,19 @@ window.addEventListener('storage', (e) => {
 </script>
 
 <style scoped>
-/* —— 这里保持你原来的样式 —— */
-:root { --bg:#f6f7fb; --panel:#fff; --text:#0b1020; --muted:#6b7280; --muted-2:#9aa3b2; --border:#e6e8ef; --shadow:0 6px 20px rgba(15,23,42,.06); --primary:#3b82f6; --primary-ink:#1e40af; --danger:#ef4444; }
+/* Portfolio页面主题适配 */
+.pf-page {
+  --pf-bg: var(--bg);
+  --pf-panel: var(--card-bg);
+  --pf-text: var(--text);
+  --pf-muted: var(--text-secondary);
+  --pf-muted-2: var(--text-secondary);
+  --pf-border: var(--border);
+  --pf-shadow: var(--shadow);
+  --pf-primary: #3b82f6;
+  --pf-primary-ink: #1e40af;
+  --pf-danger: #ef4444;
+}
 
 /* No Wallet Page Styles */
 .pf-no-wallet-page {
@@ -2743,7 +2846,7 @@ window.addEventListener('storage', (e) => {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: linear-gradient(135deg, var(--bg) 0%, #e0e7ff 100%);
+  background: var(--pf-bg);
 }
 
 .pf-no-wallet-container {
@@ -2770,7 +2873,7 @@ window.addEventListener('storage', (e) => {
 .pf-no-wallet-title {
   font-size: 2.5rem;
   font-weight: 700;
-  color: var(--text);
+  color: var(--pf-text);
   margin-bottom: 16px;
   background: linear-gradient(135deg, #3b82f6, #8b5cf6);
   -webkit-background-clip: text;
@@ -2780,7 +2883,7 @@ window.addEventListener('storage', (e) => {
 
 .pf-no-wallet-description {
   font-size: 1.2rem;
-  color: var(--muted);
+  color: var(--pf-muted);
   line-height: 1.6;
   max-width: 600px;
   margin: 0 auto;
@@ -2794,12 +2897,12 @@ window.addEventListener('storage', (e) => {
 }
 
 .pf-feature-card {
-  background: var(--panel);
-  border: 1px solid var(--border);
+  background: var(--pf-panel);
+  border: 1px solid var(--pf-border);
   border-radius: 16px;
   padding: 24px;
   text-align: center;
-  box-shadow: var(--shadow);
+  box-shadow: var(--pf-shadow);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -2814,14 +2917,14 @@ window.addEventListener('storage', (e) => {
 }
 
 .pf-feature-card h3 {
-  color: var(--text);
+  color: var(--pf-text);
   font-size: 1.2rem;
   font-weight: 600;
   margin-bottom: 8px;
 }
 
 .pf-feature-card p {
-  color: var(--muted);
+  color: var(--pf-muted);
   font-size: 0.95rem;
   line-height: 1.5;
 }
@@ -2861,14 +2964,14 @@ window.addEventListener('storage', (e) => {
 }
 
 .pf-btn-secondary {
-  background: var(--panel);
-  color: var(--text);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
+  background: var(--pf-panel);
+  color: var(--pf-text);
+  border: 1px solid var(--pf-border);
+  box-shadow: var(--pf-shadow);
 }
 
 .pf-btn-secondary:hover {
-  background: #f8fafc;
+  background: var(--hover-bg);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(15,23,42,.1);
 }
@@ -2891,7 +2994,7 @@ window.addEventListener('storage', (e) => {
 }
 
 .pf-no-wallet-help h4 {
-  color: var(--text);
+  color: var(--pf-text);
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 16px;
@@ -2905,7 +3008,7 @@ window.addEventListener('storage', (e) => {
 }
 
 .pf-no-wallet-help li {
-  color: var(--muted);
+  color: var(--pf-muted);
   font-size: 0.95rem;
   line-height: 1.6;
   margin-bottom: 12px;
@@ -2921,7 +3024,7 @@ window.addEventListener('storage', (e) => {
   top: 0;
   width: 24px;
   height: 24px;
-  background: #3b82f6;
+  background: #9ab3dc;
   color: white;
   border-radius: 50%;
   display: flex;
@@ -2932,7 +3035,7 @@ window.addEventListener('storage', (e) => {
 }
 
 .pf-no-wallet-help strong {
-  color: var(--text);
+  color: var(--pf-text);
   font-weight: 600;
 }
 
@@ -2984,128 +3087,131 @@ window.addEventListener('storage', (e) => {
     padding: 20px;
   }
 }
-.pf-page{background:var(--bg);min-height:100vh;color:var(--text);}
-.pf-topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;position:sticky;top:0;z-index:10;background:var(--bg);}
+.pf-page{background:var(--pf-bg);min-height:100vh;color:var(--pf-text);}
+.pf-topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;position:sticky;top:0;z-index:10;background:var(--pf-bg);}
 .pf-actions{display:flex;gap:12px;flex-wrap:wrap;}
-.pf-pill{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:14px;background:var(--panel);border:1px solid var(--border);box-shadow:var(--shadow);font-weight:600;cursor:pointer;color:#ffffff;}
-.pf-pill-ico{width:22px;height:22px;display:grid;place-items:center;border-radius:999px;background:#f1f5ff;}
+.pf-pill{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:14px;background:var(--pf-panel);border:1px solid var(--pf-border);box-shadow:var(--pf-shadow);font-weight:600;cursor:pointer;color:var(--pf-text);}
+.pf-pill-ico{width:22px;height:22px;display:grid;place-items:center;border-radius:999px;background:var(--bg-secondary);}
 .pf-pill:hover{transform:translateY(-1px)}
-.pf-add{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:14px;background:var(--panel);border:1px solid var(--border);box-shadow:var(--shadow);font-weight:600;cursor:pointer;color:#ffffff;}
+.pf-add{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:14px;background:var(--pf-panel);border:1px solid var(--pf-border);box-shadow:var(--pf-shadow);font-weight:600;cursor:pointer;color:var(--pf-text);}
 .pf-add-ico{font-size:18px;line-height:1}
 .pf-body{display:grid;grid-template-columns:280px 1fr;gap:16px;padding:0 20px 24px;margin-top: 30px;;}
-.pf-sidebar{margin-left:50px;margin-top:17px;width:300px;background:#141426;border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px;}
+.pf-sidebar{margin-left:50px;margin-top:17px;width:300px;background:var(--pf-panel);border:1px solid var(--pf-border);border-radius:16px;box-shadow:var(--pf-shadow);padding:16px;}
 .pf-side-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.pf-side-head h2{font-size:20px;font-weight:800;color:#ffffff;}
-.pf-side-tools{display:flex;gap:10px;color:#9ca3af}
+.pf-side-head h2{font-size:20px;font-weight:800;color:var(--pf-text);}
+.pf-side-tools{display:flex;gap:10px;color:var(--pf-muted)}
 .pf-acc-group{margin-top:8px;}
-.pf-acc-title{font-size:16px;width:100%;display:flex;align-items:center;justify-content:space-between;background:transparent;border:none;padding:6px 6px;border-radius:10px;cursor:pointer;font-weight:600;color:#ffffff;}
+.pf-acc-title{font-size:16px;width:100%;display:flex;align-items:center;justify-content:space-between;background:transparent;border:none;padding:6px 6px;border-radius:10px;cursor:pointer;font-weight:600;color:var(--pf-text);}
 .caret{transition:.2s transform ease}
 .caret.open{transform:rotate(180deg)}
-.pf-acc-item{display:flex;align-items:center;gap:10px;margin-top:8px;padding:8px;border-radius:10px;background:#1f2937}
-.pf-avatar{width:28px;height:28px;border-radius:50%;background:radial-gradient(100% 100% at 25% 25%,#ffd79a 0%,#ff9e6e 40%,#ff7b7b 100%);box-shadow: inset 0 0 0 2px #374151;}
-.pf-addr{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;color:#9ca3af}
+.pf-acc-item{display:flex;align-items:center;gap:10px;margin-top:8px;padding:8px;border-radius:10px;background:var(--bg-secondary)}
+.pf-avatar{width:28px;height:28px;border-radius:50%;background:var(--bg-secondary);box-shadow: inset 0 0 0 2px var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.pf-wallet-icon{width:20px;height:20px;border-radius:50%;object-fit:cover;}
+.pf-addr{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;color:var(--pf-muted)}
 
-.pf-main{width:800px;background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px 18px;margin-left:66px;margin-top:16px;}
-.pf-hero{padding:8px 4px 12px;border-bottom:1px solid var(--border)}
-.pf-balance{font-size:56px;font-weight:900;letter-spacing:-.02em;display:flex;align-items:center;gap:10px;}
-.pf-eye{border:none;background:transparent;cursor:pointer;font-size:20px}
-.pf-change{color:var(--danger);font-weight:600;margin-top:4px}
+.pf-main{width:800px;background:var(--pf-panel);border:1px solid var(--pf-border);border-radius:16px;box-shadow:var(--pf-shadow);padding:16px 18px;margin-left:66px;margin-top:16px;}
+.pf-hero{padding:8px 4px 12px;border-bottom:1px solid var(--pf-border)}
+.pf-balance{font-size:56px;font-weight:900;letter-spacing:-.02em;display:flex;align-items:center;gap:10px;color:var(--pf-text);}
+.pf-eye{border:none;background:transparent;cursor:pointer;font-size:20px;color:var(--pf-text);}
+.pf-change{color:var(--pf-danger);font-weight:600;margin-top:4px}
 .pf-tabs{display:flex;gap:32px;margin-top:8px;}
-.pf-tab{appearance:none;background:none;border:none;cursor:pointer;padding:14px 0;font-weight:700;color:var(--muted);position:relative;}
-.pf-tab.active{color:var(--primary)}
-.pf-tab.active::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;background:var(--primary);border-radius:3px;}
+.pf-tab{appearance:none;background:none;border:none;cursor:pointer;padding:14px 0;font-weight:700;color:var(--pf-muted);position:relative;}
+.pf-tab.active{color:var(--pf-primary)}
+.pf-tab.active::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;background:var(--pf-primary);border-radius:3px;}
 .pf-toolbar{display:flex;gap:14px;align-items:center;padding:16px 0;}
-.pf-chip{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--border);background:#fff;border-radius:999px;box-shadow:var(--shadow);font-weight:600;cursor:pointer;}
-.pf-chip-ghost{background:#0f172a;color:#ffffff;border-color:#0f172a}
+.pf-chip{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--pf-border);background:var(--pf-panel);border-radius:999px;box-shadow:var(--pf-shadow);font-weight:600;cursor:pointer;color:var(--pf-text);}
+.pf-chip-ghost{background:var(--bg-secondary);color:var(--pf-text);border-color:var(--pf-border)}
 .pf-chip-text{white-space:nowrap}
 .pf-chain-badges{display:flex;align-items:center;margin-left:-4px}
-.pf-badge{width:24px;height:24px;border-radius:999px;display:grid;place-items:center;background:#eef2ff;margin-left:-6px;border:2px solid #fff;font-size:12px}
+.pf-badge{width:24px;height:24px;border-radius:999px;display:grid;place-items:center;background:var(--bg-secondary);margin-left:-6px;border:2px solid var(--pf-panel);font-size:12px}
 .pf-badge.eth{background:#dbeafe}
 .pf-badge.op{background:#ffe4e6}
 .pf-badge.arb{background:#dcfce7}
 .pf-badge.more{background:#e2e8f0}
-.pf-chip-caret{color:var(--muted-2)}
+.pf-chip-caret{color:var(--pf-muted-2)}
 .pf-empty{display:grid;place-items:center;padding:48px 0 56px;text-align:center;gap:16px}
-.pf-empty-ico{font-size:40px}
-.pf-empty-title{font-weight:800;font-size:20px}
-.pf-cta{padding:12px 18px;border-radius:12px;background:#111827;color:#ffffff;border:1px solid #111827;box-shadow:var(--shadow);cursor:pointer}
+.pf-empty-ico{font-size:40px;color:var(--pf-text);}
+.pf-empty-title{font-weight:800;font-size:20px;color:var(--pf-text);}
+.pf-cta{padding:12px 18px;border-radius:12px;background:var(--bg-secondary);color:var(--pf-text);border:1px solid var(--pf-border);box-shadow:var(--pf-shadow);cursor:pointer}
 .pf-cta:hover{opacity:.9}
 .pf-placeholder{padding:18px}
-.pf-card{border:1px solid var(--border);border-radius:12px;padding:16px;background:#fff;color:var(--muted)}
+.pf-card{border:1px solid var(--pf-border);border-radius:12px;padding:16px;background:var(--pf-panel);color:var(--pf-muted)}
 
 /* 账户管理样式 */
 .pf-acc-list{margin-top:8px;}
 .pf-acc-item{display:flex;align-items:center;gap:12px;margin-bottom:8px;padding:12px;border-radius:12px;cursor:pointer;transition:all 0.2s ease;border:1px solid transparent;}
-.pf-acc-item:hover{background:#374151;border-color:#4b5563;}
-.pf-acc-item.active{background:#1e40af;border-color:#3b82f6;}
+.pf-acc-item:hover{background:var(--hover-bg);border-color:var(--pf-border);}
+.pf-acc-item.active{background:var(--pf-primary);border-color:var(--pf-primary);}
 .pf-acc-info{flex:1;}
-.pf-acc-name{font-weight:600;color:#ffffff;margin-bottom:2px;}
-.pf-acc-balance{font-size:12px;color:#9ca3af;margin-top:2px;}
-.pf-avatar{width:32px;height:32px;border-radius:50%;background:radial-gradient(100% 100% at 25% 25%,#ffd79a 0%,#ff9e6e 40%,#ff7b7b 100%);box-shadow: inset 0 0 0 2px #374151;}
+.pf-acc-name{font-weight:600;color:var(--pf-text);margin-bottom:2px;}
+.pf-wallet-type{font-size:10px;color:var(--pf-muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:0.5px;}
+.pf-acc-balance{font-size:12px;color:var(--pf-muted);margin-top:2px;}
+.pf-avatar{width:32px;height:32px;border-radius:50%;background:var(--bg-secondary);box-shadow: inset 0 0 0 2px var(--pf-border);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.pf-wallet-icon{width:24px;height:24px;border-radius:50%;object-fit:cover;}
 
 /* 账户概览样式 */
-.pf-account-overview{margin-top:20px;padding-top:20px;border-top:1px solid #374151;}
-.pf-account-overview h3{margin-bottom:12px;font-size:16px;font-weight:700;color:#ffffff;}
-.pf-account-overview h4{margin-bottom:8px;font-size:14px;font-weight:600;color:#ffffff;}
+.pf-account-overview{margin-top:20px;padding-top:20px;border-top:1px solid var(--pf-border);}
+.pf-account-overview h3{margin-bottom:12px;font-size:16px;font-weight:700;color:var(--pf-text);}
+.pf-account-overview h4{margin-bottom:8px;font-size:14px;font-weight:600;color:var(--pf-text);}
 
 /* 统计卡片样式 */
 .pf-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
-.pf-stat-card{padding:12px;border-radius:10px;background:#1f2937;border:1px solid #374151;}
-.pf-stat-label{font-size:11px;color:#9ca3af;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;}
-.pf-stat-value{font-size:14px;font-weight:700;color:#ffffff;}
+.pf-stat-card{padding:12px;border-radius:10px;background:var(--bg-secondary);border:1px solid var(--pf-border);}
+.pf-stat-label{font-size:11px;color:var(--pf-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;}
+.pf-stat-value{font-size:14px;font-weight:700;color:var(--pf-text);}
 .pf-stat-value.positive{color:#16a34a;}
 .pf-stat-value.negative{color:#dc2626;}
 
 /* 最近交易记录样式 - 与TradeProjectView保持一致 */
 .pf-holdings{margin-top:16px;}
-.no-trades{text-align:center;color:#9ca3af;font-size:14px;padding:20px 0;}
-.pf-trade-item{padding:12px;border-radius:8px;background:#1f2937;border:1px solid #374151;margin-bottom:8px;}
+.no-trades{text-align:center;color:var(--pf-muted);font-size:14px;padding:20px 0;}
+.pf-trade-item{padding:12px;border-radius:8px;background:var(--bg-secondary);border:1px solid var(--pf-border);margin-bottom:8px;}
 .pf-trade-item:last-child{margin-bottom:0;}
 .pf-trade-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
 .pf-trade-type{padding:4px 8px;border-radius:4px;font-size:11px;font-weight:600;text-transform:uppercase;}
 .pf-trade-type.buy{background:#dcfce7;color:#16a34a;}
 .pf-trade-type.sell{background:#fee2e2;color:#dc2626;}
-.pf-trade-time{font-size:11px;color:#9ca3af;}
+.pf-trade-time{font-size:11px;color:var(--pf-muted);}
 .pf-trade-info{display:flex;flex-direction:column;gap:4px;}
 .pf-trade-project-section,.pf-trade-amount-section{display:flex;justify-content:space-between;align-items:center;}
-.pf-label{font-size:12px;color:#9ca3af;font-weight:500;}
-.pf-value{font-size:12px;color:#ffffff;font-weight:600;}
+.pf-label{font-size:12px;color:var(--pf-muted);font-weight:500;}
+.pf-value{font-size:12px;color:var(--pf-text);font-weight:600;}
 
 /* 交易历史样式 */
 .pf-transactions-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.pf-transactions-header h3{margin:0;font-size:18px;font-weight:700;color:#ffffff;}
+.pf-transactions-header h3{margin:0;font-size:18px;font-weight:700;color:var(--pf-text);}
 .pf-transactions-actions{display:flex;gap:8px;align-items:center;}
-.pf-filter-btn{padding:6px 12px;border:1px solid #374151;border-radius:8px;background:#1f2937;color:#ffffff;cursor:pointer;font-size:14px;}
-.pf-filter-btn:hover{background:#374151;}
-.pf-refresh-btn{padding:6px 12px;border:1px solid #374151;border-radius:8px;background:#1f2937;color:#ffffff;cursor:pointer;font-size:14px;transition:all 0.2s ease;}
-.pf-refresh-btn:hover:not(:disabled){background:#374151;}
+.pf-filter-btn{padding:6px 12px;border:1px solid var(--pf-border);border-radius:8px;background:var(--bg-secondary);color:var(--pf-text);cursor:pointer;font-size:14px;}
+.pf-filter-btn:hover{background:var(--hover-bg);}
+.pf-refresh-btn{padding:6px 12px;border:1px solid var(--pf-border);border-radius:8px;background:var(--bg-secondary);color:var(--pf-text);cursor:pointer;font-size:14px;transition:all 0.2s ease;}
+.pf-refresh-btn:hover:not(:disabled){background:var(--hover-bg);}
 .pf-refresh-btn:disabled{opacity:0.6;cursor:not-allowed;}
 
-.pf-filters{display:flex;gap:12px;margin-bottom:16px;padding:12px;background:#1f2937;border-radius:10px;}
-.pf-filter-select{padding:6px 10px;border:1px solid #374151;border-radius:6px;background:#141426;color:#ffffff;font-size:14px;}
+.pf-filters{display:flex;gap:12px;margin-bottom:16px;padding:12px;background:var(--bg-secondary);border-radius:10px;}
+.pf-filter-select{padding:6px 10px;border:1px solid var(--pf-border);border-radius:6px;background:var(--pf-panel);color:var(--pf-text);font-size:14px;}
 
-.pf-transaction-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;background:#141426;border:1px solid #374151;margin-bottom:8px;}
+.pf-transaction-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;background:var(--pf-panel);border:1px solid var(--pf-border);margin-bottom:8px;}
 .pf-transaction-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;}
 .pf-transaction-icon.buy{background:#dcfce7;color:#16a34a;}
 .pf-transaction-icon.sell{background:#fee2e2;color:#dc2626;}
 .pf-transaction-details{flex:1;}
-.pf-transaction-title{font-weight:600;color:#ffffff;margin-bottom:2px;}
-.pf-transaction-subtitle{font-size:12px;color:#9ca3af;margin-bottom:4px;}
-.pf-transaction-time{font-size:12px;color:#9ca3af;}
+.pf-transaction-title{font-weight:600;color:var(--pf-text);margin-bottom:2px;}
+.pf-transaction-subtitle{font-size:12px;color:var(--pf-muted);margin-bottom:4px;}
+.pf-transaction-time{font-size:12px;color:var(--pf-muted);}
 .pf-transaction-value{text-align:right;}
-.pf-transaction-price{font-weight:600;color:#ffffff;}
-.pf-transaction-total{font-size:12px;color:#9ca3af;margin-top:2px;}
+.pf-transaction-price{font-weight:600;color:var(--pf-text);}
+.pf-transaction-total{font-size:12px;color:var(--pf-muted);margin-top:2px;}
 
 /* 空状态样式 */
 .pf-no-transactions{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;}
 .pf-empty-icon{font-size:48px;margin-bottom:16px;opacity:0.5;}
-.pf-no-transactions p{margin:8px 0;color:#9ca3af;}
-.pf-empty-hint{font-size:14px;color:#6b7280;}
+.pf-no-transactions p{margin:8px 0;color:var(--pf-muted);}
+.pf-empty-hint{font-size:14px;color:var(--pf-muted);}
 
 /* 资产总结图表样式 */
-.pf-asset-summary{margin-bottom:24px;padding:20px;border-radius:16px;background:#141426;border:1px solid var(--border);max-width: 820px;}
+.pf-asset-summary{margin-bottom:24px;padding:20px;border-radius:16px;background:var(--pf-panel);border:1px solid var(--pf-border);max-width: 820px;}
 .pf-summary-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
-.pf-summary-header h3{margin:0;font-size:20px;font-weight:700;color:#ffffff;}
+.pf-summary-header h3{margin:0;font-size:20px;font-weight:700;color:var(--pf-text);}
 .pf-summary-stats{display:flex;gap:24px;}
 .pf-summary-stat{
   text-align: center;
@@ -3113,18 +3219,18 @@ window.addEventListener('storage', (e) => {
   flex-direction: column;
   align-items: center;
 }
-.pf-stat-number{display:block;font-size:18px;font-weight:700;color:#ffffff;margin-bottom:4px;}
+.pf-stat-number{display:block;font-size:18px;font-weight:700;color:var(--pf-text);margin-bottom:4px;}
 .pf-stat-number.positive{color:#16a34a;}
 .pf-stat-number.negative{color:#dc2626;}
-.pf-stat-label{font-size:12px;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;}
+.pf-stat-label{font-size:12px;color:var(--pf-muted);text-transform:uppercase;letter-spacing:0.5px;}
 
 /* 交易图表样式 */
 .pf-transaction-chart{
   margin-bottom: 24px;
   padding: 20px;
   border-radius: 16px;
-  background: #141426;
-  border: 1px solid var(--border);
+  background: var(--pf-panel);
+  border: 1px solid var(--pf-border);
 }
 
 /* 图表摘要样式 */
@@ -3133,9 +3239,9 @@ window.addEventListener('storage', (e) => {
   justify-content: space-around;
   margin-bottom: 20px;
   padding: 16px;
-  background: #1f2937;
+  background: var(--bg-secondary);
   border-radius: 12px;
-  border: 1px solid #374151;
+  border: 1px solid var(--pf-border);
 }
 
 .pf-chart-summary-header{
@@ -3149,7 +3255,7 @@ window.addEventListener('storage', (e) => {
   margin: 0;
   font-size: 16px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--pf-text);
   text-align: center;
 }
 
@@ -3161,7 +3267,7 @@ window.addEventListener('storage', (e) => {
 
 .pf-summary-label{
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--pf-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   text-align: center;
@@ -3170,7 +3276,7 @@ window.addEventListener('storage', (e) => {
 .pf-summary-value{
   font-size: 16px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--pf-text);
   text-align: center;
 }
 
@@ -3201,7 +3307,7 @@ window.addEventListener('storage', (e) => {
   margin: 0;
   font-size: 18px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--pf-text);
 }
 
 .pf-chart-controls{
@@ -3213,9 +3319,9 @@ window.addEventListener('storage', (e) => {
 .pf-select{
   padding: 8px 12px;
   border-radius: 8px;
-  border: 1px solid #374151;
-  background: #1f2937;
-  color: #343232;
+  border: 1px solid var(--pf-border);
+  background: var(--bg-secondary);
+  color: var(--pf-text);
   font-size: 14px;
   cursor: pointer;
 }
@@ -3223,9 +3329,9 @@ window.addEventListener('storage', (e) => {
 .pf-refresh-btn{
   padding: 8px;
   border-radius: 8px;
-  border: 1px solid #374151;
-  background: #1f2937;
-  color: #9ca3af;
+  border: 1px solid var(--pf-border);
+  background: var(--bg-secondary);
+  color: var(--pf-muted);
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -3606,10 +3712,10 @@ window.addEventListener('storage', (e) => {
 .pf-pie-chart-section{flex:0 0 400px;min-width:400px;max-width:500px;}
 
 /* 侧栏饼图样式 */
-.pf-sidebar-pie-section{margin-bottom:4px;padding:16px;border-radius:12px;background:#141426;border:1px solid #292e36;}
+.pf-sidebar-pie-section{margin-bottom:4px;padding:16px;border-radius:12px;background:var(--pf-panel);border:1px solid var(--pf-border);}
 .pf-sidebar-pie-section .pf-chart-header{margin-bottom:16px;}
-.pf-sidebar-pie-section .pf-chart-header h4{margin:0;font-size:16px;font-weight:700;color:#ffffff;}
-.pf-sidebar-pie-section .pf-chart-subtitle{margin:4px 0 0 0;font-size:12px;color:#9ca3af;font-weight:400;}
+.pf-sidebar-pie-section .pf-chart-header h4{margin:0;font-size:16px;font-weight:700;color:var(--pf-text);}
+.pf-sidebar-pie-section .pf-chart-subtitle{margin:4px 0 0 0;font-size:12px;color:var(--pf-muted);font-weight:400;}
 .pf-sidebar-pie-section .pf-pie-chart-container{display:flex;flex-direction:column;align-items:center;gap:3px;}
 .pf-sidebar-pie-section .pf-pie-chart{margin-top:10px;margin-bottom:10px;width:130px;height:200px;}
 .pf-sidebar-pie-section .pf-pie-svg{width:100%;height:100%;}
@@ -3619,23 +3725,23 @@ window.addEventListener('storage', (e) => {
 .pf-sidebar-pie-section .pf-legend-left{display:flex;align-items:center;gap:6px;flex:1;min-width:0;}
 .pf-sidebar-pie-section .pf-legend-right{display:flex;flex-direction:column;align-items:flex-end;gap:1px;}
 .pf-sidebar-pie-section .pf-legend-color{width:12px;height:12px;border-radius:2px;}
-.pf-sidebar-pie-section .pf-legend-code{font-weight:600;color:#ffffff;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pf-sidebar-pie-section .pf-legend-value{font-size:12px;color:#9ca3af;white-space:nowrap;}
-.pf-sidebar-pie-section .pf-legend-percentage{font-size:24px;color:#9ca3af;white-space:nowrap;}
+.pf-sidebar-pie-section .pf-legend-code{font-weight:600;color:var(--pf-text);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pf-sidebar-pie-section .pf-legend-value{font-size:12px;color:var(--pf-muted);white-space:nowrap;}
+.pf-sidebar-pie-section .pf-legend-percentage{font-size:24px;color:var(--pf-muted);white-space:nowrap;}
 
 .pf-chart-container{display:flex;align-items:center;gap:32px;}
 .pf-pie-chart{position:relative;width:200px;height:200px;}
 .pf-pie-svg{width:100%;height:100%;}
 .pf-pie-center{position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);text-align:center;}
-.pf-pie-total{font-size:20px;font-weight:700;color:#ffffff;margin-bottom:4px;}
-.pf-pie-label{font-size:12px;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;}
+.pf-pie-total{font-size:20px;font-weight:700;color:var(--pf-text);margin-bottom:4px;}
+.pf-pie-label{font-size:12px;color:var(--pf-muted);text-transform:uppercase;letter-spacing:0.5px;}
 
 /* 饼图标签样式 */
 .pf-pie-label-text {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 20px;
   font-weight: 600;
-  fill: #ffffff;
+  fill: var(--pf-text);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   pointer-events: none;
 }
@@ -3645,9 +3751,9 @@ window.addEventListener('storage', (e) => {
 .pf-legend-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
 .pf-legend-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
 .pf-legend-color{width:16px;height:16px;border-radius:4px;flex-shrink:0;}
-.pf-legend-code{font-weight:600;color:#ffffff;font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pf-legend-value{font-size:20px;color:#9ca3af;white-space:nowrap;}
-.pf-legend-percentage{font-size:20px;color:#9ca3af;white-space:nowrap;}
+.pf-legend-code{font-weight:600;color:var(--pf-text);font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pf-legend-value{font-size:20px;color:var(--pf-muted);white-space:nowrap;}
+.pf-legend-percentage{font-size:20px;color:var(--pf-muted);white-space:nowrap;}
 
 
 /* 分析页面样式 */

@@ -14,6 +14,9 @@ import AboutUsView from '../views/info/aboutus/AboutUsView.vue'
 import SettingsView from '../views/settings/SettingsView.vue'
 import ContactUs from '../components/ContactUs.vue'
 import kycService from '../components/kycService.vue'
+// Admin pages
+import AdminDashboard from '../views/admin/AdminDashboard.vue'
+import AdminSubscriptions from '../views/admin/AdminSubscriptions.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -35,7 +38,33 @@ const router = createRouter({
     { path: '/about', name: 'about', component: AboutUsView },
     { path: '/contact', name: 'contact', component: ContactUs },
     {path:'/settings',name:'settings',component:SettingsView},
+    // Admin routes
+    { path: '/admin', name: 'admin', component: AdminDashboard },
+    { path: '/admin/subscriptions', name: 'adminSubscriptions', component: AdminSubscriptions },
   ]
+})
+
+// 路由守卫 - 保护管理员页面
+router.beforeEach((to, from, next) => {
+  const isAdmin = localStorage.getItem('isAdmin') === 'true'
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true'
+  
+  // 检查是否是管理员页面
+  if (to.path.startsWith('/admin')) {
+    if (!isLoggedIn) {
+      // 未登录，重定向到登录页面
+      next('/login')
+      return
+    }
+    
+    if (!isAdmin) {
+      // 已登录但不是管理员，重定向到首页
+      next('/about')
+      return
+    }
+  }
+  
+  next()
 })
 
 export default router

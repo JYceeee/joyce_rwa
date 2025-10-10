@@ -2,61 +2,61 @@
   <section class="kyc-page container">
     <!-- 顶部 -->
     <header class="topbar">
-      <button class="back" @click="goProfile">&larr; Back</button>
-      <h1 class="title">KYC Verification</h1>
-      <button class="btn light danger" @click="cancelKYC">Cancel Verification</button>
+      <button class="back" @click="goProfile">&larr; {{ t('kyc.back') }}</button>
+      <h1 class="title">{{ t('kyc.title') }}</h1>
+      <button class="btn light danger" @click="cancelKYC">{{ t('kyc.cancelVerification') }}</button>
     </header>
 
     <!-- 进度 -->
     <ol class="steps">
-      <li :class="{active: step===1, done: step>1}">1. Upload ID & auto-read</li>
+      <li :class="{active: step===1, done: step>1}">{{ t('kyc.step1') }}</li>
       <!-- <li :class="{active: step===2, done: step>2}">2. Document</li> -->
-      <li :class="{active: step===3, done: step>3}">2. Liveness</li>
-      <li :class="{active: step===4, done: step>4}">3. Complete</li>
+      <li :class="{active: step===3, done: step>3}">{{ t('kyc.step2') }}</li>
+      <li :class="{active: step===4, done: step>4}">{{ t('kyc.step3') }}</li>
     </ol>
 
     <!-- Step 1：上传证件并自动识别（OCR 占位） -->
     <div v-if="step===1" class="modal">
       <div class="card">
-        <h2>Upload your ID and auto-read info</h2>
+        <h2>{{ t('kyc.uploadIdTitle') }}</h2>
         <form @submit.prevent="goDoc">
           <div class="grid">
-            <label>Upload front image* <input type="file" accept="image/*" @change="onFile($event,'front')" required /></label>
-            <label>Upload back image <input type="file" accept="image/*" @change="onFile($event,'back')" /></label>
-            <label>Issuing country*
+            <label>{{ t('kyc.uploadFront') }} <input type="file" accept="image/*" @change="onFile($event,'front')" required /></label>
+            <label>{{ t('kyc.uploadBack') }} <input type="file" accept="image/*" @change="onFile($event,'back')" /></label>
+            <label>{{ t('kyc.issuingCountry') }}
               <select v-model="form.country" required>
-                <option value="" disabled>Select…</option>
+                <option value="" disabled>{{ t('kyc.selectCountry') }}</option>
                 <option value="AU">Australia</option>
                 <option value="US">United States</option>
                 <option value="AR">Argentina</option>
               </select>
             </label>
-            <label>ID type*
+            <label>{{ t('kyc.idType') }}
               <select v-model="form.docType" required>
-                <option value="" disabled>Select…</option>
-                <option value="passport">Passport</option>
-                <option value="driver">Driver's license</option>
-                <option value="idcard">ID card</option>
-                <option value="residence">Residence permit</option>
+                <option value="" disabled>{{ t('kyc.selectIdType') }}</option>
+                <option value="passport">{{ t('kyc.passport') }}</option>
+                <option value="driver">{{ t('kyc.driverLicense') }}</option>
+                <option value="idcard">{{ t('kyc.idCard') }}</option>
+                <option value="residence">{{ t('kyc.residencePermit') }}</option>
               </select>
             </label>
           </div>
 
           <div class="actions" style="justify-content: flex-start; gap: 10px;">
-            <button type="button" class="btn light" @click="extractFromId" :disabled="!form.fileFront">Auto-read from ID</button>
-            <small class="hint">将使用 OCR/解析服务读取 first name, last name, DOB 等信息。</small>
+            <button type="button" class="btn light" @click="extractFromId" :disabled="!form.fileFront">{{ t('kyc.autoRead') }}</button>
+            <small class="hint">{{ t('kyc.autoReadHint') }}</small>
           </div>
 
           <div class="grid" style="margin-top:12px;">
-            <label>First name* <input v-model.trim="form.firstName" required readonly /></label>
-            <label>Last name*  <input v-model.trim="form.lastName" required readonly /></label>
-            <label>Date of birth*  <input v-model.trim="form.dob" required readonly /></label>
-            <label>ID number  <input v-model.trim="form.docNumber" readonly /></label>
+            <label>{{ t('kyc.firstName') }} <input v-model.trim="form.firstName" required readonly /></label>
+            <label>{{ t('kyc.lastName') }}  <input v-model.trim="form.lastName" required readonly /></label>
+            <label>{{ t('kyc.dateOfBirth') }}  <input v-model.trim="form.dob" required readonly /></label>
+            <label>{{ t('kyc.idNumber') }}  <input v-model.trim="form.docNumber" readonly /></label>
           </div>
 
           <div class="actions">
-            <button type="button" class="btn light" @click="cancelKYC">Cancel</button>
-            <button type="submit" class="btn orange" :disabled="!readyExtract">Continue</button>
+            <button type="button" class="btn light" @click="cancelKYC">{{ t('kyc.cancel') }}</button>
+            <button type="submit" class="btn orange" :disabled="!readyExtract">{{ t('kyc.continue') }}</button>
           </div>
         </form>
       </div>
@@ -65,13 +65,13 @@
     <!-- Step 2：活体检测（占位，接第三方时替换） -->
      <div v-if="step===3" class="modal">
       <div class="card">
-        <h2>Liveness detection</h2>
-        <p>Center your face in the frame and follow the instruction.</p>
+        <h2>{{ t('kyc.livenessTitle') }}</h2>
+        <p>{{ t('kyc.livenessDescription') }}</p>
         <!-- <div class="face-ring"></div> -->
 
         <div class="camera-block">
           <video v-if="cameraEnabled" ref="videoEl" autoplay playsinline class="cam-preview"></video>
-          <button v-else class="btn orange" @click="enableCamera">Enable Camera</button>
+          <button v-else class="btn orange" @click="enableCamera">{{ t('kyc.enableCamera') }}</button>
           <p v-if="camError" class="cam-error">{{ camError }}</p>
           
           <!-- 检测状态显示 -->
@@ -80,10 +80,10 @@
             <p class="detection-text">{{ livenessStatus }}</p>
           </div>
         </div>
-        <small class="hint">接入 Sumsub/Persona/Onfido 时，把此区域替换为他们的组件，并在成功回调里调用 <code>complete()</code>。</small>
+        <small class="hint">{{ t('kyc.livenessHint') }}</small>
         <div class="actions">
-          <button type="button" class="btn light" @click="prev">Back</button>
-          <button v-if="!cameraEnabled" class="btn light danger" @click="cancelLiveness">Cancel</button>
+          <button type="button" class="btn light" @click="prev">{{ t('kyc.back') }}</button>
+          <button v-if="!cameraEnabled" class="btn light danger" @click="cancelLiveness">{{ t('kyc.cancelLiveness') }}</button>
         </div>
       </div>
     </div> 
@@ -92,10 +92,10 @@
     <div v-if="step===4" class="modal">
       <div class="card success">
         <div class="bigcheck">✓</div>
-        <h2>Your profile has been verified</h2>
-        <p>Please wait for the whitelist application...</p>
+        <h2>{{ t('kyc.verifiedTitle') }}</h2>
+        <p>{{ t('kyc.verifiedDescription') }}</p>
         <div class="actions">
-          <button class="btn orange" @click="goProfile">Back to Profile</button>
+          <button class="btn orange" @click="goProfile">{{ t('kyc.backToProfile') }}</button>
         </div>
       </div>
     </div>
@@ -104,12 +104,12 @@
     <div v-if="showWhitelistEligibility" class="modal">
       <div class="card">
         <div class="success-icon">🎉</div>
-        <h2 style="color: #16a34a;">Congratulations!</h2>
-        <p style="font-weight: bold; color:#000;">Your KYC verification has been completed successfully.</p>
-        <p style="font-weight: bold; color:#000;">Now you are eligible to apply for the whitelist and start trading!</p>
+        <h2 style="color: #16a34a;">{{ t('kyc.congratulations') }}</h2>
+        <p style="font-weight: bold; color:#000;">{{ t('kyc.kycCompleted') }}</p>
+        <p style="font-weight: bold; color:#000;">{{ t('kyc.eligibleForWhitelist') }}</p>
         <div class="actions">
-          <button class="btn light" @click="goProfile">Maybe Later</button>
-          <button class="btn orange" @click="applyWhitelist">Apply for Whitelist</button>
+          <button class="btn light" @click="goProfile">{{ t('kyc.maybeLater') }}</button>
+          <button class="btn orange" @click="applyWhitelist">{{ t('kyc.applyForWhitelist') }}</button>
         </div>
       </div>
     </div>
@@ -120,8 +120,8 @@
         <div class="loading-icon">
           <div class="spinner"></div>
         </div>
-        <h2>Applying for Whitelist...</h2>
-        <p>Please wait while we process your whitelist application.</p>
+        <h2>{{ t('kyc.applyingWhitelist') }}</h2>
+        <p>{{ t('kyc.applyingWhitelistDescription') }}</p>
         <div class="loading-text">{{ loadingMessage }}</div>
       </div>
     </div>
@@ -130,12 +130,12 @@
     <div v-if="showWhitelistSuccess" class="modal">
       <div class="card success">
         <div class="bigcheck">✓</div>
-        <h2>Welcome to the Whitelist!</h2>
-        <p>You have successfully joined the whitelist.</p>
-        <p><strong>Now you can go to the Projects page to subscribe to your preferred assets!</strong></p>
+        <h2>{{ t('kyc.welcomeToWhitelist') }}</h2>
+        <p>{{ t('kyc.whitelistSuccess') }}</p>
+        <p><strong>{{ t('kyc.canSubscribe') }}</strong></p>
         <!-- <div class="actions">
-          <button class="btn orange" @click="goToProjects">Go to Projects</button>
-          <!-- <button class="btn light" @click="goProfile">Back to Profile</button> -->
+          <button class="btn orange" @click="goToProjects">{{ t('kyc.goToProjects') }}</button>
+          <!-- <button class="btn light" @click="goProfile">{{ t('kyc.backToProfile') }}</button> -->
         <!-- </div> -->
       </div>
     </div>
@@ -144,12 +144,12 @@
     <div v-if="showCancelConfirm" class="modal">
       <div class="card">
         <div class="warning-icon">⚠️</div>
-        <h2>Cancel KYC Verification</h2>
-        <p>Canceling KYC will revoke your subscription eligibility.</p>
-        <p><strong>Are you sure you want to cancel KYC verification?</strong></p>
+        <h2>{{ t('kyc.cancelKycTitle') }}</h2>
+        <p>{{ t('kyc.cancelKycWarning') }}</p>
+        <p><strong>{{ t('kyc.cancelKycConfirm') }}</strong></p>
         <div class="actions">
-          <button class="btn light" @click="hideCancelConfirm">Continue KYC</button>
-          <button class="btn danger" @click="confirmCancelKYC">Yes, Cancel KYC</button>
+          <button class="btn light" @click="hideCancelConfirm">{{ t('kyc.continueKyc') }}</button>
+          <button class="btn danger" @click="confirmCancelKYC">{{ t('kyc.yesCancelKyc') }}</button>
         </div>
       </div>
     </div>
@@ -159,6 +159,7 @@
 <script>
 import { setKycStatus, KYC_STATUS } from '@/service/kycService'
 import { unifiedContractService as contractService } from '@/service/unifiedContractService'
+import { useLanguage } from '@/composables/useLanguage'
 
 export default {
   name: 'KycServicePage',
@@ -190,6 +191,10 @@ export default {
     ,readyExtract(){ return !!(this.form.firstName && this.form.lastName && this.form.dob) }
   },
   methods:{
+    t(key) {
+      const { t } = useLanguage()
+      return t(key)
+    },
     goProfile(){ this.$router.push('/profile') },
     prev(){ this.step = Math.max(1, this.step - 1) },
     

@@ -88,8 +88,12 @@ const getSystemTheme = () => {
 // 应用主题到文档
 const applyTheme = (themeName) => {
   const theme = themes[themeName]
-  if (!theme) return
+  if (!theme) {
+    console.warn('🎨 主题不存在:', themeName)
+    return
+  }
 
+  console.log('🎨 应用主题:', themeName)
   const root = document.documentElement
   Object.entries(theme.cssVars).forEach(([property, value]) => {
     root.style.setProperty(property, value)
@@ -97,6 +101,7 @@ const applyTheme = (themeName) => {
   
   // 设置 data-theme 属性用于 CSS 选择器
   root.setAttribute('data-theme', themeName)
+  console.log('🎨 data-theme属性已设置:', root.getAttribute('data-theme'))
 }
 
 // 从 localStorage 加载保存的主题
@@ -118,9 +123,18 @@ const setTheme = (themeName) => {
     return
   }
   
+  console.log('🎨 设置主题:', themeName)
   currentTheme.value = themeName
   applyTheme(themeName)
   localStorage.setItem('rwa-theme', themeName)
+  console.log('🎨 主题已保存到localStorage:', localStorage.getItem('rwa-theme'))
+}
+
+// 在深色和浅色主题之间切换
+const toggleTheme = () => {
+  const newTheme = currentTheme.value === 'dark' ? 'light' : 'dark'
+  console.log('🎨 切换主题:', currentTheme.value, '->', newTheme)
+  setTheme(newTheme)
 }
 
 // 获取当前主题信息
@@ -162,6 +176,7 @@ export function useTheme() {
   return {
     currentTheme,
     setTheme,
+    toggleTheme,
     getCurrentTheme,
     getAvailableThemes,
     initTheme,

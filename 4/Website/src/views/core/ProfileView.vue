@@ -52,11 +52,12 @@
           <span class="contact-label">{{ t('profile.password') }}</span>
           <button class="btn-small" type="button" >{{ t('profile.changePassword') }}</button>
         </div>
-        <div v-if="userLoading" class="contact-item loading-item">
+        <!-- 用户信息加载状态已隐藏 -->
+        <!-- <div v-if="userLoading" class="contact-item loading-item">
           <span class="contact-icon">🔄</span>
           <span class="contact-label">{{ t('profile.status') }}</span>
           <span class="contact-value">{{ t('profile.loadingUserInfo') }}</span>
-        </div>
+        </div> -->
         <div v-if="userError && !userLoading" class="contact-item error-item">
           <span class="contact-icon">⚠️</span>
           <span class="contact-label">{{ t('profile.status') }}</span>
@@ -92,7 +93,7 @@
       <div class="field">
         <label class="label">{{ t('profile.kycVerification') }} <span class="req">*</span></label>
         <div class="kyc-banner" :class="isVerified ? 'green' : 'orange'" role="status">
-          <span class="icon">
+          <span class="icon" :class="{ 'icon-verified': isVerified }">
             <svg viewBox="0 0 24 24" class="i">
               <path d="M12 2 2 7l10 5 10-5-10-5Zm0 7L2 4v13l10 5 10-5V4L12 9Zm0 9.5-7-3.5V9l7 3.5V20.5Z"/>
             </svg>
@@ -122,8 +123,8 @@
       <!-- Trading Permission -->
       <div class="field">
         <label class="label">{{ t('profile.tradingPermission') }} <span class="req"></span></label>
-        <div class="kyc-banner" :class="isVerified ? 'green' : 'orange'" role="status">
-          <span class="icon">
+        <div class="kyc-banner" :class="isTradingFullyVerified ? 'green' : 'orange'" role="status">
+          <span class="icon" :class="{ 'icon-verified': isTradingFullyVerified }">
             <svg viewBox="0 0 24 24" class="i">
               <path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/>
             </svg>
@@ -144,8 +145,8 @@
   
     <!-- 底部按钮 -->
     <div class="actions bottom">
-      <button class="btn light" type="button" @click="onCancel">{{ t('common.cancel') }}</button>
-      <button class="btn orange" type="submit">{{ t('common.save') }}</button>
+      <!-- <button class="btn light" type="button" @click="onCancel">{{ t('common.cancel') }}</button>
+      <button class="btn orange" type="submit">{{ t('common.save') }}</button> -->
       <!-- 新增：安全退出 -->
       <button class="btn light" type="button" @click="logout" style="margin-left:auto;">{{ t('profile.logout') }}</button>
     </div>
@@ -383,6 +384,11 @@ export default {
       }
     },
     
+    // 交易权限是否完全验证
+    isTradingFullyVerified() {
+      return this.kycLevel >= KYC_LEVELS.LEVEL_2 && this.whitelistStatus === 'approved'
+    },
+    
     // 交易权限显示
     tradingPermissionText() {
       if (this.kycLevel >= KYC_LEVELS.LEVEL_2 && this.whitelistStatus === 'approved') {
@@ -396,11 +402,11 @@ export default {
     
     tradingPermissionClass() {
       if (this.kycLevel >= KYC_LEVELS.LEVEL_2 && this.whitelistStatus === 'approved') {
-        return '全访问'
+        return 'permission-full'
       } else if (this.kycLevel >= KYC_LEVELS.LEVEL_2) {
-        return '有限访问'
+        return 'permission-limited'
       } else {
-        return '无访问'
+        return 'permission-none'
       }
     },
     
@@ -1504,6 +1510,19 @@ export default {
 .kyc-banner .icon{
   width:28px; height:28px; border-radius:10px; background:var(--bg-secondary); display:grid; place-items:center;
   box-shadow:0 2px 6px rgba(0, 0, 0, 0.2), inset 0 0 0 1px #4b5563; opacity:.9;
+  transition: all 0.3s ease;
+}
+
+/* 验证通过的图标样式 */
+.kyc-banner .icon.icon-verified {
+  background: #16a34a;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.3), inset 0 0 0 1px #15803d;
+  opacity: 1;
+}
+
+.kyc-banner .icon.icon-verified svg {
+  fill: #ffffff;
 }
 
 
