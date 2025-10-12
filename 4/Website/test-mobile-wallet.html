@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>移动端钱包连接测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .test-section {
+            background: #2a2a4a;
+            border: 1px solid #374151;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .test-section h2 {
+            margin-top: 0;
+            color: #60a5fa;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #374151;
+        }
+        
+        .info-item:last-child {
+            border-bottom: none;
+        }
+        
+        .label {
+            color: #94a3b8;
+        }
+        
+        .value {
+            font-weight: 600;
+        }
+        
+        .success { color: #22c55e; }
+        .error { color: #ef4444; }
+        .warning { color: #f59e0b; }
+        .info { color: #3b82f6; }
+        
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .test-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .test-btn.primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .test-btn.primary:hover {
+            background: #5a67d8;
+        }
+        
+        .test-btn.secondary {
+            background: #374151;
+            color: white;
+            border: 1px solid #4b5563;
+        }
+        
+        .test-btn.secondary:hover {
+            background: #4b5563;
+        }
+        
+        .test-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .log-section {
+            background: #1a1a2e;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            padding: 16px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 4px 0;
+        }
+        
+        .log-time {
+            color: #6b7280;
+        }
+        
+        .mobile-only {
+            border: 2px solid #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .mobile-only h2 {
+            color: #60a5fa;
+        }
+        
+        .instructions {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .instructions h3 {
+            margin-top: 0;
+            color: #60a5fa;
+        }
+        
+        .instructions ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🦊 移动端钱包连接测试</h1>
+            <p>测试MetaMask和其他移动钱包的连接功能</p>
+        </div>
+
+        <div class="instructions">
+            <h3>📋 测试步骤</h3>
+            <ol>
+                <li>确保您在移动设备上打开此页面</li>
+                <li>安装MetaMask App (如果还没有)</li>
+                <li>点击下方的"测试MetaMask连接"按钮</li>
+                <li>在弹出的MetaMask App中确认连接</li>
+                <li>查看测试结果和日志</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h2>🔍 设备检测</h2>
+            <div class="info-item">
+                <span class="label">设备类型:</span>
+                <span class="value" id="deviceType">检测中...</span>
+            </div>
+            <div class="info-item">
+                <span class="label">User Agent:</span>
+                <span class="value" id="userAgent">检测中...</span>
+            </div>
+            <div class="info-item">
+                <span class="label">屏幕尺寸:</span>
+                <span class="value" id="screenSize">检测中...</span>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>💰 钱包检测</h2>
+            <div class="info-item">
+                <span class="label">window.ethereum:</span>
+                <span class="value" id="ethereumStatus">检测中...</span>
+            </div>
+            <div class="info-item">
+                <span class="label">MetaMask Provider:</span>
+                <span class="value" id="metamaskStatus">检测中...</span>
+            </div>
+        </div>
+
+        <div class="test-section mobile-only" id="mobileSection">
+            <h2>📱 移动端钱包测试</h2>
+            <div class="info-item">
+                <span class="label">MetaMask深链接:</span>
+                <span class="value" id="deepLinkUrl">生成中...</span>
+            </div>
+            
+            <div class="button-group">
+                <button class="test-btn primary" onclick="testMetaMaskConnection()">
+                    🦊 测试MetaMask连接
+                </button>
+                <button class="test-btn secondary" onclick="testTrustWallet()">
+                    🔒 测试Trust Wallet
+                </button>
+                <button class="test-btn secondary" onclick="testCoinbaseWallet()">
+                    🔵 测试Coinbase Wallet
+                </button>
+                <button class="test-btn secondary" onclick="clearLogs()">
+                    🗑️ 清除日志
+                </button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📝 测试日志</h2>
+            <div class="log-section" id="logSection">
+                <div class="log-entry">
+                    <span class="log-time">00:00:00</span>
+                    <span class="log-time">[系统]</span>
+                    <span class="info">测试页面已加载</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let isMobile = false;
+        let deepLinkUrl = '';
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            detectDevice();
+            detectWallet();
+            generateDeepLink();
+        });
+
+        // 设备检测
+        function detectDevice() {
+            const userAgent = navigator.userAgent;
+            isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+            
+            document.getElementById('deviceType').textContent = isMobile ? '移动设备' : '桌面设备';
+            document.getElementById('deviceType').className = 'value ' + (isMobile ? 'success' : 'warning');
+            
+            document.getElementById('userAgent').textContent = userAgent.substring(0, 50) + '...';
+            document.getElementById('screenSize').textContent = `${window.innerWidth}x${window.innerHeight}`;
+            
+            // 如果不是移动设备，隐藏移动端测试部分
+            if (!isMobile) {
+                document.getElementById('mobileSection').style.display = 'none';
+                addLog('设备检测', '非移动设备，移动端测试已隐藏', 'warning');
+            } else {
+                addLog('设备检测', '移动设备检测成功', 'success');
+            }
+        }
+
+        // 钱包检测
+        function detectWallet() {
+            const hasEthereum = typeof window.ethereum !== 'undefined';
+            const isMetaMask = window.ethereum?.isMetaMask || false;
+            
+            document.getElementById('ethereumStatus').textContent = hasEthereum ? '✅ 检测到' : '❌ 未检测到';
+            document.getElementById('ethereumStatus').className = 'value ' + (hasEthereum ? 'success' : 'error');
+            
+            document.getElementById('metamaskStatus').textContent = isMetaMask ? '✅ MetaMask' : '⚠️ 其他钱包';
+            document.getElementById('metamaskStatus').className = 'value ' + (isMetaMask ? 'success' : 'warning');
+            
+            if (hasEthereum) {
+                addLog('钱包检测', '检测到以太坊钱包', 'success');
+                if (isMetaMask) {
+                    addLog('钱包检测', '检测到MetaMask钱包', 'success');
+                } else {
+                    addLog('钱包检测', '检测到其他以太坊钱包', 'info');
+                }
+            } else {
+                addLog('钱包检测', '未检测到以太坊钱包', 'error');
+            }
+        }
+
+        // 生成深链接
+        function generateDeepLink() {
+            const hostname = window.location.hostname;
+            deepLinkUrl = `https://metamask.app.link/dapp/${hostname}`;
+            document.getElementById('deepLinkUrl').textContent = deepLinkUrl;
+            addLog('深链接', `MetaMask深链接已生成: ${deepLinkUrl}`, 'info');
+        }
+
+        // 测试MetaMask连接
+        function testMetaMaskConnection() {
+            addLog('MetaMask测试', '开始测试MetaMask连接...', 'info');
+            
+            if (!isMobile) {
+                addLog('MetaMask测试', '错误: 当前设备不是移动设备', 'error');
+                return;
+            }
+            
+            // 尝试直接连接（如果浏览器中已有MetaMask）
+            if (window.ethereum && window.ethereum.isMetaMask) {
+                addLog('MetaMask测试', '检测到浏览器中的MetaMask，尝试连接...', 'info');
+                window.ethereum.request({ method: 'eth_requestAccounts' })
+                    .then(accounts => {
+                        addLog('MetaMask测试', `连接成功! 账户: ${accounts[0]}`, 'success');
+                    })
+                    .catch(error => {
+                        addLog('MetaMask测试', `连接失败: ${error.message}`, 'error');
+                        // 如果浏览器连接失败，尝试深链接
+                        openMetaMaskDeepLink();
+                    });
+            } else {
+                // 直接使用深链接
+                openMetaMaskDeepLink();
+            }
+        }
+
+        // 打开MetaMask深链接
+        function openMetaMaskDeepLink() {
+            addLog('MetaMask测试', '尝试打开MetaMask App...', 'info');
+            
+            // 创建隐藏的iframe来尝试打开App
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = 'metamask://dapp/' + window.location.hostname;
+            document.body.appendChild(iframe);
+            
+            // 同时尝试HTTP深链接
+            setTimeout(() => {
+                window.open(deepLinkUrl, '_blank');
+                addLog('MetaMask测试', '深链接已打开，请在MetaMask App中确认连接', 'info');
+            }, 1000);
+            
+            // 清理iframe
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+            }, 3000);
+        }
+
+        // 测试Trust Wallet
+        function testTrustWallet() {
+            const trustUrl = `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(window.location.href)}`;
+            addLog('Trust Wallet测试', `打开Trust Wallet深链接: ${trustUrl}`, 'info');
+            window.open(trustUrl, '_blank');
+        }
+
+        // 测试Coinbase Wallet
+        function testCoinbaseWallet() {
+            const coinbaseUrl = `https://go.cb-w.com/dapp?cb_url=${encodeURIComponent(window.location.href)}`;
+            addLog('Coinbase Wallet测试', `打开Coinbase Wallet深链接: ${coinbaseUrl}`, 'info');
+            window.open(coinbaseUrl, '_blank');
+        }
+
+        // 添加日志
+        function addLog(type, message, level = 'info') {
+            const now = new Date();
+            const time = now.toTimeString().split(' ')[0];
+            
+            const logSection = document.getElementById('logSection');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            
+            logEntry.innerHTML = `
+                <span class="log-time">${time}</span>
+                <span class="log-time">[${type}]</span>
+                <span class="${level}">${message}</span>
+            `;
+            
+            logSection.insertBefore(logEntry, logSection.firstChild);
+            
+            // 限制日志数量
+            const logs = logSection.children;
+            if (logs.length > 50) {
+                logSection.removeChild(logs[logs.length - 1]);
+            }
+        }
+
+        // 清除日志
+        function clearLogs() {
+            const logSection = document.getElementById('logSection');
+            logSection.innerHTML = `
+                <div class="log-entry">
+                    <span class="log-time">${new Date().toTimeString().split(' ')[0]}</span>
+                    <span class="log-time">[系统]</span>
+                    <span class="info">日志已清除</span>
+                </div>
+            `;
+        }
+
+        // 监听页面可见性变化（用于检测从App返回）
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                addLog('页面检测', '页面重新获得焦点，可能从钱包App返回', 'info');
+                
+                // 检查钱包连接状态
+                if (window.ethereum) {
+                    window.ethereum.request({ method: 'eth_accounts' })
+                        .then(accounts => {
+                            if (accounts.length > 0) {
+                                addLog('连接检测', `检测到已连接的账户: ${accounts[0]}`, 'success');
+                            } else {
+                                addLog('连接检测', '未检测到已连接的账户', 'warning');
+                            }
+                        })
+                        .catch(error => {
+                            addLog('连接检测', `检测连接状态失败: ${error.message}`, 'error');
+                        });
+                }
+            }
+        });
+
+        // 监听MetaMask账户变化
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', function(accounts) {
+                if (accounts.length > 0) {
+                    addLog('账户变化', `账户已切换: ${accounts[0]}`, 'success');
+                } else {
+                    addLog('账户变化', '账户已断开连接', 'warning');
+                }
+            });
+
+            window.ethereum.on('chainChanged', function(chainId) {
+                addLog('网络变化', `网络已切换: ${chainId}`, 'info');
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,8 +1,7 @@
 <template>
   <!-- Contact Us Section -->
   <section 
-    class="contact-section" 
-    :class="{ 'fade-in': !showIntroVideo && !isTransitioning }"
+    class="contact-section"
   >
     <!-- Background Decorations -->
     <!-- <div class="contact-bg-decoration">
@@ -215,29 +214,14 @@ export default {
 /* Contact Section */
 .contact-section {
   position: relative;
-  min-height: 100vh;
   background: 
     radial-gradient(circle at 20% 80%, rgba(51, 204, 255, 0.15) 0%, transparent 50%),
     radial-gradient(circle at 80% 20%, rgba(0, 153, 204, 0.15) 0%, transparent 50%),
     radial-gradient(circle at 40% 40%, rgba(25, 25, 112, 0.1) 0%, transparent 50%);
-  padding: 120px 0;
+  padding: 40px 0;
   overflow: hidden;
 }
 
-.contact-section.fade-in {
-  animation: fadeInUp 1s ease-out;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 /* Background Decorations */
 .contact-bg-decoration {
@@ -311,7 +295,7 @@ export default {
   position: relative;
   z-index: 2;
   max-width: 1200px;
-  margin: auto auto 0 auto;
+  margin: 0 auto;
   padding: 0 40px;
 }
 

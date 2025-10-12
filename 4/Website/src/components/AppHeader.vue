@@ -1037,7 +1037,7 @@ export default {
   }
   
   .right {
-    gap: 8px;
+    gap: 15px;
     margin-right: 0; /* 重置桌面端边距 */
     flex-wrap: nowrap; /* 防止换行 */
     align-items: center;
@@ -1053,7 +1053,7 @@ export default {
     justify-content: center;
     align-items: center;
     width: 100%;
-    gap: 12px;
+    gap: 15px;
   }
   
   /* Wallet按钮 - 左侧 */
@@ -1102,13 +1102,15 @@ export default {
     color: #000000 !important; /* 保持黑色 */
   }
   
-  /* 深色主题下的语言按钮为白色 */
+  /* 深色主题下的语言按钮为黑色 */
   [data-theme="dark"] .language-btn {
-    color: #ffffff !important;
+    background: #f3f4f6 !important; /* 浅色背景 */
+    color: #000000 !important;
   }
   
   [data-theme="dark"] .language-btn:hover {
-    color: #ffffff !important;
+    background: #e5e7eb !important; /* 悬停时稍深的浅色背景 */
+    color: #000000 !important;
   }
   
   /* 浅色主题下的语言按钮为黑色 */
@@ -1321,7 +1323,7 @@ export default {
   }
   
   .right {
-    gap: 6px;
+    gap: 15px;
     flex-wrap: nowrap;
     align-items: center;
     justify-content: center; /* 改为center实现居中对齐 */
@@ -1336,7 +1338,7 @@ export default {
     justify-content: center;
     align-items: center;
     width: 100%;
-    gap: 10px;
+    gap: 15px;
   }
   
   /* Wallet按钮 - 左侧 */
@@ -1488,7 +1490,7 @@ export default {
   }
   
   .right {
-    gap: 0px;
+    gap: 15px;
     flex-wrap: nowrap;
     align-items: center;
     justify-content: space-between; /* 改为space-between实现左中右分布 */
@@ -1503,7 +1505,7 @@ export default {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    gap: 0px;
+    gap: 15px;
   }
   
   /* Wallet按钮 - 左侧 */
@@ -1598,7 +1600,8 @@ export default {
   
   /* 移动端深色主题下的语言按钮 */
   [data-theme="dark"] .language-btn {
-    color: #ffffff !important; /* 深色主题下文字为白色 */
+    background: #f3f4f6 !important; /* 浅色背景 */
+    color: #000000 !important; /* 深色主题下文字为黑色 */
   }
   
   /* 移动端浅色主题下的语言按钮 */

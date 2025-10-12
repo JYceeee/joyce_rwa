@@ -132,7 +132,7 @@
               </div>
               
               <div class="contract-address-item">
-                <div class="contract-address-label">利息代币地址:</div>
+                <div class="contract-address-label">{{ t('trade.interestTokenAddress') }}:</div>
                 <div class="contract-address-value" @click="copyToClipboard(contractAddressModal.interestTokenAddress)">
                   {{ formatAddress(contractAddressModal.interestTokenAddress) }}
                   <!-- <span class="copy-icon">📋</span> -->
@@ -140,7 +140,7 @@
               </div>
               
               <div class="contract-address-item">
-                <div class="contract-address-label">KYC注册地址:</div>
+                <div class="contract-address-label">{{ t('trade.kycRegistryAddress') }}:</div>
                 <div class="contract-address-value" @click="copyToClipboard(contractAddressModal.kycRegistryAddress)">
                   {{ formatAddress(contractAddressModal.kycRegistryAddress) }}
                   <span class="copy-icon">📋</span>
@@ -148,7 +148,7 @@
               </div>
               
               <div class="contract-address-item">
-                <div class="contract-address-label">贷款发行方地址：</div>
+                <div class="contract-address-label">{{ t('trade.loanIssuerAddress') }}：</div>
                 <div class="contract-address-value" @click="copyToClipboard(contractAddressModal.loanIssuerAddress)">
                   {{ formatAddress(contractAddressModal.loanIssuerAddress) }}
                   <span class="copy-icon">📋</span>
@@ -158,8 +158,8 @@
           </div>
           
           <div class="contract-address-actions">
-            <button class="btn secondary" @click="closeContractAddressModal">关闭</button>
-            <button class="btn primary" @click="proceedWithTransaction">继续交易</button>
+            <button class="btn secondary" @click="closeContractAddressModal">{{ t('common.close') }}</button>
+            <button class="btn primary" @click="proceedWithTransaction">{{ t('trade.continueTransaction') }}</button>
           </div>
         </div>
       </div>
@@ -176,37 +176,37 @@
             </div>
           </div>
           <div class="success-content">
-            <h2 class="success-title">交易成功!</h2>
-            <p class="success-description">您的交易已经完成!</p>
+            <h2 class="success-title">{{ t('trade.transactionSuccess') }}</h2>
+            <p class="success-description">{{ t('trade.transactionCompleted') }}</p>
             
             <div class="success-details">
               <div class="detail-card">
                 <div class="detail-header">
-                  <span class="detail-label">交易详情</span>
+                  <span class="detail-label">{{ t('trade.transactionDetails') }}</span>
                 </div>
                 <div class="detail-grid">
                   <div class="detail-item">
-                    <span class="detail-key">类型:</span>
-                    <span class="detail-value">{{ successData.tradeType === 'buy' ? 'Buy' : 'Sell' }}</span>
+                    <span class="detail-key">{{ t('trade.type') }}:</span>
+                    <span class="detail-value">{{ successData.tradeType === 'buy' ? t('trade.buy') : t('trade.sell') }}</span>
                   </div>
                   <div class="detail-item">
-                    <span class="detail-key">数量:</span>
-                    <span class="detail-value">{{ formatNumber(successData.amount) }} Tokens</span>
+                    <span class="detail-key">{{ t('trade.amount') }}:</span>
+                    <span class="detail-value">{{ formatNumber(successData.amount) }} {{ t('trade.tokens') }}</span>
                   </div>
                 </div>
               </div>
               
               <div class="detail-card">
                 <div class="detail-header">
-                  <span class="detail-label">区块链咨询</span>
+                  <span class="detail-label">{{ t('trade.blockchainInfo') }}</span>
                 </div>
                 <div class="detail-grid">
                   <div class="detail-item">
-                    <span class="detail-key">哈希值:</span>
+                    <span class="detail-key">{{ t('trade.hash') }}:</span>
                     <span class="detail-value hash-value" @click="copyHash">{{ formatHash(successData.transactionHash) }}</span>
                   </div>
                   <div class="detail-item">
-                    <span class="detail-key">区块:</span>
+                    <span class="detail-key">{{ t('trade.block') }}:</span>
                     <span class="detail-value">{{ successData.blockNumber }}</span>
                   </div>
                 </div>
@@ -214,15 +214,15 @@
               
               <div class="detail-card">
                 <div class="detail-header">
-                  <span class="detail-label">合约地址</span>
+                  <span class="detail-label">{{ t('trade.contractAddresses') }}</span>
                 </div>
                 <div class="detail-grid">
                   <div class="detail-item">
-                    <span class="detail-key">本金代币:</span>
+                    <span class="detail-key">{{ t('trade.principalToken') }}:</span>
                     <span class="detail-value hash-value" @click="copyContractAddress(successData.principalTokenAddress)">{{ formatAddress(successData.principalTokenAddress) }}</span>
                   </div>
                   <div class="detail-item">
-                    <span class="detail-key">利息代币:</span>
+                    <span class="detail-key">{{ t('trade.interestToken') }}:</span>
                     <span class="detail-value hash-value" @click="copyContractAddress(successData.interestTokenAddress)">{{ formatAddress(successData.interestTokenAddress) }}</span>
                   </div>
                 </div>
@@ -231,7 +231,7 @@
           </div>
           
           <div class="success-actions">
-            <button class="btn secondary" @click="closeSuccessModal">关闭</button>
+            <button class="btn secondary" @click="closeSuccessModal">{{ t('common.close') }}</button>
             <!-- <button class="btn primary" @click="viewPortfolio">View Portfolio</button> -->
           </div>
         </div>
@@ -258,16 +258,16 @@
       <!-- 加载状态 -->
       <div v-if="projectLoading" class="loading-container">
         <div class="loading-spinner"></div>
-        <h2>加载产品数据...</h2>
-        <p>Please wait while we load the project information.</p>
+        <h2>{{ t('trade.loadingProjectData') }}</h2>
+        <p>{{ t('trade.pleaseWait') }}</p>
       </div>
       
       <!-- 错误状态 -->
       <div v-else-if="projectError" class="error-container"> 
         <div class="error-icon">⚠️</div>
-        <h2>加载失败</h2>
+        <h2>{{ t('trade.loadingFailed') }}</h2>
          <p>{{ projectError }}</p> 
-        <button class="btn primary" @click="loadProjectData">重试</button>
+        <button class="btn primary" @click="loadProjectData">{{ t('trade.retry') }}</button>
       </div>
       
       <!-- 主要内容布局 -->
@@ -293,18 +293,18 @@
           <div class="project-metrics-container">
             <!-- 认购信息 -->
             <div class="metrics-section">
-              <h3 class="metrics-section-title">认购信息</h3>
+              <h3 class="metrics-section-title">{{ t('trade.subscriptionInfo') }}</h3>
               <div class="project-metrics">
                 <div class="metric-item">
-                  <span class="metric-label">总发行量</span>
+                  <span class="metric-label">{{ t('trade.totalOffering') }}</span>
                   <span class="metric-value">{{ projectData?.totalOffering || 'AUD0' }}</span>
                 </div>
                 <div class="metric-item">
-                  <span class="metric-label">已认购量</span>
+                  <span class="metric-label">{{ t('trade.subscribed') }}</span>
                   <span class="metric-value">{{ projectData?.subscribed || 'AUD0' }}</span>
                 </div>
                 <div class="metric-item">
-                  <span class="metric-label">认购比例</span>
+                  <span class="metric-label">{{ t('trade.subscriptionRatio') }}</span>
                   <span class="metric-value subscription-progress">{{ projectData?.subscriptionProgress?.toFixed(0) + '%' }}</span>
                 </div>
               </div>
@@ -312,69 +312,69 @@
 
             <!-- 贷款信息 -->
             <div class="metrics-section">
-              <h3 class="metrics-section-title">贷款信息</h3>
+              <h3 class="metrics-section-title">{{ t('trade.loanInfo') }}</h3>
               <div class="project-metrics">
                 <div class="metric-item">
-                  <span class="metric-label">贷款金额</span>
+                  <span class="metric-label">{{ t('trade.loanAmount') }}</span>
                   <span class="metric-value">{{ projectData?.loanAmountFormatted || 'AUD0' }}</span>
                 </div>
                 <div class="metric-item">
-                  <span class="metric-label">预计收益率</span>
+                  <span class="metric-label">{{ t('trade.expectedYield') }}</span>
                   <span class="metric-value" style="color: #16a34a;">{{ projectData?.metrics?.targetLoanYield || 'N/A' }}</span> <!--xx%每年，pa不要-->
                 </div>
                 <div class="metric-item">
-                  <span class="metric-label">期限</span>
+                  <span class="metric-label">{{ t('trade.term') }}</span>
                   <span class="metric-value">{{ projectData?.loanTermFormatted || '12 months' }}</span>
                 </div>
                 <div class="metric-item">
-                  <span class="metric-label">抵押率</span>
+                  <span class="metric-label">{{ t('trade.ltvRatio') }}</span>
                   <span class="metric-value">{{ projectData?.metrics?.loanToValue || 'N/A' }}</span>
                 </div>
                 <div class="metric-item">
-                  <span class="metric-label">违约利率</span>
+                  <span class="metric-label">{{ t('trade.defaultRate') }}</span>
                   <span class="metric-value">{{ projectData?.metrics?.defaultRate || 'N/A' }}</span> <!--xx%每年-->
                 </div>
                 <div class="metric-item">
-                  <span class="metric-label">贷款方</span>
+                  <span class="metric-label">{{ t('trade.lender') }}</span>
                   <span class="metric-value">{{ projectData?.lender || 'N/A' }}</span>
                 </div>
-                <div class="metric-item">
+                <!-- <div class="metric-item">
                   <span class="metric-label">借款方</span>
                   <span class="metric-value">{{ projectData?.borrower || 'N/A' }}</span>
-                </div>
+                </div> -->
               </div>
             </div>
 
             <!-- 抵押物信息 -->
             <div class="metrics-section">
-              <h3 class="metrics-section-title">抵押物信息</h3>
+              <h3 class="metrics-section-title">{{ t('trade.collateralInfo') }}</h3>
               <div class="project-metrics">
                 <div class="metric-item">
-                  <span class="metric-label">评估值</span>
+                  <span class="metric-label">{{ t('trade.appraisalValue') }}</span>
                   <span class="metric-value">{{ projectData.metrics?.collateralPropertyValue || 'N/A' }}</span>
                 </div>
-                <div class="metric-item">
+                <!-- <div class="metric-item">
                   <span class="metric-label">地址</span>
                   <span class="metric-value">{{ getAssetAddress() }}</span>
-                </div>
+                </div> -->
                 <div class="metric-item">
-                  <span class="metric-label">抵押类型</span>
+                  <span class="metric-label">{{ t('trade.mortgageType') }}</span>
                   <span class="metric-value">{{ getMortgageType() }}</span>
                 </div>
                 <div class="metric-item">
-                  <span class="metric-label">保荐人</span>
+                  <span class="metric-label">{{ t('trade.sponsor') }}</span>
                   <span class="metric-value">{{ projectData.dealMaker || 'N/A' }}</span>
                 </div>
                 <div class="metric-item">
-                  <span class="metric-label">评估机构</span>
+                  <span class="metric-label">{{ t('trade.appraiser') }}</span>
                   <span class="metric-value">{{ projectData.valuer || 'N/A' }}</span>
                 </div>
                 <div class="metric-item">
-                  <span class="metric-label">律师</span>
+                  <span class="metric-label">{{ t('trade.lawyer') }}</span>
                   <span class="metric-value">{{ projectData.lawyer || 'N/A' }}</span>
                 </div>
                 <div class="metric-item">
-                  <span class="metric-label">监管方</span>
+                  <span class="metric-label">{{ t('trade.trustee') }}</span>
                   <span class="metric-value">{{ projectData.trustee || 'N/A' }}</span>
                 </div>
               </div>
@@ -386,11 +386,11 @@
         <div v-if="projectData.status === 'ACTIVE' && isBuyEntry" class="trade-form-card">
           <!-- 合约地址信息 (仅BUY入口显示) -->
           <div class="contract-addresses-section">
-            <h3 class="contract-addresses-title">智能合约地址</h3>
+            <h3 class="contract-addresses-title">{{ t('trade.smartContractAddresses') }}</h3>
             <div class="contract-addresses-grid">
               <div class="contract-address-item">
                 <div class="contract-address-label">
-                  本金代币地址
+                  {{ t('trade.principalTokenAddress') }}
                 </div>
                 <div class="contract-address-value" @click="copyToClipboard(getPrincipalTokenAddress())">
                   {{ formatAddress(getPrincipalTokenAddress()) }}
@@ -400,7 +400,7 @@
               <div class="contract-address-item">
                 <div class="contract-address-label">
                   <!-- <span class="contract-icon">📈</span> -->
-                  利息代币地址
+                  {{ t('trade.interestTokenAddressLabel') }}
                 </div>
                 <div class="contract-address-value" @click="copyToClipboard(getInterestTokenAddress())">
                   {{ formatAddress(getInterestTokenAddress()) }}
@@ -414,7 +414,7 @@
            <hr class="section-divider" />
  
            <div class="form-header">
-            <h2 class="form-title">认购 {{ projectData?.code }}</h2>
+            <h2 class="form-title">{{ t('trade.subscribe') }} {{ projectData?.code }}</h2>
             <!-- 钱包状态 -->
             <div class="wallet-status-inline">
               <!-- <div class="wallet-status-item">
@@ -424,7 +424,7 @@
                 </span>
               </div> -->
               <div class="wallet-status-item" v-if="connected">
-                <span class="status-label">钱包地址：</span>
+                <span class="status-label">{{ t('trade.walletAddress') }}：</span>
                 <span class="status-value">{{ shortAddress }}</span>
               </div>
               <!-- <div class="wallet-status-item" v-if="connected">
@@ -434,141 +434,122 @@
             </div>
           </div>
 
-        <!-- 交易表单 -->
-        <div class="trade-form">
-          <!-- 交易类型显示（不可选择） -->
-          <!-- <div class="form-group">
-            <label class="form-label">交易类型</label>
-            <div class="trade-type-display">
-              <div :class="['trade-type-indicator', tradeType]">
-                {{ tradeType === 'buy' ? '认购代币' : '赎回利息' }}
+          <!-- 交易表单 -->
+          <div class="trade-form">
+            <!-- 交易类型显示（不可选择） -->
+            <!-- <div class="form-group">
+              <label class="form-label">交易类型</label>
+              <div class="trade-type-display">
+                <div :class="['trade-type-indicator', tradeType]">
+                  {{ tradeType === 'buy' ? '认购代币' : '赎回利息' }}
+            </div>
           </div>
-        </div>
-          </div> -->
+            </div> -->
 
-          <div class="form-group">
-            <label class="form-label">数量（代币）</label>
-            <input 
-              v-model="tradeAmount"
-              type="number" 
-              class="form-input"
-              placeholder="输入数量"
-              min="0"
-              step="0.01"
-            />
-        </div>
+            <div class="form-group">
+              <label class="form-label">{{ t('trade.quantityTokens') }}</label>
+              <input 
+                v-model="tradeAmount"
+                type="number" 
+                class="form-input"
+                :placeholder="t('trade.enterQuantity')"
+                min="0"
+                step="0.01"
+              />
+          </div>
 
-          <!-- 交易摘要 -->
-          <div v-if="tradeAmount && parseFloat(tradeAmount) > 0" class="subscription-summary">
-            <div class="summary-header">
-              <h3 class="summary-title">{{ tradeType === 'buy' ? t('trade.subscriptionSummary') : t('trade.redemptionSummary') }}</h3>
-        </div>
+            <!-- 交易摘要 -->
+            <div v-if="tradeAmount && parseFloat(tradeAmount) > 0" class="subscription-summary">
+              <div class="summary-header">
+                <h3 class="summary-title">{{ tradeType === 'buy' ? t('trade.subscriptionSummary') : t('trade.redemptionSummary') }}</h3>
+          </div>
 
-            <div class="summary-content">
-              <div class="summary-row">
-                <span class="summary-label">{{ t('trade.projectCode') }}：</span>
-                <span class="summary-value">{{ projectData?.code || 'N/A' }}</span>
-      </div>
-
-              <div class="summary-row">
-                <span class="summary-label">{{ t('trade.tradeType') }}：</span>
-                <span class="summary-value">{{ tradeType === 'buy' ? t('trade.tokenPurchase') : t('trade.interestRedemption') }}</span>
-        </div> 
-
-              <div class="summary-row">
-                <span class="summary-label">{{ t('trade.tokenAmount') }}：</span>
-                <span class="summary-value">{{ formatNumber(tradeAmount) }} {{ t('trade.tokens') }}</span>
-      </div>
-
-              <div class="summary-row">
-                <span class="summary-label">{{ t('trade.annualYield') }}：</span>
-                <span class="summary-value">{{ projectData?.interestRate || 'N/A' }}%</span>
-      </div>
-
-              <div class="summary-row">
-                <span class="summary-label">{{ t('trade.expectedReturn') }}：</span>
-                <span class="summary-value">{{ calculateExpectedReturn() }}</span>
-      </div>
-          
-              <div class="summary-row">
-                <span class="summary-label">{{ t('trade.loanTerm') }}：</span>
-                <span class="summary-value">{{ projectData?.loanTerm || 'N/A' }}</span>
-        </div>
+              <div class="summary-content">
+                <div class="summary-row">
+                  <span class="summary-label">{{ t('trade.projectCode') }}：</span>
+                  <span class="summary-value">{{ projectData?.code || 'N/A' }}</span>
         </div>
 
-            <div class="summary-footer">
-              <div class="risk-warning">
-                <div class="warning-icon">⚠️</div>
-                <div class="warning-text">
-                  <p>{{ t('trade.riskWarning') }}</p>
+                <div class="summary-row">
+                  <span class="summary-label">{{ t('trade.tradeType') }}：</span>
+                  <span class="summary-value">{{ tradeType === 'buy' ? t('trade.tokenPurchase') : t('trade.interestRedemption') }}</span>
+          </div> 
+
+                <div class="summary-row">
+                  <span class="summary-label">{{ t('trade.tokenAmount') }}：</span>
+                  <span class="summary-value">{{ formatNumber(tradeAmount) }} {{ t('trade.tokens') }}</span>
         </div>
+
+                <div class="summary-row">
+                  <span class="summary-label">{{ t('trade.annualYield') }}：</span>
+                  <span class="summary-value">{{ projectData?.interestRate || 'N/A' }}%</span>
+        </div>
+
+                <div class="summary-row">
+                  <span class="summary-label">{{ t('trade.expectedReturn') }}：</span>
+                  <span class="summary-value">{{ calculateExpectedReturn() }}</span>
+        </div>
+            
+                <div class="summary-row">
+                  <span class="summary-label">{{ t('trade.loanTerm') }}：</span>
+                  <span class="summary-value">{{ projectData?.loanTerm || 'N/A' }}</span>
           </div>
           </div>
-              </div>
 
-         <!-- 认购按钮 -->
-        <div class="form-actions">
-            <button 
-            class="btn primary trade-btn"
-            @click="executeOneClickTrade"
-            :disabled="!isFormValid || loading"
-            >
-            <span class="btn-text">
-                {{ loading ? t('trade.processing') : (tradeType === 'buy' ? t('trade.confirmSubscription') : t('trade.confirmRedemption')) }}
-                  </span>
-            </button>
+              <div class="summary-footer">
+                <div class="risk-warning">
+                  <div class="warning-icon">⚠️</div>
+                  <div class="warning-text">
+                    <p>{{ t('trade.riskWarning') }}</p>
+          </div>
+            </div>
+            </div>
                 </div>
-          
-                </div>
-                </div>
-        </div>
+
+          <!-- 认购按钮 -->
+          <div class="form-actions">
+              <button 
+              class="btn primary trade-btn"
+              @click="executeOneClickTrade"
+              :disabled="!isFormValid || loading"
+              >
+              <span class="btn-text">
+                  {{ loading ? t('trade.processing') : (tradeType === 'buy' ? t('trade.confirmSubscription') : t('trade.confirmRedemption')) }}
+                    </span>
+              </button>
+                  </div>
+            
+          </div>
+                  </div>
+          </div>
         
-        <!-- DETAILS入口：项目最新动态 -->
-        <div v-else-if="projectData.status === 'ACTIVE' && !isBuyEntry" class="project-news-card">
+        <!-- 右侧：项目最新动态 (当项目状态为INCOMING或ACTIVE且为DETAILS入口时显示) -->
+        <div v-if="(projectData?.status === 'INCOMING' || (projectData?.status === 'ACTIVE' && !isBuyEntry))" class="trade-form-card">
           <div class="news-header">
-            <h2 class="news-title">项目更新</h2>
+            <h2 class="news-title">{{ t('trade.projectUpdates') }}</h2>
           </div>
           <div class="news-content">
             <div class="news-list">
               <div class="news-item">
                 <div class="news-date">2024-10-04</div>
-                <div class="news-text">项目正式启动，开始接受投资申请</div>
+                <div class="news-text">{{ t('trade.newsItem1') }}</div>
               </div>
               <div class="news-item">
                 <div class="news-date">2024-10-03</div>
-                <div class="news-text">完成项目尽职调查，风险评估报告已发布</div>
+                <div class="news-text">{{ t('trade.newsItem2') }}</div>
               </div>
               <div class="news-item">
                 <div class="news-date">2024-10-02</div>
-                <div class="news-text">项目抵押物评估完成，估值确认</div>
+                <div class="news-text">{{ t('trade.newsItem3') }}</div>
               </div>
               <div class="news-item">
                 <div class="news-date">2024-10-01</div>
-                <div class="news-text">项目上线，详细信息已更新</div>
+                <div class="news-text">{{ t('trade.newsItem4') }}</div>
               </div>
             </div>
           </div>
         </div>
         
-        <!-- 非ACTIVE状态提示 (仅BUY入口显示) -->
-        <!-- <div v-else class="project-status-card">
-          <div class="status-header">
-            <h2 class="status-title">PROJECT STATUS</h2>
-          </div>
-          <div class="status-content">
-            <div class="status-info">
-              <div class="status-badge" :class="getStatusClass(projectData.status)">
-                {{ getStatusText(projectData.status) }}
-              </div>
-              <p class="status-description">
-                {{ getStatusDescription(projectData.status) }}
-              </p>
-            </div>
-            <div class="status-actions">
-              <button class="btn secondary" @click="openDetail(projectData.code)">查看详情</button>
-            </div>
-          </div>
-        </div> -->
       </div>
   </div>
 </template>

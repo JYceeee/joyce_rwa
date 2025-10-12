@@ -36,51 +36,6 @@
       </div>
     </div>
 
-    <!-- 单个产品详情视图 -->
-    <!-- <section v-else-if="isDetailView && currentProduct" class="doc-list"> 
-     <article class="doc-card" aria-labelledby="'title-' + urrentProduct.code">  -->
-        <!-- 主要内容区域 -->
-        <!-- <div class="main-content">
-          <div class="left-content">  -->
-            <!-- 项目标题信息 -->
-            <!-- <section class="title-section">
-              <div class="title-header">
-                <h2 :id="'title-' + currentProduct.code">
-                  <span class="doc-code">{{ currentProduct.code }}</span>
-                  <span class="doc-name">{{ currentProduct.name }}</span>
-                </h2>
-              </div>
-              <p class="doc-subtitle">{{ currentProduct.subtitle }}</p>
-              
-              <div class="project-basic-info">
-                <div class="info-item">
-                  <span class="info-label">类型:</span>
-                  <span class="info-value">{{ currentProduct.type }}</span>
-                </div>
-              </div>
-            </section> 
-            <hr class="sep" />
-          </div>
-        </div>  -->
-
-        <!-- 按钮与进度条-->
-         <!-- <div class="progress-actions-row">
-          <div class="progress-container">
-            <div class="progress-bar">
-              <div class="progress-fill" :style="{ width: getProgressPercentage(currentProduct) + '%' }"></div>
-              <div class="progress-empty" :style="{ width: (100 - getProgressPercentage(currentProduct)) + '%' }"></div>
-            </div>
-            <span class="progress-text">{{ getProgressPercentage(currentProduct) }}%</span>
-          </div> -->
-          <!-- <div class="doc-actions">  -->
-            <!-- 统一显示Buy和Detail按钮 -->
-            <!-- <a href="#" class="btn small orange" @click.prevent="openTrade(currentProduct.code)">Learn More & Buy</a> -->
-            <!-- <a href="#" class="btn small" @click.prevent="openDetail(currentProduct.code)">Detail</a> -->
-          <!-- </div>-->
-       <!-- </div>
-      </article> 
-    </section> -->
-
     <!-- 产品列表视图 -->
     <section v-else class="doc-list">
       <article
@@ -105,52 +60,33 @@
 
          <!-- 项目指标 -->
          <div class="pf-project-metrics">
-           <div class="pf-project-metric">
+           <!-- <div class="pf-project-metric">
              <span class="pf-metric-label">{{ t('project.loanAmount') }}</span>
              <span class="pf-metric-value">AUD{{ formatNumber(p.loanAmount)}}</span>
-           </div>
+           </div> -->
            <div class="pf-project-metric">
+              <span class="pf-metric-label">{{ t('project.issuer') }}</span>
+              <span class="pf-metric-value">{{ p.issuer || 'TBA' }}</span>
+          </div>
+          <div class="pf-project-metric">
+              <span class="pf-metric-label">{{ t('trade.totalOffering') }}</span>
+              <span class="pf-metric-value">{{ (p.totalOffering) }}</span>
+          </div>
+          <div class="pf-project-metric">
+              <span class="pf-metric-label">{{ t('trade.subscribed') }}</span>
+              <span class="pf-metric-value">{{ formatNumber(p.subscribed) }}</span>
+          </div>
+           <!-- <div class="pf-project-metric">
              <span class="pf-metric-label">{{ t('project.interestRate') }}</span>
              <span class="pf-metric-value" style="color: #16a34a;">{{ p.interestRate }}%{{ t('project.perYear') }}</span>
            </div>
            <div class="pf-project-metric">
              <span class="pf-metric-label">{{ t('project.loanTerm') }}</span>
              <span class="pf-metric-value">{{ p.loanTermMonths }}{{ t('project.months') }}</span>
-           </div>
-         </div>
-         <!-- 投资进度信息 -->
-         <div class="pf-investment-progress">
-           <div class="pf-progress-metrics">
-             <div class="pf-progress-metric">
-               <span class="pf-progress-label">{{ t('project.currentSubscription') }}</span>
-               <span class="pf-progress-value">{{ formatNumber(p.subscribed) }}</span>
-             </div>
-             <div class="pf-progress-metric">
-               <span class="pf-progress-label">{{ t('project.totalOffering') }}</span>
-               <span class="pf-progress-value">{{ formatNumber(p.totalOffering) }}</span>
-             </div>
-           </div>
-           <div class="pf-progress-bar-container">
-             <div class="pf-progress-bar">
-               <div class="pf-progress-fill" :style="{ width: getSubscriptionProgress(p) + '%' }"></div>
-             </div>
-             <div class="pf-progress-text">{{ getSubscriptionProgress(p) }}% {{ t('project.subscribed') }}</div>
-           </div>
-         </div>
-         <!-- 展开/收起按钮 -->
-         <div class="pf-expand-toggle" @click.stop="toggleProjectDetails(p.code)">
-           <span class="expand-text">{{ t('project.partyInfo') }}</span>
-           <span class="expand-icon" :class="{ 'expanded': isProjectExpanded(p.code) }">▼</span>
-         </div>
+           </div> -->
 
-         <!-- 可展开的详情内容 -->
-         <div class="pf-expandable-content" :class="{ 'expanded': isProjectExpanded(p.code) }">
-           <!-- 新增项目指标 -->
-           <div class="pf-project-metrics pf-project-metrics-new">
-             <div class="pf-project-metric">
-               <span class="pf-metric-label">{{ t('project.issuer') }}</span>
-               <span class="pf-metric-value">{{ p.issuer || 'TBA' }}</span>
-             </div>
+          <!-- <div class="pf-project-metrics pf-project-metrics-new"> -->
+
              <div class="pf-project-metric">
                <span class="pf-metric-label">{{ t('project.underlyingAsset') }}</span>
                <span class="pf-metric-value">{{ p.collateral || 'TBA' }}</span>
@@ -171,21 +107,49 @@
                <span class="pf-metric-label">{{ t('project.trustee') }}</span>
                <span class="pf-metric-value">{{ p.trustee || 'TBA' }}</span>
              </div>
-           </div>
+          <!-- </div> -->
            
-           <!-- Etherscan链接 -->
-           <div class="pf-etherscan-link" v-if="p.principalTokenAddress">
-             <a 
-               :href="`https://etherscan.io/address/${p.principalTokenAddress}`" 
-               target="_blank" 
-               rel="noopener noreferrer"
-               class="etherscan-link"
-             >
-               <span class="etherscan-icon">🔗</span>
-               <span class="etherscan-text">{{ t('project.viewOnEtherscan') }}</span>
-             </a>
+          <!-- Etherscan链接 -->
+          <div class="pf-etherscan-link" v-if="p.principalTokenAddress">
+            <a 
+              :href="`https://etherscan.io/address/${p.principalTokenAddress}`" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              class="etherscan-link"
+            >
+              <span class="etherscan-icon">🔗</span>
+              <span class="etherscan-text">{{ t('project.viewOnEtherscan') }}</span>
+            </a>
+          </div> 
+        </div>
+         <!-- 投资进度信息 -->
+         <!-- <div class="pf-investment-progress">
+           <div class="pf-progress-metrics">
+             <div class="pf-progress-metric">
+               <span class="pf-progress-label">{{ t('project.currentSubscription') }}</span>
+               <span class="pf-progress-value">{{ formatNumber(p.subscribed) }}</span>
+             </div>
+             <div class="pf-progress-metric">
+               <span class="pf-progress-label">{{ t('project.totalOffering') }}</span>
+               <span class="pf-progress-value">{{ formatNumber(p.totalOffering) }}</span>
+             </div>
            </div>
-         </div>
+           <div class="pf-progress-bar-container">
+             <div class="pf-progress-bar">
+               <div class="pf-progress-fill" :style="{ width: getSubscriptionProgress(p) + '%' }"></div>
+             </div>
+             <div class="pf-progress-text">{{ getSubscriptionProgress(p) }}% {{ t('project.subscribed') }}</div>
+           </div>
+         </div> -->
+         <!-- 展开/收起按钮 -->
+         <!-- <div class="pf-expand-toggle" @click.stop="toggleProjectDetails(p.code)">
+           <span class="expand-text">{{ t('project.partyInfo') }}</span>
+           <span class="expand-icon" :class="{ 'expanded': isProjectExpanded(p.code) }">▼</span>
+         </div> -->
+
+         <!-- 可展开的详情内容 -->
+         <!-- <div class="pf-expandable-content" :class="{ 'expanded': isProjectExpanded(p.code) }">
+         </div> -->
       </article>
     </section>
     </div>
@@ -410,7 +374,7 @@ export default {
             // 计算指标
             metrics: {
               currentElaraPrice: this.calculateTokenPrice(product),
-              collateralPropertyValue: product.valuation ? `AUD${product.valuation.toLocaleString()}` : 'TBA',
+              collateralPropertyValue: product.valuation ? `${product.valuation.toLocaleString()}` : 'TBA',
               rentalIncome: this.calculateRentalIncome(product),
               targetLoanYield: `${product.targetYield}% p.a.`
             }
@@ -449,8 +413,8 @@ export default {
               status: project.loan_status || 'UNKNOWN',
               
               // 认购信息
-              totalOffering: this.formatCurrency(project.total_offering_token),
-              subscribed: this.formatCurrency(project.subscribe_token),
+              totalOffering: this.formatNumber(project.total_offering_token),
+              subscribed: this.formatNumber(project.subscribe_token),
               
               // 原始数值用于计算
               totalOfferingRaw: project.total_offering_token || 0,
@@ -559,8 +523,8 @@ export default {
           status: product.loan_status,
           
           // 认购信息
-          totalOffering: product.total_offering_token ? `AUD${product.total_offering_token.toLocaleString()}` : 'AUD0',
-          subscribed: product.subscribe_token ? `AUD${product.subscribe_token.toLocaleString()}` : 'AUD0',
+          totalOffering: product.total_offering_token ? `${product.total_offering_token.toLocaleString()}` : 'N/A',
+          subscribed: product.subscribe_token ? `${product.subscribe_token.toLocaleString()}` : 'N/A',
           totalOfferingRaw: product.total_offering_token || 0,
           subscribedRaw: product.subscribe_token || 0,
           
@@ -660,7 +624,7 @@ export default {
       if (this.refreshInterval) {
         clearInterval(this.refreshInterval)
         this.refreshInterval = null
-        console.log('⏹️ 停止自动刷新')
+        console.log('停止自动刷新')
       }
     },
     formatCurrency(value, currency = 'AUD') {
@@ -1230,7 +1194,7 @@ export default {
 
 .doc-list{
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 2px;
 }
 
@@ -1306,9 +1270,8 @@ export default {
   width:100%;
   display:flex;
   flex-direction:column;
-  align-items:stretch;
-  text-align:justify;
-  margin-left:30px;
+  align-items:center;
+  text-align:center;
 }
 
 .pf-progress-label{
@@ -1317,7 +1280,6 @@ export default {
   text-transform:uppercase;
   letter-spacing:0.5px;
   margin-bottom:4px;
-  margin-left:10px;
 }
 
 .pf-progress-value{
@@ -1518,7 +1480,7 @@ export default {
 
 .investment-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   margin-top: 8px;
 }
