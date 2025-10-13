@@ -44,8 +44,8 @@
               </div>
             </div>
             <div class="status-content">
-              <h2 class="status-title">{{ t('trade.submitted') }}</h2>
-              <p class="status-description">{{ t('trade.submittedDesc') }}</p>
+              <h2 class="status-title">{{ t('trade.subscriptionSubmitted') }}</h2>
+              <p class="status-description">{{ t('trade.checkEmailForUpdates') }}</p>
               
               <div class="subscription-details">
                 <div class="detail-card">
@@ -96,9 +96,6 @@
           
           <!-- 操作按钮 -->
           <div class="subscription-actions">
-            <button v-if="subscriptionStatus === 'submitted'" class="btn primary" @click="viewPortfolioFromSubscription">
-              {{ t('trade.viewPortfolio') }}
-            </button>
             <button v-if="subscriptionStatus === 'failed'" class="btn primary" @click="closeSubscriptionModal">
               {{ t('trade.resubmit') }}
             </button>
@@ -278,9 +275,14 @@
           <!-- 不展示图片 -->
           <!-- <img :src="projectData.image" :alt="projectCode" class="project-image" /> -->
           <div class="project-details">
-            <h1 class="project-title"> {{ projectData?.code || 'Loading...' }}   
-              <!-- •{{ projectData?.name }}  -->
-            </h1>
+            <div class="project-title-row">
+              <h1 class="project-title"> {{ projectData?.code || 'Loading...' }}   
+                <!-- •{{ projectData?.name }}  -->
+              </h1>
+              <button class="subscribe-btn" @click="scrollToTradeForm">
+                {{ t('trade.subscribe') }}
+              </button>
+            </div>
             <div class="project-meta">
               <span class="meta-item">{{ projectData?.propertyType || 'Loading...' }}</span>
               <span class="meta-item">{{ projectData?.propertyState || 'Loading...' }}</span>
@@ -383,7 +385,7 @@
         </div>
         
         <!-- 右侧：交易表单 (仅当项目状态为ACTIVE且为BUY入口时显示) -->
-        <div v-if="projectData.status === 'ACTIVE' && isBuyEntry" class="trade-form-card">
+        <div v-if="projectData.status === 'ACTIVE' && isBuyEntry" id="trade-form" class="trade-form-card">
           <!-- 合约地址信息 (仅BUY入口显示) -->
           <div class="contract-addresses-section">
             <h3 class="contract-addresses-title">{{ t('trade.smartContractAddresses') }}</h3>
@@ -706,6 +708,17 @@ export default {
     }
   },
   methods: {
+    // 滚动到交易表单
+    scrollToTradeForm() {
+      const tradeFormElement = document.getElementById('trade-form')
+      if (tradeFormElement) {
+        tradeFormElement.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        })
+      }
+    },
+    
     // 获取本金代币合约地址
     getPrincipalTokenAddress() {
       // 根据项目代码返回对应的本金代币地址
@@ -1029,46 +1042,22 @@ export default {
           userAddress: this.address
         })
         
-        // 步骤1: 准备交易数据
-        const tradeData = {
-          projectCode: this.projectCode,
+        // 模拟处理时间
+        await new Promise(resolve => setTimeout(resolve, 1500))
+        
+        // 直接显示成功状态，提示用户检查邮箱
+        this.subscriptionStatus = 'submitted'
+        this.subscriptionData = {
           tradeType: this.tradeType,
-          amount: parseFloat(this.tradeAmount),
-          userAddress: this.address,
-          price: 1.00, // 固定价格
-          total: parseFloat(this.tradeAmount),
-          transactionHash: 'sim_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-          blockNumber: Math.floor(Math.random() * 1000000) + 1000000,
-          userId: this.getUserId(),
-          // 合约信息字段
-          tradeContractABI: '',
-          compliantERC20ABI: '',
-          tokenAddressNative: this.projectData?.principalTokenAddress || '',
-          tokenAddressInterest: this.projectData?.interestTokenAddress || '',
-          loanIssuerWalletAddress: this.projectData?.loanIssuerAddress || ''
+          amount: this.tradeAmount,
+          projectCode: this.projectCode,
+          projectName: this.projectData?.name || '',
+          interestRate: this.projectData?.interestRate || 'N/A',
+          expectedReturn: this.calculateExpectedReturn(),
+          messageId: 'email-confirmation'
         }
         
-        // 步骤2: 提交到后端API
-        console.log('📤 提交认购数据到后端:', tradeData)
-        const response = await this.submitSubscriptionToAPI(tradeData)
-        
-        if (response.success) {
-          // 步骤3: 显示成功结果
-          this.subscriptionStatus = 'submitted'
-          this.subscriptionData = {
-            tradeType: this.tradeType,
-            amount: this.tradeAmount,
-            projectCode: this.projectCode,
-            projectName: this.projectData?.name || '',
-            interestRate: this.projectData?.interestRate || 'N/A',
-            expectedReturn: this.calculateExpectedReturn(),
-            messageId: response.messageId
-          }
-          
-          console.log('✅ TradeProjectView: 认购流程完成')
-        } else {
-          throw new Error(response.message || '认购提交失败')
-        }
+        console.log('✅ TradeProjectView: 认购申请已提交，请检查邮箱')
         
       } catch (error) {
         console.error('❌ TradeProjectView: 认购失败:', error)
@@ -1583,23 +1572,49 @@ export default {
   gap: 20px;
   margin-bottom: 24px;
 }
-
+/* 
 .project-image {
   width: 80px;
   height: 80px;
   border-radius: 12px;
   object-fit: cover;
-}
+} */
 
 .project-details {
   flex: 1;
+}
+
+.project-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 8px;
+  gap: 16px;
 }
 
 .project-title {
   font-size: 24px;
   font-weight: 700;
   color: var(--text);
-  margin: 0 0 8px 0;
+  margin: 0;
+  flex: 1;
+}
+
+.subscribe-btn {
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.subscribe-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
 }
 
 .project-meta {
@@ -2609,8 +2624,12 @@ export default {
   
   .project-header {
     flex-direction: column;
-  text-align: center;
-}
+  }
+  
+  .project-title-row {
+    justify-content: flex-start;
+    text-align: left;
+  }
 
   .project-metrics-container {
     gap: 16px;

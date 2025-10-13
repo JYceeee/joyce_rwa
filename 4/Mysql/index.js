@@ -36,7 +36,10 @@ const userRouter = require('./src/routers/userRouter')
 const transactionRouter = require('./src/routers/transactionRouter')
 const unifiedProjectRouter = require('./src/routers/unifiedProjectRouter')
 const contactRouter = require('./src/routers/contactRouter')
-const subscriptionRouter = require('./src/routers/subscriptionRouter')
+const subscriptionRouter = require('./src/routers/subscriptionRouter_Enhanced')
+
+// 导入支付验证服务
+const paymentVerificationService = require('./src/services/paymentVerificationService')
 
 // 使用路由模块
 app.use('/user', userRouter)
@@ -77,15 +80,28 @@ app.use((err, req, res, next) => {
 
 //启动服务器
 const PORT = process.env.VITE_BACKEND_PORT || 3000
-app.listen(PORT, () => { console.log(`服务器${PORT}端口已启动成功`) })
+app.listen(PORT, () => { 
+  console.log(`✅ 服务器已启动，端口: ${PORT}`)
+  console.log(`📍 API地址: http://localhost:${PORT}`)
+  console.log(`🔄 启动支付验证调度器...`)
+  
+  // 启动支付验证调度器（每5分钟检查一次）
+  try {
+    paymentVerificationService.startPaymentVerificationScheduler(5)
+    console.log('✅ 支付验证调度器已启动')
+  } catch (error) {
+    console.error('❌ 启动支付验证调度器失败:', error.message)
+    console.log('⚠️ 系统将继续运行，但自动交易核查功能不可用')
+  }
+})
 
 // 测试数据库连接，执行sql语句
 const sqlStr = 'select * from user'
 mysql.query(sqlStr, (err, results) => {
   if (err) {
-    console.log('数据库连接错误:' + err.message);
+    console.log('❌ 数据库连接错误:' + err.message);
   } else {
-    console.log('数据库连接成功!');
+    console.log('✅ 数据库连接成功!');
   }
 });
 

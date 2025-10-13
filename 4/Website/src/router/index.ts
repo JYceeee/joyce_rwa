@@ -8,6 +8,7 @@ import ToBeListedView from '../views/core/ToBeListedView.vue'
 import ProfileView from '../views/core/ProfileView.vue'
 import TradeProjectView from '../views/core/TradeProjectView.vue'
 import TokenDetailView from '../views/core/TokenDetailView.vue'
+import NotificationsView from '../views/core/NotificationsView.vue'
 import LoginView from '../views/auth/LoginView.vue'
 import SignupView from '../views/auth/SignupView.vue'
 import AboutUsView from '../views/info/aboutus/AboutUsView.vue'
@@ -16,7 +17,7 @@ import ContactUs from '../components/ContactUs.vue'
 import kycService from '../components/kycService.vue'
 // Admin pages
 import AdminDashboard from '../views/admin/AdminDashboard.vue'
-import AdminSubscriptions from '../views/admin/AdminSubscriptions.vue'
+// import AdminSubscriptions from '../views/admin/AdminSubscriptions.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -38,9 +39,10 @@ const router = createRouter({
     { path: '/about', name: 'about', component: AboutUsView },
     { path: '/contact', name: 'contact', component: ContactUs },
     {path:'/settings',name:'settings',component:SettingsView},
+    { path: '/notifications', name: 'notifications', component: NotificationsView },
     // Admin routes
     { path: '/admin', name: 'admin', component: AdminDashboard },
-    { path: '/admin/subscriptions', name: 'adminSubscriptions', component: AdminSubscriptions },
+    { path: '/admin/subscriptions', redirect: '/admin' }, // 重定向到管理员面板，认购管理功能已整合
   ]
 })
 

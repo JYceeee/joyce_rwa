@@ -44,8 +44,6 @@
             <a href="#" @click.prevent="go('/listedprojects')" class="menu-item">{{ t('nav.listedProjects') }}</a>
             <a href="#" @click.prevent="go('/to-be-listed')" class="menu-item">{{ t('nav.toBeListed') }}</a>
             <a href="#" @click.prevent="goToContactUs" class="menu-item">{{ t('nav.contact') }}</a>
-            
-            <!-- More 下拉菜单 -->
             <!-- <div class="more-dropdown-container">
               <button class="menu-item more-btn" @click.prevent="toggleMoreDropdown">
                 {{ t('nav.more') }}
@@ -62,7 +60,6 @@
           <!-- 管理员菜单 -->
           <template v-else>
             <a href="#" @click.prevent="go('/admin')" class="menu-item">Dashboard</a>
-            <a href="#" @click.prevent="go('/admin/subscriptions')" class="menu-item">认购管理</a>
             <a href="#" @click.prevent="go('/listedprojects')" class="menu-item">{{ t('nav.listedProjects') }}</a>
             <a href="#" @click.prevent="go('/to-be-listed')" class="menu-item">{{ t('nav.toBeListed') }}</a>
           </template>
@@ -82,18 +79,15 @@
       </div>
 
       <div class="right">
-      
-      <!-- User Auth Buttons -->
         <div v-if="isLoggedIn">
-          <!-- 钱包连接状态显示 -->
           <div v-if="!connected" class="wallet-connect-section">
             <button class="btn orange pill" @click.prevent="connectWallet">
               <span>{{ t('wallet.connect') }}</span>
             </button>
           </div>
           
-          <!-- 已连接钱包显示 -->
           <div v-else class="wallet-dropdown-container">
+            <!--钱包按钮-->
             <div class="wallet-btn-wrapper">
                <button class="btn orange pill wallet-main-btn" @click.prevent="goToWallet()">
                  <span class="wallet-address-text">{{ shortAddress }}</span>
@@ -112,26 +106,75 @@
               </a>
             </div>
           </div>
-          <button class="btn light pill" @click.prevent="goToProfile()">
-            <span>👤</span>
+          <!--通知按钮-->
+          <button class="btn ghost pill notification-btn" @click.prevent="go('/notifications')" :title="t('nav.notifications')">
+            <svg viewBox="0 0 24 24" class="notification-icon">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            <!-- <span v-if="unreadNotificationsCount > 0" class="notification-badge">{{ unreadNotificationsCount }}</span> -->
           </button>
-          <!-- <button class="btn ghost pill settings-btn" @click.prevent="go('/settings')">⚙️</button> -->
-          <button class="btn ghost pill language-btn" @click.prevent="toggleLanguage">
-            <span>{{ getCurrentLanguageDisplay() }}</span>
+          <!--个人资料按钮-->
+          <button class="btn ghost pill profile-btn" @click.prevent="goToProfile()">
+            <svg viewBox="0 0 24 24" class="profile-icon">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
           </button>
+          <!--设置按钮-->
+          <button class="btn ghost pill settings-btn" @click.prevent="go('/settings')">
+            <svg viewBox="0 0 24 24" class="settings-icon">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </button>
+          <!--语言按钮-->
+          <button class="btn ghost pill language-btn" @click.prevent="toggleLanguage"><span>{{ getCurrentLanguageDisplay() }}</span></button>
+          <!--主题按钮-->
           <button class="btn ghost pill theme-btn" @click.prevent="toggleTheme">
-            <span>{{ currentTheme === 'dark' ? '🌙' : '☀️' }}</span>
+            <svg v-if="currentTheme === 'dark'" viewBox="0 0 24 24" class="theme-icon moon-icon">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+            <svg v-else viewBox="0 0 24 24" class="theme-icon sun-icon">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1" x2="12" y2="3"/>
+              <line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/>
+              <line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
           </button>
         </div>
         <div v-else>
           <a class="btn ghost" href="#" @click.prevent="go('/login')">{{ t('common.login') }}</a>
           <a class="btn orange" href="#" @click.prevent="go('/signup')">{{ t('common.signup') }}</a>
-          <a href="#" @click.prevent="go('/settings')"><button class="btn ghost pill settings-btn">⚙️</button></a>
+          <a href="#" @click.prevent="go('/settings')"><button class="btn ghost pill settings-btn">
+            <svg viewBox="0 0 24 24" class="settings-icon">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </button></a>
           <button class="btn ghost pill language-btn" @click.prevent="toggleLanguage">
             <span>{{ getCurrentLanguageDisplay() }}</span>
           </button>
           <button class="btn ghost pill theme-btn" @click.prevent="toggleTheme">
-            <span>{{ currentTheme === 'dark' ? '🌙' : '☀️' }}</span>
+            <svg v-if="currentTheme === 'dark'" viewBox="0 0 24 24" class="theme-icon moon-icon">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+            <svg v-else viewBox="0 0 24 24" class="theme-icon sun-icon">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1" x2="12" y2="3"/>
+              <line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/>
+              <line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
           </button>
         </div>
       </div>
@@ -143,36 +186,23 @@
         <!-- 普通用户移动端菜单 -->
         <template v-if="!isAdmin">
           <!-- <a href="#" @click.prevent="go('/home')" class="mobile-menu-item">
-            <span class="mobile-menu-icon">🏠</span> 
             <span>Home</span>
           </a> -->
           <a href="#" @click.prevent="go('/about')" class="mobile-menu-item">
-            <!-- <span class="mobile-menu-icon">🏢</span> -->
             <span>{{ t('nav.about') }}</span>
           </a>
           <a href="#" @click.prevent="go('/listedprojects')" class="mobile-menu-item">
-            <!-- <span class="mobile-menu-icon">📊</span> -->
             <span>{{ t('nav.listedProjects') }}</span>
           </a>
           <a href="#" @click.prevent="go('/to-be-listed')" class="mobile-menu-item">
-            <!-- <span class="mobile-menu-icon">⏳</span> -->
             <span>{{ t('nav.toBeListed') }}</span>
           </a>
           <a href="#" @click.prevent="goToContactUs" class="mobile-menu-item">
-            <!-- <span class="mobile-menu-icon">📞</span> -->
             <span>{{ t('nav.contact') }}</span>
           </a>
           <!-- <a href="#" @click.prevent="go('/portfolio')" class="mobile-menu-item">
             <span>{{ t('nav.portfolio') }}</span>
           </a> -->
-          <!-- <div class="mobile-menu-item mobile-toggle-buttons">
-            <button class="btn ghost pill language-btn" @click.prevent="toggleLanguage">
-              <span>{{ getCurrentLanguageDisplay() }}</span>
-            </button>
-            <button class="btn ghost pill theme-btn" @click.prevent="toggleTheme">
-              <span>{{ currentTheme === 'dark' ? '🌙' : '☀️' }}</span>
-            </button>
-          </div> -->
         </template>
         
         <!-- 管理员移动端菜单 -->
@@ -189,14 +219,6 @@
           <a href="#" @click.prevent="go('/to-be-listed')" class="mobile-menu-item">
             <span>{{ t('nav.toBeListed') }}</span>
           </a>
-          <!-- <div class="mobile-menu-item mobile-toggle-buttons">
-            <button class="btn ghost pill language-btn" @click.prevent="toggleLanguage">
-              <span>{{ getCurrentLanguageDisplay() }}</span>
-            </button>
-            <button class="btn ghost pill theme-btn" @click.prevent="toggleTheme">
-              <span>{{ currentTheme === 'dark' ? '🌙' : '☀️' }}</span>
-            </button>
-          </div> -->
         </template>
       </div>
     </div>
@@ -241,7 +263,8 @@ export default {
       walletDropdownOpen: false,
       showDisconnectModal: false,
       showDisconnectSuccess: false,
-      disconnectSuccessMsg: ''
+      disconnectSuccessMsg: '',
+      unreadNotificationsCount: 2 // 模拟未读通知数量，实际应该从API获取
     }
   },
 
@@ -494,8 +517,9 @@ export default {
 /* 钱包连接区域样式 */
 .wallet-connect-section {
   display: inline-block;
-  margin-left: 15px;
-  margin-right: 15px;
+  /* margin-left: 5px;
+  margin-right: 5px; */
+  gap: 5px;
 }
 
 /* 连接钱包按钮样式 */
@@ -529,7 +553,7 @@ export default {
   background: transparent;
   border: none;
   color: #ffffff !important;
-  padding: 10px 16px;
+  padding: 8px 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   border-radius: 0;
@@ -538,7 +562,7 @@ export default {
 /* 钱包地址和图标显示控制 */
 .wallet-address-text {
   display: inline;
-  font-size: 14px;
+  font-size: 12px;
   color: #ffffff !important;
   font-weight: bold;
 }
@@ -1037,14 +1061,14 @@ export default {
   }
   
   .right {
-    gap: 15px;
-    margin-right: 0; /* 重置桌面端边距 */
+    gap: 8px;
+    margin-right: 0px; /* 重置桌面端边距 */
     flex-wrap: nowrap; /* 防止换行 */
     align-items: center;
-    justify-content: center; /* 改为center实现居中对齐 */
-    min-width: 0; /* 允许收缩 */
-    width: 100%;
-    max-width: 200px;
+    justify-content: flex-end; /* 改为右对齐 */
+    min-width: 0;
+    width: auto; /* 改为自动宽度 */
+    max-width: 280px;
   }
   
   /* 移动端按钮布局 - 居中对齐 */
@@ -1075,86 +1099,257 @@ export default {
   /* Settings按钮 - 右侧 */
   .settings-btn {
     flex: 0 0 auto;
-    background:#94a3b8;
+    background: transparent !important;
+    border: none !important;
   }
 
   /* 语言切换按钮 - 桌面端 */
   .language-btn {
     flex: 0 0 auto;
-    background: transparent !important;
-    border: none !important;
-    color: #000000 !important; /* 始终保持黑色 */
+    background: #f3f4f6 !important;
+    border: 1px solid #e5e7eb !important;
+    color: var(--text) !important;
     font-size: 12px;
     font-weight: 600;
-    min-width: 40px;
-    height: 28px; /* 与其他按钮保持一致的高度 */
-    padding: 6px 8px;
+    padding: 8px;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     transition: all 0.2s ease;
-    margin-left: 8px; /* 添加左边距 */
+    margin: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    min-width: 36px;
+    height: 36px;
   }
 
   .language-btn:hover {
-    background: var(--hover-bg) !important;
-    border: none !important;
-    color: #000000 !important; /* 保持黑色 */
+    background: #e5e7eb !important;
+    border: 1px solid #d1d5db !important;
+    color: var(--text) !important;
   }
   
-  /* 深色主题下的语言按钮为黑色 */
+  /* 语言按钮在所有主题下使用统一的样式 */
   [data-theme="dark"] .language-btn {
-    background: #f3f4f6 !important; /* 浅色背景 */
-    color: #000000 !important;
+    background: #374151 !important;
+    border: 1px solid #4b5563 !important;
+    color: var(--text) !important;
   }
   
   [data-theme="dark"] .language-btn:hover {
-    background: #e5e7eb !important; /* 悬停时稍深的浅色背景 */
-    color: #000000 !important;
+    background: #4b5563 !important;
+    border: 1px solid #6b7280 !important;
+    color: var(--text) !important;
   }
   
-  /* 浅色主题下的语言按钮为黑色 */
   [data-theme="light"] .language-btn {
-    color: #000000 !important;
+    background: #f3f4f6 !important;
+    border: 1px solid #e5e7eb !important;
+    color: var(--text) !important;
   }
   
   [data-theme="light"] .language-btn:hover {
-    color: #000000 !important;
+    background: #e5e7eb !important;
+    border: 1px solid #d1d5db !important;
+    color: var(--text) !important;
   }
   
   /* 主题切换按钮 - 桌面端 */
   .theme-btn {
     flex: 0 0 auto;
-    background: transparent !important;
-    border: none !important;
-    color: #000000 !important; /* 始终保持黑色 */
+    background: #f3f4f6 !important;
+    border: 1px solid #e5e7eb !important;
+    color: var(--text) !important;
     font-size: 12px;
     font-weight: 600;
-    min-width: 40px;
-    height: 28px; /* 与其他按钮保持一致的高度 */
-    padding: 6px 8px;
+    padding: 8px;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     transition: all 0.2s ease;
-    margin-left: 8px; /* 添加左边距 */
+    margin: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    min-width: 36px;
+    height: 36px;
   }
 
   .theme-btn:hover {
-    background: var(--hover-bg) !important;
-    border: none !important;
-    color: #000000 !important; /* 保持黑色 */
+    background: #e5e7eb !important;
+    border: 1px solid #d1d5db !important;
+    color: var(--text) !important;
   }
   
-  /* 所有主题下的主题按钮都保持黑色 */
-  [data-theme="dark"] .theme-btn,
+  /* 主题按钮在所有主题下使用统一的样式 */
+  [data-theme="dark"] .theme-btn {
+    background: #374151 !important;
+    border: 1px solid #4b5563 !important;
+    color: var(--text) !important;
+  }
+  
+  [data-theme="dark"] .theme-btn:hover {
+    background: #4b5563 !important;
+    border: 1px solid #6b7280 !important;
+    color: var(--text) !important;
+  }
+  
   [data-theme="light"] .theme-btn {
-    color: #000000 !important;
+    background: #f3f4f6 !important;
+    border: 1px solid #e5e7eb !important;
+    color: var(--text) !important;
   }
   
-  [data-theme="dark"] .theme-btn:hover,
   [data-theme="light"] .theme-btn:hover {
-    color: #000000 !important;
+    background: #e5e7eb !important;
+    border: 1px solid #d1d5db !important;
+    color: var(--text) !important;
+  }
+  
+  /* SVG主题图标样式 */
+  .theme-icon {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  
+  .moon-icon {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+  
+  .sun-icon {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+  
+  /* SVG通知图标样式 */
+  .notification-icon {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  
+  .notification-btn {
+    position: relative;
+    background: #f3f4f6 !important;
+    border: 1px solid #e5e7eb !important;
+    color: var(--text);
+    padding: 8px !important;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+  }
+
+  .notification-btn:hover {
+    background: #e5e7eb !important;
+    border: 1px solid #d1d5db !important;
+  }
+  
+  .notification-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #ef4444;
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 5px;
+    border-radius: 10px;
+    min-width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+  
+  [data-theme="dark"] .notification-icon {
+    stroke: currentColor;
+  }
+  
+  /* 深色主题下的通知按钮 */
+  [data-theme="dark"] .notification-btn {
+    background: #374151 !important;
+    border: 1px solid #4b5563 !important;
+  }
+  
+  [data-theme="dark"] .notification-btn:hover {
+    background: #4b5563 !important;
+    border: 1px solid #6b7280 !important;
+  }
+  
+  /* Profile按钮样式 - 浅灰色背景 */
+  .profile-btn {
+    background: #f3f4f6 !important;
+    border: 1px solid #e5e7eb !important;
+    color: var(--text);
+    padding: 8px !important;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+  }
+
+  .profile-btn:hover {
+    background: #e5e7eb !important;
+    border: 1px solid #d1d5db !important;
+  }
+
+  /* SVG用户图标样式 */
+  .profile-icon {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  
+  /* 深色主题下的用户图标 */
+  [data-theme="dark"] .profile-icon {
+    stroke: currentColor;
+  }
+  
+  /* 深色主题下的profile按钮 */
+  [data-theme="dark"] .profile-btn {
+    background: #374151 !important;
+    border: 1px solid #4b5563 !important;
+  }
+  
+  [data-theme="dark"] .profile-btn:hover {
+    background: #4b5563 !important;
+    border: 1px solid #6b7280 !important;
+  }
+  
+  /* 深色主题下的profile按钮样式 */
+  [data-theme="dark"] .btn.light.pill {
+    background: transparent !important;
+    border: none !important;
+    color: #ffffff !important;
+  }
+  
+  [data-theme="dark"] .btn.light.pill:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: none !important;
+    color: #ffffff !important;
   }
   
   .brand-logo {
@@ -1199,13 +1394,13 @@ export default {
   
   /* Settings按钮样式 */
   .settings-btn {
-    padding: 4px !important;
+    padding: 6px !important;
     flex-shrink: 0;
-    width: 33px;
-    height: 33px;
     display: flex;
     align-items: center;
     justify-content: center;
+    min-width: auto;
+    height: auto;
   }
   
   .btn.pill span:last-child {
@@ -1400,22 +1595,21 @@ export default {
     min-width: 24px;
   }
   
-  /* 中等屏幕语言和主题按钮高度调整 */
+  /* 中等屏幕语言和主题按钮样式 */
   .language-btn,
   .theme-btn {
-    height: 24px;
     font-size: 10px;
-    padding: 4px 6px;
+    padding: 6px;
   }
   
   /* Settings按钮样式 */
   .settings-btn {
-    padding: 3px !important;
-    width: 29px;
-    height: 29px;
+    padding: 5px !important;
     display: flex;
     align-items: center;
     justify-content: center;
+    min-width: auto;
+    height: auto;
   }
   
   .wallet-main-btn {
@@ -1563,22 +1757,21 @@ export default {
     min-width: 20px;
   }
   
-  /* 最小屏幕语言和主题按钮高度调整 */
+  /* 最小屏幕语言和主题按钮样式 */
   .language-btn,
   .theme-btn {
-    height: 20px;
     font-size: 9px;
-    padding: 3px 5px;
+    padding: 4px;
   }
   
   /* Settings按钮样式 */
   .settings-btn {
-    padding: 2px !important;
-    width: 25px;
-    height: 25px;
+    padding: 4px !important;
     display: flex;
     align-items: center;
     justify-content: center;
+    min-width: auto;
+    height: auto;
   }
 
   /* 语言切换按钮样式 */
@@ -1600,8 +1793,9 @@ export default {
   
   /* 移动端深色主题下的语言按钮 */
   [data-theme="dark"] .language-btn {
-    background: #f3f4f6 !important; /* 浅色背景 */
-    color: #000000 !important; /* 深色主题下文字为黑色 */
+    background: transparent !important;
+    border: none !important;
+    color: #ffffff !important;
   }
   
   /* 移动端浅色主题下的语言按钮 */
@@ -1781,38 +1975,60 @@ export default {
 
 
 
-/* Settings按钮样式 - 移除背景和边框 */
+/* Settings按钮样式 - 浅灰色背景 */
 .settings-btn {
-  background: transparent !important;
-  border: none !important;
+  background: #f3f4f6 !important;
+  border: 1px solid #e5e7eb !important;
   color: var(--text);
   padding: 8px !important;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
 }
 
 .settings-btn:hover {
-  background: var(--hover-bg) !important;
-  border: none !important;
+  background: #e5e7eb !important;
+  border: 1px solid #d1d5db !important;
+}
+
+/* 深色主题下的设置按钮 */
+[data-theme="dark"] .settings-btn {
+  background: #374151 !important;
+  border: 1px solid #4b5563 !important;
+}
+
+[data-theme="dark"] .settings-btn:hover {
+  background: #4b5563 !important;
+  border: 1px solid #6b7280 !important;
 }
 
 .settings-icon {
-  width: 20px;
-  height: 20px;
-  fill: currentColor;
-  transition: fill 0.2s ease;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.2s ease;
 }
 
 /* 响应式 SVG 图标大小 */
 @media (max-width: 768px) {
   .settings-icon {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
   }
 }
 
 @media (max-width: 640px) {
   .settings-icon {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
   }
 }
 

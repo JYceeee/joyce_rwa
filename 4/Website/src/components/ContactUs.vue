@@ -328,6 +328,11 @@ export default {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
 .description {
@@ -335,8 +340,9 @@ export default {
   font-size: 15px;
   font-weight: 600;
   color: var(--text-secondary);
-  margin-left: 120px;
-  width: 80%;
+  text-align: center;
+  margin: 0 auto;
+  max-width: 80%;
 }
 
 /* Two Column Layout */
@@ -588,11 +594,24 @@ export default {
   
   .headline {
     font-size: 2.5rem;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .description {
+    text-align: center;
+    margin: 0 auto;
+    max-width: 90%;
+    font-size: 14px;
   }
   
   .contact-header {
     margin-bottom: 30px;
     margin-top: 15px;
+    text-align: center;
   }
   
   .social-links {

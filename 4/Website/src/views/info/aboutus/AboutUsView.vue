@@ -72,15 +72,15 @@
         <!-- <h2>Background</h2> -->
         <!-- <div class="vision-content"> -->
           <div class="vision-text">
-            <p class="vision-intro">
+            <p :class="['vision-intro', { 'no-indent': currentLanguage.code === 'en' }]">
               {{ t('about.intro1') }}
             </p>
             
-            <p class="vision-intro">
+            <p :class="['vision-intro', { 'no-indent': currentLanguage.code === 'en' }]">
               {{ t('about.intro2') }}
             </p>
             
-            <p class="vision-intro">
+            <p :class="['vision-intro', { 'no-indent': currentLanguage.code === 'en' }]">
               {{ t('about.intro3') }}
             </p>
           </div>
@@ -171,8 +171,8 @@ import { useLanguage } from '@/composables/useLanguage'
 export default {
   name: 'AboutUsView',
   setup() {
-    const { t } = useLanguage()
-    return { t }
+    const { t, currentLanguage } = useLanguage()
+    return { t, currentLanguage }
   },
   data() {
     return {
@@ -539,6 +539,10 @@ export default {
   margin-bottom: 40px;
   color: #ffffff;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
 .vision-content {
@@ -565,6 +569,10 @@ export default {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+.vision-intro.no-indent {
+  text-indent: 0;
+}
+
 .vision-image {
   display: flex;
   justify-content: center;
@@ -583,6 +591,11 @@ export default {
   font-weight: 700;
   margin-bottom: 24px;
   color: #ffffff;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
 .mission-text p {
@@ -618,6 +631,10 @@ export default {
   text-align: center;
   margin-bottom: 40px;
   color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
 .values-grid {
@@ -724,10 +741,40 @@ export default {
 @media (max-width: 768px) {
   .page-header h1 {
     font-size: 2rem;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
   }
   
   .background-vision-section h2 {
     font-size: 2rem;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .mission-text h2 {
+    font-size: 2rem;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .values-section h2,
+  .team-section h2,
+  .stats-section h2 {
+    font-size: 2rem;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
   }
   
   .vision-content {

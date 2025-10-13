@@ -1,26 +1,26 @@
 <template>
   <section class="container">
     <header class="td-top">
-      <h1 class="headline">Token details</h1>
+      <h1 class="headline">{{ t('tokenDetail.title') }}</h1>
       <div class="td-actions">
         <button class="btn" @click="menuOpen = !menuOpen">⋮</button>
         <div v-if="menuOpen" class="td-menu">
-          <button class="td-item" @click="openInExplorer">View Asset in explorer</button>
-          <button class="td-item" @click="hideToken">Hide {{ symbol }}</button>
-          <button class="td-item danger" @click="deleteToken">Delete from my wallet</button>
+          <button class="td-item" @click="openInExplorer">{{ t('tokenDetail.viewAssetInExplorer') }}</button>
+          <button class="td-item" @click="hideToken">{{ t('tokenDetail.hide') }} {{ symbol }}</button>
+          <button class="td-item danger" @click="deleteToken">{{ t('tokenDetail.deleteFromWallet') }}</button>
         </div>
       </div>
     </header>
 
     <div class="td-grid">
       <article class="card">
-        <h3>Overview</h3>
-        <div class="kv"><span class="k">Network name</span><span class="v">{{ networkLabel }}</span></div>
-        <div class="kv"><span class="k">Contract address</span><span class="v addr">{{ address }}</span></div>
-        <div class="kv"><span class="k">Token decimal</span><span class="v">{{ decimals ?? '-' }}</span></div>
-        <div class="kv"><span class="k">Spending caps</span><span class="v">—</span></div>
-        <div class="kv"><span class="k">Token import date</span><span class="v">{{ importDate || '-' }}</span></div>
-        <div class="kv"><span class="k">Token import source</span><span class="v">{{ importSource || 'metamask' }}</span></div>
+        <h3>{{ t('tokenDetail.overview') }}</h3>
+        <div class="kv"><span class="k">{{ t('tokenDetail.networkName') }}</span><span class="v">{{ networkLabel }}</span></div>
+        <div class="kv"><span class="k">{{ t('tokenDetail.contractAddress') }}</span><span class="v addr">{{ address }}</span></div>
+        <div class="kv"><span class="k">{{ t('tokenDetail.tokenDecimal') }}</span><span class="v">{{ decimals ?? '-' }}</span></div>
+        <div class="kv"><span class="k">{{ t('tokenDetail.spendingCaps') }}</span><span class="v">—</span></div>
+        <div class="kv"><span class="k">{{ t('tokenDetail.tokenImportDate') }}</span><span class="v">{{ importDate || '-' }}</span></div>
+        <div class="kv"><span class="k">{{ t('tokenDetail.tokenImportSource') }}</span><span class="v">{{ importSource || 'metamask' }}</span></div>
       </article>
     </div>
   </section>
@@ -29,6 +29,7 @@
 <script>
 import { computed, ref, onMounted } from 'vue'
 import { useWallet } from '/src/composables/useWallet'
+import { useLanguage } from '@/composables/useLanguage'
 import { ethers } from 'ethers'
 
 export default {
@@ -36,6 +37,7 @@ export default {
   props: { address: { type: String, required: true } },
   setup(props){
     const { chainId, networkLabel } = useWallet()
+    const { t } = useLanguage()
     const symbol = ref('')
     const name = ref('')
     const decimals = ref(null)
@@ -82,9 +84,9 @@ export default {
         const set = new Set((Array.isArray(list) ? list : []).map(x => String(x).toLowerCase()))
         set.add(props.address.toLowerCase())
         sessionStorage.setItem(key, JSON.stringify(Array.from(set)))
-        alert('Hidden successfully')
+        alert(t('tokenDetail.hiddenSuccessfully'))
         window.history.back()
-      } catch { alert('Hide failed') }
+      } catch { alert(t('tokenDetail.hideFailed')) }
     }
 
     function deleteToken(){
@@ -94,14 +96,14 @@ export default {
         const list = raw ? JSON.parse(raw) : []
         const next = Array.isArray(list) ? list.filter(x => (x.address || '').toLowerCase() !== props.address.toLowerCase()) : []
         sessionStorage.setItem(key, JSON.stringify(next))
-        alert('Deleted from custom tokens')
+        alert(t('tokenDetail.deletedFromCustomTokens'))
         window.history.back()
-      } catch { alert('Delete failed') }
+      } catch { alert(t('tokenDetail.deleteFailed')) }
     }
 
     const importDate = ref('')
     const importSource = ref('')
-    return { networkLabel, address: props.address, symbol, name, decimals, importDate, importSource, menuOpen, openInExplorer, hideToken, deleteToken }
+    return { t, networkLabel, address: props.address, symbol, name, decimals, importDate, importSource, menuOpen, openInExplorer, hideToken, deleteToken }
   }
 }
 </script>

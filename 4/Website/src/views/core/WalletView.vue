@@ -85,21 +85,6 @@
         </div>
       </div>
 
-      <!-- 自定义代币输入 -->
-      <div class="mm-custom">
-        <span class="mm-net-left">{{ t('wallet.insertContractAddress') }}</span>
-        <form class="mm-custom-form" @submit.prevent="addToken">
-          <input v-model="customAddress" class="mm-input" :placeholder="t('wallet.pasteERC20Address')" />
-          <input v-model="customLabel" class="mm-input" :placeholder="t('wallet.labelOptional')" />
-          <button class="mm-btn mm-outline" type="submit" :disabled="!customAddress">{{ t('wallet.addToken') }}</button>
-          <button class="mm-btn mm-outline" type="button" @click="refreshTokens">{{ t('wallet.refresh') }}</button>
-        </form>
-        <!-- 警告信息显示 -->
-        <div v-if="warning" class="mm-warning">
-          <span class="mm-warning-icon">⚠️</span>
-          <span class="mm-warning-text">{{ warning }}</span>
-        </div>
-      </div>
 
       <!-- Tabs -->
       <nav class="mm-tabs">
@@ -150,6 +135,22 @@
           <div class="mm-token-right">
             <div class="mm-token-sub">{{ token.displayBalance }}</div>
           </div>
+        </div>
+      </div>
+      
+      <!-- 自定义代币输入 -->
+      <div class="mm-custom">
+        <span class="mm-net-left">{{ t('wallet.insertContractAddress') }}</span>
+        <form class="mm-custom-form" @submit.prevent="addToken">
+          <input v-model="customAddress" class="mm-input" :placeholder="t('wallet.pasteERC20Address')" />
+          <input v-model="customLabel" class="mm-input" :placeholder="t('wallet.labelOptional')" />
+          <button class="mm-btn mm-outline" type="submit" :disabled="!customAddress">{{ t('wallet.addToken') }}</button>
+          <button class="mm-btn mm-outline" type="button" @click="refreshTokens">{{ t('wallet.refresh') }}</button>
+        </form>
+        <!-- 警告信息显示 -->
+        <div v-if="warning" class="mm-warning">
+          <span class="mm-warning-icon">⚠️</span>
+          <span class="mm-warning-text">{{ warning }}</span>
         </div>
       </div>
     </section>
@@ -539,11 +540,17 @@ onBeforeUnmount(() => {
 const customAddress = ref('')
 const customLabel = ref('')
 async function addToken(){
+console.log('🔄 Adding custom token:', customAddress.value.trim(), customLabel.value.trim())
 const ok = await addCustomToken(customAddress.value.trim(), customLabel.value.trim())
+console.log('✅ Add token result:', ok)
 if (ok) {
   customAddress.value = ''
   customLabel.value = ''
+  console.log('🔄 Refreshing tokens after adding...')
   await refreshTokens()
+  console.log('📋 Tokens after refresh:', tokens.length)
+} else {
+  console.log('❌ Failed to add token')
 }
 }
 

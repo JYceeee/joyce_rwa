@@ -556,7 +556,7 @@ async function refreshTokens() {
   try {
     // 获取当前钱包的代币列表
     const walletTokens = await getWalletTokens()
-    console.log(`📋 Wallet tokens:`, walletTokens)
+    console.log(`📋 Wallet tokens (${walletTokens.length}):`, walletTokens)
     
     // 处理钱包内的代币
     for (const item of walletTokens) {
@@ -624,13 +624,28 @@ function copyAddress() { if (address.value) navigator.clipboard.writeText(addres
 function customKey(cid){ return `customTokens:${cid || ''}` }
 function getCustomTokens(cid){
   try {
-    const raw = sessionStorage.getItem(customKey(cid))
+    const key = customKey(cid)
+    const raw = sessionStorage.getItem(key)
+    console.log(`🔍 Getting custom tokens for chain ${cid}, key: ${key}`)
     const arr = raw ? JSON.parse(raw) : []
-    return Array.isArray(arr) ? arr.filter(x => x && x.address) : []
-  } catch { return [] }
+    const filtered = Array.isArray(arr) ? arr.filter(x => x && x.address) : []
+    console.log(`📋 Custom tokens found:`, filtered)
+    return filtered
+  } catch (e) { 
+    console.error('Error getting custom tokens:', e)
+    return [] 
+  }
 }
 function setCustomTokens(cid, list){
-  try { sessionStorage.setItem(customKey(cid), JSON.stringify(list || [])) } catch {}
+  try { 
+    const key = customKey(cid)
+    console.log(`💾 Saving custom tokens for chain ${cid}, key: ${key}`)
+    console.log(`📋 Tokens to save:`, list)
+    sessionStorage.setItem(key, JSON.stringify(list || []))
+    console.log(`✅ Custom tokens saved successfully`)
+  } catch (e) { 
+    console.error('Error saving custom tokens:', e)
+  }
 }
 async function addCustomToken(addr, label){
   try {

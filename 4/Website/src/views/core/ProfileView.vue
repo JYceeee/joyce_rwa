@@ -3,7 +3,7 @@
     <!-- 顶部：面包屑 & 操作按钮 -->
     <header class="topbar container">
       <nav class="breadcrumb" aria-label="Breadcrumb">
-        <button class="crumb-back" @click="$emit('navigate','home')" aria-label="Back to Home">
+        <button class="crumb-back" @click="$router.back()" aria-label="Back to Previous Page">
           <svg viewBox="0 0 24 24" class="i"><path d="M10 19a1 1 0 0 1-.7-.3l-7-7a1 1 0 0 1 0-1.4l7-7a1 1 0 1 1 1.4 1.4L4.41 11H21a1 1 0 1 1 0 2H4.41l6.3 6.3A1 1 0 0 1 10 19z"/></svg>
         </button>
         <span class="sep">/</span>
@@ -32,21 +32,45 @@
         <div class="contact-item">
           <!-- <span class="contact-icon">📧</span> -->
           <span class="contact-label">{{ t('profile.email') }}</span>
-          <span class="contact-value">
-            {{ userEmail || t('profile.notProvided') }}
-          </span>
-          <span class="email-status" :class="emailVerificationClass"> &nbsp; {{ emailVerificationText }}</span>
-          <button v-if="!emailVerified" class="btn-small" type="button" @click="sendEmailVerification">
+          <div class="contact-value-group">
+            <span class="contact-value">
+              {{ userEmail || t('profile.notProvided') }}
+            </span>
+            <span class="email-status" :class="emailVerificationClass">
+              <template v-if="emailVerified">
+                <svg viewBox="0 0 24 24" class="email-verified-icon">
+                  <path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/>
+                </svg>
+              </template>
+              <template v-else>
+                {{ emailVerificationText }}
+              </template>
+            </span>
+          </div>
+          <button v-if="!emailVerified" class="btn-small" type="button" @click.stop.prevent="sendEmailVerification">
             {{ t('profile.verifyEmail') }}
           </button>
         </div>
         <div class="contact-item">
           <!-- <span class="contact-icon">📱</span> -->
           <span class="contact-label">{{ t('profile.phone') }}</span>
-          <span class="contact-value">
-            {{ userPhone || t('profile.notProvided') }}
-          </span>
-          <button class="btn-small" type="button" >{{ t('profile.changePhone') }}</button>
+          <div class="contact-value-group">
+            <span class="contact-value">
+              {{ userPhone || t('profile.notProvided') }}
+            </span>
+            <span class="phone-status" :class="phoneVerificationClass">
+              <template v-if="phoneVerified">
+                <svg viewBox="0 0 24 24" class="phone-verified-icon">
+                  <path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/>
+                </svg>
+              </template>
+              <template v-else>
+                {{ phoneVerificationText }}
+              </template>
+            </span>
+          </div>
+          <button v-if="!phoneVerified && userPhone" class="btn-small" type="button" @click.stop.prevent="sendPhoneVerification">{{ t('profile.verifyPhone') }}</button>
+          <button v-if="!userPhone" class="btn-small" type="button" >{{ t('profile.addPhone') }}</button>
         </div>
         <div class="contact-item">
           <span class="contact-label">{{ t('profile.password') }}</span>
@@ -64,26 +88,6 @@
           <span class="contact-value">{{ userError }}</span>
         </div>
       </div>
-
-        <!-- 邮箱验证弹窗 -->
-      <div v-if="showEmailModal" class="modal-mask">
-        <div class="modal-wrapper">
-          <div class="modal-container">
-            <h2 style="margin-bottom:8px;">{{ t('profile.checkEmail') }}</h2>
-            <p v-html="t('profile.verifyEmailDescription')"></p>
-            <div style="margin-top:12px; display:flex; flex-wrap:wrap; gap:10px;">
-              <a href="#" style="color:#ea7a2e; text-decoration:underline;">{{ t('profile.accountHelp') }}</a>
-              <a href="#" style="color:#ea7a2e; text-decoration:underline;">{{ t('profile.subscribe') }}</a>
-              <a href="#" style="color:#ea7a2e; text-decoration:underline;">{{ t('profile.unsubscribe') }}</a>
-              <a href="#" style="color:#ea7a2e; text-decoration:underline;">{{ t('profile.privacy') }}</a>
-              <a href="#" style="color:#ea7a2e; text-decoration:underline;">{{ t('profile.cookiePreferences') }}</a>
-            </div>
-            <div style="margin-top:18px; text-align:right;">
-              <button class="btn orange" @click="showEmailModal=false">{{ t('profile.confirm') }}</button>
-            </div>
-          </div>
-        </div>
-      </div> 
     </div>
     
     <!-- KYC & Whitelist Status Section -->
@@ -105,7 +109,9 @@
             <!-- <span class="level-badge" :class="kycLevelClass"> {{ kycLevelText }}</span> -->
           </span>
           <!-- 右侧按钮：未验证=Start；已验证=Cancel -->
-          <button v-if="!isVerified" class="link" type="button" @click="verifyKYC">{{ t('profile.start') }}</button>
+          <button v-if="!isVerified" class="link" type="button" @click="verifyKYC">
+            {{ t('profile.start') }}
+          </button>
           <button v-else class="link danger" type="button" @click="cancelKYC">{{ t('profile.cancelVerification') }}</button>
         </div>
       </div>
@@ -121,7 +127,7 @@
       />
 
       <!-- Trading Permission -->
-      <div class="field">
+      <!-- <div class="field">
         <label class="label">{{ t('profile.tradingPermission') }} <span class="req"></span></label>
         <div class="kyc-banner" :class="isTradingFullyVerified ? 'green' : 'orange'" role="status">
           <span class="icon" :class="{ 'icon-verified': isTradingFullyVerified }">
@@ -129,18 +135,17 @@
               <path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/>
             </svg>
           </span>
-          <span class="permission-text">                
+          <span v-if="isTradingFullyVerified" class="trading-permission-text">{{ tradingPermissionText }}</span>
+          <span v-else class="permission-text">                
             <li v-for="requirement in tradingPermissionRequirements" :key="requirement" 
                       :class="{ 'requirement-met': isRequirementMet(requirement) }">
                     <span class="requirement-icon">{{ isRequirementMet(requirement) ? '' : '' }}</span>
                     {{ requirement }}
                   </li></span>
-          <span class="permission-badge" :class="tradingPermissionClass">{{ tradingPermissionText }}</span>
-          <!-- 右侧按钮：未验证=Start；已验证=Cancel -->
           <button v-if="!isVerified" class="link" type="button" @click="verifyKYC">{{ t('profile.start') }}</button>
           <button v-else class="link danger" type="button" @click="cancelKYC">{{ t('profile.cancelVerification') }}</button>
         </div>
-      </div>
+      </div> -->
     </div>
   
     <!-- 底部按钮 -->
@@ -151,6 +156,78 @@
       <button class="btn light" type="button" @click="logout" style="margin-left:auto;">{{ t('profile.logout') }}</button>
     </div>
     </form>
+
+    <!-- 邮箱验证码弹窗 -->
+    <div v-if="showVerificationModal" class="modal-mask" @click.self="closeVerificationModal">
+      <div class="modal-wrapper">
+        <div class="modal-container">
+          <h2 style="margin-bottom:16px;">邮箱验证</h2>
+          <p style="margin-bottom:20px; color: #9ca3af;">已向您的邮箱发送验证码，请查收</p>
+          
+          <div class="verification-input-group">
+            <label style="display:block; margin-bottom:8px; font-size:14px; color:#9ca3af;">验证码</label>
+            <input 
+              v-model="verificationCode" 
+              type="text" 
+              placeholder="请输入6位验证码"
+              maxlength="6"
+              class="verification-input"
+              @keyup.enter="confirmVerification"
+            />
+          </div>
+          
+          <div style="margin-top:24px; display:flex; gap:12px; justify-content:flex-end;">
+            <button type="button" class="btn light" @click.stop.prevent="closeVerificationModal">取消</button>
+            <button type="button" class="btn orange" @click.stop.prevent="confirmVerification" :disabled="verificationCode.length !== 6">确认</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 手机号验证码弹窗 -->
+    <div v-if="showPhoneVerificationModal" class="modal-mask" @click.self="closePhoneVerificationModal">
+      <div class="modal-wrapper">
+        <div class="modal-container">
+          <h2 style="margin-bottom:16px;">手机号验证</h2>
+          <p style="margin-bottom:20px; color: #9ca3af;">已向您的手机号发送验证码，请查收</p>
+          
+          <div class="verification-input-group">
+            <label style="display:block; margin-bottom:8px; font-size:14px; color:#9ca3af;">验证码</label>
+            <input 
+              v-model="phoneVerificationCode" 
+              type="text" 
+              placeholder="请输入6位验证码"
+              maxlength="6"
+              class="verification-input"
+              @keyup.enter="confirmPhoneVerification"
+            />
+          </div>
+          
+          <div style="margin-top:24px; display:flex; gap:12px; justify-content:flex-end;">
+            <button type="button" class="btn light" @click.stop.prevent="closePhoneVerificationModal">取消</button>
+            <button type="button" class="btn orange" @click.stop.prevent="confirmPhoneVerification" :disabled="phoneVerificationCode.length !== 6">确认</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 验证成功弹窗 -->
+    <div v-if="showSuccessModal" class="modal-mask" @click.self="showSuccessModal=false">
+      <div class="modal-wrapper">
+        <div class="modal-container success-modal">
+          <div class="success-icon">
+            <svg viewBox="0 0 24 24" style="width:48px; height:48px; fill:#10b981;">
+              <path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/>
+            </svg>
+          </div>
+          <h2 style="margin-bottom:8px; color:#10b981;">验证成功</h2>
+          <p style="color:#9ca3af;">{{ successMessage }}</p>
+          <div style="margin-top:20px; text-align:center;">
+            <button type="button" class="btn orange" @click.stop.prevent="showSuccessModal=false">确定</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
   </section>
 </template>
@@ -199,6 +276,15 @@ export default {
   _offStorage: null,
   _offAfterEach: null,
   showEmailModal: false,
+  showVerificationModal: false,
+  showSuccessModal: false,
+  verificationCode: '',
+  // 手机号验证相关
+  showPhoneVerificationModal: false,
+  phoneVerificationCode: '',
+  phoneVerified: false,
+  phoneCodeSent: false,
+  successMessage: '您的邮箱已验证',
   // 用户信息，传递给白名单组件
   userInfo: getUserInfo(),
   // 状态信息
@@ -339,6 +425,27 @@ export default {
         return '邮箱验证已发送'
       } else {
         return '邮箱未验证'
+      }
+    },
+    
+    // 手机号验证状态
+    phoneVerificationText() {
+      if (this.phoneVerified) {
+        return '已验证'
+      } else if (this.phoneCodeSent) {
+        return '验证已发送'
+      } else {
+        return '未验证'
+      }
+    },
+    
+    phoneVerificationClass() {
+      if (this.phoneVerified) {
+        return '手机号已验证'
+      } else if (this.phoneCodeSent) {
+        return '手机号验证已发送'
+      } else {
+        return '手机号未验证'
       }
     },
     
@@ -803,14 +910,24 @@ export default {
 
     // 发送邮箱验证
     async sendEmailVerification() {
+      console.log('🔘 sendEmailVerification 方法被调用');
+      console.log('📧 当前邮箱:', this.userEmail);
+      
       const email = this.userEmail;
       if (!email || !this.isValidEmail(email)) {
-        this.$emit('notify', 'Please provide a valid email address');
+        console.log('❌ 邮箱验证失败: 邮箱为空或格式不正确');
+        alert('请提供有效的邮箱地址');
         return;
       }
 
       try {
-        console.log('📧 发送邮箱验证到:', email);
+        console.log('📧 开始发送邮箱验证到:', email);
+        
+        // 先显示验证码输入弹窗（模拟发送成功）
+        this.emailCodeSent = true;
+        this.showVerificationModal = true;
+        this.verificationCode = '';
+        console.log('✅ 验证码弹窗已显示');
         
         // 调用后端API发送验证邮件
         const res = await fetch(import.meta.env.VITE_API_EmailVerify || 'http://localhost:3000/api/email/verify', {
@@ -820,15 +937,157 @@ export default {
         });
 
         if (res.ok) {
-          this.emailCodeSent = true;
-          this.$emit('notify', 'Verification email sent successfully');
-          console.log('✅ 邮箱验证邮件发送成功');
+          const data = await res.json();
+          this.generatedCode = data.code; // 保存验证码（开发环境）
+          console.log('✅ 邮箱验证邮件发送成功, 验证码:', data.code);
         } else {
-          this.$emit('notify', 'Failed to send verification email');
-          console.error('❌ 邮箱验证邮件发送失败:', res.status);
+          console.warn('⚠️ 邮箱验证邮件发送失败:', res.status);
         }
       } catch (error) {
         console.error('❌ 发送邮箱验证失败:', error);
+        // 即使API失败也显示弹窗，允许用户输入
+        console.log('⚠️ API调用失败，但仍显示验证码输入弹窗');
+      }
+    },
+    
+    // 关闭验证码弹窗
+    closeVerificationModal() {
+      this.showVerificationModal = false;
+      this.verificationCode = '';
+    },
+    
+    // 确认验证码
+    async confirmVerification() {
+      if (this.verificationCode.length !== 6) {
+        this.$emit('notify', '请输入6位验证码');
+        return;
+      }
+
+      try {
+        console.log('🔍 验证验证码:', this.verificationCode);
+        
+        // 调用后端API验证验证码
+        const res = await fetch(import.meta.env.VITE_API_EmailVerify || 'http://localhost:3000/api/email/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            user_email: this.userEmail, 
+            verification_code: this.verificationCode 
+          })
+        });
+
+        const data = await res.json();
+        
+        if (data.status === 0 || res.ok) {
+          // 验证成功
+          this.emailVerified = true;
+          this.emailCodeSent = false;
+          this.showVerificationModal = false;
+          this.verificationCode = '';
+          
+          // 显示成功弹窗
+          this.successMessage = '您的邮箱已验证';
+          this.showSuccessModal = true;
+          
+          console.log('✅ 邮箱验证成功');
+        } else {
+          this.$emit('notify', '验证码错误，请重新输入');
+          console.error('❌ 验证码验证失败:', data.message);
+        }
+      } catch (error) {
+        console.error('❌ 验证验证码失败:', error);
+        this.$emit('notify', 'Network error, please try again');
+      }
+    },
+    
+    // 发送手机号验证
+    async sendPhoneVerification() {
+      console.log('🔘 sendPhoneVerification 方法被调用');
+      console.log('📱 当前手机号:', this.userPhone);
+      
+      const phone = this.userPhone;
+      if (!phone) {
+        console.log('❌ 手机号验证失败: 手机号为空');
+        alert('请先添加手机号');
+        return;
+      }
+
+      try {
+        console.log('📱 开始发送手机号验证到:', phone);
+        
+        // 先显示验证码输入弹窗（模拟发送成功）
+        this.phoneCodeSent = true;
+        this.showPhoneVerificationModal = true;
+        this.phoneVerificationCode = '';
+        console.log('✅ 手机号验证码弹窗已显示');
+        
+        // 调用后端API发送验证短信
+        const res = await fetch(import.meta.env.VITE_API_PhoneVerify || 'http://localhost:3000/api/phone/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_phone: phone })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          this.generatedCode = data.code; // 保存验证码（开发环境）
+          console.log('✅ 手机号验证短信发送成功, 验证码:', data.code);
+        } else {
+          console.warn('⚠️ 手机号验证短信发送失败:', res.status);
+        }
+      } catch (error) {
+        console.error('❌ 发送手机号验证失败:', error);
+        // 即使API失败也显示弹窗，允许用户输入
+        console.log('⚠️ API调用失败，但仍显示验证码输入弹窗');
+      }
+    },
+    
+    // 关闭手机号验证码弹窗
+    closePhoneVerificationModal() {
+      this.showPhoneVerificationModal = false;
+      this.phoneVerificationCode = '';
+    },
+    
+    // 确认手机号验证码
+    async confirmPhoneVerification() {
+      if (this.phoneVerificationCode.length !== 6) {
+        this.$emit('notify', '请输入6位验证码');
+        return;
+      }
+
+      try {
+        console.log('🔍 验证手机号验证码:', this.phoneVerificationCode);
+        
+        // 调用后端API验证验证码
+        const res = await fetch(import.meta.env.VITE_API_PhoneVerify || 'http://localhost:3000/api/phone/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            user_phone: this.userPhone, 
+            verification_code: this.phoneVerificationCode 
+          })
+        });
+
+        const data = await res.json();
+        
+        if (data.status === 0 || res.ok) {
+          // 验证成功
+          this.phoneVerified = true;
+          this.phoneCodeSent = false;
+          this.showPhoneVerificationModal = false;
+          this.phoneVerificationCode = '';
+          
+          // 显示成功弹窗
+          this.successMessage = '您的手机号已验证';
+          this.showSuccessModal = true;
+          
+          console.log('✅ 手机号验证成功');
+        } else {
+          this.$emit('notify', '验证码错误，请重新输入');
+          console.error('❌ 手机号验证码验证失败:', data.message);
+        }
+      } catch (error) {
+        console.error('❌ 验证手机号验证码失败:', error);
         this.$emit('notify', 'Network error, please try again');
       }
     },
@@ -1055,8 +1314,9 @@ export default {
   font-weight: 700;
   color: var(--text);
   display: block;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  /* text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); */
   letter-spacing: 0.5px;
+  font-family: 'Inter', sans-serif;
 }
 
 .contact-item {
@@ -1103,6 +1363,14 @@ export default {
   letter-spacing: 0.3px;
 }
 
+.contact-value-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  max-width: 400px;
+}
+
 .contact-value {
   color: var(--text);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -1110,15 +1378,10 @@ export default {
   padding: 6px 12px;
   border-radius: 6px;
   border: 1px solid var(--border);
-  flex: 1;
-  max-width: 200px;
   word-break: break-all;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  justify-content: flex-start;
   font-size: 13px;
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .contact-value:hover {
@@ -1137,16 +1400,43 @@ export default {
   font-size: 14px;
 }
 
-.email-verified {
+.email-verified-icon {
+  width: 20px;
+  height: 20px;
+  fill: #10b981; /* 绿色对勾 */
+}
+
+.邮箱已验证 {
   color: #10b981;
 }
 
-.email-pending {
+.邮箱验证已发送 {
   color: #f59e0b;
 }
 
-.email-unverified {
-  color: #ef4444;
+.邮箱未验证 {
+  color: #ef4444; /* 红色文字 */
+  font-weight: 500;
+}
+
+/* 手机号验证状态样式 */
+.phone-verified-icon {
+  width: 20px;
+  height: 20px;
+  fill: #10b981; /* 绿色对勾 */
+}
+
+.手机号已验证 {
+  color: #10b981;
+}
+
+.手机号验证已发送 {
+  color: #f59e0b;
+}
+
+.手机号未验证 {
+  color: #ef4444; /* 红色文字 */
+  font-weight: 500;
 }
 
 .btn-small {
@@ -1169,6 +1459,36 @@ export default {
 .contact-item .btn-small {
   margin-left: auto;
   flex-shrink: 0;
+}
+
+/* 移动端布局调整 */
+@media (max-width: 768px) {
+  .contact-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .contact-item .btn-small {
+    margin-left: 0;
+    margin-top: 4px;
+    align-self: flex-start;
+  }
+  
+  .contact-value-group {
+    max-width: 100%;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  
+  .contact-value {
+    max-width: 100%;
+    flex: 1;
+  }
+  
+  .email-status {
+    flex-shrink: 0;
+  }
 }
 
 /* 加载状态样式 */
@@ -1214,6 +1534,7 @@ export default {
   font-size: 18px;
   font-weight: 600;
   color: var(--text);
+  font-family: 'Inter', sans-serif;
 }
 
 .status-item {
@@ -1440,7 +1761,7 @@ export default {
 /* 简易弹窗样式 */
 .modal-mask {
   position: fixed;
-  z-index: 9999;
+  z-index: 99999;
   top: 0;
   left: 0;
   width: 100vw;
@@ -1449,19 +1770,36 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+  backdrop-filter: blur(4px);
 }
 .modal-wrapper {
   width: 100%;
   max-width: 420px;
+  position: relative;
+  z-index: 100000;
 }
 .modal-container {
   background: var(--modal-bg);
   border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.1);
   padding: 28px 24px 18px;
   font-size: 15px;
   color: #ffffff;
   border: 1px solid rgba(74, 85, 104, 0.3);
+  position: relative;
+  z-index: 100001;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  0% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 .container { max-width: 920px; margin: 0 auto; }
 /* 页面容器深色主题 - 与图片风格一致 */
@@ -1478,12 +1816,28 @@ export default {
 
 /* 顶部 */
 .topbar { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:24px 16px;font-size: 20px; }.breadcrumb { display:flex; align-items:center; gap:10px; color:#9ca3af; }
-.crumb-back { border:0; background:transparent; cursor:pointer; color:#9ca3af; }
+.crumb-back { 
+  border: 0; 
+  background: transparent; 
+  cursor: pointer; 
+  color: var(--text-secondary);
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.crumb-back:hover {
+  background: var(--hover-bg);
+  color: var(--text);
+}
 .sep{ opacity:.6; }
 .crumb-current{ color:var(--text); font-weight:600; }
 
 /* 标题块 */
-.head { display:flex; align-items:center; gap:16px; padding:0 16px 8px; }
+.head { display:flex; align-items:center; gap:16px; padding:0 16px 8px;}
 .avatar{ width:44px; height:44px; border-radius:999px; background:var(--bg-secondary); display:grid; place-items:center;}
 .avatar-initial{ font-weight:700; color:var(--text); }
 .title{ font-size:24px; line-height:1.2; margin:0; color:var(--text); }
@@ -1501,10 +1855,27 @@ export default {
 .input.with-icon select{ border:0; outline:none; width:100%; height:38px; background:transparent; color:#ffffff; }
 .input.with-icon .icon{ width:28px; height:28px; border-radius:10px; background:#374151; display:grid; place-items:center;
   box-shadow:0 2px 6px rgba(0, 0, 0, 0.2), inset 0 0 0 1px #4b5563; }
-.i{ width:18px; height:18px; fill:currentColor; color:#ffffff; }
+.i{ 
+  width: 18px; 
+  height: 18px; 
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 
 /* KYC 横幅 */
-.kyc-banner{ display:flex; align-items:center; gap:10px; height:40px; border-radius:8px; padding:0 12px; border:1px solid; }
+.kyc-banner{ 
+  display:flex; 
+  align-items:center; 
+  gap:10px; 
+  height:40px; 
+  border-radius:8px; 
+  padding:0 12px; 
+  border:1px solid; 
+  font-size: 13px; /* 与contact-value保持一致 */
+}
 .kyc-banner.orange{ background:var(--card-bg); color:#f97316; border-color:var(--border); }
 .kyc-banner.green{ background:var(--card-bg); color:#16a34a; border-color:var(--border); }
 .kyc-banner .icon{
@@ -1530,6 +1901,20 @@ export default {
 .link.danger{ color:#dc2626; }
 .verified{ margin-left:4px; display:inline-flex; align-items:center; gap:6px; font-weight:600; }
 
+/* 交易权限文字样式 - 直接显示在icon后面，无背景色 */
+.trading-permission-text {
+  margin-left: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: inherit; /* 继承父元素颜色 */
+  background: none; /* 无背景色 */
+  padding: 0; /* 无内边距 */
+  border: none; /* 无边框 */
+  border-radius: 0; /* 无圆角 */
+}
+
 
 /* 底部按钮 */
 .actions { display:flex; gap:12px; }
@@ -1539,4 +1924,95 @@ export default {
 .btn.orange:hover{ filter:brightness(.96); }
 .btn.light{ background:#374151; color:#ffffff; border-color:#4b5563; }
 .btn.light:hover{ background:#4b5563; }
+
+/* 验证码输入样式 */
+.verification-input-group {
+  margin: 16px 0;
+}
+
+.verification-input {
+  width: 100%;
+  height: 48px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 0 16px;
+  background: var(--bg-secondary);
+  color: var(--text);
+  font-size: 16px;
+  letter-spacing: 4px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.verification-input:focus {
+  border-color: #ea7a2e;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(234, 122, 46, 0.1);
+}
+
+.verification-input::placeholder {
+  letter-spacing: normal;
+  color: #9ca3af;
+}
+
+/* 成功弹窗样式 */
+.success-modal {
+  text-align: center;
+}
+
+.success-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 50%;
+  animation: scaleIn 0.3s ease;
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 禁用按钮样式 */
+.btn.orange:disabled {
+  background: #6b7280;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn.orange:disabled:hover {
+  filter: none;
+}
+
+/* 移动端弹窗优化 */
+@media (max-width: 768px) {
+  .modal-mask {
+    z-index: 999999;
+    padding: 20px;
+  }
+  
+  .modal-wrapper {
+    z-index: 1000000;
+    max-width: 100%;
+  }
+  
+  .modal-container {
+    z-index: 1000001;
+    padding: 24px 20px 16px;
+    margin: 0;
+  }
+}
 </style>

@@ -20,7 +20,8 @@
         <!-- 右侧按钮：根据状态显示不同操作 -->
         <button v-if="whitelistStatus === 'none'" class="link" type="button" @click="applyWhitelist" :disabled="loading">{{ t('whitelist.applyNow') }}</button>
         <button v-else-if="whitelistStatus === 'pending'" class="link" type="button" @click="checkWhitelistStatus" :disabled="loading">{{ t('whitelist.checkStatus') }}</button>
-        <button v-else-if="whitelistStatus === 'approved'" class="link" type="button" @click="goToProjects">{{ t('whitelist.startTrading') }}</button>
+        <!-- 取消显示start trading按钮 -->
+        <!-- <button v-else-if="whitelistStatus === 'approved'" class="link" type="button" @click="goToProjects">{{ t('whitelist.startTrading') }}</button> -->
         <button v-else-if="whitelistStatus === 'rejected'" class="link" type="button" @click="reapplyWhitelist" :disabled="loading">{{ t('whitelist.reapply') }}</button>
       </div>
     </div>
@@ -522,6 +523,7 @@ export default {
   padding: 0 12px;
   border: 1px solid;
   background: var(--card-bg);
+  font-size: 13px; /* 与kyc-banner保持一致 */
 }
 
 .whitelist-banner.gray {
@@ -537,6 +539,17 @@ export default {
 .whitelist-banner.green {
   color: #16a34a;
   border-color: var(--border);
+}
+
+.whitelist-banner.green .icon {
+  background: #16a34a; /* 绿色背景 */
+  color: #ffffff; /* 白色图案 */
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.3), inset 0 0 0 1px #15803d;
+  opacity: 1;
+}
+
+.whitelist-banner.green .icon svg {
+  fill: #ffffff; /* 确保SVG图标为白色 */
 }
 
 .whitelist-banner.red {
