@@ -930,6 +930,106 @@ export default {
 
 /* 深色主题适配 - 已直接应用深色样式 */
 
+/* Header右侧按钮容器 - 桌面端 */
+.right {
+  display: flex;
+  align-items: center;
+  gap: 6px; /* 缩小按钮之间的距离 */
+}
+
+.right > div {
+  display: flex;
+  align-items: center;
+  gap: 6px; /* 缩小按钮之间的距离 */
+}
+
+/* 桌面端按钮样式 - 统一设置 */
+.notification-btn,
+.profile-btn,
+.settings-btn,
+.language-btn,
+.theme-btn {
+  background: #f3f4f6 !important;
+  border: 1px solid #e5e7eb !important;
+  color: #111827 !important;
+  padding: 8px !important;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  transition: all 0.2s ease;
+}
+
+.notification-btn:hover,
+.profile-btn:hover,
+.settings-btn:hover,
+.language-btn:hover,
+.theme-btn:hover {
+  background: #e5e7eb !important;
+  border: 1px solid #d1d5db !important;
+  color: #111827 !important;
+}
+
+/* 深色主题下的按钮样式 */
+[data-theme="dark"] .notification-btn,
+[data-theme="dark"] .profile-btn,
+[data-theme="dark"] .settings-btn,
+[data-theme="dark"] .language-btn,
+[data-theme="dark"] .theme-btn {
+  background: #374151 !important;
+  border: 1px solid #4b5563 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .notification-btn:hover,
+[data-theme="dark"] .profile-btn:hover,
+[data-theme="dark"] .settings-btn:hover,
+[data-theme="dark"] .language-btn:hover,
+[data-theme="dark"] .theme-btn:hover {
+  background: #4b5563 !important;
+  border: 1px solid #6b7280 !important;
+  color: #ffffff !important;
+}
+
+/* 图标样式 */
+.notification-icon,
+.profile-icon,
+.settings-icon,
+.theme-icon {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.notification-btn {
+  position: relative;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 5px;
+  border-radius: 10px;
+  min-width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
 /* 汉堡菜单按钮样式 */
 .mobile-menu-btn {
   display: none;
@@ -1057,18 +1157,16 @@ export default {
   
   .left {
     gap: 6px;
-    margin-left: 0; /* 重置桌面端边距 */
+    margin-left: -35px; 
   }
   
   .right {
-    gap: 8px;
-    margin-right: 0px; /* 重置桌面端边距 */
-    flex-wrap: nowrap; /* 防止换行 */
+    display: flex;
+    justify-content: center;
     align-items: center;
-    justify-content: flex-end; /* 改为右对齐 */
-    min-width: 0;
-    width: auto; /* 改为自动宽度 */
-    max-width: 280px;
+    width: 100%;
+    gap: 6px;
+    margin-right: 10px;
   }
   
   /* 移动端按钮布局 - 居中对齐 */
@@ -1077,7 +1175,7 @@ export default {
     justify-content: center;
     align-items: center;
     width: 100%;
-    gap: 15px;
+    gap: 6px;
   }
   
   /* Wallet按钮 - 左侧 */
@@ -1108,7 +1206,7 @@ export default {
     flex: 0 0 auto;
     background: #f3f4f6 !important;
     border: 1px solid #e5e7eb !important;
-    color: var(--text) !important;
+    color: #111827 !important;
     font-size: 12px;
     font-weight: 600;
     padding: 8px;
@@ -1126,32 +1224,32 @@ export default {
   .language-btn:hover {
     background: #e5e7eb !important;
     border: 1px solid #d1d5db !important;
-    color: var(--text) !important;
+    color: #111827 !important;
   }
   
   /* 语言按钮在所有主题下使用统一的样式 */
   [data-theme="dark"] .language-btn {
     background: #374151 !important;
     border: 1px solid #4b5563 !important;
-    color: var(--text) !important;
+    color: #ffffff !important;
   }
   
   [data-theme="dark"] .language-btn:hover {
     background: #4b5563 !important;
     border: 1px solid #6b7280 !important;
-    color: var(--text) !important;
+    color: #ffffff !important;
   }
   
   [data-theme="light"] .language-btn {
     background: #f3f4f6 !important;
     border: 1px solid #e5e7eb !important;
-    color: var(--text) !important;
+    color: #111827 !important;
   }
   
   [data-theme="light"] .language-btn:hover {
     background: #e5e7eb !important;
     border: 1px solid #d1d5db !important;
-    color: var(--text) !important;
+    color: #111827 !important;
   }
   
   /* 主题切换按钮 - 桌面端 */
@@ -1159,7 +1257,7 @@ export default {
     flex: 0 0 auto;
     background: #f3f4f6 !important;
     border: 1px solid #e5e7eb !important;
-    color: var(--text) !important;
+    color: #111827 !important;
     font-size: 12px;
     font-weight: 600;
     padding: 8px;
@@ -1177,32 +1275,32 @@ export default {
   .theme-btn:hover {
     background: #e5e7eb !important;
     border: 1px solid #d1d5db !important;
-    color: var(--text) !important;
+    color: #111827 !important;
   }
   
   /* 主题按钮在所有主题下使用统一的样式 */
   [data-theme="dark"] .theme-btn {
     background: #374151 !important;
     border: 1px solid #4b5563 !important;
-    color: var(--text) !important;
+    color: #ffffff !important;
   }
   
   [data-theme="dark"] .theme-btn:hover {
     background: #4b5563 !important;
     border: 1px solid #6b7280 !important;
-    color: var(--text) !important;
+    color: #ffffff !important;
   }
   
   [data-theme="light"] .theme-btn {
     background: #f3f4f6 !important;
     border: 1px solid #e5e7eb !important;
-    color: var(--text) !important;
+    color: #111827 !important;
   }
   
   [data-theme="light"] .theme-btn:hover {
     background: #e5e7eb !important;
     border: 1px solid #d1d5db !important;
-    color: var(--text) !important;
+    color: #111827 !important;
   }
   
   /* SVG主题图标样式 */
@@ -1243,7 +1341,7 @@ export default {
     position: relative;
     background: #f3f4f6 !important;
     border: 1px solid #e5e7eb !important;
-    color: var(--text);
+    color: #111827 !important;
     padding: 8px !important;
     border-radius: 8px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -1257,6 +1355,7 @@ export default {
   .notification-btn:hover {
     background: #e5e7eb !important;
     border: 1px solid #d1d5db !important;
+    color: #111827 !important;
   }
   
   .notification-badge {
@@ -1285,18 +1384,20 @@ export default {
   [data-theme="dark"] .notification-btn {
     background: #374151 !important;
     border: 1px solid #4b5563 !important;
+    color: #ffffff !important;
   }
   
   [data-theme="dark"] .notification-btn:hover {
     background: #4b5563 !important;
     border: 1px solid #6b7280 !important;
+    color: #ffffff !important;
   }
   
   /* Profile按钮样式 - 浅灰色背景 */
   .profile-btn {
     background: #f3f4f6 !important;
     border: 1px solid #e5e7eb !important;
-    color: var(--text);
+    color: #111827 !important;
     padding: 8px !important;
     border-radius: 8px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -1310,6 +1411,7 @@ export default {
   .profile-btn:hover {
     background: #e5e7eb !important;
     border: 1px solid #d1d5db !important;
+    color: #111827 !important;
   }
 
   /* SVG用户图标样式 */
@@ -1332,11 +1434,13 @@ export default {
   [data-theme="dark"] .profile-btn {
     background: #374151 !important;
     border: 1px solid #4b5563 !important;
+    color: #ffffff !important;
   }
   
   [data-theme="dark"] .profile-btn:hover {
     background: #4b5563 !important;
     border: 1px solid #6b7280 !important;
+    color: #ffffff !important;
   }
   
   /* 深色主题下的profile按钮样式 */
@@ -1518,7 +1622,7 @@ export default {
   }
   
   .right {
-    gap: 15px;
+    gap: 6px;
     flex-wrap: nowrap;
     align-items: center;
     justify-content: center; /* 改为center实现居中对齐 */
@@ -1533,7 +1637,7 @@ export default {
     justify-content: center;
     align-items: center;
     width: 100%;
-    gap: 15px;
+    gap: 6px;
   }
   
   /* Wallet按钮 - 左侧 */
@@ -1684,7 +1788,7 @@ export default {
   }
   
   .right {
-    gap: 15px;
+    gap: 4px;
     flex-wrap: nowrap;
     align-items: center;
     justify-content: space-between; /* 改为space-between实现左中右分布 */
@@ -1699,7 +1803,7 @@ export default {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    gap: 15px;
+    gap: 4px;
   }
   
   /* Wallet按钮 - 左侧 */
@@ -1979,7 +2083,7 @@ export default {
 .settings-btn {
   background: #f3f4f6 !important;
   border: 1px solid #e5e7eb !important;
-  color: var(--text);
+  color: #111827 !important;
   padding: 8px !important;
   border-radius: 8px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -1993,17 +2097,20 @@ export default {
 .settings-btn:hover {
   background: #e5e7eb !important;
   border: 1px solid #d1d5db !important;
+  color: #111827 !important;
 }
 
 /* 深色主题下的设置按钮 */
 [data-theme="dark"] .settings-btn {
   background: #374151 !important;
   border: 1px solid #4b5563 !important;
+  color: #ffffff !important;
 }
 
 [data-theme="dark"] .settings-btn:hover {
   background: #4b5563 !important;
   border: 1px solid #6b7280 !important;
+  color: #ffffff !important;
 }
 
 .settings-icon {

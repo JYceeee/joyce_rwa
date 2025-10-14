@@ -64,37 +64,37 @@
              <span class="pf-metric-label">{{ t('project.loanAmount') }}</span>
              <span class="pf-metric-value">AUD{{ formatNumber(p.loanAmount)}}</span>
            </div> -->
+           
            <div class="pf-project-metric">
               <span class="pf-metric-label">{{ t('project.issuer') }}</span>
               <span class="pf-metric-value">{{ p.issuer || 'TBA' }}</span>
           </div>
           <div class="pf-project-metric">
-              <span class="pf-metric-label">{{ t('trade.totalOffering') }}</span>
-              <span class="pf-metric-value">{{ (p.totalOffering) }}</span>
-          </div>
-          <div class="pf-project-metric">
-              <span class="pf-metric-label">{{ t('trade.subscribed') }}</span>
-              <span class="pf-metric-value">{{ formatNumber(p.subscribed) }}</span>
-          </div>
-           <!-- <div class="pf-project-metric">
              <span class="pf-metric-label">{{ t('project.interestRate') }}</span>
              <span class="pf-metric-value" style="color: #16a34a;">{{ p.interestRate }}%{{ t('project.perYear') }}</span>
            </div>
-           <div class="pf-project-metric">
+          <div class="pf-project-metric">
+              <span class="pf-metric-label">{{ t('trade.totalOffering') }}</span>
+              <span class="pf-metric-value">{{ (p.totalOffering) }}</span>
+          </div>
+          <!-- <div class="pf-project-metric">
+              <span class="pf-metric-label">{{ t('trade.subscribed') }}</span>
+              <span class="pf-metric-value">{{ formatNumber(p.subscribed) }}</span>
+          </div> -->
+           <!-- <div class="pf-project-metric">
              <span class="pf-metric-label">{{ t('project.loanTerm') }}</span>
              <span class="pf-metric-value">{{ p.loanTermMonths }}{{ t('project.months') }}</span>
-           </div> -->
+           </div>  -->
 
           <!-- <div class="pf-project-metrics pf-project-metrics-new"> -->
-
              <div class="pf-project-metric">
                <span class="pf-metric-label">{{ t('project.underlyingAsset') }}</span>
                <span class="pf-metric-value">{{ p.collateral || 'TBA' }}</span>
              </div>
-             <div class="pf-project-metric">
+             <!-- <div class="pf-project-metric">
                <span class="pf-metric-label">{{ t('project.sponsor') }}</span>
                <span class="pf-metric-value">{{ p.sponsor || 'TBA' }}</span>
-             </div>
+             </div> -->
              <div class="pf-project-metric">
                <span class="pf-metric-label">{{ t('project.valuer') }}</span>
                <span class="pf-metric-value">{{ p.valuer || 'TBA' }}</span>

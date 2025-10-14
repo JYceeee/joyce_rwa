@@ -51,6 +51,10 @@
                   <span class="pf-metric-label">{{ t('tobelisted.issuer') }}</span>
                   <span class="pf-metric-value">{{ p.issuer || t('tobelisted.tba') }}</span>
                 </div>
+                <!-- <div class="pf-project-metric">
+                  <span class="pf-metric-label">{{ t('tobelisted.estYield') }}</span>
+                  <span class="pf-metric-value" style="color: #16a34a;">{{ p.interestRate }}%/年</span>
+                </div>  -->
                 <div class="pf-project-metric">
                   <span class="pf-metric-label">{{ t('tobelisted.collateral') }}</span>
                   <span class="pf-metric-value">{{ p.collateral || t('tobelisted.tba') }}</span>

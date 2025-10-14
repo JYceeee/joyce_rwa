@@ -293,57 +293,85 @@
         
           <!-- 项目指标 -->
           <div class="project-metrics-container">
-            <!-- 认购信息 -->
+            <!-- 项目基本信息 -->
             <div class="metrics-section">
-              <h3 class="metrics-section-title">{{ t('trade.subscriptionInfo') }}</h3>
+              <h3 class="metrics-section-title">{{ t('trade.projectInfo') }}</h3>
               <div class="project-metrics">
                 <div class="metric-item">
-                  <span class="metric-label">{{ t('trade.totalOffering') }}</span>
-                  <span class="metric-value">{{ projectData?.totalOffering || 'AUD0' }}</span>
+                  <span class="metric-label">{{ t('trade.issuer') }}</span>
+                  <span class="metric-value">{{ projectData?.issuer || 'N/A' }}</span>
                 </div>
                 <div class="metric-item">
-                  <span class="metric-label">{{ t('trade.subscribed') }}</span>
-                  <span class="metric-value">{{ projectData?.subscribed || 'AUD0' }}</span>
+                  <span class="metric-label">{{ t('trade.estimateReturn') }}</span>
+                  <span class="metric-value" style="color: #16a34a;">{{ projectData?.interestRate || 'N/A' }}% / {{ t('trade.year') }}</span>
                 </div>
                 <div class="metric-item">
-                  <span class="metric-label">{{ t('trade.subscriptionRatio') }}</span>
-                  <span class="metric-value subscription-progress">{{ projectData?.subscriptionProgress?.toFixed(0) + '%' }}</span>
+                  <span class="metric-label">{{ t('trade.tokenizedAmount') }}</span>
+                  <span class="metric-value">{{ projectData?.totalOffering || 'N/A' }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">{{ t('trade.underlyingAsset') }}</span>
+                  <span class="metric-value">{{ projectData?.collateral || 'N/A' }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">{{ t('trade.valuer') }}</span>
+                  <span class="metric-value">{{ projectData?.valuer || 'N/A' }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">{{ t('trade.lawyer') }}</span>
+                  <span class="metric-value">{{ projectData?.lawyer || 'N/A' }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">{{ t('trade.trustee') }}</span>
+                  <span class="metric-value">{{ projectData?.trustee || 'N/A' }}</span>
                 </div>
               </div>
             </div>
 
-            <!-- 贷款信息 -->
+            <!-- 底层资产 - 贷款信息 -->
             <div class="metrics-section">
-              <h3 class="metrics-section-title">{{ t('trade.loanInfo') }}</h3>
+              <h3 class="metrics-section-title">{{ t('trade.underlyingAssetLoanInfo') }}</h3>
               <div class="project-metrics">
-                <div class="metric-item">
-                  <span class="metric-label">{{ t('trade.loanAmount') }}</span>
-                  <span class="metric-value">{{ projectData?.loanAmountFormatted || 'AUD0' }}</span>
-                </div>
-                <div class="metric-item">
-                  <span class="metric-label">{{ t('trade.expectedYield') }}</span>
-                  <span class="metric-value" style="color: #16a34a;">{{ projectData?.metrics?.targetLoanYield || 'N/A' }}</span> <!--xx%每年，pa不要-->
-                </div>
-                <div class="metric-item">
-                  <span class="metric-label">{{ t('trade.term') }}</span>
-                  <span class="metric-value">{{ projectData?.loanTermFormatted || '12 months' }}</span>
-                </div>
-                <div class="metric-item">
-                  <span class="metric-label">{{ t('trade.ltvRatio') }}</span>
-                  <span class="metric-value">{{ projectData?.metrics?.loanToValue || 'N/A' }}</span>
-                </div>
-                <div class="metric-item">
-                  <span class="metric-label">{{ t('trade.defaultRate') }}</span>
-                  <span class="metric-value">{{ projectData?.metrics?.defaultRate || 'N/A' }}</span> <!--xx%每年-->
-                </div>
                 <div class="metric-item">
                   <span class="metric-label">{{ t('trade.lender') }}</span>
                   <span class="metric-value">{{ projectData?.lender || 'N/A' }}</span>
                 </div>
                 <!-- <div class="metric-item">
-                  <span class="metric-label">借款方</span>
+                  <span class="metric-label">{{ t('trade.borrower') }}</span>
                   <span class="metric-value">{{ projectData?.borrower || 'N/A' }}</span>
                 </div> -->
+                <div class="metric-item">
+                  <span class="metric-label">{{ t('trade.loanAmount') }}</span>
+                  <span class="metric-value">{{ projectData?.loanAmountFormatted || 'N/A' }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">{{ t('trade.collateral') }}</span>
+                  <span class="metric-value">{{ projectData?.propertyType || 'N/A' }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">{{ t('trade.valuation') }}</span>
+                  <span class="metric-value">{{ projectData?.metrics?.collateralPropertyValue || 'N/A' }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">{{ t('trade.lvr') }}</span>
+                  <span class="metric-value">{{ projectData?.lvr || 'N/A' }}%</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">{{ t('trade.mortgageTitle') }}</span>
+                  <span class="metric-value">{{ getMortgageType() || 'N/A' }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">{{ t('trade.interestRate') }}</span>
+                  <span class="metric-value" style="color: #16a34a;">{{ projectData?.interestRate || 'N/A' }}%</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">{{ t('trade.loanTerm') }}</span>
+                  <span class="metric-value">{{ projectData?.loanTermMonths || 'N/A' }} {{ t('trade.months') }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">{{ t('trade.defaultInterestRate') }}</span>
+                  <span class="metric-value">{{ projectData?.defaultRate || 'N/A' }}%</span>
+                </div>
               </div>
             </div>
 
@@ -351,33 +379,44 @@
             <div class="metrics-section">
               <h3 class="metrics-section-title">{{ t('trade.collateralInfo') }}</h3>
               <div class="project-metrics">
-                <div class="metric-item">
-                  <span class="metric-label">{{ t('trade.appraisalValue') }}</span>
-                  <span class="metric-value">{{ projectData.metrics?.collateralPropertyValue || 'N/A' }}</span>
-                </div>
                 <!-- <div class="metric-item">
-                  <span class="metric-label">地址</span>
-                  <span class="metric-value">{{ getAssetAddress() }}</span>
+                  <span class="metric-label">{{ t('trade.assetAddress') }}</span>
+                  <span class="metric-value">{{ projectData?.propertyLocation || 'N/A' }}</span>
                 </div> -->
                 <div class="metric-item">
-                  <span class="metric-label">{{ t('trade.mortgageType') }}</span>
-                  <span class="metric-value">{{ getMortgageType() }}</span>
+                  <span class="metric-label">{{ t('trade.siteArea') }}</span>
+                  <span class="metric-value">{{ projectData?.siteArea || 'N/A' }} {{ t('trade.squareMeters') }}</span>
                 </div>
                 <div class="metric-item">
-                  <span class="metric-label">{{ t('trade.sponsor') }}</span>
-                  <span class="metric-value">{{ projectData.dealMaker || 'N/A' }}</span>
+                  <span class="metric-label">{{ t('trade.floorArea') }}</span>
+                  <span class="metric-value">{{ projectData?.floorArea || 'N/A' }} {{ t('trade.squareMeters') }}</span>
                 </div>
                 <div class="metric-item">
-                  <span class="metric-label">{{ t('trade.appraiser') }}</span>
-                  <span class="metric-value">{{ projectData.valuer || 'N/A' }}</span>
+                  <span class="metric-label">{{ t('trade.propertyType') }}</span>
+                  <span class="metric-value">{{ projectData?.propertyType || 'N/A' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 代币信息 - 发行与认购信息 -->
+            <div class="metrics-section">
+              <h3 class="metrics-section-title">{{ t('trade.tokenInfo') }}</h3>
+              <div class="project-metrics">
+                <div class="metric-item">
+                  <span class="metric-label">{{ t('trade.underlyingAssetSize') }}</span>
+                  <span class="metric-value">{{ projectData?.loanAmountFormatted || 'N/A' }}</span>
                 </div>
                 <div class="metric-item">
-                  <span class="metric-label">{{ t('trade.lawyer') }}</span>
-                  <span class="metric-value">{{ projectData.lawyer || 'N/A' }}</span>
+                  <span class="metric-label">{{ t('trade.totalTokenizedAmount') }}</span>
+                  <span class="metric-value">{{ projectData?.totalOffering || 'N/A' }}</span>
                 </div>
                 <div class="metric-item">
-                  <span class="metric-label">{{ t('trade.trustee') }}</span>
-                  <span class="metric-value">{{ projectData.trustee || 'N/A' }}</span>
+                  <span class="metric-label">{{ t('trade.subscribedAmount') }}</span>
+                  <span class="metric-value">{{ projectData?.subscribed || 'N/A' }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">{{ t('trade.subscriptionPercentage') }}</span>
+                  <span class="metric-value subscription-progress">{{ projectData?.subscriptionProgress?.toFixed(0) || 'N/A' }}%</span>
                 </div>
               </div>
             </div>
@@ -526,7 +565,7 @@
           </div>
         
         <!-- 右侧：项目最新动态 (当项目状态为INCOMING或ACTIVE且为DETAILS入口时显示) -->
-        <div v-if="(projectData?.status === 'INCOMING' || (projectData?.status === 'ACTIVE' && !isBuyEntry))" class="trade-form-card">
+        <!-- <div v-if="(projectData?.status === 'INCOMING' || (projectData?.status === 'ACTIVE' && !isBuyEntry))" class="trade-form-card">
           <div class="news-header">
             <h2 class="news-title">{{ t('trade.projectUpdates') }}</h2>
           </div>
@@ -550,7 +589,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </div> -->
         
       </div>
   </div>
@@ -766,7 +805,8 @@ export default {
         // 可以添加更多项目的抵押权类型
       }
       
-      return mortgageTypes[this.projectCode] || '第一抵押权人'
+      // 使用翻译函数返回默认值
+      return mortgageTypes[this.projectCode] || this.t('trade.firstMortgage')
     },
     
     // 获取状态样式类
@@ -3141,5 +3181,6 @@ export default {
   background: #f9fafb; /* 更浅的灰色背景 */
 }
 </style>
+
 
 

@@ -183,6 +183,12 @@ const translations = {
     'settings.gasSettings': 'Gas设置',
     'settings.gasSettings.description': '配置交易Gas偏好',
     'settings.gasSettings.configure': 'Gas设置',
+    'settings.connectWallet': '连接钱包',
+    'settings.connectWallet.description': '连接或断开您的钱包',
+    'settings.connectWallet.button': '连接钱包',
+    'settings.walletAddress': '钱包地址',
+    'settings.walletAddress.description': '查看您的钱包地址',
+    'settings.walletAddress.view': '查看地址',
     
     // 通知设置
     'settings.pushNotifications': '推送通知',
@@ -266,7 +272,7 @@ const translations = {
     'project.loanTerm': '贷款期限',
     'project.months': '月',
     'project.currentSubscription': '当前认购',
-    'project.totalOffering': '总发行量',
+    'project.totalOffering': '代币发行量',
     'project.subscribed': '已认购',
     'project.partyInfo': '相关方信息',
     'project.issuer': '发行主体',
@@ -324,7 +330,48 @@ const translations = {
     'footer.disclaimer': '免责声明：本平台提供的信息仅供参考，不保证其真实性、准确性或完整性，亦不构成投资邀约或投资建议。',
     'footer.copyright': '© 2025 RWA Dealmaker. All rights reserved.',
     
-    // 交易页面
+    // 交易页面 - 项目信息
+    'trade.projectInfo': '项目信息',
+    'trade.issuer': '发行主体',
+    'trade.estimateReturn': '预期收益',
+    'trade.tokenizedAmount': '代币发行量',
+    'trade.underlyingAsset': '底层资产',
+    'trade.valuer': '评估机构',
+    'trade.lawyer': '律师',
+    'trade.trustee': '监管方',
+    'trade.year': '年',
+    
+    // 底层资产 - 贷款信息
+    'trade.underlyingAssetLoanInfo': '底层资产 - 贷款信息',
+    'trade.lender': '贷款人',
+    'trade.borrower': '借款人',
+    'trade.loanAmount': '借款金额',
+    'trade.collateral': '抵押物',
+    'trade.valuation': '评估值',
+    'trade.lvr': '抵押率',
+    'trade.mortgageTitle': '抵押权',
+    'trade.firstMortgage': '第一抵押权人',
+    'trade.interestRate': '利率',
+    'trade.loanTerm': '借款期限',
+    'trade.months': '个月',
+    'trade.defaultInterestRate': '违约利息',
+    
+    // 抵押物信息
+    'trade.collateralInfo': '抵押物信息',
+    'trade.assetAddress': '资产地址',
+    'trade.siteArea': '占地面积',
+    'trade.floorArea': '建筑面积',
+    'trade.propertyType': '房产类型',
+    'trade.squareMeters': '平方米',
+    
+    // 代币信息
+    'trade.tokenInfo': '代币信息 - 发行与认购信息',
+    'trade.underlyingAssetSize': '底层资产规模',
+    'trade.totalTokenizedAmount': '总发行量',
+    'trade.subscribedAmount': '已认购量',
+    'trade.subscriptionPercentage': '认购比例',
+    
+    // 交易页面 - 合约地址
     'trade.contractAddress': '合约地址',
     'trade.contractAddressDescription': '以下合约地址将用于此次交易:',
     'trade.principalTokenAddress': '本金代币地址',
@@ -775,6 +822,12 @@ const translations = {
     'settings.gasSettings': 'Gas Settings',
     'settings.gasSettings.description': 'Configure transaction gas preferences',
     'settings.gasSettings.configure': 'Gas Settings',
+    'settings.connectWallet': 'Connect Wallet',
+    'settings.connectWallet.description': 'Connect or disconnect your wallet',
+    'settings.connectWallet.button': 'Connect Wallet',
+    'settings.walletAddress': 'Wallet Address',
+    'settings.walletAddress.description': 'View your wallet address',
+    'settings.walletAddress.view': 'View Address',
     
     // Notification Settings
     'settings.pushNotifications': 'Push Notifications',
@@ -916,7 +969,48 @@ const translations = {
     'footer.disclaimer': 'Disclaimer: The information provided on this platform is for reference only and does not guarantee its authenticity, accuracy or completeness, nor does it constitute an investment invitation or investment advice.',
     'footer.copyright': '© 2025 RWA Dealmaker. All rights reserved.',
     
-    // Trading Page
+    // Trading Page - Project Information
+    'trade.projectInfo': 'Project Information',
+    'trade.issuer': 'Issuer',
+    'trade.estimateReturn': 'Estimate Return',
+    'trade.tokenizedAmount': 'Tokenized Amount',
+    'trade.underlyingAsset': 'Underlying Asset',
+    'trade.valuer': 'Valuer',
+    'trade.lawyer': 'Lawyer',
+    'trade.trustee': 'Trustee',
+    'trade.year': 'p.a.',
+    
+    // Underlying Asset - Loan Information
+    'trade.underlyingAssetLoanInfo': 'Underlying Asset - Loan Information',
+    'trade.lender': 'Lender',
+    'trade.borrower': 'Borrower',
+    'trade.loanAmount': 'Loan Amount',
+    'trade.collateral': 'Collateral',
+    'trade.valuation': 'Valuation',
+    'trade.lvr': 'LVR',
+    'trade.mortgageTitle': 'Mortgage Title',
+    'trade.firstMortgage': 'First Mortgage',
+    'trade.interestRate': 'Interest Rate',
+    'trade.loanTerm': 'Loan Term',
+    'trade.months': 'Months',
+    'trade.defaultInterestRate': 'Default Interest Rate',
+    
+    // Collateral Information
+    'trade.collateralInfo': 'Collateral Information',
+    'trade.assetAddress': 'Asset Address',
+    'trade.siteArea': 'Site Area',
+    'trade.floorArea': 'Gross Floor Area',
+    'trade.propertyType': 'Property Type',
+    'trade.squareMeters': 'm²',
+    
+    // Token Information
+    'trade.tokenInfo': 'Token Information',
+    'trade.underlyingAssetSize': 'Underlying Asset Size',
+    'trade.totalTokenizedAmount': 'Total Tokenized Amount',
+    'trade.subscribedAmount': 'Subscribed Amount',
+    'trade.subscriptionPercentage': 'Subscription Percentage',
+    
+    // Trading Page - Contract Address
     'trade.contractAddress': 'Contract Address',
     'trade.contractAddressDescription': 'The following contract addresses will be used for this transaction:',
     'trade.principalTokenAddress': 'Principal Token Address',

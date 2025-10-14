@@ -277,15 +277,15 @@
             <!-- General Settings -->
             <div class="settings-section mobile-section">
               <div class="section-header">
-                <h3 class="section-title">常规设置</h3>
-                <p class="section-description">基本应用程序设置和偏好</p>
+                <h3 class="section-title">{{ t('settings.general') }}</h3>
+                <p class="section-description">{{ t('settings.general.description') }}</p>
               </div>
               <div class="settings-items">
 
                 <div class="settings-item">
                   <div class="settings-info">
-                    <h3 class="settings-name">主题</h3>
-                    <p class="settings-description">选择您偏好的主题</p>
+                    <h3 class="settings-name">{{ t('settings.theme') }}</h3>
+                    <p class="settings-description">{{ t('settings.theme.description') }}</p>
                   </div>
                   <div class="settings-control">
                     <select 
@@ -293,23 +293,23 @@
                       :value="currentTheme" 
                       @change="handleThemeChange"
                     >
-                      <option value="dark">深色</option>
-                      <option value="light">浅色</option>
+                      <option value="dark">{{ t('settings.theme.dark') }}</option>
+                      <option value="light">{{ t('settings.theme.light') }}</option>
                     </select>
                   </div>
                 </div>
 
                 <div class="settings-item">
                   <div class="settings-info">
-                    <h3 class="settings-name">时区</h3>
-                    <p class="settings-description">设置您的本地时区</p>
+                    <h3 class="settings-name">{{ t('settings.timezone') }}</h3>
+                    <p class="settings-description">{{ t('settings.timezone.description') }}</p>
                   </div>
                   <div class="settings-control">
                     <select class="settings-select">
-                      <option value="UTC">UTC</option>
-                      <option value="EST">东部时间</option>
-                      <option value="PST">太平洋时间</option>
-                      <option value="CST">中国标准时间</option>
+                      <option value="UTC">{{ t('settings.timezone.utc') }}</option>
+                      <option value="EST">{{ t('settings.timezone.est') }}</option>
+                      <option value="PST">{{ t('settings.timezone.pst') }}</option>
+                      <option value="CST">{{ t('settings.timezone.cst') }}</option>
                     </select>
                   </div>
                 </div>
@@ -317,8 +317,8 @@
                 <!-- Notification Settings in Mobile General -->
                 <div class="settings-item">
                   <div class="settings-info">
-                    <h3 class="settings-name">推送通知</h3>
-                    <p class="settings-description">接收浏览器推送通知</p>
+                    <h3 class="settings-name">{{ t('settings.pushNotifications') }}</h3>
+                    <p class="settings-description">{{ t('settings.pushNotifications.description') }}</p>
                   </div>
                   <div class="settings-control">
                     <label class="toggle-switch">
@@ -330,8 +330,8 @@
 
                 <div class="settings-item">
                   <div class="settings-info">
-                    <h3 class="settings-name">邮件通知</h3>
-                    <p class="settings-description">接收邮件通知</p>
+                    <h3 class="settings-name">{{ t('settings.emailNotifications') }}</h3>
+                    <p class="settings-description">{{ t('settings.emailNotifications.description') }}</p>
                   </div>
                   <div class="settings-control">
                     <label class="toggle-switch">
@@ -343,8 +343,8 @@
 
                 <div class="settings-item">
                   <div class="settings-info">
-                    <h3 class="settings-name">短信通知</h3>
-                    <p class="settings-description">接收短信通知</p>
+                    <h3 class="settings-name">{{ t('settings.smsNotifications') }}</h3>
+                    <p class="settings-description">{{ t('settings.smsNotifications.description') }}</p>
                   </div>
                   <div class="settings-control">
                     <label class="toggle-switch">
@@ -356,11 +356,11 @@
 
                 <div class="settings-item">
                   <div class="settings-info">
-                    <h3 class="settings-name">开场视频</h3>
-                    <p class="settings-description">不再观看网站开场视频</p>
+                    <h3 class="settings-name">{{ t('settings.introVideo') }}</h3>
+                    <p class="settings-description">{{ t('settings.introVideo.description') }}</p>
                   </div>
                   <div class="settings-control">
-                    <button class="btn btn-secondary" @click="watchIntroVideo">观看开场视频</button>
+                    <button class="btn btn-secondary" @click="watchIntroVideo">{{ t('settings.introVideo.watch') }}</button>
                   </div>
                 </div>
               </div>
@@ -369,39 +369,39 @@
             <!-- Security Settings -->
             <div class="settings-section mobile-section">
               <div class="section-header">
-                <h3 class="section-title">安全设置</h3>
-                <p class="section-description">保护您的账户安全</p>
+                <h3 class="section-title">{{ t('settings.security') }}</h3>
+                <p class="section-description">{{ t('settings.security.description') }}</p>
               </div>
               <div class="settings-items">
                 <div class="settings-item">
                   <div class="settings-info">
-                    <h3 class="settings-name">密码</h3>
-                    <p class="settings-description">更改您的账户密码</p>
+                    <h3 class="settings-name">{{ t('settings.password') }}</h3>
+                    <p class="settings-description">{{ t('settings.password.description') }}</p>
                   </div>
                   <div class="settings-control">
-                    <button class="btn btn-secondary">更改密码</button>
+                    <button class="btn btn-secondary">{{ t('settings.password.change') }}</button>
                   </div>
                 </div>
 
                 <div class="settings-item">
                   <div class="settings-info">
-                    <h3 class="settings-name">会话超时</h3>
-                    <p class="settings-description">设置自动登出时间</p>
+                    <h3 class="settings-name">{{ t('settings.sessionTimeout') }}</h3>
+                    <p class="settings-description">{{ t('settings.sessionTimeout.description') }}</p>
                   </div>
                   <div class="settings-control">
                     <select class="settings-select">
-                      <option value="15">15分钟</option>
-                      <option value="30">30分钟</option>
-                      <option value="60">1小时</option>
-                      <option value="480">8小时</option>
+                      <option value="15">{{ t('settings.sessionTimeout.15min') }}</option>
+                      <option value="30">{{ t('settings.sessionTimeout.30min') }}</option>
+                      <option value="60">{{ t('settings.sessionTimeout.1hour') }}</option>
+                      <option value="480">{{ t('settings.sessionTimeout.8hours') }}</option>
                     </select>
                   </div>
                 </div>
 
                 <div class="settings-item">
                   <div class="settings-info">
-                    <h3 class="settings-name">登录提醒</h3>
-                    <p class="settings-description">接收新登录尝试的通知</p>
+                    <h3 class="settings-name">{{ t('settings.loginAlerts') }}</h3>
+                    <p class="settings-description">{{ t('settings.loginAlerts.description') }}</p>
                   </div>
                   <div class="settings-control">
                     <label class="toggle-switch">
@@ -416,27 +416,27 @@
             <!-- Wallet Settings -->
             <div class="settings-section mobile-section">
               <div class="section-header">
-                <h3 class="section-title">钱包设置</h3>
-                <p class="section-description">管理您的钱包连接</p>
+                <h3 class="section-title">{{ t('settings.wallet') }}</h3>
+                <p class="section-description">{{ t('settings.wallet.description') }}</p>
               </div>
               <div class="settings-items">
                 <div class="settings-item">
                   <div class="settings-info">
-                    <h3 class="settings-name">连接钱包</h3>
-                    <p class="settings-description">连接或断开您的钱包</p>
+                    <h3 class="settings-name">{{ t('settings.connectWallet') }}</h3>
+                    <p class="settings-description">{{ t('settings.connectWallet.description') }}</p>
                   </div>
                   <div class="settings-control">
-                    <button class="btn btn-primary">连接钱包</button>
+                    <button class="btn btn-primary">{{ t('settings.connectWallet.button') }}</button>
                   </div>
                 </div>
 
                 <div class="settings-item">
                   <div class="settings-info">
-                    <h3 class="settings-name">钱包地址</h3>
-                    <p class="settings-description">查看您的钱包地址</p>
+                    <h3 class="settings-name">{{ t('settings.walletAddress') }}</h3>
+                    <p class="settings-description">{{ t('settings.walletAddress.description') }}</p>
                   </div>
                   <div class="settings-control">
-                    <button class="btn btn-secondary">查看地址</button>
+                    <button class="btn btn-secondary">{{ t('settings.walletAddress.view') }}</button>
                   </div>
                 </div>
               </div>
